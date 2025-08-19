@@ -1,0 +1,249 @@
+[
+    {
+        "title": "Admin Master",
+        "icon": "bi-speedometer2",
+        "childrens": [
+           
+            {
+                "title": "Area Control",
+                "icon": "bi-layout-text-sidebar",
+                "path":  "/tab"
+            },
+            {
+                "title": "City Master",
+                "icon": "bi-pin-map",
+                "path":"/citymaster"
+            },
+            
+            {
+                "title": "Customer List",
+                "icon": "bi-phone-fill",
+                "path":"/customerlist"
+            },
+            {
+                "title": "Vendor Master",
+                "icon": "bi-shop",
+                "childrens": [
+                    {
+                        "title": "Vendor Name",
+                        "icon": "bi-person"
+                    },
+                    {
+                        "title": "Vendor Rate",
+                        "icon": "bi-currency-exchange"
+                    },
+                    {
+                        "title": "CAF Charges",
+                        "icon": "bi-credit-card"
+                    },
+                    {
+                        "title": "IDC Charges",
+                        "icon": "bi-credit-card"
+                    }
+                ]
+            },
+            
+            {
+                "title": "Mode Master",
+                "icon": "bi-sliders",
+                "childrens": [
+                    {
+                        "title": "Mode Name",
+                        "icon": "bi-file-text"
+                    },
+                    {
+                        "title": "Product Name",
+                        "icon": "bi-box"
+                    }
+                ]
+            },
+            {
+                "title": "Branch Master",
+                "icon": "bi-geo-alt",
+                "childrens": [
+                    {
+                        "title": "Branch Name",
+                        "icon": "bi-house-door"
+                    },
+                    {
+                        "title": "Bank Name",
+                        "icon": "bi-bank"
+                    },
+                    {
+                        "title": "Delivery Name",
+                        "icon": "bi-truck"
+                    }
+                ]
+            },
+            {
+                "title": "Inventory",
+                "icon": "bi-archive",
+                "childrens": [
+                    {
+                        "title": "Stock Entry",
+                        "icon": "bi-journal-text"
+                    },
+                    {
+                        "title": "Branch Stock",
+                        "icon": "bi-building"
+                    },
+                    {
+                        "title": "Customer Stock",
+                        "icon": "bi-person"
+                    },
+                    {
+                        "title": "Employee Stock",
+                        "icon": "bi-people"
+                    }
+                ]
+            }
+            
+                       
+           
+        ]
+    },
+    {
+        "title": "Booking Dashboard ",
+        "icon": "bi-info-circle-fill",
+        "childrens": [
+            {
+                "title": "Daily Booking",
+                "icon": "bi-calendar-check",
+                "path": "/login"
+            },
+            {
+                "title": "Daily Manifest",
+                "icon": "bi-journal-text",
+                "path": "/register"
+            },
+            {
+                "title": " Inscan Data",
+                "icon": "bi-box-arrow-in-down",
+                "path": "/forgot-password"
+            },
+            {
+                "title": "Run Sheet Entry",
+                "icon": "bi-list-check",
+                "path": "/reset-password"
+            },
+            {
+                "title": "Live Status Entry",
+                "icon": "bi-broadcast",
+                "path": "/reset-password"
+            },
+            
+            {   
+                "title": "Delivery Status",
+                "icon": "bi-truck",
+                "path": "/reset-password"
+            },
+        
+                {
+                    "title": "Docket Print 1",
+                    "icon": "bi-printer",
+                    "path": "/reset-password"
+                },
+                {
+                    "title": "Docket Print 2",
+                    "icon": "bi-printer",
+                    "path": "/reset-password"
+                }
+            
+            
+        ]
+    },
+    
+    {
+        "title": "Reports Dashboard",
+        "icon": "bi-person-fill",
+        "childrens": [
+            {
+                "title": "Daily Report",
+                "icon": "bi-calendar",
+                "path": "/profile"
+            },
+            {
+                "title": " Bill Summary Report",
+                "icon": "bi-graph-up",
+                "path": "/profile"
+            },
+            {
+                "title": "Mis Report",
+                "icon": "bi-file-earmark-bar-graph",
+                "path": "/profile"
+            },
+            {
+                "title": "Unbill Report",
+                "icon": "bi-file-earmark-break",
+                "path": "/profile"
+            },
+            {
+                "title": "Vendor Report",
+                "icon": "bi-book",
+                "path": "/profile"
+            },
+            {
+                "title": "Vendor Mis Report",
+                "icon": "bi-file-earmark-text",
+                "path": "/profile"
+            },
+            {
+                "title": "Settings",
+                "childrens": [
+                    {
+                        "title": "Account",
+                        "path": "/settings/account"
+                    },
+                    {
+                        "title": "Billing",
+                        "childrens": [
+                            {
+                                "title": "Payment",
+                                "path": "/settings/billing/payment"
+                            },
+                            {
+                                "title": "Subscription",
+                                "path": "/settings/billing/subscription"
+                            }
+                        ]
+                    },
+                    {
+                        "title": "Notifications",
+                        "path": "/settings/notifications"
+                    }
+                ],
+                "icon": "bi-gear"
+            },
+            {
+                "title": "Logout",
+                "icon": "bi-box-arrow-right",
+                "path": "/logout"
+            }
+        ]
+    },
+    
+    {
+        "title": "Advance",
+        "icon": "bi-view-list",
+        "childrens": [
+            {
+                "title": "Search",
+                "path": "/search"
+            },
+            {
+                "title": "History",
+                "path": "/history"   
+            }
+        ]
+    },
+    {
+        "title": "Support",
+        "icon": "bi-question-circle-fill",
+        "path": "/support"
+    },
+    {
+        "title": "Report Bug",
+        "icon": "bi-bug",
+        "path": "/report-bug"
+    }
+]

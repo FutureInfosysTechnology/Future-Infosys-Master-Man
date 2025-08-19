@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+
+.container-transport {
+    min-width: 70%;
+    width: 100%;
+    background-color: #fff;
+    padding: 30px 10px;
+    border-radius: 10px;
+    /* display: block; */
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    margin-left: 10px;
+    transition: all 0.3s;
+}
+
+
+.container-transport nav {
+    position: relative;
+    height: 22px;
+    width: 100%;
+    display: flex;
+    /* align-items: center; */
+    /* justify-content: center; */
+    margin-bottom: 20px;
+}
+
+.container-transport nav::after {
+    content: "";
+    background: silver;
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    top: 21px;
+    filter: blur(0.5px);
+}
+
+.container-transport nav label {
+    position: relative;
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    line-height: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 650;
+    transition: all 0.3s ease;
+}
+
+
+/******************************************* For Tabs Slider ********************************************/
+
+#product:checked~nav label .mode,
+#product:checked~nav label .product{
+    color: #4fd181;
+}
+
+
+.container-transport nav .slider {
+    position: absolute;
+    height: 4.5px;
+    background-color: #4FD1C5;
+    border-radius: 20px;
+    width: 50%;
+    z-index: 1;
+    left: 0;
+    bottom: 0;
+    transition: all 0.3s ease;
+    filter: blur(0.4px);
+}
+
+
+#mode:checked~nav .slider {
+    left: 0%;
+}
+
+#product:checked~nav .slider {
+    left: 50%;
+}
+
+
+#mode:checked~nav .mode {
+    color: #4FD1C5;
+}
+
+#product:checked~nav .product {
+    color: #4FD1C5;
+}
+
+
+.container-transport section {
+    filter: blur(0.3px);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+#mode:checked~section .content-1 {
+    display: block;
+}
+
+#product:checked~section .content-2 {
+    display: block;
+}
+
+
+
+/******************************************** media query ***********************************************/
+
+@media (max-width:900px) {
+    .container-transport nav label {
+        position: relative;
+        display: block;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        line-height: 10px;
+        cursor: pointer;
+        font-size: 8px;
+        font-weight: 400;
+        transition: all 0.3s ease;
+    }
+}

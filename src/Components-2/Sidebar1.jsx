@@ -1,0 +1,369 @@
+import React, { useState } from "react";
+import './Sidebar1.css';
+import { Link } from 'react-router-dom';
+
+
+function Sidebar1() {
+    const [openMenu, setOpenMenu] = useState(null); // Track which menu is open
+
+    const toggleMenu = (menuId) => {
+        setOpenMenu(openMenu === menuId ? null : menuId); // Toggle or close the menu
+    };
+
+
+    return (
+        <aside id="sidebar1" className="sidebar1">
+            <ul className="sidebar1-nav" id="sidebar1-nav">
+                <li className="nav-item">
+                    <Link to="/dashboard" className="nav-link">
+                        <i className="bi bi-grid"></i>
+                        <span>Dashboard</span>
+                    </Link>
+                </li>
+
+                <li className="nav-item">
+                    <a href="#" className="nav-link collapsed"
+                        onClick={() => toggleMenu('adminMaster')}>
+                        <i className="bi bi-person"></i>
+                        <span>Admin Master</span>
+                        <i className={`bi ${openMenu === 'adminMaster' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
+                    </a>
+
+                    <ul id="components-nav"
+                        className={`nav-content collapse ${openMenu === 'adminMaster' ? 'show' : ''}`}>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/branchmaster">
+                                <i className="bi bi-asterisk"></i>
+                                <span>Branch Master</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/customerlist">
+                                <i className="bi bi-file-person"></i>
+                                <span>Customer List</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/citymaster" className="link">
+                                <i className="bi bi-buildings-fill"></i>
+                                <span>City Master</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link tab="a" to="/tab" className="link">
+                                <i className="bi bi-stack"></i>
+                                <span>Area Control</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/customercharges">
+                                <i className="bi bi-cash-coin"></i>
+                                <span>Customer Charges</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/vendormaster">
+                                <i className="bi bi-badge-vr"></i>
+                                <span>Vendor Master</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/vehiclemaster">
+                                <i className="bi bi-truck"></i>
+                                <span>Transport Master</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/inventory">
+                                <i className="bi bi-cart"></i>
+                                <span>Inventory</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/regionmaster">
+                                <i className="bi bi-globe-americas"></i>
+                                <span>Region Master</span>
+                            </Link>
+                        </li>
+                    </ul>
+
+                </li>
+
+                <li className="nav-item">
+                    <a href="#" className="nav-link collapsed"
+                        onClick={() => toggleMenu('booking')}>
+                        <i className="bi bi-menu-button-wide"></i>
+                        <span>Operation Management</span>
+                        <i className={`bi ${openMenu === 'booking' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
+                    </a>
+
+                    <ul id="components1-nav"
+                        className={`nav-content collapse ${openMenu === 'booking' ? 'show' : ''}`}>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/dailybooking" className="link">
+                                <i className="bi bi-stack"></i>
+                                <span>Docket Booking</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/dailymanifest">
+                                <i className="bi bi-cart3"></i>
+                                <span>Outgoing Manifest</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/inscan">
+                                <i className="bi bi-truck"></i>
+                                <span>Inscan Process Hub</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/runsheet">
+                                <i className="bi bi-layout-text-sidebar-reverse"></i>
+                                <span>Delivery Run Sheet</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/statusactivity">
+                                <i className="bi bi-ui-checks-grid"></i>
+                                <span>Status Activity Entry</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/podentry">
+                                <i className="bi bi-ui-checks"></i>
+                                <span>Delivery Updation</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/custquery">
+                                <i className="bi bi-person-raised-hand"></i>
+                                <span>Customer Queries</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/internationalbooking">
+                                <i className="bi bi-person-raised-hand"></i>
+                                <span>International Booking</span>
+                            </Link>
+                        </li>
+                    </ul>
+
+                </li>
+
+
+                <li className="nav-item">
+                    <a href="#" className="nav-link collapsed"
+                        onClick={() => toggleMenu('docket')}>
+                        <i className="bi bi-printer-fill"></i>
+                        <span>Docket Print</span>
+                        <i className={`bi ${openMenu === 'docket' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
+                    </a>
+
+                    <ul id="components2-nav"
+                        className={`nav-content collapse ${openMenu === 'docket' ? 'show' : ''}`}>
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/docketprint" className="link">
+                                <i className="bi bi-printer"></i>
+                                <span>Docket Print</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/docketpdf" className="link">
+                                <i className="bi bi-printer"></i>
+                                <span>Docket Print pdf</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/drsrunsheet" className="link">
+                                <i className="bi bi-printer"></i>
+                                <span>Drs Runsheet</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/manifest" className="link">
+                                <i className="bi bi-printer"></i>
+                                <span>Manifest</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/mobilereceipt" className="link">
+                                <i className="bi bi-printer"></i>
+                                <span>Mobile Receipt</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/firstinvoice" className="link">
+                                <i className="bi bi-receipt-cutoff"></i>
+                                <span>First Invoice</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/secondinvoice" className="link">
+                                <i className="bi bi-receipt-cutoff"></i>
+                                <span>Second Invoice</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/performanceinvoice" className="link">
+                                <i className="bi bi-receipt-cutoff"></i>
+                                <span>Performance Invoice</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/boxsticker" className="link">
+                                <i className="bi bi-receipt-cutoff"></i>
+                                <span>Box Sticker</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/docketbill" className="link">
+                                <i className="bi bi-receipt-cutoff"></i>
+                                <span>Docket Bill</span>
+                            </Link>
+                        </li>
+                        
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/vendorboxlabel" className="link">
+                                <i className="bi bi-receipt-cutoff"></i>
+                                <span>Vendor Box Label</span>
+                            </Link>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li className="nav-item">
+                    <a href="#" className="nav-link collapsed"
+                        onClick={() => toggleMenu('invoice')}>
+                        <i className="bi bi-receipt-cutoff"></i>
+                        <span>Invoice / Billing</span>
+                        <i className={`bi ${openMenu === 'invoice' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
+                    </a>
+
+                    <ul id="components3-nav"
+                        className={`nav-content collapse ${openMenu === 'invoice' ? 'show' : ''}`}>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/invoice" className="link">
+                                <i className="bi bi-receipt-cutoff"></i>
+                                <span>Invoice Generate</span>
+                            </Link>
+                        </li>
+                    </ul>
+                </li>
+
+                <li className="nav-item">
+                    <a href="#" className="nav-link collapsed"
+                        onClick={() => toggleMenu('laiser')}>
+                        <i className="bi bi-cash-coin"></i>
+                        <span>Laiser</span>
+                        <i className={`bi ${openMenu === 'laiser' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
+                    </a>
+
+                    <ul id="components4-nav"
+                        className={`nav-content collapse ${openMenu === 'laiser' ? 'show' : ''}`}>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/laiser" className="link">
+                                <i className="bi bi-cash-stack"></i>
+                                <span>Laiser</span>
+                            </Link>
+                        </li>
+                    </ul>
+                </li>
+
+                <li className="nav-item">
+                    <a href="#" className="nav-link collapsed"
+                        onClick={() => toggleMenu('reports')}>
+                        <i className="bi bi-clipboard-data"></i>
+                        <span>Reports</span>
+                        <i className={`bi ${openMenu === 'reports' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
+                    </a>
+
+                    <ul id="components5-nav"
+                        className={`nav-content collapse ${openMenu === 'reports' ? 'show' : ''}`}>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/statusreport" className="link">
+                                <i className="bi bi-filter-square"></i>
+                                <span>Status Report</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/statement">
+                                <i className="bi bi-layout-text-sidebar-reverse"></i>
+                                <span>Statement Wise Report</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/salesregister">
+                                <i className="bi bi-filter-square"></i>
+                                <span>Sales Register Report</span>
+                            </Link>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li className="nav-item">
+                    <a href="#" className="nav-link collapsed"
+                        onClick={() => toggleMenu('userControl')}>
+                        <i className="bi bi-universal-access"></i>
+                        <span>User Control</span>
+                        <i className={`bi ${openMenu === 'userControl' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
+                    </a>
+                    <ul id="forms-nav"
+                        className={`nav-content collapse ${openMenu === 'userControl' ? 'show' : ''}`}>
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/useradmin">
+                                <i className="bi bi-incognito"></i>
+                                <span>User Admin</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab">
+                            <Link to="/branchadmin">
+                                <i className="bi bi-x-diamond-fill"></i>
+                                <span>Branch Admin</span>
+                            </Link>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+        </aside >
+
+    );
+};
+
+
+export default Sidebar1;

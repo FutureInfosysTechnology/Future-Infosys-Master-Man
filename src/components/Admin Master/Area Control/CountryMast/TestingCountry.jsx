@@ -1,0 +1,246 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Swal from 'sweetalert';
+import CountrymastApi from '../CountryMast/CountrymastApi';
+import '../Zonemaster/Zonemaster.css';
+import SidebarItem from '../SidebarItem';
+import Sidebar from '../Sidebar';
+
+
+const TestingCountry = () => {
+    const [editMode, setEditMode] = useState(false);
+    const [editCountry, setEditCountry] = useState('');
+    const [Country, setCountry] = useState({
+        Country_ID: '',
+        Country_Code: '',
+        Country_Name: '',
+    });
+
+    const [displayCountry, setDisplayCountry] = useState({
+        Storedata: [],
+    });
+
+    const [searchText, setSearchText] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(6);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/GetCountrymastdata');
+            const data = await res.json();
+
+            if (res.ok) {
+                setDisplayCountry({ Storedata: Array.isArray(data.Data) ? data.Data : [] });
+            } else {
+                console.log('Data Not Fetch', data.message);
+            }
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        }
+    };
+
+    const changeInput = (e) => {
+        const { name, value } = e.target;
+        setCountry({
+            ...Country,
+            [name]: value,
+        });
+    };
+
+    const editCountryData = (Country_ID) => {
+        const countryToEdit = displayCountry.Storedata.find((country) => country.Country_ID === Country_ID);
+        if (countryToEdit) {
+            setCountry({
+                Country_ID: countryToEdit.Country_ID,
+                Country_Code: countryToEdit.Country_Code,
+                Country_Name: countryToEdit.Country_Name,
+            });
+            setEditMode(true);
+            setEditCountry(Country_ID);
+        }
+    };
+
+    const Delete = async (Country_ID) => {
+        try {
+            const confirmDelete = await Swal({
+                title: 'Are you sure?',
+                text: 'You will not be able to recover this data!',
+                icon: 'warning',
+                buttons: ['Cancel', 'Yes, delete it!'],
+                dangerMode: true,
+            });
+            if (confirmDelete) {
+                const res = await axios.delete(`http://localhost:5000/Deletecountrymastdata?Country_ID=${Country_ID}`);
+          if (res.status === 200) {
+                    Swal('Deleted!', 'Your data has been deleted.', 'success');
+                    fetchData();
+                } else {
+                    Swal('Error', 'Failed to delete data', 'error');
+                }
+            } else {
+                Swal('Cancelled', 'Your data is safe :)', 'info');
+            }
+        } catch (error) {
+            console.error('API call error:', error);
+            Swal('Error', 'Failed to delete data', 'error');
+        }
+    };
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            if (!editMode) {
+                const res = await CountrymastApi.Countrymast(Country);
+                if (res.status === 200) {
+                    window.alert('Data inserted successfully');
+                    setCountry({ Country_ID: '', Country_Code: '', Country_Name: '' });
+                    fetchData();
+                } else {
+                    window.alert('Failed to insert data');
+                }
+            } else {
+                const res = await CountrymastApi.upcountrymast(editCountry, Country.Country_Name, Country);
+                if (res.status === 200) {
+                    setEditMode(false);
+                    setEditCountry('');
+                    setCountry({ Country_ID: '', Country_Code: '', Country_Name: '' });
+                    window.alert('Data updated successfully');
+                    fetchData();
+                } else {
+                    window.alert('Failed to update data');
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            window.alert('Duplicate CountryName Not Allow .');
+        }
+    };
+
+    const filteredcountryname = displayCountry.Storedata.filter((country) =>
+        country.Country_Name && country.Country_Name.toLowerCase().includes(searchText.toLowerCase())
+    );
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredcountryname.slice(indexOfFirstItem, indexOfLastItem);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    return (
+        <>
+            <Sidebar>
+                <SidebarItem item={{ name: 'Countrylist' }} />
+            </Sidebar>
+            <div className="row justify-content-end">
+                <div className="col col-lg-9">
+                    <div className='card p-1 shadow'>
+                        <div className="card-header">
+                            <p className="submitzonemast">Country List</p>
+                        </div>
+                        <form onSubmit={onSubmit}>
+                            <div className='input-group mb-3'>
+                                <span className="input-group-text-univershal" id="basic-addon1">
+                                    Country_Code
+                                </span>
+                                <input
+                                    type="text"
+                                    value={Country.Country_Code}
+                                    name="Country_Code"
+                                    readOnly={editMode}
+                                    onChange={changeInput}
+                                    placeholder="Country_Code"
+                                />
+                                <span className="input-group-text-univershal" id="basic-addon1">
+                                    Country_Name
+                                </span>
+                                <input
+                                    type="text"
+                                    value={Country.Country_Name}
+                                    name="Country_Name"
+                                    onChange={changeInput}
+                                    placeholder="Country_Name"
+                                />
+                            </div>
+                            <div className='input-group mb-3'>
+                                <input
+                                    type="text"
+                                    value={searchText}
+                                    onChange={(e) => setSearchText(e.target.value)}
+                                    placeholder=" Find Country_Name"
+                                    style={{ width: '79%' }}
+                                />
+                                <button
+                                    type="submit"
+                                    style={{
+                                        fontSize: '16px',
+                                        backgroundColor: '#007bff',
+                                        width: '21%',
+                                        marginTop: '3%',
+                                        color: 'white',
+                                    }}
+                                >
+                                    {editMode ? 'Update' : 'Submit'}
+                                </button>
+                            </div>
+                        </form>
+                        <div className='table-container'>
+                            <table className='table table-bordered table-sm'>
+                                <thead className='table-info body-bordered table-sm'>
+                                    <tr>
+                                        <th scope="col">Sr.No</th>
+                                        <th scope="col">Country_Code</th>
+                                        <th scope="col">Country_Name</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className='table-body'>
+                                    {currentItems.map((Storedata, index) => (
+                                        <tr key={index}>
+                                            <td className="myCell">{((currentPage - 1) * itemsPerPage) + index + 1}</td>
+                                            <td>{Storedata.Country_Code}</td>
+                                            <td>{Storedata.Country_Name}</td>
+                                            <td>
+                                                <button className='unvershaledit' onClick={() => editCountryData(Storedata.Country_ID)}>Edit</button>
+                                                <button className='unvershalsave' onClick={() => Delete(Storedata.Country_ID)}>Delete</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="pagination">
+                            <button
+                                onClick={() => paginate(currentPage - 1)}
+                                disabled={currentPage === 1}
+                            >
+                                {'<'}
+                            </button>
+                            {Array.from({ length: Math.ceil(filteredcountryname.length / itemsPerPage) }).map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => paginate(index + 1)}
+                                    className={currentPage === index + 1 ? 'active' : ''}
+                                >
+                                    {index + 1}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => paginate(currentPage + 1)}
+                                disabled={currentPage === Math.ceil(filteredcountryname.length / itemsPerPage)}
+                            >
+                                {'>'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default TestingCountry;

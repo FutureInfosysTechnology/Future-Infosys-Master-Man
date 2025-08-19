@@ -1,0 +1,39 @@
+/******************************************Footer CSS ******************************************/
+
+
+.footer{
+    min-height: 100px;
+    padding: 20px;
+    font-size: 14px;
+    transition: all 0.3s;
+    border-top: 1px solid #cddfff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: 10px;
+    bottom: 0;
+}
+
+.footer .copyright{
+    text-align: center;
+    color: gray;
+    display: block;
+}
+
+.footer .credits{
+    padding-top: 5px;
+    text-align: center;
+    font-size: 13px;
+    color: gray;
+    display: block;
+}
+
+
+@media (max-width:500px){
+    .footer{
+        display: flex;
+        flex-direction: column;
+    }
+}

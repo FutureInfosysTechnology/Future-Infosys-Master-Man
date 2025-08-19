@@ -1,0 +1,186 @@
+/************************************** New SIdebar1 CSS ***********************************************/
+
+
+.sidebar1 {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    bottom: 0;
+    width: 300px;
+    z-index: 996;
+    transition: all 0.3s;
+    padding: 20px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #aaa transparent;
+    box-shadow: 0px 0px 0px rgba(1, 41, 112, 0.1);
+    background-color: #E6EBEE;
+}
+
+.sidebar1.active {
+    left: 0;
+}
+
+
+.sidebar1-nav {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.sidebar1-nav li {
+    padding: 3px;
+    margin: 0;
+    list-style: none;
+    box-shadow: 5px 5px 5px gray;
+    border-radius: 5px;
+}
+
+.sidebar1-nav .nav-item {
+    margin-bottom: 5px;
+}
+
+.nav-item span {
+    margin-left: 14px;
+}
+
+.sidebar1-nav .nav-heading {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #4FD1C5;
+    font-weight: 600;
+    margin: 10px 0 5px 15px;
+}
+
+.sidebar1-nav .nav-link {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 650;
+    color: gray;
+    transition: 0.3;
+    background: transparent;
+    height: 50px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin: 5px;
+}
+
+.sidebar1-nav .nav-link i {
+    font-size: 18px;
+    margin-right: 10px;
+    color: #4FD1C5;
+}
+
+.sidebar1-nav .nav-link.collapsed {
+    color: gray;
+    background: transparent;
+}
+
+.sidebar1-nav .nav-link.collapsed i {
+    color: #4FD1C5;
+}
+
+.sidebar1-nav .nav-link:hover {
+    color: #11ad9e;
+    background: #dddee0;
+    border-radius: 10px;
+}
+
+.sidebar1-nav .nav-link:hover i {
+    color: #11ad9e;
+}
+
+#compo-tab{
+    margin: 5px;
+    box-shadow: 0px 0px 0px gray;
+}
+
+.compo-tab:hover {
+    background: #dddee0;
+    color: #11ad9e;
+    border-radius: 10px;
+}
+
+
+.sidebar1-nav .nav-link .bi-chevron-up {
+    margin-right: 0;
+    transition: transform 0.2s ease-in-out;
+}
+
+.sidebar1-nav .nav-link.collapsed .bi-chevron-up {
+    transform: rotate(360deg);
+}
+
+
+
+.sidebar1-nav .nav-content {
+    padding: 5px 0 0 0;
+    margin: 0;
+    list-style: none;
+}
+
+.sidebar1-nav .nav-content a {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: gray;
+    transition: 0.3;
+    padding: 10px 0 10px 40px;
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+.sidebar1-nav .nav-content a i {
+    font-size: 16px;
+    margin-right: 8px;
+    line-height: 0;
+    border-radius: 50%;
+    color: #4FD1C5;
+}
+
+
+.sidebar1-nav .nav-content a:hover,
+.sidebar1-nav .nav-content a:active {
+    color: #11ad9e;
+}
+
+
+
+
+@media(min-width:1200px) {
+
+    #main,
+    #main-body {
+        margin-left: 300px;
+    }
+}
+
+@media (max-width:1199px) {
+    .toggle-sidebar .sidebar1 {
+        left: 0;
+    }
+}
+
+@media (min-width:1200px) {
+
+    .toggle-sidebar #main,
+    .toggle-sidebar #footer,
+    .toggle-sidebar #main-body {
+        margin-left: 0;
+    }
+
+    .toggle-sidebar .sidebar1 {
+        left: -300px;
+    }
+
+}
+
+
+@media(max-width: 1199px) {
+    .sidebar1 {
+        left: -300px;
+    }
+}

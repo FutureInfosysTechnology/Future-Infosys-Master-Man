@@ -1,0 +1,341 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap'); */
+
+
+.login-body {
+    height: 100vh;
+    background: #f6f5f7;
+    display: grid;
+    place-content: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+.login-container {
+    position: relative;
+    width: 850px;
+    height: 500px;
+    background-color: #fff;
+    box-shadow: 25px 25px 25px rgba(85, 87, 119, 0.7); /* Updated shadow color for better readability */
+    border-radius: 13px;
+    overflow: hidden;
+}
+
+.form-container {
+    position: absolute;
+    width: 60%;
+    height: 100%;
+    padding: 0 40px;
+    transition: all 0.6s ease-in-out;
+}
+
+.sign-up-container {
+    opacity: 0;
+    z-index: 1;
+}
+
+.sign-in-container {
+    z-index: 2;
+}
+
+.login-form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 50px;
+}
+
+.login-container h1 {
+    color: var(--grad-clr3);
+}
+
+.social-container {
+    margin: 20px 0;
+}
+
+.social-container a {
+    border: 1px solid #DDD;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    height: 40px;
+    width: 40px;
+}
+
+.social-container a i {
+    font-size: 24px;
+}
+
+.login-span {
+    font-size: 12px;
+}
+
+.infield {
+    position: relative;
+    margin: 8px 0;
+    width: 100%;
+}
+
+.login-input {
+    width: 100%;
+    padding: 12px 8px;
+    background-color: var(--grad-clr2);
+    color: #FFF;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    /* text-align: center; */
+}
+
+.login-label {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: var(--linear-grad);
+    transition: 0.3s;
+}
+
+.login-input:focus ~ .login-label { /* Fixed the label selector */
+    width: 100%;
+}
+
+.social {
+    color: #333;
+    font-size: 14px;
+    text-decoration: none;
+    margin: 15px 0;
+}
+
+.social.forgot {
+    padding-bottom: 3px;
+    border-bottom: 2px solid #EEE;
+}
+
+.login-button {
+    border-radius: 20px;
+    border: 1px solid var(--grad-clr1);
+    background: var(--grad-clr2);
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 12px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: background 80ms ease-in; 
+}
+
+.login-button:hover {
+    background: #fff;
+    color: var(--grad-clr1);
+}
+
+.overlay-container {
+    position: absolute;
+    top: 0;
+    left: 60%;
+    width: 40%;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.6s ease-in-out;
+    z-index: 9;
+}
+
+.bottom-div {
+    display: none;
+}
+
+.down-container {
+    display: none;
+}
+
+.forgot {
+    text-decoration: none;
+}
+
+#overlayBtn {
+    cursor: pointer;
+    position: absolute;
+    left: 50%;
+    top: 304px;
+    transform: translateX(-50%);
+    width: 143.67px;
+    height: 40px;
+    border: 1px solid var(--grad-clr2);
+    background: transparent;
+    border-radius: 20px;
+}
+
+.overlay {
+    position: relative;
+    background: var(--linear-grad);
+    color: #fff;
+    left: -150%;
+    height: 100%;
+    width: 250%;
+    transition: transform 0.6s ease-in-out;
+}
+
+.overlay-panel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    text-align: center;
+    height: 100%;
+    width: 340px;
+    transition: 0.6s ease-in-out;
+}
+
+.overlay-left {
+    right: 60%;
+    transform: translateX(-12%);
+    background-image: url(../../Assets/Images/person-siitting-desk.jpg);
+    background-size: cover;
+    background-position: center;
+}
+
+.overlay .overlay-panel button {
+    background-color: var(--grad-clr2);
+    color: #FFF;
+    border: transparent;
+    margin-top: 150px;
+}
+
+.overlay-right {
+    right: 0;
+    transform: translateX(0);
+    background-image: url(../../Assets/Images/person-siitting-desk.jpg);
+    background-size: cover;
+    background-position: center;
+}
+
+.overlay-panel h1 {
+    color: #fff;
+}
+
+
+.right-panel-active .overlay-container {
+    transform: translateX(-150%);
+}
+
+.right-panel-active .overlay {
+    transform: translateX(50%);
+}
+
+.right-panel-active .overlay-left {
+    transform: translateX(25%);
+}
+
+.right-panel-active .overlay-right {
+    transform: translateX(0);
+}
+
+.right-panel-active .sign-in-container {
+    transform: translateX(20%);
+    opacity: 0;
+}
+
+.right-panel-active .sign-up-container {
+    transform: translateX(66.7%);
+    opacity: 1;
+    z-index: 5;
+    animation: show 0.6s;
+}
+
+@keyframes show {
+    0%,
+    50% {
+        opacity: 0;
+        z-index: 1;
+    }
+
+    50.1%,
+    100% {
+        opacity: 0;
+        z-index: 5;
+    }
+}
+
+.btnScaled {
+    animation: scaleBtn 0.6s;
+}
+
+@keyframes scaleBtn {
+    0% {
+        width: 143.67px;
+    }
+
+    50% {
+        width: 250px;
+    }
+
+    100% {
+        width: 143.67px;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .login-body {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .login-container {
+        height: 500px;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .login-container h1 {
+        font-size: 22px;
+    }
+
+    .forgot {
+        font-size: 10px;
+    }
+
+    .form-container {
+        margin: 0;
+        padding: 20px;
+        width: 80%;
+        left: 10%;
+    }
+
+    .social-container a i {
+        font-size: 20px;
+    }
+
+    .login-button {
+        font-size: 12px;
+        padding: 12px 35px;
+        width: 130px;
+    }
+
+    .login-input {
+        height: 35px;
+    }
+
+    .overlay-container {
+        display: none;
+    }
+
+    .bottom-div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 85px;
+    }
+}

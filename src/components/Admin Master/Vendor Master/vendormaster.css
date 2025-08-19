@@ -1,0 +1,248 @@
+
+
+.container-vendor{
+    min-width: 100%;
+    width: 100%;
+    background-color: #fff;
+    padding: 30px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    box-shadow: 0 0 8px rgba(0,0,0,0.2);
+}
+
+.container-vendor nav{
+    position: relative;
+    height: 22px;
+    width: 100%;
+    display: flex;
+}
+
+.container-vendor nav::after{
+    content: "";
+    background: silver;
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    top: 21px;
+    filter: blur(0.5px);
+}
+
+.container-vendor nav label{
+    position: relative;
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    line-height: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 650;
+    transition: all 0.3s ease;
+}
+
+#vendorrate:checked ~ nav label .vendor,
+#vendorrate:checked ~ nav label .vendorrate,
+#vendorrate:checked ~ nav label .vendorfuel,
+#vendorrate:checked ~ nav label .vendorgst,
+#vendorrate:checked ~ nav label .vendorcharge,
+#vendorrate:checked ~ nav label .entry{
+    color: #4fd181;
+}
+
+
+.container-vendor nav .slider{
+    position: absolute;
+    height: 4.5px;
+    background-color: #4FD1C5;
+    border-radius: 20px;
+    width: 16%;
+    z-index: 1;
+    left: 0;
+    bottom: 0;
+    transition: all 0.3s ease;
+    filter: blur(0.4px);
+}
+
+#vendor:checked ~ nav .slider{
+    left: 0%;
+}
+
+#vendorrate:checked ~ nav .slider{
+    left: 17%;
+}
+
+#vendorfuel:checked ~ nav .slider{
+    left: 34%;
+}
+
+#entry:checked ~ nav .slider{
+    left: 50%;
+}
+
+#vendorgst:checked ~ nav .slider{
+    left: 67%;
+}
+
+#vendorcharge:checked ~ nav .slider{
+    left: 84%;
+}
+
+
+
+
+#vendor:checked ~ nav .vendor{
+    color: #4FD1C5;
+}
+
+#vendorrate:checked ~ nav .vendorrate{
+    color: #4FD1C5;
+}
+
+#vendorfuel:checked ~ nav .vendorfuel{
+    color: #4FD1C5;
+}
+
+#vendorgst:checked ~ nav .vendorgst{
+    color: #4FD1C5;
+}
+
+#vendorcharge:checked ~ nav .vendorcharge{
+    color: #4FD1C5;
+}
+
+#entry:checked ~ nav .entry{
+    color: #4FD1C5;
+}
+
+
+
+
+.container-vendor section{
+    filter: blur(0.3px);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+#vendor:checked ~ section .content-1{
+    display: block;
+}
+
+#vendorrate:checked ~ section .content-2{
+    display: block;
+}
+
+#vendorfuel:checked ~ section .content-3{
+    display: block;
+}
+
+#vendorgst:checked ~ section .content-4{
+    display: block;
+}
+
+#vendorcharge:checked ~ section .content-5{
+    display: block;
+}
+
+#entry:checked ~ section .content-6{
+    display: block;
+}
+
+
+
+#createmanifest:checked ~ nav label .pendingmanifest,
+#createmanifest:checked ~ nav label .createmanifest,
+#createmanifest:checked ~ nav label .viewmanifest,
+#createmanifest:checked ~ nav label .forwardingmanifest,
+#createmanifest:checked ~ nav label .importmanifest{
+    color: #4fd181;
+}
+
+
+#pendingmanifest:checked ~ nav .slider{
+    left: 2%;
+}
+
+#createmanifest:checked ~ nav .slider{
+    left: 22%;
+}
+
+#viewmanifest:checked ~ nav .slider{
+    left: 42%;
+}
+
+#forwardingmanifest:checked ~ nav .slider{
+    left: 62%;
+}
+
+#importmanifest:checked ~ nav .slider{
+    left: 82%;
+}
+
+
+
+#pendingmanifest:checked ~ nav .pendingmanifest{
+    color: #4FD1C5;
+}
+
+#createmanifest:checked ~ nav .createmanifest{
+    color: #4FD1C5;
+}
+
+#viewmanifest:checked ~ nav .viewmanifest{
+    color: #4FD1C5;
+}
+
+#forwardingmanifest:checked ~ nav .forwardingmanifest{
+    color: #4FD1C5;
+}
+
+#importmanifest:checked ~ nav .importmanifest{
+    color: #4FD1C5;
+}
+
+
+
+#pendingmanifest:checked ~ section .content-1{
+    display: block;
+}
+
+#createmanifest:checked ~ section .content-2{
+    display: block;
+}
+
+#viewmanifest:checked ~ section .content-3{
+    display: block;
+}
+
+#forwardingmanifest:checked ~ section .content-4{
+    display: block;
+}
+
+#importmanifest:checked ~ section .content-5{
+    display: block;
+}
+
+
+
+/******************************************** media query ***********************************************/
+
+@media (max-width:900px){
+    .container-vendor nav label{
+        position: relative;
+        display: block;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        line-height: 10px;
+        cursor: pointer;
+        font-size: 8px;
+        font-weight: 400;
+        transition: all 0.3s ease;
+    }
+}

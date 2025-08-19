@@ -1,0 +1,133 @@
+
+
+.container-6{
+    min-width: 100%;
+    width: 100%;
+    background-color: #fff;
+    padding: 30px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    box-shadow: 0 0 8px rgba(0,0,0,0.2);
+}
+
+
+.container-6 nav{
+    position: relative;
+    height: 22px;
+    width: 100%;
+    display: flex;
+    /* margin-bottom: 5px; */
+}
+
+.container-6 nav::after{
+    content: "";
+    background: silver;
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    top: 21px;
+    filter: blur(0.5px);
+}
+
+.container-6 nav label{
+    position: relative;
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    line-height: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 650;
+    transition: all 0.3s ease;
+}
+
+#undelivered:checked ~ nav label .delivered,
+#undelivered:checked ~ nav label .undelivered,
+#undelivered:checked ~ nav label .upload{
+    color: #4fd181;
+}
+
+
+
+.container-6 nav .slider{
+    position: absolute;
+    height: 4.5px;
+    background-color: #4FD1C5;
+    border-radius: 20px;
+    width: 25%;
+    z-index: 1;
+    left: 0;
+    bottom: 0;
+    transition: all 0.3s ease;
+    filter: blur(0.4px);
+}
+
+#delivered:checked ~ nav .slider{
+    left: 4%;
+}
+
+#undelivered:checked ~ nav .slider{
+    left: 37%;
+}
+
+#upload:checked ~ nav .slider{
+    left: 70%;
+}
+
+
+
+#delivered:checked ~ nav .delivered{
+    color: #4FD1C5;
+}
+
+#undelivered:checked ~ nav .undelivered{
+    color: #4FD1C5;
+}
+
+#upload:checked ~ nav .upload{
+    color: #4FD1C5;
+}
+
+
+.container-6 section{
+    filter: blur(0.3px);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+#delivered:checked ~ section .content-1{
+    display: block;
+}
+
+#undelivered:checked ~ section .content-2{
+    display: block;
+}
+
+#upload:checked ~ section .content-3{
+    display: block;
+}
+
+
+/******************************************** media query ***********************************************/
+
+@media (max-width:900px){
+    .container-6 nav label{
+        position: relative;
+        display: block;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        line-height: 10px;
+        cursor: pointer;
+        font-size: 8px;
+        font-weight: 400;
+        transition: all 0.3s ease;
+    }
+}

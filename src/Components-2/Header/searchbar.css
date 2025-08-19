@@ -1,0 +1,191 @@
+/************************************** Search bar CSS ******************************************/
+
+
+.header .search-bar {
+    min-width: 360px;
+    padding: 0 20px;
+    margin-left: 100px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header .search-form {
+    width: 100%;
+}
+
+.header .search-form input {
+    border: 0;
+    font-size: 14px;
+    color: #333;
+    padding: 7px 38px 7px 22px;
+    border-radius: 5px;
+    transition: 0.3s;
+    width: 50%;
+    border: 1px solid silver;
+    margin-left: 20px;
+}
+
+.header .search-form input:focus,
+.header .search-form input:hover {
+    outline: none;
+    box-shadow: 0 0 1px #333;
+    border: 1px solid #333;
+}
+
+.header .search-form button {
+    border: 0;
+    padding: 0;
+    margin-left: -30px;
+    background: none;
+}
+
+.header .search-form button i {
+    color: #4FD1C5;
+    font-size: 20px;
+}
+
+.steps-container {
+    display: flex;
+    flex-direction: row;
+    width: 95%;
+    justify-content: space-between;
+    text-align: center;
+    position: relative;
+    margin: 0 20px;
+}
+
+.step-circle {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    background: white;
+    color: #999;
+    display: inline-block;
+    line-height: 30px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 500;
+    border: 4px solid #e3e0de;
+    transition: all 200ms ease;
+    transition-delay: 0s;
+}
+
+.step-circle.active {
+    transition-delay: 100ms;
+    border-color: #ecae06;
+    color: #4070f4;
+}
+
+.progress-bar-container .progress-indicator {
+    position: absolute;
+    height: 10px;
+    background: linear-gradient(to right, #4070f4, green);
+    transition: all 300ms ease;
+    margin-top: 20px;
+    border-radius: 5px;
+    opacity: 0.5;
+    left: 0;
+}
+
+.detail-label {
+    display: inline-block;
+    text-align: left;
+    width: 150px;
+}
+
+.BLuedarttracking {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(to right, #4070f4, green);
+    width: 90%;
+    margin-top: 5px;
+    border-radius: 10px;
+    height: 40px;
+    padding: 5px;
+    margin: 5px;
+    color: white;
+    font-size: 18px;
+}
+
+.tab-center {
+    width: 100%;
+}
+
+.shadow {
+    width: 100%;
+    display: flex;
+    padding: 10px;
+    background-color: white;
+    color: black;
+    margin-bottom: 20px;
+}
+
+.shipment-details {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 5px;
+    border-bottom: 1px solid gray;
+}
+
+.detail-label {
+    width: 350px;
+}
+
+.detail-value {
+    width: 350px;
+}
+
+
+@media (max-width:1199px) {
+    .header .search-bar {
+        position: fixed;
+        top: 50px;
+        left: 0;
+        right: 0;
+        padding: 20px;
+        box-shadow: 0px 0px 15px 0px rgba(1, 41, 112, 0.1);
+        background: white;
+        z-index: 9999;
+        transition: 0.3s;
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    .header .search-bar-show {
+        top: 60px;
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
+@media(max-width:1000px){
+    .detail-label{
+        width: 200px;
+    }
+
+    .detail-value{
+        width: 200px;
+    }
+}
+
+@media(max-width:500px) {
+    .detail-label{
+        width: 100%;
+    }
+
+    .detail-value{
+        width: 100%;
+    }
+}

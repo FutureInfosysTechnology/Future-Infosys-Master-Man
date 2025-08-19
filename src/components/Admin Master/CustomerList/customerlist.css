@@ -1,0 +1,182 @@
+
+
+.container-5{
+    min-width: 90%;
+    width: 99%;
+    background-color: #fff;
+    padding: 30px 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    margin-left: 10px;
+}
+
+
+.container-5 nav{
+    position: relative;
+    height: 22px;
+    width: 100%;
+    display: flex;
+    /* align-items: center; */
+    /* justify-content: center; */
+    margin-bottom: 20px;
+}
+
+.container-5 nav::after{
+    content: "";
+    background: silver;
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    top: 21px;
+    filter: blur(0.5px);
+}
+
+.container-5 nav label{
+    position: relative;
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    line-height: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 650;
+    transition: all 0.3s ease;
+}
+
+#receiver:checked ~ nav label .customer,
+#receiver:checked ~ nav label .receiver,
+#receiver:checked ~ nav label .pwgst,
+#receiver:checked ~ nav label .pwfuel,
+#receiver:checked ~ nav label .charges,
+#receiver:checked ~ nav label .rate,
+#receiver:checked ~ nav label .volumetric{
+    color: #4fd181;
+}
+
+
+.container-5 nav .slider{
+    position: absolute;
+    height: 4.5px;
+    background-color: #4FD1C5;
+    border-radius: 20px;
+    width: 13%;
+    z-index: 1;
+    left: 0;
+    bottom: 0;
+    transition: all 0.3s ease;
+    filter: blur(0.4px);
+}
+
+#receiver:checked ~ nav .slider{
+    left: 14%;
+}
+
+#pwgst:checked ~ nav .slider{
+    left: 27%;
+}
+
+#pwfuel:checked ~ nav .slider{
+    left: 43%;
+}
+
+#charges:checked ~ nav .slider{
+    left: 59%;
+}
+
+#rate:checked ~ nav .slider{
+    left: 72%;
+}
+
+#volumetric:checked ~ nav .slider{
+    left: 86%;
+}
+
+
+
+#customer:checked ~ nav .customer{
+    color: #4FD1C5;
+}
+
+#receiver:checked ~ nav .receiver{
+    color: #4FD1C5;
+}
+
+#pwgst:checked ~ nav .pwgst{
+    color: #4FD1C5;
+}
+
+#pwfuel:checked ~ nav .pwfuel{
+    color: #4FD1C5;
+}
+
+#charges:checked ~ nav .charges{
+    color: #4FD1C5;
+}
+
+#rate:checked ~ nav .rate{
+    color: #4FD1C5;
+}
+
+#volumetric:checked ~ nav .volumetric{
+    color: #4FD1C5;
+}
+
+
+.container-5 section{
+    filter: blur(0.3px);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+#customer:checked ~ section .content-1{
+    display: block;
+}
+
+#receiver:checked ~ section .content-2{
+    display: block;
+}
+
+#pwgst:checked ~ section .content-3{
+    display: block;
+}
+
+#pwfuel:checked ~ section .content-4{
+    display: block;
+}
+
+#charges:checked ~ section .content-5{
+    display: block;
+}
+
+#rate:checked ~ section .content-6{
+    display: block;
+}
+
+#volumetric:checked ~ section .content-7{
+    display: block;
+}
+
+/******************************************** media query ***********************************************/
+
+@media (max-width:900px){
+    .container-5 nav label{
+        position: relative;
+        display: block;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        line-height: 10px;
+        cursor: pointer;
+        font-size: 8px;
+        font-weight: 400;
+        transition: all 0.3s ease;
+    }
+}

@@ -1,0 +1,346 @@
+import React, { useState, useEffect } from "react";
+import { getApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+import Modal from 'react-modal';
+import Swal from "sweetalert2";
+
+
+function ViewManifest() {
+
+    const [getCity, setGetCity] = useState([]);
+    const [getManifestData, setGetManifestData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [showModal, setShowModal] = useState(false);
+    const [deleteInput, setDeleteInput] = useState({ manifestNo: "", docketNo: "" });
+    const today = new Date().toISOString().split('T')[0];
+    const [isLoading, setIsLoading] = useState(false);
+    const [formValues, setFormValues] = useState({
+        manifestNo: '',
+        manifestDest: '',
+        fromDate: today,
+        toDate: today
+    });
+
+    const fetchData = async (endpoint, params) => {
+        try {
+            const response = await getApi(endpoint, { params });
+            const manifestData = Array.isArray(response.data) ? response.data : [];
+
+            if (manifestData.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Data Found',
+                    text: 'No data available for the selected date range.',
+                    showConfirmButton: true,
+                });
+            }
+            setGetManifestData(manifestData);
+        } catch (err) {
+            console.error('Fetch Manifest Error:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormValues({
+            ...formValues,
+            [name]: value
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const params = {
+            sessionLocationCode: 'MUM',
+            manifestNo: formValues.manifestNo,
+            manifestDest: formValues.manifestDest,
+            fromDate: formValues.fromDate,
+            toDate: formValues.toDate,
+            pageNumber: currentPage,
+            pageSize: 10
+        };
+        setTimeout(() => {
+            fetchData('/Manifest/viewManifestData', params);
+        }, 1000);
+    };
+
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const response = await getApi('/Master/getdomestic');
+                setGetCity(response.Data || []);
+            } catch (err) {
+                console.error('Error fetching cities:', err);
+            }
+        };
+        fetchCities();
+    }, []);
+
+
+    const rowsPerPage = 10;
+    const indexOfLastRow = currentPage * rowsPerPage;
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+    const currentRows = getManifestData.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.ceil(getManifestData.length / rowsPerPage);
+
+    const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+    const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+
+
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        try {
+            const { manifestNo, docketNo } = deleteInput;
+            if (manifestNo && !docketNo) {
+                await deleteApi(`/Manifest/deleteManifest?inputName=deleteByManifestNo&sessionLocationCode=MUM&DocketNo=&manifestNo=${manifestNo}`);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Data has been successfully Deleted!',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            } else if (manifestNo && docketNo) {
+                await getApi(`/Manifest/addAwbToManifest?DocketNo=${docketNo}&manifestNo=${manifestNo}&sessionLocationCode=MUM`);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Data has been successfully Deleted!',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            }
+            else {
+                alert("Please enter Manifest No and/or Docket No to delete.");
+                return;
+            }
+            setShowModal(false);
+            await fetchData('/Manifest/viewManifestData', {
+                sessionLocationCode: 'MUM',
+                manifestNo: formValues.manifestNo,
+                manifestDest: formValues.manifestDest,
+                fromDate: formValues.fromDate,
+                toDate: formValues.toDate,
+                pageNumber: currentPage,
+                pageSize: 10
+            });
+        } catch (err) {
+            console.error("Delete Error:", err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to delete data!',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        }
+    };
+
+    const handleDeleteInputChange = (e) => {
+        const { name, value } = e.target;
+        setDeleteInput({ ...deleteInput, [name]: value });
+    };
+
+    const handleOpenDeleteModal = () => {
+        setDeleteInput({ manifestNo: "", docketNo: "" });
+        setShowModal(true);
+    };
+
+    const handleOpenManifestPrint = (manifestData) => {
+        const manifestNo = manifestData.manifestNo;
+        const sumQty = manifestData.sumQty;
+        const sumActualWt = manifestData.sumActualWt;
+        const url = `/manifest?manifestNo=${encodeURIComponent(manifestNo)}&sumQty=${encodeURIComponent(sumQty)}&sumActualWt=${encodeURIComponent(sumActualWt)}`;
+
+        const newWindow = window.open(
+            url,
+            '_blank', 'width=900,height=600,fullscreen=yes'
+        );
+
+        if (newWindow) {
+            newWindow.focus();
+        }
+    };
+
+
+    return (
+        <>
+            <div className="body">
+                <div className="container1">
+                    <form action="" onSubmit={handleSubmit}>
+                        <div className="fields2">
+                            <div className="input-field3">
+                                <label htmlFor="">Manifest No</label>
+                                <input type="tel" placeholder="Manifest No" value={formValues.manifestNo}
+                                    onChange={handleInputChange} name="manifestNo" />
+                            </div>
+
+                            <div className="input-field3">
+                                <label htmlFor="">Destination</label>
+                                <select name="manifestDest"
+                                    value={formValues.manifestDest}
+                                    onChange={handleInputChange}>
+                                    <option value="" disabled>Select Destination</option>
+                                    {getCity.map((city, index) => (
+                                        <option value={city.City_Code} key={index}>{city.City_Name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="input-field3">
+                                <label htmlFor="">From</label>
+                                <input type="date" name="fromDate"
+                                    value={formValues.fromDate}
+                                    onChange={handleInputChange} />
+                            </div>
+
+                            <div className="input-field3">
+                                <label htmlFor="">To</label>
+                                <input type="date" name="toDate"
+                                    value={formValues.toDate}
+                                    onChange={handleInputChange} />
+                            </div>
+
+                            <div className="bottom-buttons" style={{ marginTop: "18px" }}>
+                                <button className="ok-btn" style={{ height: "35px" }} type="submit">Submit</button>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <div className="addNew" style={{ justifyContent: "end", paddingRight: "10px" }}>
+                        <div className="search-input">
+                            <input className="add-input" type="text" placeholder="search" />
+                            <button type="submit" title="search">
+                                <i className="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {isLoading ? (<div className="loader"></div>) : (
+                        <div className='table-container'>
+                            <table className='table table-bordered table-sm'>
+                                <thead className='table-sm'>
+                                    <tr>
+                                        <th scope="col">Sr.No</th>
+                                        <th scope="col">Vendor.Name</th>
+                                        <th scope="col">Manifest.No</th>
+                                        <th scope="col">Customer.Name</th>
+                                        <th scope="col">Receiver.Name</th>
+                                        <th scope="col">Manifest.Date</th>
+                                        <th scope="col">From</th>
+                                        <th scope="col">To</th>
+                                        <th scope="col">Dkt.Count</th>
+                                        <th scope="col">Mode</th>
+                                        <th scope="col">Qty</th>
+                                        <th scope="col">Weight</th>
+                                        <th scope="col">Vehicle.No</th>
+                                        <th scope="col">Driver.Name</th>
+                                        <th scope="col">Driver.Mobile</th>
+                                        <th scope="col">Remark</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    {currentRows.map((manifest, index) => (
+                                        <tr key={index} style={{ fontSize: "12px" }}>
+                                            <td>{index + 1}</td>
+                                            <td>{manifest.vendorName}</td>
+                                            <td>{manifest.manifestNo}</td>
+                                            <td>{manifest.vendorName}</td>
+                                            <td>{manifest.vendorName}</td>
+                                            <td style={{ width: "100px" }}>{manifest.manifestDt}</td>
+                                            <td>{manifest.fromDest}</td>
+                                            <td>{manifest.toDest}</td>
+                                            <td>{manifest.shipment}</td>
+                                            <td>{manifest.mode}</td>
+                                            <td>{manifest.sumQty}</td>
+                                            <td>{manifest.sumActualWt}</td>
+                                            <td>{manifest.vehicleNo}</td>
+                                            <td>{manifest.driverName}</td>
+                                            <td>{manifest.driverMobile}</td>
+                                            <td>{manifest.Remark}</td>
+                                            <td>
+                                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                    <button className='edit-btn' onClick={() => handleOpenManifestPrint(manifest)}>
+                                                        <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "24px" }}></i>
+                                                    </button>
+                                                    <button className="edit-btn" onClick={handleOpenDeleteModal}>
+                                                        <i className='bi bi-trash' style={{ fontSize: "24px" }}></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>)}
+
+                    <div className="pagination">
+                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            {'<'}
+                        </button>
+                        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
+                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                            {'>'}
+                        </button>
+                    </div>
+
+
+                    <Modal overlayClassName="custom-overlay" isOpen={showModal}
+                        className="custom-modal-gst" contentLabel="Modal">
+                        <div className="custom-modal-content">
+                            <div className="header-tittle" style={{ display: "flex", flexDirection: "row" }}>
+                                <header style={{ width: "95%", textAlign: "center" }}>Delete Manifest Data</header>
+                                <button className="ok-btn" style={{ width: "40px", height: "100%", backgroundColor: "red" }}
+                                    onClick={() => setShowModal(false)}>
+                                    <i className="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <div className='container2' style={{ padding: "20px" }}>
+
+                                <form action="" style={{ backgroundColor: "white" }}>
+                                    <div className="fields2">
+                                        <div className="input-field">
+                                            <label>Manifest No:</label>
+                                            <input
+                                                type="text"
+                                                name="manifestNo"
+                                                value={deleteInput.manifestNo}
+                                                onChange={handleDeleteInputChange}
+                                                placeholder="Enter Manifest No"
+                                            />
+                                        </div>
+
+                                        <div className="input-field">
+                                            <label>Docket No:</label>
+                                            <input
+                                                type="text"
+                                                name="docketNo"
+                                                value={deleteInput.docketNo}
+                                                onChange={handleDeleteInputChange}
+                                                placeholder="Enter Docket No"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="bottom-buttons">
+                                        <button className="ok-btn" type="button" onClick={handleDelete}>Delete</button>
+                                        <button className="ok-btn" type="button" onClick={() => setShowModal(false)}>Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </Modal >
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default ViewManifest;
