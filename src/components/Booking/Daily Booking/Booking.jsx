@@ -6,6 +6,8 @@ import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
 import Swal from "sweetalert2";
 import Select from 'react-select';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 function Booking() {
 
@@ -67,11 +69,13 @@ function Booking() {
     const [bookingDate, setBookingDate] = useState('');
     const [open, setOpen] = useState(false);
 
-
+     const handleDateChange = (date, field) => {
+    setFormData({ ...formData, [field]: date });
+  };
 
     const getTodayDate = () => {
-        const today = new Date();
-        return today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+  const today = new Date();
+  return today;
     };
 
     // ===============================Enter Block =============================
@@ -1380,13 +1384,12 @@ function Booking() {
 
                                     <div className="input-field">
                                         <label htmlFor="booking-date">Booking Date</label>
-                                        <input
-                                            id="booking-date"
-                                            required
-                                            type="date"
-                                            value={formData.BookDate}
-                                            onChange={(e) => setFormData({ ...formData, BookDate: e.target.value })}
-                                        />
+                                        <DatePicker
+                                                      selected={formData.BookDate}
+                                                      onChange={(date) => handleDateChange(date, "BookDate")}
+                                                      dateFormat="dd/MM/yyyy"
+                                                      className="form-control form-control-sm"
+                                                    />
                                     </div>
                                 </div>
 

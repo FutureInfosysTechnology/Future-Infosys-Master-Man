@@ -1,9 +1,14 @@
-import React from "react";
-
+import React, { useState } from "react";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 
 function ForwardingManifest() {
-
+    const [maniDate,setManiDate]=useState(new Date());
+    const handleDateChange=(date)=>
+    {
+        setManiDate(date);
+    }
     return (
         <>
             <div className="body">
@@ -26,7 +31,12 @@ function ForwardingManifest() {
                         <div className="fields2">
                             <div className="input-field3">
                                 <label htmlFor="">Manifest Date</label>
-                                <input type="date" />
+                                <DatePicker
+                                              selected={maniDate}
+                                              onChange={(date) => handleDateChange(date)}
+                                              dateFormat="dd/MM/yyyy"
+                                              className="form-control form-control-sm"
+                                            />
                             </div>
 
                             <div className="input-field3">

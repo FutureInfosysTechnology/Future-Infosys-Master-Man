@@ -88,9 +88,9 @@ function DailyBooking() {
             <label htmlFor="entry" className="entry">
               Short Entry
             </label>
-            {/* <label htmlFor="vendorgst" className="vendorgst">
+            {/*<label htmlFor="vendorgst" className="vendorgst">
               Bulk Import Data
-            </label> */}
+            </label>*/}
             <label htmlFor="excelimport" className="excelimport">
               Excel Import Bulk
             </label>
@@ -127,20 +127,21 @@ function DailyBooking() {
             </div>
 
             <div
-              className={`content content-7 ${
+              className={`content content-4 ${
                 activeTab === "entry" ? "active" : ""
               }`}
             >
               <ShortEntry />
             </div>
 
-            <div
-              className={`content content-6 ${
-                activeTab === "excelimport" ? "active" : ""
-              }`}
-            >
-              <ExcelImportBulk />
-            </div>
+             <div
+               className={`content content-5 ${
+                 activeTab === "excelimport" ? "active" : ""
+               }`}
+             >
+               <ExcelImportBulk />
+             </div>
+
 {/* 
             <div
               className={`content content-4 ${

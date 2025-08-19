@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
-
-
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 function CreateManifest() {
+    const getTodayDate = () => {
+        const today = new Date();
+        return today;
+    }
 
     const [getTransport, setGetTransport] = useState([]);
     const [getVehicle, setGetVehicle] = useState([]);
@@ -28,6 +32,7 @@ function CreateManifest() {
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [formData, setFormData] = useState({
+        maniDate: getTodayDate(),
         fromDest: '',
         toDest: '',
         mode: '',
@@ -43,8 +48,9 @@ function CreateManifest() {
         manifestWeight: '',
         docketNo: []
     });
-
-
+    const handleDateChange = (date, field) => {
+        setFormData({ ...formData, [field]: date });
+    };
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -251,6 +257,17 @@ function CreateManifest() {
                     <form onSubmit={handleSubmit}>
                         <div className="fields2">
                             <div className="input-field3" >
+                                <label htmlFor="">Manifest Date</label>
+                                <DatePicker
+                                    selected={formData.maniDate}
+                                    onChange={(date) => handleDateChange(date, "maniDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
+
+                            </div>
+
+                            <div className="input-field3" >
                                 <label htmlFor="">From City</label>
                                 <select name="fromDest" value={formData.fromDest}
                                     onChange={handleFormChange} required>
@@ -260,7 +277,6 @@ function CreateManifest() {
                                     ))}
                                 </select>
                             </div>
-
                             <div className="input-field3" >
                                 <label htmlFor="">To City</label>
                                 <select name="toDest" value={formData.toDest}
@@ -329,7 +345,7 @@ function CreateManifest() {
 
                             <div className="input-field3" >
                                 <label htmlFor="">Driver Number</label>
-                                <input type="tel" placeholder="Driver Number" maxLength={10} 
+                                <input type="tel" placeholder="Driver Number" maxLength={10}
                                     value={formData.driverMobile} onChange={(e) => setFormData({ ...formData, driverMobile: e.target.value })} />
                             </div>
 
@@ -370,8 +386,8 @@ function CreateManifest() {
 
                             <div className="input-field3" >
                                 <label htmlFor="">Bulk Docket Manifest</label>
-                                <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize:"14px" }} 
-                                onClick={() => { setModalIsOpen(true) }}>Bulk Docket Manifest</button>
+                                <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px" }}
+                                    onClick={() => { setModalIsOpen(true) }}>Bulk Docket Manifest</button>
                             </div>
 
                             <div className="input-field3" >
@@ -444,15 +460,15 @@ function CreateManifest() {
                                         </button>
                                     </div>
 
-                                    <div className="input-field" style={{display:"flex", flexDirection:"row", marginLeft:"20px", marginTop:"10px"}}>
-                                        <label htmlFor="" style={{marginTop:"10px"}}>From Date :</label>
+                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", marginLeft: "20px", marginTop: "10px" }}>
+                                        <label htmlFor="" style={{ marginTop: "10px" }}>From Date :</label>
                                         <input type="date" style={{ width: "120px", marginLeft: "10px" }}
                                             value={fromDate}
                                             onChange={handleFromDateChange} />
                                     </div>
 
-                                    <div className="input-field" style={{display:"flex", flexDirection:"row", marginTop:"10px", marginLeft:"20px"}}>
-                                        <label htmlFor="" style={{marginTop:"10px"}}>To Date :</label>
+                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", marginTop: "10px", marginLeft: "20px" }}>
+                                        <label htmlFor="" style={{ marginTop: "10px" }}>To Date :</label>
                                         <input type="date" style={{ width: "120px", marginLeft: "10px" }}
                                             value={toDate}
                                             onChange={handleToDateChange} />

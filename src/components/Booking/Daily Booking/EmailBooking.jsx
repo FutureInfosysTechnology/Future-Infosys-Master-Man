@@ -161,7 +161,7 @@ function EmailBooking() {
           <div>
             {/* <label className="form-label mb-0" style={{ fontSize: "0.85rem" }}></label> */}
              <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
-            <DatePicker
+             <DatePicker
               selected={formData.fromdt}
               onChange={(date) => handleDateChange(date, "fromdt")}
               dateFormat="dd/MM/yyyy"

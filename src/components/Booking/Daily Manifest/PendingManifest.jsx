@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import '../../Tabs/tabs.css';
 import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
-
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 function PendingManifest() {
 
@@ -11,10 +12,19 @@ function PendingManifest() {
     const [loading, setLoading] = useState(false);
     const [totalRecords, setTotalRecords] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
-    const [fromDate, setFromDate] = useState('');
-    const [toDate, setToDate] = useState('');
+    // const [fromDate, setFromDate] = useState('');
+    // const [toDate, setToDate] = useState('');
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-
+    const [formDate, setFormDate] = useState({
+        fromDate: firstDayOfMonth,
+        toDate: today,
+    });
+    const handleDateChange = (date, field) => {
+        setFormDate({ ...formDate, [field]: date });
+        setCurrentPage(1);
+    };
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -51,8 +61,8 @@ function PendingManifest() {
             (manifest?.bookDate?.toLowerCase().includes(searchQuery.toLowerCase()));
 
         const manifestDate = new Date(convertDateFormat(manifest.bookDate));
-        const from = fromDate ? new Date(fromDate) : null;
-        const to = toDate ? new Date(toDate) : null;
+        const from = formDate.fromDate ? new Date(formDate.fromDate) : null;
+        const to = formDate.toDate ? new Date(formDate.toDate) : null;
 
         const isDateInRange = (!from || manifestDate >= from) && (!to || manifestDate <= to);
 
@@ -63,16 +73,6 @@ function PendingManifest() {
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
-        setCurrentPage(1);
-    };
-
-    const handleFromDateChange = (e) => {
-        setFromDate(e.target.value);
-        setCurrentPage(1);
-    };
-
-    const handleToDateChange = (e) => {
-        setToDate(e.target.value);
         setCurrentPage(1);
     };
 
@@ -103,18 +103,26 @@ function PendingManifest() {
                             </div>
                         </div>
 
-                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
-                            <label htmlFor="" style={{ marginTop: "8px" }}>From Date </label>
-                            <input type="date" style={{ width: "120px", marginLeft: "10px" }}
-                                value={fromDate}
-                                onChange={handleFromDateChange} />
+                        <div className="input-field" style={{ display: "flex", flexDirection: "row", gap:"10px"}}>
+                            <label htmlFor="" style={{ marginTop: "8px",textAlign:"end"}}>From Date </label>
+                            <DatePicker
+                                selected={formDate.fromDate}
+                                onChange={(date) => handleDateChange(date, "fromDate")}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm"
+                                style={{ width: "120px", marginLeft: "10px" }}
+                            />
                         </div>
 
-                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
-                            <label htmlFor="" style={{ marginTop: "8px" }}>To Date </label>
-                            <input type="date" style={{ width: "120px", marginLeft: "10px" }}
-                                value={toDate}
-                                onChange={handleToDateChange} />
+                        <div className="input-field" style={{ display: "flex", flexDirection: "row", gap:"10px" }}>
+                            <label htmlFor="" style={{ marginTop: "8px",textAlign:"end" }}>To Date </label>
+                            <DatePicker
+                                selected={formDate.toDate}
+                                onChange={(date) => handleDateChange(date, "toDate")}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm"
+                                // style={{ width: "120px", marginLeft: "10px" }}
+                            />
                         </div>
 
                         <div className="search-input">

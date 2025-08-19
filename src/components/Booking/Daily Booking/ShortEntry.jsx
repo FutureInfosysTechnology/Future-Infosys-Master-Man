@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 import { getApi, postApi, putApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 function ShortEntry() {
@@ -12,7 +14,9 @@ function ShortEntry() {
   const [selectedMode, setSelectedMode] = useState(null);
   const [selectedOrigin, setSelectedOrigin] = useState(null);
   const [selectedDestination, setSelectedDestination] = useState(null);
-
+    const handleDateChange = (date) => {
+    setBookingDate(date);
+  };
   const [formData, setFormData] = useState({
     Customer_Code: '',
     Customer_Name: '',
@@ -39,7 +43,7 @@ function ShortEntry() {
   const allCustomerOptions = getCustomer.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString() }));
 
   useEffect(() => {
-    setBookingDate(new Date().toISOString().split('T')[0]);
+    setBookingDate(new Date());
     getApi('/Master/getCustomerdata').then(response => {
       if (response?.status === 1) setGetCustomer(response.Data);
     });
@@ -241,7 +245,13 @@ const resetForm = () => {
 
             <div className="col-md-6 col-lg-4">
               <label className="form-label">Booking Date</label>
-              <input type="date" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} className="form-control" />
+              <DatePicker
+                            selected={bookingDate}
+                            onChange={(date) => handleDateChange(date)}
+                            dateFormat="dd/MM/yyyy"
+                            className="form-control form-control-sm"
+                            wrapperClassName="w-100"
+                          />
             </div>
 
             <div className="col-md-6 col-lg-4">

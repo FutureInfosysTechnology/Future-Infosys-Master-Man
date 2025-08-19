@@ -2,24 +2,27 @@ import React, { useState, useEffect } from "react";
 import { getApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
-
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 function ViewManifest() {
-
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [getCity, setGetCity] = useState([]);
     const [getManifestData, setGetManifestData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [showModal, setShowModal] = useState(false);
     const [deleteInput, setDeleteInput] = useState({ manifestNo: "", docketNo: "" });
-    const today = new Date().toISOString().split('T')[0];
     const [isLoading, setIsLoading] = useState(false);
     const [formValues, setFormValues] = useState({
         manifestNo: '',
         manifestDest: '',
-        fromDate: today,
-        toDate: today
+        fromDate: firstDayOfMonth,
+        toDate: today,
     });
-
+    const handleDateChange = (date, field) => {
+        setFormValues({ ...formValues, [field]: date });
+    };
     const fetchData = async (endpoint, params) => {
         try {
             const response = await getApi(endpoint, { params });
@@ -193,16 +196,22 @@ function ViewManifest() {
 
                             <div className="input-field3">
                                 <label htmlFor="">From</label>
-                                <input type="date" name="fromDate"
-                                    value={formValues.fromDate}
-                                    onChange={handleInputChange} />
+                                <DatePicker
+                                    selected={formValues.fromDate}
+                                    onChange={(date) => handleDateChange(date, "fromDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
                             </div>
 
                             <div className="input-field3">
                                 <label htmlFor="">To</label>
-                                <input type="date" name="toDate"
-                                    value={formValues.toDate}
-                                    onChange={handleInputChange} />
+                                <DatePicker
+                                    selected={formValues.toDate}
+                                    onChange={(date) => handleDateChange(date, "toDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
                             </div>
 
                             <div className="bottom-buttons" style={{ marginTop: "18px" }}>
