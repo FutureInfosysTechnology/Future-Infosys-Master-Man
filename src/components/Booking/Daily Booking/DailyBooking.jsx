@@ -102,62 +102,12 @@ function DailyBooking() {
 
           {/* Sections */}
           <section>
-            <div
-              className={`content content-1 ${
-                activeTab === "vendor" ? "active" : ""
-              }`}
-            >
-              <Booking />
-            </div>
-
-            <div
-              className={`content content-2 ${
-                activeTab === "vendorrate" ? "active" : ""
-              }`}
-            >
-              <DailyExpenses />
-            </div>
-
-            <div
-              className={`content content-3 ${
-                activeTab === "vendorfuel" ? "active" : ""
-              }`}
-            >
-              <EmailBooking />
-            </div>
-
-            <div
-              className={`content content-4 ${
-                activeTab === "entry" ? "active" : ""
-              }`}
-            >
-              <ShortEntry />
-            </div>
-
-             <div
-               className={`content content-5 ${
-                 activeTab === "excelimport" ? "active" : ""
-               }`}
-             >
-               <ExcelImportBulk />
-             </div>
-
-{/* 
-            <div
-              className={`content content-4 ${
-                activeTab === "vendorgst" ? "active" : ""
-              }`}
-            >
-              <BulkImport />
-            </div> */}
-
-            <div
-              className={`content content-5 ${
-                activeTab === "vendorcharge" ? "active" : ""
-              }`}
-            >
-              <VendorBill />
-            </div>
+            {activeTab === "vendor" && <Booking />}
+            {activeTab === "vendorrate" && <DailyExpenses />}
+            {activeTab === "vendorfuel" && <EmailBooking />}
+            {activeTab === "entry" && <ShortEntry />}
+            {activeTab === "excelimport" && <ExcelImportBulk />}
+            {activeTab === "vendorcharge" && <VendorBill />}
           </section>
         </div>
         <Footer />

@@ -4,6 +4,8 @@ import Modal from 'react-modal';
 import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import Select from 'react-select';
+import 'react-toggle/style.css';
 
 function ViewManifest() {
     const today = new Date();
@@ -184,15 +186,29 @@ function ViewManifest() {
 
                             <div className="input-field3">
                                 <label htmlFor="">Destination</label>
-                                <select name="manifestDest"
-                                    value={formValues.manifestDest}
-                                    onChange={handleInputChange}>
-                                    <option value="" disabled>Select Destination</option>
-                                    {getCity.map((city, index) => (
-                                        <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getCity.map(city => ({
+                                        value: city.CityCode,   // adjust keys from your API
+                                        label: city.CityName
+                                    }))}
+                                    value={
+                                        formValues.manifestDest
+                                            ? { value: formValues.manifestDest, label: formValues.manifestDest }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormValues({
+                                            ...formValues,
+                                            manifestDest: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Destination"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
                             </div>
+
 
                             <div className="input-field3">
                                 <label htmlFor="">From</label>
