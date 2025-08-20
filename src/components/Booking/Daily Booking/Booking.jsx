@@ -26,7 +26,7 @@ function Booking() {
     const [getCountry, setGetCountry] = useState([]);
     const [getVendor, setGetVendor] = useState([]);
     const [getState, setGetState] = useState([]);
-    const [getCity, setGetCity] = useState([]);
+    const [getCity, setGetCity] = useState([]);  
     const [getMode, setGetMode] = useState([]);
     const [selectedMode_Code, setSelectedMode_Code] = useState('');
     const [selectedModeName, setSelectedModeName] = useState('');
@@ -1417,6 +1417,10 @@ function Booking() {
                                                 }}
                                                 placeholder="Select Customer"
                                                 isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                        styles={{
+                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                        }}
                                             />
                                         </div>
                                         <div className="input-field" style={{ width: "18%" }}>
@@ -1531,7 +1535,7 @@ function Booking() {
                                     </div>
 
                                     {/* Origin Row */}
-                                    <div style={{ display: "flex", gap: "-5rem", marginBottom: "1rem" }}>
+                                    <div style={{ display: "flex", gap: "-5rem" ,marginBottom: "1rem",width: "100%",gap:"10px" }}>
                                         <div className="input-field1" style={{ width: "25%" }}>
                                             <label>Pincode</label>
                                             <input
@@ -1576,7 +1580,7 @@ function Booking() {
                                     </div>
 
                                     {/* Destination Row */}
-                                    <div style={{ display: "flex", gap: "-5rem", marginBottom: "1rem" }}>
+                                    <div style={{ display: "flex", gap: "-5rem", marginBottom: "1rem",width: "100%",gap:"10px"}}>
                                         <div className="input-field1" style={{ width: "25%" }}>
                                             <label>Pincode</label>
                                             <input
@@ -1634,10 +1638,8 @@ function Booking() {
                                         <div className="section-title">Vendor Information</div>
 
                                         <div className="fields2">
-                                            <div style={{ display: "flex", flexDirection: "row", width: "99%" }}>
-
-
-                                                <div className="input-field" style={{ width: "85%", position: "relative" }}>
+                                            <div style={{ display: "flex", flexDirection: "row", width: "100%",gap:"10px" }}>
+                                                <div className="input-field" style={{ flex:"3",position: "relative" }}>
                                                     <label>Mode Name</label>
 
                                                     <Select

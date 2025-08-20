@@ -4,12 +4,12 @@ import Modal from 'react-modal';
 import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import Select from 'react-select';
+import 'react-toggle/style.css';
 
 function CreateManifest() {
-    const getTodayDate = () => {
-        const today = new Date();
-        return today;
-    }
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     const [getTransport, setGetTransport] = useState([]);
     const [getVehicle, setGetVehicle] = useState([]);
@@ -29,10 +29,10 @@ function CreateManifest() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDocketNos, setSelectedDocketNos] = useState([]);
     const [selectedManifestRows, setSelectedManifestRows] = useState([]);
-    const [fromDate, setFromDate] = useState('');
-    const [toDate, setToDate] = useState('');
+    const [fromDate, setFromDate] = useState(firstDayOfMonth);
+    const [toDate, setToDate] = useState(today);
     const [formData, setFormData] = useState({
-        maniDate: getTodayDate(),
+        maniDate: new Date(),
         fromDest: '',
         toDest: '',
         mode: '',
@@ -51,49 +51,59 @@ function CreateManifest() {
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
+
+    const fetchDataM = async () => {
+        setLoading(true);
+        try {
+            // Current page data
+            const response = await getApi(`/Manifest/getPendingManifest?branchCode=MUM&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
+            const currentPageData = response?.Data || [];  // <-- remove extra .Data
+            setGetManifest(currentPageData);
+
+            // Total records for pagination
+            const allDataResponse = await getApi(`/Manifest/getPendingManifest?branchCode=MUM&pageNumber=1&pageSize=10000`);
+            const allData = allDataResponse?.Data || [];   // <-- remove extra .Data
+            setTotalRecords(allData.length);
+
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const response = await getApi(`/Manifest/getPendingManifest?branchCode=MUM&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
-                const currentPageData = Array.isArray(response.data) ? response.data : [];
-                setGetManifest(currentPageData);
-
-                const allDataResponse = await getApi(`/Manifest/getPendingManifest?branchCode=MUM&pageNumber=1&pageSize=10000`);
-                const allData = Array.isArray(allDataResponse.data) ? allDataResponse.data : [];
-                setTotalRecords(allData.length);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+        fetchDataM();
     }, [currentPage, rowsPerPage]);
 
+    const filteredgetManifestData = getManifest.filter((manifest) => {
+        const isDocketNoMatch =
+            manifest?.DocketNo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            manifest?.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            manifest?.fromDest?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            manifest?.toDest?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            manifest?.BookDate?.toLowerCase().includes(searchQuery.toLowerCase());
+
+        let manifestDate = null;
+        if (manifest?.BookDate) {
+            const [day, month, year] = manifest.BookDate.split("/");
+            manifestDate = new Date(year, month - 1, day);
+        }
+
+        const from = fromDate ? new Date(fromDate.setHours(0, 0, 0, 0)) : null;
+        const to = toDate ? new Date(toDate.setHours(23, 59, 59, 999)) : null;
+
+        const isDateInRange =
+            (!from || (manifestDate && manifestDate >= from)) &&
+            (!to || (manifestDate && manifestDate <= to));
+
+        return isDocketNoMatch && isDateInRange;
+    });
     const convertDateFormat = (dateStr) => {
         const [day, month, year] = dateStr.split('-');
         return `${year}-${month}-${day}`;
     };
-
-    const filteredgetManifestData = getManifest.filter((manifest) => {
-
-        const isDocketNoMatch =
-            (manifest?.DocketNo?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (manifest?.customerName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (manifest?.fromDest?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (manifest?.toDest?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (manifest?.bookDate?.toLowerCase().includes(searchQuery.toLowerCase()));
-
-        const manifestDate = new Date(convertDateFormat(manifest.bookDate));
-        const from = fromDate ? new Date(fromDate) : null;
-        const to = toDate ? new Date(toDate) : null;
-
-        const isDateInRange = (!from || manifestDate >= from) && (!to || manifestDate <= to);
-
-        return isDocketNoMatch && isDateInRange;
-    });
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
@@ -269,78 +279,180 @@ function CreateManifest() {
 
                             <div className="input-field3" >
                                 <label htmlFor="">From City</label>
-                                <select name="fromDest" value={formData.fromDest}
-                                    onChange={handleFormChange} required>
-                                    <option value="" disabled>Select City</option>
-                                    {getCity.map((city, index) => (
-                                        <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getCity.map(city => ({
+                                        value: city.City_Code,   // adjust keys from your API
+                                        label: city.City_Name
+                                    }))}
+                                    value={
+                                        formData.fromDest
+                                            ? { value: formData.fromDest, label: getCity.find(c => c.City_Code === formData.fromDest)?.City_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) => {
+                                        console.log(selectedOption);
+                                        setFormData({
+                                            ...formData,
+                                            fromDest: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    }
+                                    placeholder="Select City"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
                             </div>
                             <div className="input-field3" >
                                 <label htmlFor="">To City</label>
-                                <select name="toDest" value={formData.toDest}
-                                    onChange={handleFormChange} required>
-                                    <option value="" disabled>Select City</option>
-                                    {getCity.map((city, index) => (
-                                        <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getCity.map(city => ({
+                                        value: city.City_Code,   // adjust keys from your API
+                                        label: city.City_Name
+                                    }))}
+                                    value={
+                                        formData.toDest
+                                            ? { value: formData.toDest, label: getCity.find(c => c.City_Code === formData.toDest)?.City_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            toDest: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select City"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
+
                             </div>
 
                             <div className="input-field3" >
                                 <label htmlFor="">Mode</label>
-                                <select name="mode" value={formData.mode}
-                                    onChange={handleFormChange} required>
-                                    <option value="" disabled>Select Mode</option>
-                                    {getMode.map((mode, index) => (
-                                        <option value={mode.Mode_Code} key={index}>{mode.Mode_Name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getMode.map(mode => ({
+                                        value: mode.Mode_Code,   // adjust keys from your API
+                                        label: mode.Mode_Name
+                                    }))}
+                                    value={
+                                        formData.mode
+                                            ? { value: formData.mode, label: getMode.find(c => c.Mode_Code === formData.mode)?.Mode_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            mode: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Mode"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
+
                             </div>
 
                             <div className="input-field3" >
                                 <label htmlFor="">Transport Type</label>
-                                <select name="transportType" value={formData.transportType}
-                                    onChange={handleFormChange}>
-                                    <option value="" disabled>Transport Type</option>
-                                    {getTransport.map((transport, index) => (
-                                        <option value={transport.Transport_Code} key={index}>{transport.Transport_Name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getTransport.map(tra => ({
+                                        value: tra.Transport_Code,   // adjust keys from your API
+                                        label: tra.Transport_Name
+                                    }))}
+                                    value={
+                                        formData.transportType
+                                            ? { value: formData.transportType, label: getTransport.find(c => c.Transport_Code === formData.transportType)?.Transport_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            transportType: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Transport Type"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
                             </div>
 
                             <div className="input-field3" >
                                 <label htmlFor="">Vehicle Type</label>
-                                <select name="vehicleType" value={formData.vehicleType}
-                                    onChange={handleFormChange}>
-                                    <option value="" disabled>Vehicle Type</option>
-                                    {getVehicle.map((vehicle, index) => (
-                                        <option value={vehicle.vehicle_model} key={index}>{vehicle.vehicle_model}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getVehicle.map(vehicle => ({
+                                        value: vehicle.vehicle_model,   // adjust keys from your API
+                                        label: vehicle.vehicle_model
+                                    }))}
+                                    value={
+                                        formData.vehicleType
+                                            ? { value: formData.vehicleType, label: getVehicle.find(c => c.vehicle_model === formData.vehicleType)?.vehicle_model || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            vehicleType: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Vehicle Type"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
                             </div>
 
                             <div className="input-field3" >
                                 <label htmlFor="">Vehicle Number</label>
-                                <select name="vehicleNo" value={formData.vehicleNo}
-                                    onChange={handleFormChange}>
-                                    <option value="" disabled>Vehicle Number</option>
-                                    {getVehicle.map((vehicle, index) => (
-                                        <option value={vehicle.vehicle_number} key={index}>{vehicle.vehicle_number}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getVehicle.map(vehicle => ({
+                                        value: vehicle.vehicle_number,   // adjust keys from your API
+                                        label: vehicle.vehicle_number
+                                    }))}
+                                    value={
+                                        formData.vehicleNo
+                                            ? { value: formData.vehicleNo, label: getVehicle.find(c => c.vehicle_number === formData.vehicleNo)?.vehicle_number || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            vehicleNo: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Vehicle Number"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
                             </div>
 
                             <div className="input-field3" >
                                 <label htmlFor="">Driver Name</label>
-                                <select name="driverName" value={formData.driverName}
-                                    onChange={handleFormChange}>
-                                    <option value="" disabled>Driver Name</option>
-                                    {getDriver.map((driver, index) => (
-                                        <option value={driver.Driver_Code} key={index}>{driver.Driver_Name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getDriver.map(driver => ({
+                                        value: driver.Driver_Code,   // adjust keys from your API
+                                        label: driver.Driver_Name
+                                    }))}
+                                    value={
+                                        formData.driverName
+                                            ? { value: formData.driverName, label: getDriver.find(c => c.Driver_Code === formData.driverName)?.Driver_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            driverName: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Driver Name"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
                             </div>
 
                             <div className="input-field3" >
@@ -351,13 +463,28 @@ function CreateManifest() {
 
                             <div className="input-field3" >
                                 <label htmlFor="">Vendor Name</label>
-                                <select name="vendorCode" value={formData.vendorCode}
-                                    onChange={handleFormChange}>
-                                    <option value="" disabled>Vendor Name</option>
-                                    {getVendor.map((vendor, index) => (
-                                        <option value={vendor.Vendor_Code} key={index}>{vendor.Vendor_Name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getVendor.map(vendor => ({
+                                        value: vendor.Vendor_Code,   // adjust keys from your API
+                                        label: vendor.Vendor_Name
+                                    }))}
+                                    value={
+                                        formData.vendorCode
+                                            ? { value: formData.vendorCode, label: getVendor.find(c => c.Vendor_Code === formData.vendorCode)?.Vendor_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            vendorCode: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Vendor Name"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
+
                             </div>
 
                             <div className="input-field3" >
@@ -399,7 +526,6 @@ function CreateManifest() {
                             </div>
                         </div>
                     </form>
-
                     <div className="table-container" style={{ padding: "10px" }}>
                         <table className="table table-bordered table-sm">
                             <thead>
@@ -460,18 +586,25 @@ function CreateManifest() {
                                         </button>
                                     </div>
 
-                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", marginLeft: "20px", marginTop: "10px" }}>
-                                        <label htmlFor="" style={{ marginTop: "10px" }}>From Date :</label>
-                                        <input type="date" style={{ width: "120px", marginLeft: "10px" }}
-                                            value={fromDate}
-                                            onChange={handleFromDateChange} />
+                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", marginLeft: "20px", marginTop: "10px", gap: "10px" }}>
+                                        <label htmlFor="" style={{ marginTop: "10px", textAlign: "end" }}>From Date :</label>
+                                        <DatePicker
+                                            selected={fromDate}
+                                            onChange={handleFromDateChange}
+                                            dateFormat="dd/MM/yyyy"
+                                            className="form-control form-control-sm"
+                                        />
                                     </div>
 
-                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", marginTop: "10px", marginLeft: "20px" }}>
-                                        <label htmlFor="" style={{ marginTop: "10px" }}>To Date :</label>
-                                        <input type="date" style={{ width: "120px", marginLeft: "10px" }}
-                                            value={toDate}
-                                            onChange={handleToDateChange} />
+                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", marginTop: "10px", marginLeft: "20px", gap: "10px" }}>
+                                        <label htmlFor="" style={{ marginTop: "10px", textAlign: "end" }}>To Date :</label>
+                                        <DatePicker
+                                            selected={toDate}
+                                            onChange={handleToDateChange}
+                                            dateFormat="dd/MM/yyyy"
+                                            className="form-control form-control-sm"
+                                            style={{ width: "120px", marginLeft: "10px" }}
+                                        />
                                     </div>
 
                                     <div className="bottom-buttons" style={{ marginTop: "0px", marginLeft: "255px" }}>

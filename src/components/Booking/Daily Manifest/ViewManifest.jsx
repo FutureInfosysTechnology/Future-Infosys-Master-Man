@@ -188,12 +188,12 @@ function ViewManifest() {
                                 <label htmlFor="">Destination</label>
                                 <Select
                                     options={getCity.map(city => ({
-                                        value: city.CityCode,   // adjust keys from your API
-                                        label: city.CityName
+                                        value: city.City_Code,   // adjust keys from your API
+                                        label: city.City_Name
                                     }))}
                                     value={
                                         formValues.manifestDest
-                                            ? { value: formValues.manifestDest, label: formValues.manifestDest }
+                                            ? { value: formValues.manifestDest, label: getCity.find(c=>c.City_Code===formValues.manifestDest)?.City_Name}
                                             : null
                                     }
                                     onChange={(selectedOption) =>

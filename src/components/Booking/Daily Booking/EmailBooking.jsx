@@ -141,10 +141,12 @@ function EmailBooking() {
         <div className="d-flex flex-wrap gap-3 mb-3 align-items-center">
           {/* 🔍 react-select Searchable Dropdown */}
           <div style={{ minWidth: "260px" }}>
-           
-             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Client Name</h6>
-          
+
+            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Client Name</h6>
+
             <Select
+              className="blue-selectbooking"
+              classNamePrefix="blue-selectbooking"
               options={allOptions}
               value={formData.CustomerName ? { label: formData.CustomerName, value: formData.CustomerName } : null}
               onChange={handleSearchChange}
@@ -153,15 +155,15 @@ function EmailBooking() {
               noOptionsMessage={() => "Customer not found"}
               styles={{
                 control: (base) => ({ ...base, minHeight: "32px", fontSize: "0.85rem" }),
-                menu: (base) => ({ ...base, zIndex: 9999 }),
+                menu: (base) => ({ ...base, zIndex: 9999 })
               }}
             />
           </div>
 
           <div>
             {/* <label className="form-label mb-0" style={{ fontSize: "0.85rem" }}></label> */}
-             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
-             <DatePicker
+            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
+            <DatePicker
               selected={formData.fromdt}
               onChange={(date) => handleDateChange(date, "fromdt")}
               dateFormat="dd/MM/yyyy"
