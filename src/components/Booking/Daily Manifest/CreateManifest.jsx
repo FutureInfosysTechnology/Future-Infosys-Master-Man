@@ -206,7 +206,7 @@ function CreateManifest() {
         }
 
         const requestPayload = {
-            DocketNo: formData.docketNo,
+            DocketNo: selectedDocketNos,
             fromDest: formData.fromDest,
             toDest: formData.toDest,
             Mode: formData.mode,
@@ -219,7 +219,6 @@ function CreateManifest() {
             driverMobile: formData.driverMobile,
             DispatchFlag: "0",
         };
-
         try {
             const response = await postApi('/Manifest/generateManifest', requestPayload);
             Swal.fire({
@@ -301,6 +300,10 @@ function CreateManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
                             </div>
                             <div className="input-field3" >
@@ -325,6 +328,10 @@ function CreateManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
 
                             </div>
@@ -351,6 +358,10 @@ function CreateManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
 
                             </div>
@@ -377,6 +388,10 @@ function CreateManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
                             </div>
 
@@ -402,6 +417,10 @@ function CreateManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
                             </div>
 
@@ -427,6 +446,10 @@ function CreateManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
                             </div>
 
@@ -452,6 +475,10 @@ function CreateManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
                             </div>
 
@@ -483,6 +510,10 @@ function CreateManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
 
                             </div>
@@ -550,7 +581,7 @@ function CreateManifest() {
                                     <tr key={index}>
                                         <td>{index + 1}</td>
                                         <td>{docket.DocketNo}</td>
-                                        <td style={{ width: "100px" }}>{docket.bookDate}</td>
+                                        <td style={{ width: "100px" }}>{docket.BookDate}</td>
                                         <td>{docket.customerName}</td>
                                         <td>{docket.consigneeName}</td>
                                         <td>{docket.fromDest}</td>
@@ -576,28 +607,34 @@ function CreateManifest() {
                                     <i className="bi bi-x-lg"></i>
                                 </button>
                             </div>
-                            <div className='container2' style={{ borderRadius: "0px", padding: "20px" }}>
-                                <div style={{ display: "flex", flexDirection: "row" }}>
-                                    <div className="search-input">
-                                        <input className="add-input" type="text" placeholder="search"
-                                            value={searchQuery} onChange={handleSearchChange} />
+                            <div className='container2' style={{ borderRadius: "0px", padding: "20px"}}>
+                                <div style={{ display: "flex", flexDirection: "row", alignItems:"center",justifyContent:"center",width:"100%",gap:"50px"}}>
+                                    <div className="search-input" style={{marginBottom:"10px"}}>
+                                        <input
+                                            className="add-input1"
+                                            type="text"
+                                            placeholder="search"
+                                            value={searchQuery}
+                                            onChange={handleSearchChange}
+                                            style={{ marginLeft: "0%" }}
+                                        />
                                         <button type="submit" title="search">
                                             <i className="bi bi-search"></i>
                                         </button>
                                     </div>
-
-                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", marginLeft: "20px", marginTop: "10px", gap: "10px" }}>
-                                        <label htmlFor="" style={{ marginTop: "10px", textAlign: "end" }}>From Date :</label>
+                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px"}}>
+                                        <label style={{ marginTop: "8px", textAlign: "end"}}>From Date</label>
                                         <DatePicker
                                             selected={fromDate}
                                             onChange={handleFromDateChange}
                                             dateFormat="dd/MM/yyyy"
                                             className="form-control form-control-sm"
+                                            style={{ width: "120px", marginLeft: "10px" }}
                                         />
                                     </div>
 
-                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", marginTop: "10px", marginLeft: "20px", gap: "10px" }}>
-                                        <label htmlFor="" style={{ marginTop: "10px", textAlign: "end" }}>To Date :</label>
+                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px",marginRight:"50px" }}>
+                                        <label style={{ marginTop: "8px", textAlign: "end"}}>To Date</label>
                                         <DatePicker
                                             selected={toDate}
                                             onChange={handleToDateChange}
@@ -607,7 +644,7 @@ function CreateManifest() {
                                         />
                                     </div>
 
-                                    <div className="bottom-buttons" style={{ marginTop: "0px", marginLeft: "255px" }}>
+                                    <div className="bottom-buttons">
                                         <button style={{ marginTop: "0px" }} className="ok-btn" onClick={handleDocketNoSelect}>Submit</button>
                                     </div>
                                 </div>
@@ -642,7 +679,7 @@ function CreateManifest() {
                                                     </td>
                                                     <td>{index + 1}</td>
                                                     <td>{manifest.DocketNo}</td>
-                                                    <td style={{ width: "100px" }}>{manifest.bookDate}</td>
+                                                    <td style={{ width: "100px" }}>{manifest.BookDate}</td>
                                                     <td>{manifest.customerName}</td>
                                                     <td>{manifest.consigneeName}</td>
                                                     <td>{manifest.fromDest}</td>

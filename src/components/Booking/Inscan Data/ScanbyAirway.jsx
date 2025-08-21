@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import '../../Admin Master/Transport Master/modemaster.css';
 import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Swal from "sweetalert2";
+import Select from 'react-select';
+import 'react-toggle/style.css';
 
 
 function ScanbyAirway() {
@@ -14,7 +16,14 @@ function ScanbyAirway() {
     const [selectAll, setSelectAll] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);
     const [selectedDocketNos, setSelectedDocketNos] = useState([]);
-      const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const statusOptions = [
+        { value: "Arrived", label: "Arrived" },
+        { value: "Schedule", label: "Schedule" },
+        { value: "Dispatch", label: "Dispatch" },
+        { value: "Delivered", label: "Delivered" },
+        { value: "Return", label: "Return" }  // (maybe you meant "Return"?)
+    ];
     const [formData, setFormData] = useState({
         DocketNo: [],
         Inscan_Status: "",
@@ -69,7 +78,7 @@ function ScanbyAirway() {
 
     const filteredInscan = getData.filter((Inscan) =>
         (Inscan && Inscan.DocketNo && Inscan.DocketNo?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
-      );
+    );
 
 
     const totalPages = Math.ceil(totalRecords / rowsPerPage);
@@ -80,8 +89,8 @@ function ScanbyAirway() {
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
         setCurrentPage(1);
-      };
-    
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -137,14 +146,25 @@ function ScanbyAirway() {
                     <div className="fields2">
                         <div className="input-field3">
                             <label>Status</label>
-                            <select value={formData.Inscan_Status}
-                                onChange={(e) => setFormData({ ...formData, Inscan_Status: e.target.value })} required>
-                                <option value="Arrived">Arrived</option>
-                                <option value="Schedule">Schedule</option>
-                                <option value="Dispatch">Dispatch</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Retun">Retun</option>
-                            </select>
+                            <Select
+                                options={statusOptions}
+                                value={statusOptions.find(opt => opt.value === formData.Inscan_Status) || null}
+                                onChange={(selectedOption) =>
+                                    setFormData({
+                                        ...formData,
+                                        Inscan_Status:selectedOption?selectedOption.value:""
+                                    })
+                                }
+                                placeholder="Select Status"
+                                required
+                                isSearchable
+                                classNamePrefix="blue-selectbooking"
+                                className="blue-selectbooking"
+                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                styles={{
+                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                }}
+                            />
                         </div>
 
                         <div className="input-field3">
@@ -167,10 +187,10 @@ function ScanbyAirway() {
                     </div>
                 </form>
 
-                <div className="addNew" style={{justifyContent:"end", paddingRight:"10px"}}>
+                <div className="addNew" style={{ justifyContent: "end", paddingRight: "10px" }}>
                     <div className="search-input">
                         <input className="add-input" type="text" placeholder="search"
-                        value={searchQuery} onChange={handleSearchChange}/>
+                            value={searchQuery} onChange={handleSearchChange} />
                         <button type="submit" title="search">
                             <i className="bi bi-search"></i>
                         </button>

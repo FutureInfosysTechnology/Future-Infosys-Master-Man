@@ -8,6 +8,13 @@ import Select from 'react-select';
 import 'react-toggle/style.css';
 
 function ViewManifest() {
+
+
+    //  const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const formatDate = (date) => date ? date.toISOString().split("T")[0] : null;
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [getCity, setGetCity] = useState([]);
@@ -22,13 +29,19 @@ function ViewManifest() {
         fromDate: firstDayOfMonth,
         toDate: today,
     });
+    const extractArray = (res) => {
+        if (Array.isArray(res?.Data)) return res.Data;
+        if (Array.isArray(res?.data)) return res.data;
+        return [];
+    };
     const handleDateChange = (date, field) => {
         setFormValues({ ...formValues, [field]: date });
     };
     const fetchData = async (endpoint, params) => {
         try {
             const response = await getApi(endpoint, { params });
-            const manifestData = Array.isArray(response.data) ? response.data : [];
+            console.log(response.data);
+            const manifestData = extractArray(response.data);
 
             if (manifestData.length === 0) {
                 Swal.fire({
@@ -67,23 +80,23 @@ function ViewManifest() {
             pageNumber: currentPage,
             pageSize: 10
         };
-        setTimeout(() => {
-            fetchData('/Manifest/viewManifestData', params);
-        }, 1000);
+        fetchData('/Manifest/viewManifestData', params);
     };
-
-
-    useEffect(() => {
-        const fetchCities = async () => {
+       const fetchDataC = async (endpoint) => {
             try {
-                const response = await getApi('/Master/getdomestic');
-                setGetCity(response.Data || []);
+                const response = await getApi(endpoint);
+                setGetCity(extractArray(response));
             } catch (err) {
-                console.error('Error fetching cities:', err);
+                console.error('Fetch Error:', err);
+                setError(err);
+            } finally {
+                setLoading(false);
             }
         };
-        fetchCities();
-    }, []);
+    
+        useEffect(() => {
+                fetchDataC('/Master/getdomestic');
+            }, []);
 
 
     const rowsPerPage = 10;
@@ -91,7 +104,7 @@ function ViewManifest() {
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = getManifestData.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(getManifestData.length / rowsPerPage);
-
+    console.log(currentPage);
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
 
@@ -100,51 +113,40 @@ function ViewManifest() {
         e.preventDefault();
         try {
             const { manifestNo, docketNo } = deleteInput;
-            if (manifestNo && !docketNo) {
-                await deleteApi(`/Manifest/deleteManifest?inputName=deleteByManifestNo&sessionLocationCode=MUM&DocketNo=&manifestNo=${manifestNo}`);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Data has been successfully Deleted!',
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
-            } else if (manifestNo && docketNo) {
-                await getApi(`/Manifest/addAwbToManifest?DocketNo=${docketNo}&manifestNo=${manifestNo}&sessionLocationCode=MUM`);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Data has been successfully Deleted!',
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
-            }
-            else {
-                alert("Please enter Manifest No and/or Docket No to delete.");
+
+            if (!manifestNo) {
+                Swal.fire({ icon: "warning", text: "Please enter Manifest No" });
                 return;
             }
+
+            if (manifestNo && !docketNo) {
+                await deleteApi(
+                    `/Manifest/deleteManifest?inputName=deleteByManifestNo&sessionLocationCode=MUM&manifestNo=${manifestNo}`
+                );
+                Swal.fire({ icon: "success", text: "Manifest deleted!" });
+            } else if (manifestNo && docketNo) {
+                await deleteApi(
+                    `/Manifest/deleteManifest?inputName=deleteByDocket&sessionLocationCode=MUM&manifestNo=${manifestNo}&DocketNo=${docketNo}`
+                );
+                Swal.fire({ icon: "success", text: "Docket deleted from Manifest!" });
+            }
+
             setShowModal(false);
-            await fetchData('/Manifest/viewManifestData', {
-                sessionLocationCode: 'MUM',
+
+            fetchData("/Manifest/viewManifestData", {
+                sessionLocationCode: "MUM",
                 manifestNo: formValues.manifestNo,
                 manifestDest: formValues.manifestDest,
                 fromDate: formValues.fromDate,
                 toDate: formValues.toDate,
                 pageNumber: currentPage,
-                pageSize: 10
+                pageSize: 10,
             });
         } catch (err) {
             console.error("Delete Error:", err);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to delete data!',
-                timer: 2000,
-                showConfirmButton: false,
-            });
+            Swal.fire({ icon: "error", text: "Failed to delete data!" });
         }
     };
-
     const handleDeleteInputChange = (e) => {
         const { name, value } = e.target;
         setDeleteInput({ ...deleteInput, [name]: value });
@@ -170,8 +172,6 @@ function ViewManifest() {
             newWindow.focus();
         }
     };
-
-
     return (
         <>
             <div className="body">
@@ -193,7 +193,7 @@ function ViewManifest() {
                                     }))}
                                     value={
                                         formValues.manifestDest
-                                            ? { value: formValues.manifestDest, label: getCity.find(c=>c.City_Code===formValues.manifestDest)?.City_Name}
+                                            ? { value: formValues.manifestDest, label: getCity.find(c => c.City_Code === formValues.manifestDest)?.City_Name || "" }
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -206,6 +206,10 @@ function ViewManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
+                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
                                 />
                             </div>
 

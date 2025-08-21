@@ -15,6 +15,7 @@ function ScanbyManifest() {
             const response = await getApi(`/Inscan/viewInscanData?SessionLocationCode=DEL&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
             const currentPageData = Array.isArray(response.data) ? response.data : [];
             setGetData(currentPageData);
+            console.log(getData);
 
             const allDataResponse = await getApi(`/Inscan/viewInscanData?SessionLocationCode=DEL&pageNumber=1&pageSize=10000`);
             const allData = Array.isArray(allDataResponse.data) ? allDataResponse.data : [];

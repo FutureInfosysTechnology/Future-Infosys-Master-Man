@@ -9,12 +9,12 @@ import DailyExpenses from "./DailyExpenses";
 import Booking from "./Booking";
 import ShortEntry from "./ShortEntry";
 import ExcelImportBulk from "./ExcelImportBulk"; // ✅ Added import
-
 function DailyBooking() {
   const [activeTab, setActiveTab] = useState("vendor");
 
   const handleChange = (event) => {
     setActiveTab(event.target.id);
+    console.log(activeTab);
   };
 
   return (
@@ -52,13 +52,13 @@ function DailyBooking() {
             checked={activeTab === "entry"}
             onChange={handleChange}
           />
-          <input
+          {/*<input
             type="radio"
             name="slider"
             id="vendorgst"
             checked={activeTab === "vendorgst"}
             onChange={handleChange}
-          />
+          />*/}
           <input
             type="radio"
             name="slider"
@@ -102,6 +102,24 @@ function DailyBooking() {
 
           {/* Sections */}
           <section>
+            {/*<div className={`content content-1 ${activeTab === 'vendor' ? 'active' : ''}`}>
+                            <Booking />
+                        </div>
+                        <div className={`content content-2 ${activeTab === 'vendorrate' ? 'active' : ''}`}>
+                            <DailyExpenses />
+                        </div>
+                        <div className={`content content-3 ${activeTab === 'vendorfuel' ? 'active' : ''}`}>
+                            <EmailBooking />
+                        </div>
+                        <div className={`content content-4 ${activeTab === 'entry' ? 'active' : ''}`}>
+                            <ShortEntry />
+                        </div>
+                        <div className={`content content-5 ${activeTab === 'excelimport' ? 'active' : ''}`}>
+                            <ExcelImportBulk />
+                        </div>
+                        <div className={`content content-6 ${activeTab === 'vendorcharge' ? 'active' : ''}`}>
+                            <VendorBill />
+                        </div>*/}
             {activeTab === "vendor" && <Booking />}
             {activeTab === "vendorrate" && <DailyExpenses />}
             {activeTab === "vendorfuel" && <EmailBooking />}

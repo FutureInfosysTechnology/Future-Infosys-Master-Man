@@ -8,6 +8,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 // import './EmailBooking.css'; // Optional: for your custom styles
+import "./DailyBooking.css"
 
 function EmailBooking() {
   const today = new Date();
@@ -153,10 +154,10 @@ function EmailBooking() {
               placeholder="Search Customer..."
               isClearable
               noOptionsMessage={() => "Customer not found"}
-              styles={{
-                control: (base) => ({ ...base, minHeight: "32px", fontSize: "0.85rem" }),
-                menu: (base) => ({ ...base, zIndex: 9999 })
-              }}
+               menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
             />
           </div>
 
