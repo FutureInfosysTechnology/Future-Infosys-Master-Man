@@ -162,6 +162,12 @@ function ScanbyAirway() {
                                 className="blue-selectbooking"
                                 menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                 styles={{
+                                    placeholder: (base) => ({
+      ...base,
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis"
+    }),
                                     menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                 }}
                             />

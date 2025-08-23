@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import Modal from 'react-modal';
 import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Swal from "sweetalert2";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import Select from 'react-select';
+import 'react-toggle/style.css';
 
 
 function CreateDrs() {
@@ -20,14 +24,20 @@ function CreateDrs() {
     const [selectedRows, setSelectedRows] = useState([]);
     const [selectedManifestRows, setSelectedManifestRows] = useState([]);
     const [selectedDocketNos, setSelectedDocketNos] = useState([]);
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
         DocketNo: "",
         vehicleNo: "",
         empName: "",
         cityName: "",
-        mobileNo: ""
+        mobileNo: "",
+        toDate: today,
+        fromDate: firstDayOfMonth,
     })
-
+    const handleDateChange = (date, field) => {
+        setFormData({ ...formData, [field]: date });
+    };
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -187,35 +197,126 @@ function CreateDrs() {
                     <div className="fields2">
                         <div className="input-field3" >
                             <label htmlFor="">Vehicle No</label>
-                            <select name="vehicleNo" value={formData.vehicleNo}
-                                onChange={handleFormChange} required>
-                                <option value="" disabled>Vehicle No</option>
-                                {vehicleData.map((vehicle, index) => (
-                                    <option value={vehicle.vehicle_number} key={index}>{vehicle.vehicle_number}</option>
-                                ))}
-                            </select>
+                            <Select
+                                options={vehicleData.map(vehicle => ({
+                                    value: vehicle.vehicle_number,   // adjust keys from your API
+                                    label: vehicle.vehicle_number
+                                }))}
+                                value={
+                                    formData.vehicleNo
+                                        ? { value: formData.vehicleNo, label: vehicleData.find(c => c.vehicle_number === formData.vehicleNo)?.vehicle_number || "" }
+                                        : null
+                                }
+                                onChange={(selectedOption) =>
+                                    setFormData({
+                                        ...formData,
+                                        vehicleNo: selectedOption ? selectedOption.value : ""
+                                    })
+                                }
+                                placeholder="Vehicle Number"
+                                isSearchable
+                                classNamePrefix="blue-selectbooking"
+                                className="blue-selectbooking"
+                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                styles={{
+                                    placeholder: (base) => ({
+                                        ...base,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                    }),
+                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                }}
+                            />
                         </div>
 
                         <div className="input-field3" >
                             <label htmlFor="">Employee Name</label>
-                            <select name="empName" value={formData.empName}
-                                onChange={handleFormChange} required>
-                                <option value="" disabled>Select Employee</option>
-                                {empData.map((emp, index) => (
-                                    <option value={emp.Employee_Code} key={index}>{emp.Employee_Name}</option>
-                                ))}
-                            </select>
+                            <Select
+                                options={empData.map(emp => ({
+                                    value: emp.Employee_Code,   // adjust keys from your API
+                                    label: emp.Employee_Name
+                                }))}
+                                value={
+                                    formData.empName
+                                        ? { value: formData.empName, label: empData.find(c => c.Employee_Code === formData.empName)?.Employee_Name || "" }
+                                        : null
+                                }
+                                onChange={(selectedOption) =>
+                                    setFormData({
+                                        ...formData,
+                                        empName: selectedOption ? selectedOption.value : ""
+                                    })
+                                }
+                                placeholder="Select Employee"
+                                isSearchable
+                                classNamePrefix="blue-selectbooking"
+                                className="blue-selectbooking"
+                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                styles={{
+                                    placeholder: (base) => ({
+                                        ...base,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                    }),
+                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                }}
+                            />
+                        </div>
+                        <div className="input-field3">
+                            <label htmlFor="">From</label>
+                            <DatePicker
+                                selected={formData.fromDate}
+                                onChange={(date) => handleDateChange(date, "fromDate")}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm"
+                            />
                         </div>
 
+                        <div className="input-field3">
+                            <label htmlFor="">To</label>
+                            <DatePicker
+                                selected={formData.toDate}
+                                onChange={(date) => handleDateChange(date, "toDate")}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm"
+                            />
+                        </div>
                         <div className="input-field3" >
                             <label htmlFor="">City</label>
-                            <select name="cityName" value={formData.cityName}
-                                onChange={handleFormChange} required>
-                                <option value="" disabled>Select City</option>
-                                {getCity.map((city, index) => (
-                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                ))}
-                            </select>
+                            <Select
+                                options={getCity.map(city => ({
+                                    value: city.City_Code,   // adjust keys from your API
+                                    label: city.City_Name
+                                }))}
+                                value={
+                                    formData.toDest
+                                        ? { value: formData.toDest, label: getCity.find(c => c.City_Code === formData.toDest)?.City_Name || "" }
+                                        : null
+                                }
+                                onChange={(selectedOption) =>
+                                    setFormData({
+                                        ...formData,
+                                        toDest: selectedOption ? selectedOption.value : ""
+                                    })
+                                }
+                                placeholder="Select City"
+                                isSearchable
+                                classNamePrefix="blue-selectbooking"
+                                className="blue-selectbooking"
+                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                styles={{
+                                    placeholder: (base) => ({
+                                        ...base,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                    }),
+                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                }}
+                            />
+
                         </div>
 
                         <div className="input-field3" >
@@ -226,20 +327,20 @@ function CreateDrs() {
                         </div>
 
                         <div className="input-field3" >
-                            <label htmlFor="">Bulk Docket Manifest</label>
-                            <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px" }}
+                            <label htmlFor="" style={{whiteSpace: "nowrap"}}>Bulk Docket Manifest</label>
+                            <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px",lineHeight:"1"}}
                                 onClick={() => { setModalIsOpen(true) }}>Bulk Docket Manifest</button>
                         </div>
 
                         <div className="input-field3" >
                             <label htmlFor=""></label>
-                            <div style={{ display: "flex", flexDirection: "row", marginTop: "18px" }}>
-                                <button type="submit" className="ok-btn" style={{ height: "35px", width: "50%", marginRight: "5px" }}>Generate</button>
-                                <button type="button" className="ok-btn" style={{ width: "45%", marginLeft: "5px" }}>Reset</button>
+                            <div style={{ display: "flex", flexDirection: "row", marginTop: "18px" ,justifyContent:"center",alignItems:"center",gap:"10px",width:"150px"}}>
+                                <button type="submit" className="ok-btn" style={{  width: "55%"}}>Generate</button>
+                                <button type="button" className="ok-btn" style={{ width: "45%"}}>Reset</button>
                             </div>
                         </div>
                     </div>
-                </form>
+                </form >
 
                 <div className='table-container'>
                     <table className='table table-bordered table-sm'>
@@ -415,7 +516,7 @@ function CreateDrs() {
                         </div>
                     </div>
                 </Modal >
-            </div>
+            </div >
 
         </>
     );

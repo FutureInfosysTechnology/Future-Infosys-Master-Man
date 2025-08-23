@@ -28,3 +28,8 @@ html, body {
 .blue_input input{
   box-shadow: none !important;
 }
+/* React-Select search input focus fix */
+blue-selectbooking__input input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}

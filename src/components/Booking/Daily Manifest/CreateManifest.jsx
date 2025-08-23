@@ -302,6 +302,12 @@ function CreateManifest() {
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
@@ -330,6 +336,12 @@ function CreateManifest() {
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
@@ -360,6 +372,12 @@ function CreateManifest() {
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
@@ -390,6 +408,12 @@ function CreateManifest() {
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
@@ -419,6 +443,12 @@ function CreateManifest() {
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
@@ -448,6 +478,12 @@ function CreateManifest() {
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
@@ -477,6 +513,12 @@ function CreateManifest() {
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
@@ -512,6 +554,12 @@ function CreateManifest() {
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
@@ -543,17 +591,17 @@ function CreateManifest() {
                             </div>
 
                             <div className="input-field3" >
-                                <label htmlFor="">Bulk Docket Manifest</label>
-                                <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px" }}
+                                <label htmlFor="" style={{whiteSpace:"nowrap"}}>Bulk Docket Manifest</label>
+                                <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px" ,lineHeight:"1"}}
                                     onClick={() => { setModalIsOpen(true) }}>Bulk Docket Manifest</button>
                             </div>
 
                             <div className="input-field3" >
                                 <label htmlFor=""></label>
-                                <div style={{ display: "flex", flexDirection: "row", marginTop: "18px" }}>
-                                    <button type="submit" className="ok-btn" style={{ height: "35px", width: "50%", marginRight: "5px" }}>Generate</button>
-                                    <button type="button" className="ok-btn" style={{ width: "45%", marginLeft: "5px" }}>Reset</button>
-                                </div>
+                                <div style={{ display: "flex", flexDirection: "row", marginTop: "18px" ,justifyContent:"center",alignItems:"center",gap:"10px",width:"150px"}}>
+                                <button type="submit" className="ok-btn" style={{ width: "55%"}}>Generate</button>
+                                <button type="button" className="ok-btn" style={{ width: "45%"}}>Reset</button>
+                            </div>
                             </div>
                         </div>
                     </form>
@@ -607,9 +655,9 @@ function CreateManifest() {
                                     <i className="bi bi-x-lg"></i>
                                 </button>
                             </div>
-                            <div className='container2' style={{ borderRadius: "0px", padding: "20px"}}>
-                                <div style={{ display: "flex", flexDirection: "row", alignItems:"center",justifyContent:"center",width:"100%",gap:"50px"}}>
-                                    <div className="search-input" style={{marginBottom:"10px"}}>
+                            <div className='container2' style={{ borderRadius: "0px", padding: "20px" }}>
+                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", width: "100%", gap: "50px" }}>
+                                    <div className="search-input" style={{ marginBottom: "10px" }}>
                                         <input
                                             className="add-input1"
                                             type="text"
@@ -622,8 +670,8 @@ function CreateManifest() {
                                             <i className="bi bi-search"></i>
                                         </button>
                                     </div>
-                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px"}}>
-                                        <label style={{ marginTop: "8px", textAlign: "end"}}>From Date</label>
+                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
+                                        <label style={{ marginTop: "8px", textAlign: "end" }}>From Date</label>
                                         <DatePicker
                                             selected={fromDate}
                                             onChange={handleFromDateChange}
@@ -633,8 +681,8 @@ function CreateManifest() {
                                         />
                                     </div>
 
-                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px",marginRight:"50px" }}>
-                                        <label style={{ marginTop: "8px", textAlign: "end"}}>To Date</label>
+                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px", marginRight: "50px" }}>
+                                        <label style={{ marginTop: "8px", textAlign: "end" }}>To Date</label>
                                         <DatePicker
                                             selected={toDate}
                                             onChange={handleToDateChange}

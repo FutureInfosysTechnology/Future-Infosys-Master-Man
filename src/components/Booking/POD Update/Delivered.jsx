@@ -1,16 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import Select from 'react-select';
+import 'react-toggle/style.css';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 function Delivered() {
-
+    const today = new Date();
+    const time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");
     const [deliveryData, setDeliveryData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         DocketNo: '',
-        ReferenceNo: ''
-    })
+        ReferenceNo: '',
+        toDate: today,
+        time: time,
+        Status: "",
+        Reciept: "",
 
+    })
+    const statusOptions = [
+        { value: "Arrived", label: "Arrived" },
+        { value: "Schedule", label: "Schedule" },
+        { value: "Dispatch", label: "Dispatch" },
+        { value: "Delivered", label: "Delivered" },
+        { value: "Return", label: "Return" }  // (maybe you meant "Return"?)
+    ];
+    const handleDateChange = (date, field) => {
+        setFormData({ ...formData, [field]: date });
+    };
     const getDelieveredData = async (awbNo, refNo) => {
         try {
             setIsLoading(true);
@@ -64,30 +82,75 @@ function Delivered() {
 
                             <div className="input-field3">
                                 <label >Status</label>
-                                <select>
-                                    <option disabled value="">Select Status</option>
-                                    <option value="">Arrived</option>
-                                    <option value="">Return</option>
-                                </select>
+                                <Select
+                                    options={statusOptions}
+                                    value={statusOptions.find(opt => opt.value === formData.Status) || null}
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            Status: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Status"
+                                    required
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
                             </div>
 
                             <div className="input-field3">
                                 <label >Date</label>
-                                <input type="date" />
+                                <DatePicker
+                                    selected={formData.toDate}
+                                    onChange={(date) => handleDateChange(date, "toDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
                             </div>
 
                             <div className="input-field3">
                                 <label >Time</label>
-                                <input type="time" />
+                                <input type="time" value={formData.time} onChange={(e) => { setFormData({ ...formData, time: e.target.value }) }} />
                             </div>
 
                             <div className="input-field3">
                                 <label >Nature Of Receipt</label>
-                                <select>
-                                    <option disabled value="">Select Nature</option>
-                                    <option value="">Arrived</option>
-                                    <option value="">Return</option>
-                                </select>
+                                <Select
+                                    options={statusOptions}
+                                    value={statusOptions.find(opt => opt.value === formData.Reciept) || null}
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            Reciept: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Reciept"
+                                    required
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
                             </div>
 
                             <div className="input-field3">

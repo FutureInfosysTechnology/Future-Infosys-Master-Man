@@ -3,8 +3,9 @@ import Footer from "../../../Components-2/Footer";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 import ManualEntry from "./ManualEntry";
-import ExcelImport from "./ExcelImport";
 import NewPodEntry from './NewPodEntry'
+import ExcelImport from "./ExcelImport"
+import ExcelImportBulk from "../Daily Booking/ExcelImportBulk";
 
 
 
@@ -38,7 +39,7 @@ function StatusActivity() {
 
                     <nav>
                         <label htmlFor="delivered" className="delivered">Activity Entry</label>
-                        <label htmlFor="undelivered" className="undelivered">Excel Import</label>
+                        <label htmlFor="undelivered" className="undelivered">Activity Import Bulk</label>
                         <label htmlFor="upload" className="upload">Activity Tracking</label>
 
                         <div className="slider"></div>
@@ -49,7 +50,7 @@ function StatusActivity() {
                         </div>
 
                         <div className={`content content-2 ${activeTab === 'undelivered' ? 'active' : ''}`}>
-                            <ExcelImport/>
+                            <ExcelImportBulk/>
                         </div>
 
                         <div className={`content content-3 ${activeTab === 'upload' ? 'active' : ''}`}>

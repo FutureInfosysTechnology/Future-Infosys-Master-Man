@@ -1,14 +1,29 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
-
-
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import Select from 'react-select';
+import 'react-toggle/style.css';
 
 function ViewDrs() {
 
     const [zones, setZones] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-
-
+    const [selectedBoy, setSelectedBoy] = useState(null);
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const [formData, setFormData] = useState({
+        toDate: today,
+        fromDate: firstDayOfMonth,
+    })
+    const handleDateChange = (date, field) => {
+        setFormData({ ...formData, [field]: date });
+    };
+    const deliveryBoyOptions = [
+        { value: "vivek", label: "Vivek" },
+        { value: "suresh", label: "Suresh" },
+        { value: "mahesh", label: "Mahesh" }
+    ];
     const rowsPerPage = 10;
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -58,22 +73,45 @@ function ViewDrs() {
                     <div className="fields2">
                         <div className="input-field3">
                             <label htmlFor="">From Date</label>
-                            <input type="date"  />
+                            <DatePicker
+                                selected={formData.fromDate}
+                                onChange={(date) => handleDateChange(date, "fromDate")}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm"
+                            />
                         </div>
 
                         <div className="input-field3">
                             <label htmlFor="">To Date</label>
-                            <input type="date"  />
+                            <DatePicker
+                                selected={formData.toDate}
+                                onChange={(date) => handleDateChange(date, "toDate")}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm"
+                            />
                         </div>
 
                         <div className="input-field3">
                             <label htmlFor="">Delivery Boy</label>
-                            <select value="">
-                                <option value="" disabled>Select Delivery Boy</option>
-                                <option value="">Vivek</option>
-                                <option value="">Suresh</option>
-                                <option value="">Mahesh</option>
-                            </select>
+                            <Select
+                                options={deliveryBoyOptions}
+                                value={selectedBoy}
+                                onChange={(option) => setSelectedBoy(option)}
+                                placeholder="Select Delivery Boy"
+                                isSearchable
+                                classNamePrefix="blue-selectbooking"
+                                className="blue-selectbooking"
+                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                styles={{
+                                    placeholder: (base) => ({
+                                        ...base,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                    }),
+                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                }}
+                            />
                         </div>
 
                         <div className="input-field3">
@@ -81,7 +119,7 @@ function ViewDrs() {
                             <input type="tel" placeholder="Enter DRS No" />
                         </div>
 
-                        <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "25px" }}>
+                        <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "11px" }}>
                             <button className="ok-btn">Search</button>
                             <button className="ok-btn">Download</button>
                         </div>
@@ -125,7 +163,7 @@ function ViewDrs() {
                                     <td>{zone.name}</td>
                                     <td>{zone.name}</td>
                                     <td>
-                                        <button className="ok-btn" style={{marginRight:"5px"}}>Download</button>
+                                        <button className="ok-btn" style={{ marginRight: "5px" }}>Download</button>
                                         <button className='edit-btn'>
                                             <i className='bi bi-pen'></i></button>
                                         <button onClick={() => handleDelete(index)} className='edit-btn'>

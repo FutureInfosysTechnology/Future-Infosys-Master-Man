@@ -11,14 +11,14 @@ function ForwardingManifest() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
-         maniDate:new Date(),
+        maniDate: new Date(),
         fromDest: '',
         toDest: '',
         mode: '',
         vendorCode: '',
     });
-    const handleDateChange = (date,key) => {
-        setFormData({...formData,[key]:date})
+    const handleDateChange = (date, key) => {
+        setFormData({ ...formData, [key]: date })
     }
     const fetchData = async (endpoint, setData) => {
         try {
@@ -62,7 +62,7 @@ function ForwardingManifest() {
                                 <label htmlFor="">Manifest Date</label>
                                 <DatePicker
                                     selected={formData.maniDate}
-                                    onChange={(date) => handleDateChange(date,"maniDate")}
+                                    onChange={(date) => handleDateChange(date, "maniDate")}
                                     dateFormat="dd/MM/yyyy"
                                     className="form-control form-control-sm"
                                 />
@@ -86,6 +86,16 @@ function ForwardingManifest() {
                                             mode: selectedOption ? selectedOption.value : ""
                                         })
                                     }
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                     placeholder="Select Mode"
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
@@ -112,8 +122,17 @@ function ForwardingManifest() {
                                             ...formData,
                                             fromDest: selectedOption ? selectedOption.value : ""
                                         })
-                                    }
-                                    }
+                                    }}
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                     placeholder="Select Location"
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
@@ -137,8 +156,17 @@ function ForwardingManifest() {
                                         setFormData({
                                             ...formData,
                                             toDest: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
+                                        })}
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                     placeholder="Select Destination"
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
@@ -164,6 +192,16 @@ function ForwardingManifest() {
                                             vendorCode: selectedOption ? selectedOption.value : ""
                                         })
                                     }
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                     placeholder="Vendor Name"
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"

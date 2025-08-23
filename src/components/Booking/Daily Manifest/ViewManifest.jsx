@@ -82,21 +82,21 @@ function ViewManifest() {
         };
         fetchData('/Manifest/viewManifestData', params);
     };
-       const fetchDataC = async (endpoint) => {
-            try {
-                const response = await getApi(endpoint);
-                setGetCity(extractArray(response));
-            } catch (err) {
-                console.error('Fetch Error:', err);
-                setError(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-    
-        useEffect(() => {
-                fetchDataC('/Master/getdomestic');
-            }, []);
+    const fetchDataC = async (endpoint) => {
+        try {
+            const response = await getApi(endpoint);
+            setGetCity(extractArray(response));
+        } catch (err) {
+            console.error('Fetch Error:', err);
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDataC('/Master/getdomestic');
+    }, []);
 
 
     const rowsPerPage = 10;
@@ -206,10 +206,16 @@ function ViewManifest() {
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
-                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                                styles={{
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                                }}
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
                                 />
                             </div>
 

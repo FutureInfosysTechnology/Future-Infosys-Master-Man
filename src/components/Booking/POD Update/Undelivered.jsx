@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Select from 'react-select';
+import 'react-toggle/style.css';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
 import '../../Tabs/tabs.css';
 import * as XLSX from 'xlsx';
@@ -11,13 +16,31 @@ import Modal from 'react-modal';
 
 
 function Undelivered() {
-
+    const today = new Date();
+    const time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");
     const [zones, setZones] = useState([]);
 
     const [editIndex, setEditIndex] = useState(null);
     const [modalData, setModalData] = useState({ code: '', name: '' });
     const [modalIsOpen, setModalIsOpen] = useState(false);
-
+    const [formData, setFormData] = useState({
+            DocketNo: '',
+            toDate: today,
+            time: time,
+            Status: "",
+            Reciept: "",
+    
+        });
+         const statusOptions = [
+        { value: "Arrived", label: "Arrived" },
+        { value: "Schedule", label: "Schedule" },
+        { value: "Dispatch", label: "Dispatch" },
+        { value: "Delivered", label: "Delivered" },
+        { value: "Return", label: "Return" }  // (maybe you meant "Return"?)
+    ];
+    const handleDateChange = (date, field) => {
+          setFormData({ ...formData, [field]: date });
+    };
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
 
@@ -126,35 +149,81 @@ function Undelivered() {
                         <div className="fields2">
                             <div className="input-field3">
                                 <label htmlFor="">Docket No</label>
-                                <input type="tel" placeholder="Docket No" />
+                                <input type="tel" placeholder="Enter Docket No" value={formData.DocketNo}
+                                    onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })} />
                             </div>
 
                             <div className="input-field3">
                                 <label htmlFor="">Status</label>
-                                <select value="">
-                                    <option disabled value="">Select Status</option>
-                                    <option value="">Arrived</option>
-                                    <option value="">Return</option>
-                                </select>
+                                <Select
+                                    options={statusOptions}
+                                    value={statusOptions.find(opt => opt.value === formData.Status) || null}
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            Status: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Status"
+                                    required
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
                             </div>
 
                             <div className="input-field3">
                                 <label htmlFor="">Date</label>
-                                <input type="date" />
+                                <DatePicker
+                                                                    selected={formData.toDate}
+                                                                    onChange={(date) => handleDateChange(date, "toDate")}
+                                                                    dateFormat="dd/MM/yyyy"
+                                                                    className="form-control form-control-sm"
+                                                                />
                             </div>
 
                             <div className="input-field3">
                                 <label htmlFor="">Time</label>
-                                <input type="time" />
+                                <input type="time" value={formData.time} onChange={(e) => { setFormData({ ...formData, time: e.target.value }) }} />
                             </div>
 
                             <div className="input-field3">
                                 <label htmlFor="">Nature Of Receipt</label>
-                                <select value="">
-                                    <option disabled value="">Select Nature</option>
-                                    <option value="">Arrived</option>
-                                    <option value="">Return</option>
-                                </select>
+                               <Select
+                                    options={statusOptions}
+                                    value={statusOptions.find(opt => opt.value === formData.Reciept) || null}
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            Reciept: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Reciept"
+                                    required
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
                             </div>
 
                             <div className="input-field3">

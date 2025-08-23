@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi"
 import Footer from "../../../Components-2/Footer";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
@@ -8,7 +9,10 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
-
+import Select from 'react-select';
+import 'react-toggle/style.css';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 
 function NewPodEntry() {
@@ -17,6 +21,46 @@ function NewPodEntry() {
     const [editIndex, setEditIndex] = useState(null);
     const [modalData, setModalData] = useState({ code: '', name: '' });
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [status, setStatus] = useState(null);
+    const today = new Date();
+    const time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");
+
+
+    const [getCity, setGetCity] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [formData, setFormData] = useState({
+        toDate: today,
+        fromDest: '',
+        toDest: '',
+        time: time
+    });
+    const handleDateChange = (date, field) => {
+        setFormData({ ...formData, [field]: date });
+    };
+    const fetchData = async (endpoint, setData) => {
+        try {
+            const response = await getApi(endpoint);
+            setData(Array.isArray(response.Data) ? response.Data : []);
+        } catch (err) {
+            console.error('Fetch Error:', err);
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        console.log(today.toISOString().slice(11,16),"+",today.toLocaleTimeString().slice(0,5));
+        fetchData('/Master/getdomestic', setGetCity);
+
+    }, []);
+
+    const statusOptions = [
+        { value: "delivered", label: "Delivered" },
+        { value: "undelivered", label: "Undelivered" },
+        { value: "return", label: "Return" }
+    ];
 
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
@@ -117,28 +161,43 @@ function NewPodEntry() {
         <>
 
             <div className="container1">
-
                 <form action="" className="order-form">
-                    <div className="order-fields">
+                    <div className="order-fields" style={{ display: "flex", justifyContent: "start", alignItems: "center" }}>
 
-                        <div className="order-input">
-                            <label htmlFor="">C. Note No</label>
-                            <input type="text" placeholder="Enter C. Note No" />
+                        <div className="input-field3">
+                            <label htmlFor="">Docket No</label>
+                            <input type="text" placeholder="Enter Docket No" />
+                        </div>
+                        <div className="bottom-buttons" style={{ marginTop: "28px" }}>
+                            <button type="submit" className="ok-btn">Find</button>
                         </div>
 
-                        <div className="order-input">
+                        {/*<div className="order-input">
                             <label htmlFor="">Status</label>
-                            <select>
-                                <option disabled value="">Select Status</option>
-                                <option value="">Delivered</option>
-                                <option value="">Undelivered</option>
-                                <option value="">Return</option>
-                            </select>
-                        </div>
+                            <Select
+                                options={statusOptions}
+                                value={status}
+                                onChange={(option) => setStatus(option)}
+                                placeholder="Select Destination"
+                                isSearchable
+                                classNamePrefix="blue-selectbooking"
+                                className="blue-selectbooking"
+                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                styles={{
+                                    placeholder: (base) => ({
+                                        ...base,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                    }),
+                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                }}
+                            />
+                        </div>*/}
                     </div>
                 </form>
 
-                <div className="addNew">
+                {/*<div className="addNew">
                     <button className='add-btn' onClick={() => { setModalIsOpen(true); setModalData({ code: '', name: '' }) }}>
                         <i className="bi bi-plus-lg"></i>
                         <span>ADD NEW</span>
@@ -158,22 +217,102 @@ function NewPodEntry() {
                             <i className="bi bi-search"></i>
                         </button>
                     </div>
-                </div>
+                </div>*/}
 
                 <div className='table-container'>
                     <table className='table table-bordered table-sm'>
                         <thead className='table-info body-bordered table-sm'>
                             <tr>
                                 <th scope="col">Sr.No</th>
-                                <th scope="col">From Station</th>
-                                <th scope="col">To Station</th>
                                 <th scope="col">Date</th>
                                 <th scope="col">Time</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Actions</th>
+                                <th scope="col">From</th>
+                                <th scope="col">To</th>
+                                <th scope="col">Remark</th>
+                                <th scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody className='table-body'>
+                            <tr>
+                                <td>1</td>
+                                <td><DatePicker
+                                    selected={formData.toDate}
+                                    onChange={(date) => handleDateChange(date, "toDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                /></td>
+                                <td>
+                                    <input type="time" value={formData.time} onChange={(e) => { setFormData({ ...formData, time: e.target.value }) }} />
+                                </td>
+                                <td><Select
+                                    options={getCity.map(city => ({
+                                        value: city.City_Code,   // adjust keys from your API
+                                        label: city.City_Name
+                                    }))}
+                                    value={
+                                        formData.fromDest
+                                            ? { value: formData.fromDest, label: getCity.find(c => c.City_Code === formData.fromDest)?.City_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) => {
+                                        console.log(selectedOption);
+                                        setFormData({
+                                            ...formData,
+                                            fromDest: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    }
+                                    placeholder="Select City"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                /></td>
+                                <td><Select
+                                    options={getCity.map(city => ({
+                                        value: city.City_Code,   // adjust keys from your API
+                                        label: city.City_Name
+                                    }))}
+                                    value={
+                                        formData.toDest
+                                            ? { value: formData.toDest, label: getCity.find(c => c.City_Code === formData.toDest)?.City_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            toDest: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select City"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                /></td>
+                                <td><input type="text" /></td>
+                                <td>
+                                    <button type="submit" className="ok-btn" style={{ width: "60px", height: "30px" }}>Add +</button>
+                                </td>
+                            </tr>
                             {currentRows.map((zone, index) => (
                                 <tr key={zone.id}>
                                     <td>{zone.id}</td>

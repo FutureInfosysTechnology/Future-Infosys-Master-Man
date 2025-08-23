@@ -14,7 +14,7 @@ function ShortEntry() {
   const [selectedMode, setSelectedMode] = useState(null);
   const [selectedOrigin, setSelectedOrigin] = useState(null);
   const [selectedDestination, setSelectedDestination] = useState(null);
-    const handleDateChange = (date) => {
+  const handleDateChange = (date) => {
     setBookingDate(date);
   };
   const [formData, setFormData] = useState({
@@ -55,25 +55,25 @@ function ShortEntry() {
     });
   }, []);
 
-const resetForm = () => {
-  setFormData((prev) => ({
-    ...prev,
-    Origin_code: '',    
-    Docket_No: '',
-    Consignee_Pin: '',
-    Cityname: '',
-    Consignee_Name: '',
-    Pcs: '',
-    ActualWt: '',
-    Chargablewt: '',
-    Amount: '',
-    ShipperName: '',
-    ShipperPhone: '',
-    Consignee_Mob: '',
-    volumetricWt: ''
-  }));
-  setSelectedDestination(null);
-};
+  const resetForm = () => {
+    setFormData((prev) => ({
+      ...prev,
+      Origin_code: '',
+      Docket_No: '',
+      Consignee_Pin: '',
+      Cityname: '',
+      Consignee_Name: '',
+      Pcs: '',
+      ActualWt: '',
+      Chargablewt: '',
+      Amount: '',
+      ShipperName: '',
+      ShipperPhone: '',
+      Consignee_Mob: '',
+      volumetricWt: ''
+    }));
+    setSelectedDestination(null);
+  };
 
 
 
@@ -229,8 +229,8 @@ const resetForm = () => {
               <label className="form-label">Customer</label>
 
               <Select
-                className="blue-select"
-                classNamePrefix="blue"
+                className="blue-selectbooking"
+                classNamePrefix="blue-selectbooking"
                 options={allCustomerOptions}
                 value={formData.Customer_Code ? allCustomerOptions.find(opt => opt.value === formData.Customer_Code) : null}
                 onChange={(selectedOption) => {
@@ -240,25 +240,30 @@ const resetForm = () => {
                     Customer_Name: selectedOption.label
                   }));
                 }}
+                placeholder="Select Customer"
+                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                styles={{
+                  menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                }}
               />
             </div>
 
             <div className="col-md-6 col-lg-4">
               <label className="form-label">Booking Date</label>
               <DatePicker
-                            selected={bookingDate}
-                            onChange={(date) => handleDateChange(date)}
-                            dateFormat="dd/MM/yyyy"
-                            className="form-control form-control-sm"
-                            wrapperClassName="w-100"
-                          />
+                selected={bookingDate}
+                onChange={(date) => handleDateChange(date)}
+                dateFormat="dd/MM/yyyy"
+                className="form-control form-control-sm"
+                wrapperClassName="w-100"
+              />
             </div>
 
             <div className="col-md-6 col-lg-4">
               <label className="form-label">Mode</label>
               <Select
-                className="blue-select"
-                classNamePrefix="blue"
+                className="blue-selectbooking"
+                classNamePrefix="blue-selectbooking"
                 options={allModeOptions}
                 value={selectedMode}
                 onChange={(selected) => {
@@ -267,6 +272,11 @@ const resetForm = () => {
                     ...prev,
                     Mode_code: selected?.value || ''
                   }));
+                }}
+                placeholder="Select Mode"
+                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                styles={{
+                  menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                 }}
               />
             </div>
@@ -342,13 +352,18 @@ const resetForm = () => {
             <div className="col-md-4">
               <label className="form-label">Origin</label>
               <Select
-                className="blue-select"
-                classNamePrefix="blue"
+                className="blue-selectbooking"
+                classNamePrefix="blue-selectbooking"
                 options={allDesOptions}
                 value={selectedOrigin}
                 onChange={(selected) => {
                   setSelectedOrigin(selected);
                   setFormData({ ...formData, Origin_code: selected?.value || '' });
+                }}
+                placeholder="Select Origin"
+                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                styles={{
+                  menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                 }}
               />
             </div>
@@ -376,13 +391,18 @@ const resetForm = () => {
             <div className="col-md-4">
               <label className="form-label">Destination</label>
               <Select
-                className="blue-select"
-                classNamePrefix="blue"
+                className="blue-selectbooking"
+                classNamePrefix="blue-selectbooking"
                 options={allDesOptions}
                 value={selectedDestination}
                 onChange={(selected) => {
                   setSelectedDestination(selected);
                   setFormData({ ...formData, Destination_Code: selected?.value || '' });
+                }}
+                placeholder="Select Destination"
+                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                styles={{
+                  menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                 }}
               />
             </div>
