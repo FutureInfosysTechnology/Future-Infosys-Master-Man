@@ -41,7 +41,7 @@ function ViewManifest() {
         try {
             const response = await getApi(endpoint, { params });
             console.log(response.data);
-            const manifestData = extractArray(response.data);
+            const manifestData = extractArray(response);
 
             if (manifestData.length === 0) {
                 Swal.fire({
@@ -156,13 +156,11 @@ function ViewManifest() {
         setDeleteInput({ manifestNo: "", docketNo: "" });
         setShowModal(true);
     };
-
     const handleOpenManifestPrint = (manifestData) => {
         const manifestNo = manifestData.manifestNo;
         const sumQty = manifestData.sumQty;
         const sumActualWt = manifestData.sumActualWt;
         const url = `/manifest?manifestNo=${encodeURIComponent(manifestNo)}&sumQty=${encodeURIComponent(sumQty)}&sumActualWt=${encodeURIComponent(sumActualWt)}`;
-
         const newWindow = window.open(
             url,
             '_blank', 'width=900,height=600,fullscreen=yes'

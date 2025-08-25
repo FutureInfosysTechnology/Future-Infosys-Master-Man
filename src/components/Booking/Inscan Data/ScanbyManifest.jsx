@@ -72,7 +72,7 @@ function ScanbyManifest() {
                     <table className="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th scope="col">Sr No.</th>
+                                <th scope="col" style={{whiteSpace:"nowrap"}}>Sr No.</th>
                                 <th scope="col">Docket.No</th>
                                 <th scope="col">Booking.Date</th>
                                 <th scope="col">Customer.Name</th>

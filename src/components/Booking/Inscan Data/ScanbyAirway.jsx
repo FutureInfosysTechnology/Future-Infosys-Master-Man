@@ -19,10 +19,7 @@ function ScanbyAirway() {
     const [searchQuery, setSearchQuery] = useState('');
     const statusOptions = [
         { value: "Arrived", label: "Arrived" },
-        { value: "Schedule", label: "Schedule" },
-        { value: "Dispatch", label: "Dispatch" },
-        { value: "Delivered", label: "Delivered" },
-        { value: "Return", label: "Return" }  // (maybe you meant "Return"?)
+        // (maybe you meant "Return"?)
     ];
     const [formData, setFormData] = useState({
         DocketNo: [],

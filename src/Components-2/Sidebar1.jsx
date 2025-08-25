@@ -5,7 +5,14 @@ import { Link } from 'react-router-dom';
 
 function Sidebar1() {
     const [openMenu, setOpenMenu] = useState(null); // Track which menu is open
-
+    const sideToggle = () => {
+    if (document.body.classList.contains("toggle-sidebar")) {
+      document.body.classList.add("closing-sidebar");
+      setTimeout(() => {
+        document.body.classList.remove("toggle-sidebar", "closing-sidebar");
+      }, 300);
+    }
+  };
     const toggleMenu = (menuId) => {
         setOpenMenu(openMenu === menuId ? null : menuId); // Toggle or close the menu
     };
@@ -14,7 +21,7 @@ function Sidebar1() {
     return (
         <aside id="sidebar1" className="sidebar1">
             <ul className="sidebar1-nav" id="sidebar1-nav">
-                <li className="nav-item">
+                <li className="nav-item" onClick={sideToggle}>
                     <Link to="/dashboard" className="nav-link">
                         <i className="bi bi-grid"></i>
                         <span>Dashboard</span>
@@ -32,63 +39,63 @@ function Sidebar1() {
                     <ul id="components-nav"
                         className={`nav-content collapse ${openMenu === 'adminMaster' ? 'show' : ''}`}>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/branchmaster">
                                 <i className="bi bi-asterisk"></i>
                                 <span>Branch Master</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/customerlist">
                                 <i className="bi bi-file-person"></i>
                                 <span>Customer List</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/citymaster" className="link">
                                 <i className="bi bi-buildings-fill"></i>
                                 <span>City Master</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link tab="a" to="/tab" className="link">
                                 <i className="bi bi-stack"></i>
                                 <span>Area Control</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/customercharges">
                                 <i className="bi bi-cash-coin"></i>
                                 <span>Customer Charges</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/vendormaster">
                                 <i className="bi bi-badge-vr"></i>
                                 <span>Vendor Master</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/vehiclemaster">
                                 <i className="bi bi-truck"></i>
                                 <span>Transport Master</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/inventory">
                                 <i className="bi bi-cart"></i>
                                 <span>Inventory</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/regionmaster">
                                 <i className="bi bi-globe-americas"></i>
                                 <span>Region Master</span>
@@ -109,56 +116,56 @@ function Sidebar1() {
                     <ul id="components1-nav"
                         className={`nav-content collapse ${openMenu === 'booking' ? 'show' : ''}`}>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/dailybooking" className="link">
                                 <i className="bi bi-stack"></i>
                                 <span>Docket Booking</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/dailymanifest">
                                 <i className="bi bi-cart3"></i>
                                 <span>Outgoing Manifest</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/inscan">
                                 <i className="bi bi-truck"></i>
                                 <span>Inscan Process Hub</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/runsheet">
                                 <i className="bi bi-layout-text-sidebar-reverse"></i>
                                 <span>Delivery Run Sheet</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/statusactivity">
                                 <i className="bi bi-ui-checks-grid"></i>
                                 <span>Status Activity Entry</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/podentry">
                                 <i className="bi bi-ui-checks"></i>
                                 <span>Delivery Updation</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/custquery">
                                 <i className="bi bi-person-raised-hand"></i>
                                 <span>Customer Queries</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/internationalbooking">
                                 <i className="bi bi-person-raised-hand"></i>
                                 <span>International Booking</span>
@@ -179,82 +186,50 @@ function Sidebar1() {
 
                     <ul id="components2-nav"
                         className={`nav-content collapse ${openMenu === 'docket' ? 'show' : ''}`}>
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/docketprint" className="link">
                                 <i className="bi bi-printer"></i>
                                 <span>Docket Print</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
-                            <Link to="/docketpdf" className="link">
-                                <i className="bi bi-printer"></i>
-                                <span>Docket Print pdf</span>
-                            </Link>
-                        </li>
-
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/drsrunsheet" className="link">
                                 <i className="bi bi-printer"></i>
                                 <span>Drs Runsheet</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/manifest" className="link">
                                 <i className="bi bi-printer"></i>
                                 <span>Manifest</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
-                            <Link to="/mobilereceipt" className="link">
-                                <i className="bi bi-printer"></i>
-                                <span>Mobile Receipt</span>
-                            </Link>
-                        </li>
+                        
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/firstinvoice" className="link">
                                 <i className="bi bi-receipt-cutoff"></i>
                                 <span>First Invoice</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/secondinvoice" className="link">
                                 <i className="bi bi-receipt-cutoff"></i>
                                 <span>Second Invoice</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/performanceinvoice" className="link">
                                 <i className="bi bi-receipt-cutoff"></i>
                                 <span>Performance Invoice</span>
                             </Link>
                         </li>
-
-                        <li className="compo-tab" id="compo-tab">
-                            <Link to="/boxsticker" className="link">
-                                <i className="bi bi-receipt-cutoff"></i>
-                                <span>Box Sticker</span>
-                            </Link>
-                        </li>
-
-                        <li className="compo-tab" id="compo-tab">
-                            <Link to="/docketbill" className="link">
-                                <i className="bi bi-receipt-cutoff"></i>
-                                <span>Docket Bill</span>
-                            </Link>
-                        </li>
                         
-                        <li className="compo-tab" id="compo-tab">
-                            <Link to="/vendorboxlabel" className="link">
-                                <i className="bi bi-receipt-cutoff"></i>
-                                <span>Vendor Box Label</span>
-                            </Link>
-                        </li>
                     </ul>
                 </li>
 
@@ -270,7 +245,7 @@ function Sidebar1() {
                     <ul id="components3-nav"
                         className={`nav-content collapse ${openMenu === 'invoice' ? 'show' : ''}`}>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/invoice" className="link">
                                 <i className="bi bi-receipt-cutoff"></i>
                                 <span>Invoice Generate</span>
@@ -290,7 +265,7 @@ function Sidebar1() {
                     <ul id="components4-nav"
                         className={`nav-content collapse ${openMenu === 'laiser' ? 'show' : ''}`}>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/laiser" className="link">
                                 <i className="bi bi-cash-stack"></i>
                                 <span>Laiser</span>
@@ -310,21 +285,21 @@ function Sidebar1() {
                     <ul id="components5-nav"
                         className={`nav-content collapse ${openMenu === 'reports' ? 'show' : ''}`}>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/statusreport" className="link">
                                 <i className="bi bi-filter-square"></i>
                                 <span>Status Report</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/statement">
                                 <i className="bi bi-layout-text-sidebar-reverse"></i>
                                 <span>Statement Wise Report</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/salesregister">
                                 <i className="bi bi-filter-square"></i>
                                 <span>Sales Register Report</span>
@@ -343,14 +318,14 @@ function Sidebar1() {
                     </a>
                     <ul id="forms-nav"
                         className={`nav-content collapse ${openMenu === 'userControl' ? 'show' : ''}`}>
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/useradmin">
                                 <i className="bi bi-incognito"></i>
                                 <span>User Admin</span>
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab">
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/branchadmin">
                                 <i className="bi bi-x-diamond-fill"></i>
                                 <span>Branch Admin</span>

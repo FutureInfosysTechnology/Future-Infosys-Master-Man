@@ -14,7 +14,7 @@ import "./DocketPrint.css"
 
 function DocketPrint() {
 
-    const [activeTab, setActiveTab] = useState('label'); // Default to 'zone'
+    const [activeTab, setActiveTab] = useState('print1'); // Default to 'zone'
 
     const handleChange = (event) => {
         setActiveTab(event.target.id);
