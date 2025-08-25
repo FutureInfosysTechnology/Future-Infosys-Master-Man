@@ -47,6 +47,7 @@ function ExcelImport() {
                         <div className="input-field3">
                             <label htmlFor="">Date</label>
                             <DatePicker
+                            portalId="root-portal" 
                                 selected={formData.toDate}
                                 onChange={(date) => handleDateChange(date, "toDate")}
                                 dateFormat="dd/MM/yyyy"

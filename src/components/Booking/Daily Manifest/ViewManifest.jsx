@@ -223,6 +223,7 @@ function ViewManifest() {
                             <div className="input-field3">
                                 <label htmlFor="">From</label>
                                 <DatePicker
+                                portalId="root-portal"   
                                     selected={formValues.fromDate}
                                     onChange={(date) => handleDateChange(date, "fromDate")}
                                     dateFormat="dd/MM/yyyy"
@@ -233,6 +234,7 @@ function ViewManifest() {
                             <div className="input-field3">
                                 <label htmlFor="">To</label>
                                 <DatePicker
+                                portalId="root-portal"   
                                     selected={formValues.toDate}
                                     onChange={(date) => handleDateChange(date, "toDate")}
                                     dateFormat="dd/MM/yyyy"

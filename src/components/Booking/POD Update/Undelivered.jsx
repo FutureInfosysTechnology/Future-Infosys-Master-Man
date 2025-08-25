@@ -19,7 +19,7 @@ function Undelivered() {
     const today = new Date();
     const time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");
     const [zones, setZones] = useState([]);
-
+    const [showSecForm,setShowSecForm]=useState(false);
     const [editIndex, setEditIndex] = useState(null);
     const [modalData, setModalData] = useState({ code: '', name: '' });
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -144,7 +144,7 @@ function Undelivered() {
 
                     <header style={{ color: "black", fontSize: "18px", fontWeight: "600" }}>Undelivered Master</header>
 
-                    <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                    <form onSubmit={(e) => { e.preventDefault(); handleSave(); setShowSecForm(true);}}>
 
                         <div className="fields2">
                             <div className="input-field3">
@@ -245,26 +245,20 @@ function Undelivered() {
                             <div className="input-field3">
                                 <label htmlFor="">Upload Image</label>
                                 <input style={{ padding: "5px" }} type="file" />
-                            </div>
-
-                            <div className="input-field3">
-                                <label htmlFor=""></label>
-                            </div>
+                            </div>    
 
                             <div className="input-field3">
                                 <label style={{ marginBottom: "18px" }}></label>
-                                <button style={{ height: "40px", width:"60px" }} className="ok-btn">Submit</button>
-                            </div>
-
-                            <div className="input-field3">
-                                <label style={{ marginBottom: "18px" }}></label>
-                                <button style={{ height: "40px", width:"60px" }} className="ok-btn">Cancel</button>
+                                <div style={{ display: "flex", flexDirection: "row"}}>
+                                    <button style={{ height: "40px", width: "48%" }} className="ok-btn" type="submit">Submit</button>
+                                    <button style={{ height: "40px", width: "48%",marginLeft:"20px" }} className="ok-btn">Cancel</button>
+                                </div>
                             </div>
                         </div>
                     </form>
                     <span style={{ height: "1px", backgroundColor: "#aaa" }}></span>
 
-                    <form action="">
+                    { showSecForm && <form action="">
                         <div className="fields2">
                             <div className="input-field3">
                                 <label htmlFor="">Docket No</label>
@@ -389,8 +383,7 @@ function Undelivered() {
                             </div>
 
                         </div>
-                    </form>
-
+                    </form>}
                 </div>
             </div>
         </>

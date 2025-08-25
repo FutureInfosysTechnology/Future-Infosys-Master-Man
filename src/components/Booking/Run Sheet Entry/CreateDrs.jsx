@@ -14,6 +14,10 @@ function CreateDrs() {
     const [empData, setEmpData] = useState([]);
     const [getCity, setGetCity] = useState([]);
     const [vehicleData, setVehicleData] = useState([]);
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const [fromDateM, setFromDateM] = useState(firstDayOfMonth);
+    const [toDateM, setToDateM] = useState(today);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -24,8 +28,6 @@ function CreateDrs() {
     const [selectedRows, setSelectedRows] = useState([]);
     const [selectedManifestRows, setSelectedManifestRows] = useState([]);
     const [selectedDocketNos, setSelectedDocketNos] = useState([]);
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
         DocketNo: "",
         vehicleNo: "",
@@ -271,6 +273,7 @@ function CreateDrs() {
                                 onChange={(date) => handleDateChange(date, "fromDate")}
                                 dateFormat="dd/MM/yyyy"
                                 className="form-control form-control-sm"
+                                portalId="root-portal"   
                             />
                         </div>
 
@@ -281,6 +284,7 @@ function CreateDrs() {
                                 onChange={(date) => handleDateChange(date, "toDate")}
                                 dateFormat="dd/MM/yyyy"
                                 className="form-control form-control-sm"
+                                portalId="root-portal"   
                             />
                         </div>
                         <div className="input-field3" >
@@ -327,16 +331,16 @@ function CreateDrs() {
                         </div>
 
                         <div className="input-field3" >
-                            <label htmlFor="" style={{whiteSpace: "nowrap"}}>Bulk Docket Manifest</label>
-                            <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px",lineHeight:"1"}}
-                                onClick={() => { setModalIsOpen(true) }}>Bulk Docket Manifest</button>
+                            <label htmlFor="" style={{ whiteSpace: "nowrap" }}>Bulk Docket Runsheet</label>
+                            <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px", lineHeight: "1" }}
+                                onClick={() => { setModalIsOpen(true) }}>Bulk Docket Runsheet</button>
                         </div>
 
                         <div className="input-field3" >
                             <label htmlFor=""></label>
-                            <div style={{ display: "flex", flexDirection: "row", marginTop: "18px" ,justifyContent:"center",alignItems:"center",gap:"10px",width:"150px"}}>
-                                <button type="submit" className="ok-btn" style={{  width: "55%"}}>Generate</button>
-                                <button type="button" className="ok-btn" style={{ width: "45%"}}>Reset</button>
+                            <div style={{ display: "flex", flexDirection: "row", marginTop: "18px", justifyContent: "center", alignItems: "center", gap: "10px", width: "150px" }}>
+                                <button type="submit" className="ok-btn" style={{ width: "55%" }}>Generate</button>
+                                <button type="button" className="ok-btn" style={{ width: "45%" }}>Reset</button>
                             </div>
                         </div>
                     </div>
@@ -415,25 +419,51 @@ function CreateDrs() {
                     className="custom-modal-createmanifest" contentLabel="Modal">
                     <div className="custom-modal-content">
                         <div className="header-tittle" style={{ display: "flex", flexDirection: "row" }}>
-                            <header style={{ width: "95%", textAlign: "center" }}>Pending Manifest Data</header>
+                            <header style={{ width: "95%", textAlign: "center" }}>Pending RunSheet Data</header>
                             <button className="ok-btn" style={{ width: "5%", height: "100%", backgroundColor: "red" }}
                                 onClick={() => setModalIsOpen(false)}>
                                 <i className="bi bi-x-lg"></i>
                             </button>
                         </div>
                         <div className='container2' style={{ borderRadius: "0px", padding: "20px" }}>
-                            <div style={{ display: "flex", flexDirection: "row" }}>
-                                <div className="search-input">
-                                    <input className="add-input" type="text" placeholder="search"
-                                        value={searchQuery} onChange={handleSearchChange} />
+                            <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", width: "100%", gap: "50px" }}>
+                                <div className="search-input" style={{ marginBottom: "10px" }}>
+                                    <input
+                                        className="add-input1"
+                                        type="text"
+                                        placeholder="search"
+                                        value={searchQuery}
+                                        onChange={handleSearchChange}
+                                        style={{ marginLeft: "0%" }}
+                                    />
                                     <button type="submit" title="search">
                                         <i className="bi bi-search"></i>
                                     </button>
                                 </div>
+                                <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
+                                    <label style={{ marginTop: "8px", textAlign: "end" }}>From Date</label>
+                                    <DatePicker
+                                        selected={fromDateM}
+                                        onChange={(date) => setFromDateM(date)}
+                                        dateFormat="dd/MM/yyyy"
+                                        className="form-control form-control-sm"
+                                        style={{ width: "120px", marginLeft: "10px" }}
+                                    />
+                                </div>
 
-                                <div className="bottom-buttons" style={{ marginTop: "0px", marginLeft: "255px" }}>
-                                    <button style={{ marginTop: "0px" }} className="ok-btn"
-                                        onClick={handleDocketNoSelect} >Submit</button>
+                                <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px", marginRight: "50px" }}>
+                                    <label style={{ marginTop: "8px", textAlign: "end" }}>To Date</label>
+                                    <DatePicker
+                                        selected={toDateM}
+                                        onChange={(date) => setToDateM(date)}
+                                        dateFormat="dd/MM/yyyy"
+                                        className="form-control form-control-sm"
+                                        style={{ width: "120px", marginLeft: "10px" }}
+                                    />
+                                </div>
+
+                                <div className="bottom-buttons">
+                                    <button style={{ marginTop: "0px" }} className="ok-btn" onClick={handleDocketNoSelect}>Submit</button>
                                 </div>
                             </div>
                             <div className='table-container'>

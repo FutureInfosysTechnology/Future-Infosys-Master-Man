@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { MdEmail } from "react-icons/md";
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
+import { saveAs } from "file-saver";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import Select from 'react-select'; // 🔹 You forgot this
@@ -97,6 +99,73 @@ function EmailBooking() {
       prev.includes(docketNo) ? prev.filter((item) => item !== docketNo) : [...prev, docketNo]
     );
   };
+const exportSelectedToPDF = () => {
+  if (selectedDockets.length === 0) {
+    Swal.fire("Error", "Please select at least one docket", "error");
+    return;
+  }
+
+  const selectedData = EmailData.filter((row) =>
+    selectedDockets.includes(row.DocketNo)
+  );
+
+  const doc = new jsPDF();
+
+  const headers = [
+    [
+      "DocketNo",
+      "Book Date",
+      "Customer",
+      "Consignee",
+      "Origin",
+      "Destination",
+      "Mode",
+      "Qty",
+      "Weight",
+    ],
+  ];
+
+  const body = selectedData.map((item) => [
+    item.DocketNo,
+    item.BookDate ? new Date(item.BookDate).toLocaleDateString("en-GB") : "",
+    item.Customer_Name,
+    item.Consignee_Name,
+    item.Origin_Name,
+    item.Destination_Name,
+    item.Mode_Name,
+    item.Qty,
+    item.ActualWt,
+  ]);
+
+  doc.text("Selected Booking Data", 14, 10);
+  doc.autoTable({
+    head: headers,
+    body,
+    startY: 20,
+  });
+
+  doc.save("SelectedDockets.pdf");
+};
+
+const exportSelectedToExcel = () => {
+  if (selectedDockets.length === 0) {
+    Swal.fire("Error", "Please select at least one docket", "error");
+    return;
+  }
+
+  // filter only selected rows
+  const selectedData = EmailData.filter((row) =>
+    selectedDockets.includes(row.DocketNo)
+  );
+
+  const worksheet = XLSX.utils.json_to_sheet(selectedData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "SelectedData");
+
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+  saveAs(data, "SelectedDockets.xlsx");
+};
 
   const handleSelectAll = () => {
     setSelectedDockets(
@@ -164,6 +233,7 @@ function EmailBooking() {
             {/* <label className="form-label mb-0" style={{ fontSize: "0.85rem" }}></label> */}
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
             <DatePicker
+            portalId="root-portal"   
               selected={formData.fromdt}
               onChange={(date) => handleDateChange(date, "fromdt")}
               dateFormat="dd/MM/yyyy"
@@ -174,6 +244,7 @@ function EmailBooking() {
           <div>
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>To Date</h6>
             <DatePicker
+            portalId="root-portal"   
               selected={formData.todt}
               onChange={(date) => handleDateChange(date, "todt")}
               dateFormat="dd/MM/yyyy"
@@ -183,8 +254,10 @@ function EmailBooking() {
 
           <div className="d-flex gap-2 align-items-end ms-auto mt-2">
             <button type="submit" className="btn btn-primary btn-sm">Search</button>
-            <button type="button" className="btn btn-success btn-sm" onClick={() => handleSendEmailWithAttachment("excel")}>Excel</button>
-            <button type="button" className="btn btn-danger btn-sm" onClick={() => handleSendEmailWithAttachment("pdf")}>PDF</button>
+            <button type="button" className="btn" style={{background:"red",color:"white",fontSize:"20px",width:"50px",height:"30px",
+            display:"flex", alignItems:"center",justifyContent:"center"}}><MdEmail /></button>
+            <button type="button" className="btn btn-success btn-sm" onClick={exportSelectedToExcel}>Excel</button>
+            <button type="button" className="btn btn-danger btn-sm" onClick={exportSelectedToPDF}>PDF</button>
           </div>
         </div>
       </form>

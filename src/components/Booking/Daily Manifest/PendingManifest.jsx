@@ -24,7 +24,6 @@ function PendingManifest() {
         setFormDate({ ...formDate, [field]: date });
         setCurrentPage(1);
     };
-   
     const fetchData = async () => {
     setLoading(true);
     try {
@@ -49,7 +48,9 @@ function PendingManifest() {
     useEffect(() => {
         fetchData();
     }, [currentPage, rowsPerPage]);
-
+    const refreshPendingData = async () => {
+    await fetchData(); // your existing fetch function
+};
     const filteredgetManifestData = getManifest.filter((manifest) => {
         const isDocketNoMatch =
             manifest?.DocketNo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,7 +58,7 @@ function PendingManifest() {
             manifest?.fromDest?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             manifest?.toDest?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             manifest?.BookDate?.toLowerCase().includes(searchQuery.toLowerCase());
-
+            
         let manifestDate = null;
         if (manifest?.BookDate) {
             const [day, month, year] = manifest.BookDate.split("/");
@@ -106,6 +107,7 @@ function PendingManifest() {
                     <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
                         <label style={{ marginTop: "8px", textAlign: "end" }}>From Date</label>
                         <DatePicker
+                        portalId="root-portal"   
                             selected={formDate.fromDate}
                             onChange={(date) => handleDateChange(date, "fromDate")}
                             dateFormat="dd/MM/yyyy"
@@ -117,6 +119,7 @@ function PendingManifest() {
                     <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
                         <label style={{ marginTop: "8px", textAlign: "end" }}>To Date</label>
                         <DatePicker
+                        portalId="root-portal"   
                             selected={formDate.toDate}
                             onChange={(date) => handleDateChange(date, "toDate")}
                             dateFormat="dd/MM/yyyy"

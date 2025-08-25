@@ -61,6 +61,7 @@ function ForwardingManifest() {
                             <div className="input-field3">
                                 <label htmlFor="">Manifest Date</label>
                                 <DatePicker
+                                portalId="root-portal"   
                                     selected={formData.maniDate}
                                     onChange={(date) => handleDateChange(date, "maniDate")}
                                     dateFormat="dd/MM/yyyy"

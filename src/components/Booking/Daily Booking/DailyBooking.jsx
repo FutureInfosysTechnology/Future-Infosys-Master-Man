@@ -8,6 +8,7 @@ import BulkImport from "../Daily Manifest/BulkImport";
 import DailyExpenses from "./DailyExpenses";
 import Booking from "./Booking";
 import ShortEntry from "./ShortEntry";
+import "./DailyBooking.css"
 import ExcelImportBulk from "./ExcelImportBulk"; // ✅ Added import
 function DailyBooking() {
   const [activeTab, setActiveTab] = useState("vendor");
@@ -25,8 +26,7 @@ function DailyBooking() {
         <div className="container-vendor">
           {/* Radio buttons */}
           <input
-            type="radio"
-            name="slider"
+            type="radio" name="slider"
             id="vendor"
             checked={activeTab === "vendor"}
             onChange={handleChange}
@@ -102,24 +102,6 @@ function DailyBooking() {
 
           {/* Sections */}
           <section>
-            {/*<div className={`content content-1 ${activeTab === 'vendor' ? 'active' : ''}`}>
-                            <Booking />
-                        </div>
-                        <div className={`content content-2 ${activeTab === 'vendorrate' ? 'active' : ''}`}>
-                            <DailyExpenses />
-                        </div>
-                        <div className={`content content-3 ${activeTab === 'vendorfuel' ? 'active' : ''}`}>
-                            <EmailBooking />
-                        </div>
-                        <div className={`content content-4 ${activeTab === 'entry' ? 'active' : ''}`}>
-                            <ShortEntry />
-                        </div>
-                        <div className={`content content-5 ${activeTab === 'excelimport' ? 'active' : ''}`}>
-                            <ExcelImportBulk />
-                        </div>
-                        <div className={`content content-6 ${activeTab === 'vendorcharge' ? 'active' : ''}`}>
-                            <VendorBill />
-                        </div>*/}
             {activeTab === "vendor" && <Booking />}
             {activeTab === "vendorrate" && <DailyExpenses />}
             {activeTab === "vendorfuel" && <EmailBooking />}

@@ -64,7 +64,6 @@ function CreateManifest() {
             const allDataResponse = await getApi(`/Manifest/getPendingManifest?branchCode=MUM&pageNumber=1&pageSize=10000`);
             const allData = allDataResponse?.Data || [];   // <-- remove extra .Data
             setTotalRecords(allData.length);
-
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -268,6 +267,7 @@ function CreateManifest() {
                             <div className="input-field3" >
                                 <label htmlFor="">Manifest Date</label>
                                 <DatePicker
+                                    portalId="root-portal"   
                                     selected={formData.maniDate}
                                     onChange={(date) => handleDateChange(date, "maniDate")}
                                     dateFormat="dd/MM/yyyy"
@@ -681,7 +681,7 @@ function CreateManifest() {
                                         />
                                     </div>
 
-                                    <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px", marginRight: "50px" }}>
+                                    <div className="input-field" id="datepicker-portal" style={{ display: "flex", flexDirection: "row", gap: "10px", marginRight: "50px" }}>
                                         <label style={{ marginTop: "8px", textAlign: "end" }}>To Date</label>
                                         <DatePicker
                                             selected={toDate}

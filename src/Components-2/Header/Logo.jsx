@@ -1,7 +1,7 @@
 import React from "react";
 import './Logo.css';
 import '../Dashboard/Mainstyle.css';
-import futurelogo from '../../Assets/Images/Future Infosys logo.jpeg';
+import futurelogo from '../../Assets/Images/logo-img.png';
 
 
 
@@ -20,7 +20,6 @@ function Logo() {
                 onClick={handleToggleSidebar}></i>
             <a href="/" className="logo d-flex align-items-center" style={{ textDecoration: "none" }}>
             <img src={futurelogo} className="logo-img" alt="" />
-                <span className="d-none d-lg-block">Future Infosys</span>
             </a>
 
             

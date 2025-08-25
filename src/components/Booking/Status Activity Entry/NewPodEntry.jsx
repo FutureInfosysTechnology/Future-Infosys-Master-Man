@@ -236,6 +236,7 @@ function NewPodEntry() {
                             <tr>
                                 <td>1</td>
                                 <td><DatePicker
+                                portalId="root-portal" 
                                     selected={formData.toDate}
                                     onChange={(date) => handleDateChange(date, "toDate")}
                                     dateFormat="dd/MM/yyyy"

@@ -48,6 +48,7 @@ function ImportDrs() {
                                 onChange={(date) => handleDateChange(date, "toDate")}
                                 dateFormat="dd/MM/yyyy"
                                 className="form-control form-control-sm"
+                                portalId="root-portal"   
                             />
                         </div>
 

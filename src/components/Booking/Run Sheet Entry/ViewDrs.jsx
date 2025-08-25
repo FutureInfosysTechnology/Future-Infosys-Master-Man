@@ -70,24 +70,30 @@ function ViewDrs() {
 
             <div className="container1">
                 <form action="">
-                    <div className="fields2">
+                    <div className="fields2" style={{ overflow: "visible" }}>
                         <div className="input-field3">
                             <label htmlFor="">From Date</label>
                             <DatePicker
+                                portalId="root-portal"
                                 selected={formData.fromDate}
                                 onChange={(date) => handleDateChange(date, "fromDate")}
                                 dateFormat="dd/MM/yyyy"
                                 className="form-control form-control-sm"
                             />
+
                         </div>
 
-                        <div className="input-field3">
+                        <div className="input-field3" style={{ overflow: "visible" }}>
                             <label htmlFor="">To Date</label>
                             <DatePicker
+                                portalId="root-portal"
                                 selected={formData.toDate}
                                 onChange={(date) => handleDateChange(date, "toDate")}
                                 dateFormat="dd/MM/yyyy"
                                 className="form-control form-control-sm"
+                                popperContainer={({ children }) => (
+                                    <div style={{ zIndex: 9999 }}>{children}</div>
+                                )}
                             />
                         </div>
 

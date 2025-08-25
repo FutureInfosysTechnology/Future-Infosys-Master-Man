@@ -9,7 +9,7 @@ function Footer() {
             <div className="copyright">
                 &copy; Copyright{''}
                 <strong>
-                    <span style={{marginRight:"1px", marginLeft:"3px", color:"#4FD1C5"}}>Future Infosys Technology </span>
+                    <span style={{marginRight:"1px", marginLeft:"3px", color:"#4FD1C5"}}>Future Infosys Technologies </span>
                 </strong>
                  .All Rights Reserved 
             </div>

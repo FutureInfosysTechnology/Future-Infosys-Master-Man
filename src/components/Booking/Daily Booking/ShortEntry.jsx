@@ -27,6 +27,7 @@ function ShortEntry() {
     Cityname: '',
     Consignee_Name: '',
     Pcs: '',
+    DoxSpx: '',
     ActualWt: '',
     Chargablewt: '',
     Amount: '',
@@ -64,6 +65,7 @@ function ShortEntry() {
       Cityname: '',
       Consignee_Name: '',
       Pcs: '',
+      DoxSpx: '',
       ActualWt: '',
       Chargablewt: '',
       Amount: '',
@@ -95,6 +97,7 @@ function ShortEntry() {
       modeCode: formData.Mode_code,
       originCode: formData.Origin_code,
       destinationCode: formData.Destination_Code,
+      DoxSpx: formData.DoxSpx,
       qty: formData.Pcs?.toString() || '0',
       ActualWt: parseFloat(formData.ActualWt),
       volumetricWt: formData.volumetricWt || '0',
@@ -128,6 +131,7 @@ function ShortEntry() {
       Mode_code: formData.Mode_code,
       Origin_code: formData.Origin_code,
       Destination_Code: formData.Destination_Code,
+      DoxSpx: formData.DoxSpx,
       Qty: String(formData.Pcs),
       ActualWt: String(formData.ActualWt),
       VolumetricWt: String(formData.volumetricWt || '0'),
@@ -170,6 +174,7 @@ function ShortEntry() {
           Mode_Name: mode?.Mode_Name || '',
           Origin_code: data.Origin_code,
           Destination_Code: data.Destination_Code,
+          DoxSpx: data.DoxSpx,
           Pcs: data.Qty,
           ActualWt: data.ActualWt,
           volumetricWt: data.VolumetricWt,
@@ -407,16 +412,29 @@ function ShortEntry() {
               />
             </div>
 
-            <div className="col-md-4">
+            <div className="col-md-2">
               <label className="form-label">Pcs</label>
               <input
-                type="text"
+                type="number"
                 placeholder="Pcs"
                 className="form-control"
                 value={formData.Pcs}
                 onChange={(e) => setFormData({ ...formData, Pcs: e.target.value })}
               />
+            </div>
 
+            <div className="col-md-2">
+              <label className="form-label">Product Type</label>
+              <select
+              style={{ height: '35px', fontSize:"15px"}}
+                className="form-control"
+                value={formData.DoxSpx} // separate field for type
+                onChange={(e) => setFormData({ ...formData, DoxSpx: e.target.value })}
+              >
+                <option value="">Select Product Type</option>
+                <option value="Dox">Dox</option>
+                <option value="Spx">Spx</option>
+              </select>
             </div>
 
             <div className="col-md-4">

@@ -17,7 +17,6 @@ function Delivered() {
         time: time,
         Status: "",
         Reciept: "",
-
     })
     const statusOptions = [
         { value: "Arrived", label: "Arrived" },
@@ -112,6 +111,7 @@ function Delivered() {
                             <div className="input-field3">
                                 <label >Date</label>
                                 <DatePicker
+                                    portalId="datepicker-portal"
                                     selected={formData.toDate}
                                     onChange={(date) => handleDateChange(date, "toDate")}
                                     dateFormat="dd/MM/yyyy"
