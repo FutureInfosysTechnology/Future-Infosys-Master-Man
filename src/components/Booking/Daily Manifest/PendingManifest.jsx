@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "../../Tabs/tabs.css";
 import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { refeshPend } from "../../../App";
 
 function PendingManifest() {
+    const {ref} =useContext(refeshPend)
     const [getManifest, setGetManifest] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -43,11 +45,9 @@ function PendingManifest() {
         setLoading(false);
     }
 };
-
-
-    useEffect(() => {
+  useEffect(() => {
         fetchData();
-    }, [currentPage, rowsPerPage]);
+    }, [currentPage, rowsPerPage,ref]);
     const refreshPendingData = async () => {
     await fetchData(); // your existing fetch function
 };

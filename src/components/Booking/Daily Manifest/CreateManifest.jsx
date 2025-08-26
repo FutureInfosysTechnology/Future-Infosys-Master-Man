@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
@@ -6,8 +6,10 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
+import { refeshPend } from "../../../App";
 
 function CreateManifest() {
+    const {refFun}=useContext(refeshPend)
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -242,9 +244,13 @@ function CreateManifest() {
                 bookingWeight: '',
                 manifestWeight: '',
                 docketNo: []
-            });
-            setSelectedManifestRows([]);
-            setSelectedRows([]);
+            })
+            refFun();
+
+           setSelectedManifestRows([]);
+    setSelectedRows([]);
+    setSelectedDocketNos([]);
+    setSelectAll(false);
         } catch (error) {
             console.error("Error submitting manifest: ", error);
             Swal.fire({

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Tabs from './components/Tabs/Tabs';
 import CityMaster from './components/Admin Master/City Master/CityMaster';
@@ -48,13 +48,12 @@ import DocketBill from './components/Docket Print/DocketBill';
 import VendorBoxLabel from './components/Docket Print/VendorBoxLabel';
 import InternationalBooking from './components/Booking/Daily Booking/InternationalBooking';
 
-
-
-
-
-
+export const refeshPend=createContext();
 function App() {
+  const [ref,setRef]=useState(false);
+  const refFun=()=>setRef(!ref);
   return (
+    <refeshPend.Provider value={{ref,refFun}}>
     <Router>
       <div className="main">
 
@@ -119,6 +118,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </refeshPend.Provider>
   );
 }
 
