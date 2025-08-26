@@ -1,13 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
+import { use } from "react";
 
 function ViewDrs() {
+    const [data,setData]=useState([
+  { id: 1, code: 'DRS001', name: 'Vivek' },
+  { id: 2, code: 'DRS002', name: 'Suresh' },
+  { id: 3, code: 'DRS003', name: 'Mahesh' },
+]);
+    const [zones, setZones] = useState(data);
+    const [search,setSearch]=useState("");
+    useEffect(() => {
+  if (search === "") {
+    setZones(data);
+  } else {
+    setZones(
+      data.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          item.code.toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  }
+}, [search, data]);
 
-    const [zones, setZones] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedBoy, setSelectedBoy] = useState(null);
     const today = new Date();
@@ -63,7 +83,20 @@ function ViewDrs() {
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
+    const handleOpenDrsPrint = (zone) => {
+        const id = zone.id;
+        const code = zone.code;
+        const name = zone.name;
+        const url = `/drsrunsheet?manifestNo=${encodeURIComponent(id)}&sumQty=${encodeURIComponent(code)}&sumActualWt=${encodeURIComponent(name)}`;
+        const newWindow = window.open(
+            url,
+            '_blank', 'width=900,height=600,fullscreen=yes'
+        );
 
+        if (newWindow) {
+            newWindow.focus();
+        }
+    };
 
     return (
         <>
@@ -122,7 +155,7 @@ function ViewDrs() {
 
                         <div className="input-field3">
                             <label htmlFor="">DRS No</label>
-                            <input type="tel" placeholder="Enter DRS No" />
+                            <input type="tel" placeholder="Enter DRS No" value={search} onChange={(e)=>setSearch(e.target.value)}/>
                         </div>
 
                         <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "11px" }}>
@@ -169,11 +202,16 @@ function ViewDrs() {
                                     <td>{zone.name}</td>
                                     <td>{zone.name}</td>
                                     <td>
-                                        <button className="ok-btn" style={{ marginRight: "5px" }}>Download</button>
-                                        <button className='edit-btn'>
+                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                    <button className='edit-btn' onClick={() => handleOpenDrsPrint(zone)}>
+                                                        <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "24px" }}></i>
+                                                    </button>
+                                                     <button className='edit-btn' style={{ fontSize: "24px" }}>
                                             <i className='bi bi-pen'></i></button>
-                                        <button onClick={() => handleDelete(index)} className='edit-btn'>
-                                            <i className='bi bi-trash'></i></button>
+                                                    <button className="edit-btn" onClick={() => handleDelete(index)}>
+                                                        <i className='bi bi-trash' style={{ fontSize: "24px" }}></i>
+                                                    </button>
+                                                </div>
                                     </td>
                                 </tr>
                             ))}

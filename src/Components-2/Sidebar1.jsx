@@ -194,29 +194,6 @@ function Sidebar1() {
                         </li>
 
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
-                            <Link to="/drsrunsheet" className="link">
-                                <i className="bi bi-printer"></i>
-                                <span>Drs Runsheet</span>
-                            </Link>
-                        </li>
-
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
-                            <Link to="/manifest" className="link">
-                                <i className="bi bi-printer"></i>
-                                <span>Manifest</span>
-                            </Link>
-                        </li>
-
-                        
-
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
-                            <Link to="/firstinvoice" className="link">
-                                <i className="bi bi-receipt-cutoff"></i>
-                                <span>First Invoice</span>
-                            </Link>
-                        </li>
-
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/secondinvoice" className="link">
                                 <i className="bi bi-receipt-cutoff"></i>
                                 <span>Second Invoice</span>

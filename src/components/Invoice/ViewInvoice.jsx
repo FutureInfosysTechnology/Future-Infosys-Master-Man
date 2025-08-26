@@ -8,12 +8,15 @@ import Swal from "sweetalert2";
 import Footer from "../../Components-2/Footer";
 import Header from "../../Components-2/Header/Header";
 import Sidebar1 from "../../Components-2/Sidebar1";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 
 
 function ViewInvoice() {
 
-    const [zones, setZones] = useState([]);
+    const [zones, setZones] = useState([{ code: "INV001", date: "2025-08-25", shipper: "ABC Pvt Ltd", receiver: "XYZ Ltd", from: "Mumbai", to: "Delhi", pc: "5", weight: "50", invoiceno: "1001", invoicevalue: "5000" },
+    { code: "INV002", date: "2025-08-26", shipper: "LMN Pvt Ltd", receiver: "OPQ Ltd", from: "Pune", to: "Bangalore", pc: "3", weight: "20", invoiceno: "1002", invoicevalue: "3000" }]);
     const [editIndex, setEditIndex] = useState(null);
     const [modalData, setModalData] = useState({
         code: '', date: '', shipper: '', receiver: '', from: '', to: '',
@@ -27,10 +30,16 @@ function ViewInvoice() {
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
-
     const totalPages = Math.ceil(zones.length / rowsPerPage);
-
-
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const [formData, setFormData] = useState({
+        fromDate: firstDayOfMonth,
+        toDate: today,
+    });
+    const handleFormChange = (date, key) => {
+        setFormData({ ...formData, [key]: date })
+    }
     const handleEdit = (index) => {
         setEditIndex(index);
         setModalData({
@@ -105,7 +114,6 @@ function ViewInvoice() {
                 pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
             }
-
             pdf.save('zones.pdf');
         });
     };
@@ -118,48 +126,70 @@ function ViewInvoice() {
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
+     const handleOpenInvoicePrint = (zone) => {
+        const code = zone.code;
+        const date = zone.date;
+        const shipper = zone.shipper;
+        const url = `/firstinvoice?manifestNo=${encodeURIComponent(code)}&sumQty=${encodeURIComponent(date)}&sumActualWt=${encodeURIComponent(shipper)}`;
+        const newWindow = window.open(
+            url,
+            '_blank', 'width=900,height=600,fullscreen=yes'
+        );
 
+        if (newWindow) {
+            newWindow.focus();
+        }
+    };
 
     return (
         <>
 
             <div className="body">
                 <div className="container1">
-
-
-
-                    <div className="addNew" style={{ margin: "0px" }}>
-
-                        <form style={{ margin: "0px", padding: "0px" }}>
-                            <div className="fields2" style={{ alignItems: "center", justifyContent: "center" }}>
-                                <div className="input-field3">
-                                    <label htmlFor="">From</label>
-                                    <input type="date" />
-                                </div>
-
-                                <div className="input-field3">
-                                    <label htmlFor="">To</label>
-                                    <input type="date" />
-                                </div>
-
-                                <div className="dropdown" style={{ marginLeft: "20px", marginTop: "10px" }}>
-                                    <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
-                                    <div className="dropdown-content">
-                                        <button onClick={handleExportExcel}>Export to Excel</button>
-                                        <button onClick={handleExportPDF}>Export to PDF</button>
-                                    </div>
-                                </div>
-                                <div className="search-input" style={{ marginRight: "10px" }}>
-                                    <input style={{ marginLeft: "150px" }} className="add-input" type="text" placeholder="search" />
-                                    <button type="submit" title="search">
-                                        <i className="bi bi-search"></i>
-                                    </button>
-                                </div>
+                    <form style={{ margin: "0px", padding: "0px" }}>
+                        <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
+                            <div className="input-field3">
+                                <label htmlFor="">From</label>
+                                <DatePicker
+                                    portalId="root-portal"
+                                    selected={formData.fromDate}
+                                    onChange={(date) => handleFormChange(date, "fromDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
                             </div>
-                        </form>
+
+                            <div className="input-field3">
+                                <label htmlFor="">To</label>
+                                <DatePicker
+                                    portalId="root-portal"
+                                    selected={formData.toDate}
+                                    onChange={(date) => handleFormChange(date, "toDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
+                            </div>
+                            <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
+                                <button className="ok-btn" style={{ height: "35px" }} type="submit">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div style={{width:"100%",display:"flex", justifyContent:"space-between",marginTop:"10px"}}>
+                        <div className="dropdown">
+                            <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
+                            <div className="dropdown-content">
+                                <button onClick={handleExportExcel}>Export to Excel</button>
+                                <button onClick={handleExportPDF}>Export to PDF</button>
+                            </div>
+                        </div>
+                        <div className="search-input">
+                            <input style={{ marginLeft: "150px" }} className="add-input" type="text" placeholder="search" />
+                            <button type="submit" title="search">
+                                <i className="bi bi-search"></i>
+                            </button>
+                        </div>
 
                     </div>
-
                     <div className='table-container' style={{ margin: "0px" }}>
                         <table className='table table-sm'>
                             <thead className='table-info table-sm'>
@@ -192,7 +222,15 @@ function ViewInvoice() {
                                         <td>{zone.date}</td>
                                         <td>{zone.date}</td>
                                         <td>
-                                            <button onClick={() => handleDelete(index)} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                    <button className='edit-btn' onClick={() => handleOpenInvoicePrint(zone)}>
+                                                        <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "24px" }}></i>
+                                                    </button>
+                                                    <button onClick={() => handleDelete(index)} className='edit-btn'>
+                                                        <i className='bi bi-trash' style={{ fontSize: "24px" }}></i>
+                                                    </button>
+                                                </div>
+                                            
                                         </td>
                                     </tr>
                                 ))}
@@ -209,7 +247,6 @@ function ViewInvoice() {
                             {'>'}
                         </button>
                     </div>
-
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
                         style={{
                             content: {
