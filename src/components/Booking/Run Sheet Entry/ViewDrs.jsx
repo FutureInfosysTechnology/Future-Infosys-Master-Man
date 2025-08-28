@@ -5,28 +5,31 @@ import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
 import { use } from "react";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+
 
 function ViewDrs() {
-    const [data,setData]=useState([
-  { id: 1, code: 'DRS001', name: 'Vivek' },
-  { id: 2, code: 'DRS002', name: 'Suresh' },
-  { id: 3, code: 'DRS003', name: 'Mahesh' },
-]);
+    const [data, setData] = useState([
+        { id: 1, code: 'DRS001', name: 'Vivek' },
+        { id: 2, code: 'DRS002', name: 'Suresh' },
+        { id: 3, code: 'DRS003', name: 'Mahesh' },
+    ]);
+    const [openRow, setOpenRow] = useState(null);
     const [zones, setZones] = useState(data);
-    const [search,setSearch]=useState("");
+    const [search, setSearch] = useState("");
     useEffect(() => {
-  if (search === "") {
-    setZones(data);
-  } else {
-    setZones(
-      data.filter(
-        (item) =>
-          item.name.toLowerCase().includes(search.toLowerCase()) ||
-          item.code.toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }
-}, [search, data]);
+        if (search === "") {
+            setZones(data);
+        } else {
+            setZones(
+                data.filter(
+                    (item) =>
+                        item.name.toLowerCase().includes(search.toLowerCase()) ||
+                        item.code.toLowerCase().includes(search.toLowerCase())
+                )
+            );
+        }
+    }, [search, data]);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedBoy, setSelectedBoy] = useState(null);
@@ -155,7 +158,7 @@ function ViewDrs() {
 
                         <div className="input-field3">
                             <label htmlFor="">DRS No</label>
-                            <input type="tel" placeholder="Enter DRS No" value={search} onChange={(e)=>setSearch(e.target.value)}/>
+                            <input type="tel" placeholder="Enter DRS No" value={search} onChange={(e) => setSearch(e.target.value)} />
                         </div>
 
                         <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "11px" }}>
@@ -180,6 +183,7 @@ function ViewDrs() {
                     <table className='table table-bordered table-sm'>
                         <thead className='table-info body-bordered table-sm'>
                             <tr>
+                                <th scope="col">Actions</th>
                                 <th scope="col">Sr.No</th>
                                 <th scope="col">Drs No</th>
                                 <th scope="col">Drs Date</th>
@@ -187,13 +191,51 @@ function ViewDrs() {
                                 <th scope="col">Employee Contact No</th>
                                 <th scope="col">Area</th>
                                 <th scope="col">Total Awb</th>
-                                <th scope="col">Actions</th>
+
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((zone, index) => (
-                                <tr key={zone.id}>
+                                <tr key={zone.id} style={{ fontSize: "12px", position: "relative" }}>
+                                    <td>
+                                        <PiDotsThreeOutlineVerticalFill
+                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                            onClick={() =>
+                                                setOpenRow(openRow === index ? null : index) // toggle only this row
+                                            }
+                                        />
+
+                                        {openRow === index && (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    flexDirection: "row",
+                                                    position: "absolute",
+                                                    alignItems: "center",
+                                                    left: "80px",
+                                                    top: "0px",
+                                                    borderRadius: "10px",
+                                                    backgroundColor: "white",
+                                                    zIndex: "999999",
+                                                    height: "30px",
+                                                    width: "100px",
+                                                    padding:"10px"
+                                                }}
+                                            >
+                                                <button className='edit-btn' onClick={() => handleOpenDrsPrint(zone)}>
+                                                <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" ,marginLeft:"20px"}}></i>
+                                            </button>
+                                            <button className='edit-btn' style={{ fontSize: "18px"}}>
+                                                <i className='bi bi-pen'></i></button>
+                                            <button className="edit-btn" onClick={() => handleDelete(index)}>
+                                                <i className='bi bi-trash' style={{ fontSize: "18px" }}></i>
+                                            </button>
+                                               
+                                            </div>
+                                        )}
+                                    </td>
                                     <td>{zone.id}</td>
                                     <td>{zone.code}</td>
                                     <td>{zone.code}</td>
@@ -201,18 +243,6 @@ function ViewDrs() {
                                     <td>{zone.name}</td>
                                     <td>{zone.name}</td>
                                     <td>{zone.name}</td>
-                                    <td>
-                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                    <button className='edit-btn' onClick={() => handleOpenDrsPrint(zone)}>
-                                                        <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "24px" }}></i>
-                                                    </button>
-                                                     <button className='edit-btn' style={{ fontSize: "24px" }}>
-                                            <i className='bi bi-pen'></i></button>
-                                                    <button className="edit-btn" onClick={() => handleDelete(index)}>
-                                                        <i className='bi bi-trash' style={{ fontSize: "24px" }}></i>
-                                                    </button>
-                                                </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

@@ -431,7 +431,7 @@ function ShortEntry() {
                 value={formData.DoxSpx} // separate field for type
                 onChange={(e) => setFormData({ ...formData, DoxSpx: e.target.value })}
               >
-                <option value="">Select Product Type</option>
+                <option value="">Product</option>
                 <option value="Dox">Dox</option>
                 <option value="Spx">Spx</option>
               </select>

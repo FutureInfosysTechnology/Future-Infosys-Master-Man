@@ -92,7 +92,7 @@ function DailyBooking() {
               Bulk Import Data
             </label>*/}
             <label htmlFor="excelimport" className="excelimport">
-              Excel Import Bulk
+              Bulk Booking
             </label>
             <label htmlFor="vendorcharge" className="vendorcharge">
               Vendor Bill Entry

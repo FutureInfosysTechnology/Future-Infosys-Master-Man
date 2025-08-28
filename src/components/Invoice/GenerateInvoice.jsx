@@ -5,17 +5,18 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
-
-
+import Toggle from 'react-toggle';
 function GenerateInvoice() {
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
         if (Array.isArray(response?.Data)) return response.Data;
         return [];
     }
-     const handleFormChange = (date, key) => {
-        setFormData({ ...formData, [key]: date })
+    const onToggle = () => setToggleActive(!toggleActive);
+    const handleFormChange = (value, key) => {
+        setFormData({ ...formData, [key]: value })
     }
+    const [toggleActive, setToggleActive] = useState(false);
     const [getCustomer, setGetCustomer] = useState([]);
     const [getCity, setGetCity] = useState([]);
     const [getMode, setGetMode] = useState([]);
@@ -30,7 +31,6 @@ function GenerateInvoice() {
         fromDate: firstDayOfMonth,
         toDate: today,
         invoiceDate: today,
-        clientType: "",
         billingType: "",
         customer: "",
         mode: "",
@@ -102,7 +102,7 @@ function GenerateInvoice() {
 
                             <div className="input-field3">
                                 <label htmlFor="">Type</label>
-                                <select value={formData.type} onChange={(e)=>handleFormChange(e.target.value,"type")}>
+                                <select value={formData.type} onChange={(e) => handleFormChange(e.target.value, "type")}>
                                     <option value="" disabled>Select Type</option>
                                     <option value="client">Client Wise</option>
                                     <option value="client">Shipper Wise</option>
@@ -113,11 +113,47 @@ function GenerateInvoice() {
 
                             <div className="input-field3">
                                 <label htmlFor="">Customer Type</label>
-                                <select value={formData.customerType} onChange={(e)=>handleFormChange(e.target.value,"customerType")}>
+                                <select value={formData.customerType} onChange={(e) => handleFormChange(e.target.value, "customerType")}>
                                     <option value="" disabled>Select Customer</option>
                                     <option value="">All</option>
                                     <option value="">Single</option>
                                 </select>
+                            </div>
+                            <div className="input-field3" style={{ width: "450px" }}>
+                                <label htmlFor="">Customer</label>
+                                <Select
+                                    options={getCustomer.map(cust => ({
+                                        value: cust.Customer_Code,   // adjust keys from your API
+                                        label: cust.Customer_Name
+                                    }))}
+                                    value={
+                                        formData.customer
+                                            ? getCustomer.find(c => c.Customer_Code === formData.customer)
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            customer: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                    placeholder="Select Customer"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
+
                             </div>
 
                             <div className="input-field3">
@@ -154,57 +190,13 @@ function GenerateInvoice() {
                             </div>
 
                             <div className="input-field3">
-                                <label htmlFor="">Client Type</label>
-                                <select value={formData.clientType} onChange={(e)=>handleFormChange(e.target.value,"clientType")}>
-                                    <option value="" disabled>CLient Type</option>
-                                    <option value="client">Client</option>
-                                </select>
-                            </div>
-
-                            <div className="input-field3">
                                 <label htmlFor="">Billing Type</label>
-                                <select value={formData.billingType} onChange={(e)=>handleFormChange(e.target.value,"billingType")}>
+                                <select value={formData.billingType} onChange={(e) => handleFormChange(e.target.value, "billingType")}>
                                     <option value="" disabled>Billing Type</option>
                                     <option value="">Client</option>
                                 </select>
                             </div>
 
-
-                            <div className="input-field3">
-                                <label htmlFor="">Customer</label>
-                                <Select
-                                    options={getCustomer.map(cust => ({
-                                        value: cust.Customer_Code,   // adjust keys from your API
-                                        label: cust.Customer_Name
-                                    }))}
-                                    value={
-                                        formData.customer
-                                            ? getCustomer.find(c => c.Customer_Code === formData.customer)
-                                            : null
-                                    }
-                                    onChange={(selectedOption) =>
-                                        setFormData({
-                                            ...formData,
-                                            customer: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                    placeholder="Select Customer"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                />
-
-                            </div>
 
 
                             <div className="input-field3">
@@ -245,7 +237,19 @@ function GenerateInvoice() {
 
                             <div className="input-field3">
                                 <label htmlFor="">Invoice No</label>
-                                <input type="text" placeholder="Invoice No" value={formData.invoiceNo} onChange={(e)=>handleFormChange(e.target.value,"invoiceNo")}/>
+                                <input type="text"
+                                    placeholder={toggleActive ? "Invoice No" : ""}
+                                    disabled={!toggleActive}
+                                    value={formData.invoiceNo} onChange={(e) => handleFormChange(e.target.value, "invoiceNo")} />
+                            </div>
+                            <div className="toggle-button">
+                                <Toggle
+                                    onClick={onToggle}
+                                    on={<h2>ON</h2>}
+                                    off={<h2>OFF</h2>}
+                                    offstyle="danger"
+                                    active={toggleActive}
+                                />
                             </div>
 
                             <div className="input-field3">

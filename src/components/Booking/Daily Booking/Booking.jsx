@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 function Booking() {
 
@@ -1356,10 +1357,10 @@ function Booking() {
                         <div className="left-card" >
 
 
-                            <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
+                            <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}  style={{backgroundColor:"white"}}>
                                 <div className="section-title">Customer Docket Information</div>
 
-                                <div className="fields2">
+                                <div className="fields2" >
                                     <div className="input-field">
                                         <label htmlFor="shipper">Docket No</label>
                                         <input
@@ -1767,7 +1768,7 @@ function Booking() {
 
                             <form
                                 onSubmit={handleSaveReceiverFromBooking}
-                                style={{ padding: 0, margin: 0 }}
+                                style={{ padding: 0, margin: 0,backgroundColor:"white" }}
                                 onKeyDown={handleKeyDown}
                             >
                                 {/* Receiver Name Row */}
@@ -2013,7 +2014,7 @@ function Booking() {
 
                                 <form
                                     action=""
-                                    style={{ padding: "0px", margin: "0px" }}
+                                    style={{ padding: "0px", margin: "0px",backgroundColor:"white" }}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") e.preventDefault();
                                     }}
@@ -2309,47 +2310,21 @@ function Booking() {
 
                     </div>
 
-                    <div className="bottom-card" style={{ display: 'flex', gap: '1rem' }}>
+                    <div className="bottom-card" style={{ display: 'flex', gap: '1rem',alignItems:"center" ,justifyContent:"center"}}>
                         <button style={{ backgroundColor: '#28a745', color: '#fff', fontWeight: 'bold', padding: '0.2rem 1.5rem', borderRadius: '5px', border: 'none', marginTop: "5px" }} onClick={handleSubmit} type="button">Save</button>
                         <button style={{ backgroundColor: '#007bff', color: '#fff', fontWeight: 'bold', padding: '0.3rem 0.5rem', borderRadius: '5px', border: 'none', marginTop: "5px" }} onClick={handleUpdate} type="button">Update</button>
                         <button style={{ backgroundColor: '#ef0751ff', color: '#fff', fontWeight: 'bold', padding: '0.3rem 0.5rem', borderRadius: '5px', border: 'none', marginTop: "5px" }} onClick={handleSearch} type="button">Search</button>
-
-
+                        <PiDotsThreeOutlineVerticalFill 
+                        style={{fontSize:"30px",cursor:"pointer"}}
+                        onClick={() => setOpen(!open)}/>
 
                         <div style={{ position: "relative", display: "inline-block" }}>
-                            {/* Three Dots Icon */}
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    cursor: "pointer",
-                                    padding: "5px",
-                                }}
-                                onClick={() => setOpen(!open)}
-                            >
-                                {[...Array(3)].map((_, i) => (
-                                    <span
-                                        key={i}
-                                        style={{
-                                            width: "6px",
-                                            height: "6px",
-                                            backgroundColor: "#031653ff",
-                                            borderRadius: "50%",
-                                            margin: "2px 0",
-                                        }}
-                                    ></span>
-                                ))}
-                            </div>
-
-                            {/* Dropdown Menu */}
                             {open && (
                                 <div
                                     style={{
                                         position: "absolute",
                                         bottom: "0px",
                                         marginTop: "10px",
-                                        left: "30px",
                                         background: "#fff",
                                         boxShadow: "0 2px 8px rgba(3, 44, 71, 0.15)",
                                         borderRadius: "5px",
@@ -3079,7 +3054,15 @@ function Booking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen7}
-                        className="custom-modal-setup" contentLabel="Modal">
+                        className="custom-modal-setup" contentLabel="Modal" 
+                        style={{
+          content: {
+           
+            transform: "translate(-50%, -50%)", // Center the modal
+            height:"320px",
+            // overflowY:"hidden"
+          },
+        }}>
                         <div className="custom modal-content">
 
                             <div className="header-tittle">
@@ -3088,8 +3071,8 @@ function Booking() {
 
                             <div className='container2'>
                                 <form>
-                                    <div className="fields2">
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                    <div className="fields2" style={{paddingLeft:"10px"}}>
+                                        <div className="input-field" style={{ display: "flex", flexDirection: "row"}}>
                                             <input type="checkbox"
                                                 checked={isFovChecked}
                                                 onChange={handleFovChange}
@@ -3224,7 +3207,7 @@ function Booking() {
                                                 Dispatch Date</label>
                                         </div>
 
-                                        <div className='bottom-buttons' style={{ marginLeft: "25px", marginTop: "18px" }}>
+                                        <div className='bottom-buttons' style={{ marginLeft: "25px" }}>
                                             <button onClick={(e) => { e.preventDefault(); setModalIsOpen7(false) }} className='ok-btn'>close</button>
                                         </div>
 

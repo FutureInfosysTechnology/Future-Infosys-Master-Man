@@ -131,6 +131,7 @@ function PendingDrs() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-info body-bordered table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Docket.No</th>
                                     <th scope="col">Booking.Date</th>
@@ -149,13 +150,18 @@ function PendingDrs() {
                                     <th scope="col">Status</th>
                                     <th scope="col">Customer.Type</th>
                                     <th scope="col">Inscan.Date</th>
-                                    <th scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {filteredgetData.map((runsheet, index) => (
                                     <tr key={index}>
+                                        <td>
+                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                <button className='edit-btn'><i className='bi bi-pen'></i></button>
+                                                <button className='edit-btn'><i className='bi bi-trash'></i></button>
+                                            </div>
+                                        </td>
                                         <td>{index + 1}</td>
                                         <td>{runsheet.DocketNo}</td>
                                         <td>{runsheet.bookDate}</td>
@@ -174,12 +180,6 @@ function PendingDrs() {
                                         <td>{runsheet.Status}</td>
                                         <td>{runsheet.customerType}</td>
                                         <td>{runsheet.inscanDt}</td>
-                                        <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn'><i className='bi bi-pen'></i></button>
-                                                <button className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
-                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import '../../Admin Master/Transport Master/modemaster.css';
 import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Swal from "sweetalert2";
 import Select from 'react-select';
 import 'react-toggle/style.css';
+import { refeshPend } from "../../../App";
 
 
 function ScanbyAirway() {
@@ -17,6 +18,7 @@ function ScanbyAirway() {
     const [selectedRows, setSelectedRows] = useState([]);
     const [selectedDocketNos, setSelectedDocketNos] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const {hubFun}=useContext(refeshPend);
     const statusOptions = [
         { value: "Arrived", label: "Arrived" },
         // (maybe you meant "Return"?)
@@ -100,7 +102,6 @@ function ScanbyAirway() {
             });
             return;
         }
-
         const requestPayload = {
             DocketNo: selectedDocketNos,
             SessionLocationCode: "DEL",
@@ -124,6 +125,7 @@ function ScanbyAirway() {
             setSelectedRows([]);
             setSelectedDocketNos([]);
             await fetchData();
+            hubFun();
         } catch (error) {
             console.error("Error submitting Inscan: ", error);
             Swal.fire({

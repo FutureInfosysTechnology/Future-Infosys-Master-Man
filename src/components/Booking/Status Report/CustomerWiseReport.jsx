@@ -1,253 +1,358 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { MdEmail } from "react-icons/md";
+import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
-import './statusStyle.css';
-import { getApi } from '../../Admin Master/Area Control/Zonemaster/ServicesApi';
-import Swal from 'sweetalert2';
+import { saveAs } from "file-saver";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import Select from 'react-select'; // 🔹 You forgot this
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
+function CustomerWiseReport() {
+  const today = new Date();
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const getStatus=[{value:"All Status",label:"All Status"},
+    {value:"Intransit",label:"Intransit"},
+    {value:"OutForDelivery",label:"OutForDelivery"},
+    {value:"Delivered",label:"Delivered"},
+    {value:"RTO",label:"RTO"},
+  ]
+  const [formData, setFormData] = useState({
+    fromdt: firstDayOfMonth,
+    todt: today,
+    CustomerName: "",
+    status:"",
+  });
 
+  const [EmailData, setEmailData] = useState([]);
+  const [getCustomer, setGetCustomer] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedDockets, setSelectedDockets] = useState([]);
 
-function Customer_Status() {
+  const formatDate = (date) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${day}/${month}/${year}`;
+  };
 
-    const [getCustomer, setGetCustomer] = useState([]);
-    const [customerData, setCustomerData] = useState([]);
-    const [error, setError] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [formData, setFormData] = useState({
-        CustomerName: "",
-        fromdt: "",
-        todt: ""
-    });
-
-
+  useEffect(() => {
     const fetchCustomerData = async () => {
-        try {
-            const response = await getApi('/Master/getCustomer');
-            setGetCustomer(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Unable to fetch customer data:', err);
+      try {
+        const response = await getApi('/Master/getCustomerdata');
+        if (response?.status === 1 && Array.isArray(response.Data)) {
+          setGetCustomer(response.Data);
         }
+      } catch (err) {
+        console.error('Error loading customer data:', err);
+      }
     };
-    useEffect(() => {
-        fetchCustomerData();
-    }, [])
+    fetchCustomerData();
+  }, []);
 
+  const allOptions = [
+    { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
+    ...getCustomer.map((cust) => ({
+      label: cust.Customer_Name,
+      value: cust.Customer_Name,
+    })),
+  ];
 
-    const handlesave = async (e) => {
-        e.preventDefault();
+  const handleSearchChange = (selectedOption) => {
+    setFormData({ ...formData, CustomerName: selectedOption ? selectedOption.value : "" });
+  };
 
-        if (!formData.fromdt || !formData.todt) {
-            Swal.fire('Error', 'Both From Date and To Date are required.', 'error');
-            return;
-        }
+  const handlesave = async (e) => {
+    e.preventDefault();
+    const fromdt = formatDate(formData.fromdt);
+    const todt = formatDate(formData.todt);
+    const { CustomerName } = formData;
 
-        const { fromdt, todt, CustomerName } = formData;
-
-        const params = new URLSearchParams({
-            fromdt: fromdt,
-            todt: todt,
-            CustomerName: CustomerName
-        });
-
-        const url = `https://sunraise.in/JdCourierlablePrinting/Booking/StatusReport?${params.toString()}`;
-
-        try {
-            const response = await axios.get(url);
-
-            if (response.data.status === 1) {
-                setCustomerData(response.data.Data);
-                setFormData({ fromdt: "", todt: "", CustomerName: "" });
-                Swal.fire('Saved!', response.data.message || 'Data have been fetched.', 'success');
-            }
-        } catch (error) {
-            console.error("Unable to fetch Customer Wise Report:", error);
-        }
+    if (!fromdt || !todt) {
+      Swal.fire('Error', 'Both From Date and To Date are required.', 'error');
+      return;
     }
 
-    const exportToExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(customerData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Customer Data');
-        XLSX.writeFile(workbook, 'Customer_Data.xlsx');
-    };
+    try {
+      const response = await getApi(`/Booking/AutoMailsend?CustomerName=${encodeURIComponent(CustomerName)}&fromdt=${fromdt}&todt=${todt}`);
+      if (response.status === 1) {
+        setEmailData(response.Data);
+        setSelectedDockets([]);
+        Swal.fire('Saved!', response.message || 'Data has been fetched.', 'success');
+      } else {
+        setEmailData([]);
+        Swal.fire('No Data', response.message || 'No records found.', 'info');
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      setEmailData([]);
+      Swal.fire('Error', 'No Booking Available..', 'error');
+    }
+  };
 
-    const indexOfLastRecord = currentPage * rowsPerPage;
-    const indexOfFirstRecord = indexOfLastRecord - rowsPerPage;
-    const currentRecords = customerData.slice(indexOfFirstRecord, indexOfLastRecord);
-    const totalPages = Math.ceil(customerData.length / rowsPerPage);
+  const rowsPerPage = 10;
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = EmailData.slice(indexOfFirstRow, indexOfLastRow);
+  const totalPages = Math.ceil(EmailData.length / rowsPerPage);
 
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
-
-    const handleDateChange = (date, field) => {
-        if (date) {
-            const formattedDate = date.toLocaleDateString('en-GB');
-            setFormData((prevState) => ({
-                ...prevState,
-                [field]: formattedDate,
-            }));
-        } else {
-            setFormData((prevState) => ({
-                ...prevState,
-                [field]: '',
-            }));
-        }
-    };
-
-    return (
-        <div className="container-fluid">
-            <div className="row">
-                <div className="col-lg-12 d-flex justify-content-center">
-                    <div className="shadow-status">
-                        <form style={{ marginBottom: "10px" }} onSubmit={handlesave}>
-                            <div className="fields2">
-                                <div className='input-field1'>
-                                    <label>Customer Name</label>
-                                    <select value={formData.CustomerName}
-                                        onChange={(e) => setFormData({ ...formData, CustomerName: e.target.value })}>
-                                        <option value="" disabled>Select Customer</option>
-                                        <option value="ALL Client Data">ALL Client Data</option>
-                                        {getCustomer.map((cust, index) => (
-                                            <option value={cust.Customer_Name} key={index}>{cust.Customer_Name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="input-field3">
-                                    <label>From Date</label>
-                                    <DatePicker
-                                        selected={formData.fromdt ? new Date(formData.fromdt.split('/').reverse().join('-')) : null}
-                                        onChange={(date) => handleDateChange(date, 'fromdt')}
-                                        dateFormat="dd/MM/yyyy"
-                                        className="form-control"
-                                        placeholderText='From Date'
-                                    />
-                                </div>
-                                <div className="input-field3">
-                                    <label>To Date</label>
-                                    <DatePicker
-                                        selected={formData.todt ? new Date(formData.todt.split('/').reverse().join('-')) : null}
-                                        onChange={(date) => handleDateChange(date, 'todt')}
-                                        dateFormat="dd/MM/yyyy"
-                                        className="form-control"
-                                        placeholderText='To Date'
-                                    />
-                                </div>
-
-                                <div className="bottom-buttons" style={{ paddingTop: "18px" }}>
-                                    <button className='ok-btn' type='submit'>Submit</button>
-                                    <button className='ok-btn' onClick={exportToExcel} style={{ width: "150px" }}>Export to Excel</button>
-                                </div>
-                            </div>
-                        </form>
-
-                        {error && <div className="alert alert-danger">{error}</div>}
-
-                        <div className="table-responsive">
-                            <table className="table table-bordered table-striped">
-                                <thead className="table-info">
-                                    <tr>
-                                        <th>Sr.No</th>
-                                        <th>Docket No</th>
-                                        <th>BookDate</th>
-                                        <th>Customer_Name</th>
-                                        <th>Receiver_Name</th>
-                                        <th>Consignee_Name</th>
-                                        <th>Origin</th>
-                                        <th>Destination</th>
-                                        <th>Mode</th>
-                                        <th>Vendor</th>
-                                        <th>Vendor_Docket_No</th>
-                                        <th>Flag</th>
-                                        <th>Qty</th>
-                                        <th>Weight</th>
-                                        <th>Status</th>
-                                        <th>Delivery_Date</th>
-                                        <th>Delivery_Time</th>
-                                        <th>Remark</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {currentRecords.length > 0 ? (
-                                        currentRecords.map((item, index) => (
-                                            <tr key={index} className="fontsizesmall">
-                                                <td>{index + 1}</td>
-                                                <td>{item.DocketNo}</td>
-                                                <td>{item.BookDate}</td>
-                                                <td>{item.Customer_Name}</td>
-                                                <td>{item.RecvName}</td>
-                                                <td>{item.Consignee_Name}</td>
-                                                <td>{item.Origin_Name}</td>
-                                                <td>{item.Destination_Name}</td>
-                                                <td>{item.Mode_Name}</td>
-                                                <td>{item.Vendor_Name}</td>
-                                                <td>{item.vendorAwbno}</td>
-                                                <td>{item.T_Flag}</td>
-                                                <td>{item.Qty}</td>
-                                                <td>{item.ActualWt}</td>
-                                                <td>{item.Status}</td>
-                                                <td>{item.DelvDT}</td>
-                                                <td>{item.DelvTime}</td>
-                                                <td>{item.Remark}</td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={16} className="text-center">
-                                                No data available.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div style={{ display: "flex", flexDirection: "row", padding: "10px" }}>
-                            <div className="pagination">
-                                <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                    {'<'}
-                                </button>
-                                <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                                <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                    {'>'}
-                                </button>
-                            </div>
-
-                            <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
-                                <label htmlFor="rowsPerPage" style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
-                                <select
-                                    id="rowsPerPage"
-                                    value={rowsPerPage}
-                                    onChange={(e) => {
-                                        setRowsPerPage(Number(e.target.value));
-                                        setCurrentPage(1);
-                                    }}
-                                    style={{ height: "40px", width: "60px", marginTop: "10px" }}
-                                >
-                                    <option value={5}>5</option>
-                                    <option value={10}>10</option>
-                                    <option value={25}>25</option>
-                                    <option value={50}>50</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  const handleCheckboxChange = (docketNo) => {
+    setSelectedDockets((prev) =>
+      prev.includes(docketNo) ? prev.filter((item) => item !== docketNo) : [...prev, docketNo]
     );
+  };
+const exportSelectedToPDF = () => {
+  if (selectedDockets.length === 0) {
+    Swal.fire("Error", "Please select at least one docket", "error");
+    return;
+  }
+
+  const selectedData = EmailData.filter((row) =>
+    selectedDockets.includes(row.DocketNo)
+  );
+
+  const doc = new jsPDF();
+
+  const headers = [
+    [
+      "DocketNo",
+      "Book Date",
+      "Customer",
+      "Consignee",
+      "Origin",
+      "Destination",
+      "Mode",
+      "Qty",
+      "Weight",
+    ],
+  ];
+
+  const body = selectedData.map((item) => [
+    item.DocketNo,
+    item.BookDate ? new Date(item.BookDate).toLocaleDateString("en-GB") : "",
+    item.Customer_Name,
+    item.Consignee_Name,
+    item.Origin_Name,
+    item.Destination_Name,
+    item.Mode_Name,
+    item.Qty,
+    item.ActualWt,
+  ]);
+
+  doc.text("Selected Booking Data", 14, 10);
+  doc.autoTable({
+    head: headers,
+    body,
+    startY: 20,
+  });
+
+  doc.save("SelectedDockets.pdf");
 };
 
-export default Customer_Status;
+const exportSelectedToExcel = () => {
+  if (selectedDockets.length === 0) {
+    Swal.fire("Error", "Please select at least one docket", "error");
+    return;
+  }
+
+  // filter only selected rows
+  const selectedData = EmailData.filter((row) =>
+    selectedDockets.includes(row.DocketNo)
+  );
+
+  const worksheet = XLSX.utils.json_to_sheet(selectedData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "SelectedData");
+
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+  saveAs(data, "SelectedDockets.xlsx");
+};
+
+  const handleSelectAll = () => {
+    setSelectedDockets(
+      selectedDockets.length === currentRows.length ? [] : currentRows.map((item) => item.DocketNo)
+    );
+  };
+
+  const handleSendEmailWithAttachment = async (fileType) => {
+    const fromDate = formatDate(formData.fromdt);
+    const toDate = formatDate(formData.todt);
+    const customerName = formData.CustomerName;
+
+    if (!customerName || !fromDate || !toDate) {
+      Swal.fire('Error', 'Please fill all fields.', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:3200/Master/sendBookingExcelEmail?CustomerName=${encodeURIComponent(customerName)}&fromdt=${fromDate}&todt=${toDate}&recipientEmail=futureinfosyso@gmail.com&fileType=${fileType}`
+      );
+
+      const result = await response.json();
+      if (result.status === 1) {
+        Swal.fire('Success', result.message, 'success');
+      } else {
+        Swal.fire('Error', result.message, 'error');
+      }
+    } catch (error) {
+      console.error('Email send failed:', error);
+      Swal.fire('Error', 'Server error occurred.', 'error');
+    }
+  };
+
+  const handleDateChange = (date, field) => {
+    setFormData({ ...formData, [field]: date });
+  };
+
+  return (
+    <div className="card shadow-sm p-3 mb-4 bg-white rounded">
+      <form onSubmit={handlesave}>
+        <div className="d-flex flex-wrap gap-3 mb-3 align-items-center">
+          {/* 🔍 react-select Searchable Dropdown */}
+          <div style={{ minWidth: "250px" }}>
+
+            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Client Name</h6>
+
+            <Select
+              className="blue-selectbooking"
+              classNamePrefix="blue-selectbooking"
+              options={allOptions}
+              value={formData.CustomerName ? { label: formData.CustomerName, value: formData.CustomerName } : null}
+              onChange={handleSearchChange}
+              placeholder="Search Customer..."
+              isClearable
+              noOptionsMessage={() => "Customer not found"}
+              styles={{
+                control: (base) => ({ ...base, minHeight: "32px", fontSize: "0.85rem" }),
+                menu: (base) => ({ ...base, zIndex: 9999 })
+              }}
+            />
+          </div>
+          <div style={{ minWidth: "200px" }}>
+
+            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Status</h6>
+
+            <Select
+              className="blue-selectbooking"
+              classNamePrefix="blue-selectbooking"
+              options={getStatus}
+              value={formData.status ? getStatus.find((item)=>item.value===formData.status) : null}
+              onChange={(selected)=>{
+                setFormData({ ...formData,status:selected?selected.value:""});
+              }}
+              placeholder="Search Status..."
+              isSearchable
+              styles={{
+                control: (base) => ({ ...base, minHeight: "32px", fontSize: "0.85rem" }),
+                menu: (base) => ({ ...base, zIndex: 9999 })
+              }}
+            />
+          </div>
+
+          <div>
+            {/* <label className="form-label mb-0" style={{ fontSize: "0.85rem" }}></label> */}
+            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
+            <DatePicker
+            portalId="root-portal"   
+              selected={formData.fromdt}
+              onChange={(date) => handleDateChange(date, "fromdt")}
+              dateFormat="dd/MM/yyyy"
+              className="form-control form-control-sm"
+            />
+          </div>
+
+          <div>
+            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>To Date</h6>
+            <DatePicker
+            portalId="root-portal"   
+              selected={formData.todt}
+              onChange={(date) => handleDateChange(date, "todt")}
+              dateFormat="dd/MM/yyyy"
+              className="form-control form-control-sm"
+            />
+          </div>
+
+          <div className="d-flex gap-2 align-items-end ms-auto mt-2">
+            <button type="submit" className="btn btn-primary btn-sm">Search</button>
+            <button type="button" className="btn" style={{background:"red",color:"white",fontSize:"20px",width:"50px",height:"30px",
+            display:"flex", alignItems:"center",justifyContent:"center"}}><MdEmail /></button>
+            <button type="button" className="btn btn-success btn-sm" onClick={exportSelectedToExcel}>Excel</button>
+            <button type="button" className="btn btn-danger btn-sm" onClick={exportSelectedToPDF}>PDF</button>
+          </div>
+        </div>
+      </form>
+
+      {/* 📋 Table */}
+      <div className='table-container'>
+        <table className='table table-bordered table-sm'>
+          <thead className='green-header'>
+            <tr>
+              <th><input type="checkbox" onChange={handleSelectAll} checked={currentRows.length > 0 && selectedDockets.length === currentRows.length} /></th>
+              <th>Sr.No</th>
+              <th>DocketNo</th>
+              <th>Book_Date</th>
+              <th>Customer</th>
+              <th>Consignee</th>
+              <th>Origin</th>
+              <th>Destination</th>
+              <th>Mode</th>
+              <th>Vendor</th>
+              <th>Vendor_Docket</th>
+              <th>Flag</th>
+              <th>Qty</th>
+              <th>Weight</th>
+              <th>Status</th>
+              <th>Delivery_Date</th>
+              <th>Delivery_Time</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentRows.length === 0 ? (
+              <tr>
+                <td colSpan="18" className="text-center text-danger">No Data Found</td>
+              </tr>
+            ) : (
+              currentRows.map((item, index) => (
+                <tr key={index}>
+                  <td><input type="checkbox" checked={selectedDockets.includes(item.DocketNo)} onChange={() => handleCheckboxChange(item.DocketNo)} /></td>
+                  <td>{indexOfFirstRow + index + 1}</td>
+                  <td>{item.DocketNo}</td>
+                  <td>{item.BookDate ? new Date(item.BookDate).toLocaleDateString('en-GB') : ''}</td>
+                  <td>{item.Customer_Name}</td>
+                  <td>{item.Consignee_Name}</td>
+                  <td>{item.Origin_Name}</td>
+                  <td>{item.Destination_Name}</td>
+                  <td>{item.Mode_Name}</td>
+                  <td>{item.Vendor_Name}</td>
+                  <td>{item.vendorAwbno}</td>
+                  <td>{item.T_Flag}</td>
+                  <td>{item.Qty}</td>
+                  <td>{item.ActualWt}</td>
+                  <td>{item.Status}</td>
+                  <td>{item.DelvDT}</td>
+                  <td>{item.DelvTime}</td>
+                  <td>{item.Remark}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="pagination mt-2">
+        <button className="ok-btn" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>{'<'}</button>
+        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
+        <button className="ok-btn" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>{'>'}</button>
+      </div>
+    </div>
+  );
+}
+
+export default CustomerWiseReport;

@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { getApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Swal from 'sweetalert2';
+import { refeshPend } from "../../../App";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function ScanbyManifest() {
 
     const [getData, setGetData] = useState([]);
+    const [openRow, setOpenRow] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
+    const { hub } = useContext(refeshPend);
 
     const fetchData = async () => {
         try {
@@ -28,7 +32,7 @@ function ScanbyManifest() {
     };
     useEffect(() => {
         fetchData();
-    }, [currentPage, rowsPerPage]);
+    }, [currentPage, rowsPerPage, hub]);
 
     const handleDelete = async (DocketNo) => {
         const confirmDelete = await Swal.fire({
@@ -72,7 +76,8 @@ function ScanbyManifest() {
                     <table className="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th scope="col" style={{whiteSpace:"nowrap"}}>Sr No.</th>
+                                <th scope="col">Action</th>
+                                <th scope="col" style={{ whiteSpace: "nowrap" }}>Sr No.</th>
                                 <th scope="col">Docket.No</th>
                                 <th scope="col">Booking.Date</th>
                                 <th scope="col">Customer.Name</th>
@@ -84,13 +89,44 @@ function ScanbyManifest() {
                                 <th scope="col">QTY</th>
                                 <th scope="col">Inscan.Status</th>
                                 <th scope="col">Inscan.Remark</th>
-                                <th scope="col">Action</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             {getData.map((inscan, index) => (
-                                <tr key={index}>
+                                <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                    <td>
+                                        <PiDotsThreeOutlineVerticalFill
+                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                            onClick={() =>
+                                                setOpenRow(openRow === index ? null : index) // toggle only this row
+                                            }
+                                        />
+
+                                        {openRow === index && (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    flexDirection: "row",
+                                                    position: "absolute",
+                                                    alignItems: "center",
+                                                    left: "60px",
+                                                    top: "0px",
+                                                    borderRadius: "10px",
+                                                    backgroundColor: "white",
+                                                    zIndex: "999999",
+                                                    height: "30px",
+                                                    width: "50px",
+                                                    padding: "10px"
+                                                }}
+                                            >
+                                                <button className="edit-btn" onClick={() => handleDelete(inscan.DocketNo)}>
+                                                <i className='bi bi-trash' style={{ fontSize: "18px" }}></i>
+                                            </button>
+                                            </div>
+                                        )}
+                                    </td>
                                     <td>{index + 1}</td>
                                     <td>{inscan.DocketNo}</td>
                                     <td>{inscan.Bookdate}</td>
@@ -103,13 +139,7 @@ function ScanbyManifest() {
                                     <td>{inscan.qty}</td>
                                     <td>{inscan.InscanStatus}</td>
                                     <td>{inscan.InscanRemark}</td>
-                                    <td>
-                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                            <button className="edit-btn" onClick={() => handleDelete(inscan.DocketNo)}>
-                                                <i className='bi bi-trash' style={{ fontSize: "24px" }}></i>
-                                            </button>
-                                        </div>
-                                    </td>
+
                                 </tr>
                             ))}
                         </tbody>

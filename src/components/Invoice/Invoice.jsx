@@ -5,6 +5,7 @@ import Footer from '../../Components-2/Footer';
 import GenerateInvoice from './GenerateInvoice';
 import ViewInvoice from './ViewInvoice';
 import PerformanceBill from './PerformanceBill';
+import PendingInvoice from './PendingInvoice';
 
 
 
@@ -54,7 +55,7 @@ function Invoice() {
                         </div>
 
                         <div className={`content content-3 ${activeTab === 'state' ? 'active' : ''}`}>
-                            <ViewInvoice />
+                            <PendingInvoice/>
                         </div>
 
                         <div className={`content content-4 ${activeTab === 'country' ? 'active' : ''}`}>

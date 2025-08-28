@@ -52,8 +52,10 @@ export const refeshPend=createContext();
 function App() {
   const [ref,setRef]=useState(false);
   const refFun=()=>setRef(!ref);
+  const [hub,setHub]=useState(false);
+  const hubFun=()=>setHub(!hub);
   return (
-    <refeshPend.Provider value={{ref,refFun}}>
+    <refeshPend.Provider value={{ref,refFun,hub,hubFun}}>
     <Router>
       <div className="main">
 

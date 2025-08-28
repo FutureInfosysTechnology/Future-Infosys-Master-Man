@@ -1,19 +1,58 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import Select from 'react-select';
+import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+
 
 
 function PaymentReceived() {
-
+    const extrectArray = (response) => {
+        if (Array.isArray(response?.data)) return response.data;
+        if (Array.isArray(response?.Data)) return response.Data;
+        return [];
+    }
+    const [getCustomer, setGetCustomer] = useState([]);
+     const [loading, setLoading] = useState(true);
+        const [error, setError] = useState(null);
     const [zones, setZones] = useState([]);
     const [editIndex, setEditIndex] = useState(null);
     const [modalData, setModalData] = useState({ code: '', name: '' });
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const [formData, setFormData] = useState({
+        fromDate: firstDayOfMonth,
+        toDate: today,
+        customer: "",
 
+    });
+        const fetchData = async (endpoint, setData) => {
+            try {
+                const response = await getApi(endpoint);
+                console.log("API Response for", endpoint, response);  // 👀 Check here
+                setData(extrectArray(response));
+            } catch (err) {
+                console.error('Fetch Error:', err);
+                setError(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+    
+    
+        useEffect(() => {
+            fetchData('/Master/getCustomerdata', setGetCustomer);
+        }, []);
+    const handleFormChange = (value, key) => {
+        setFormData({ ...formData, [key]: value })
+    }
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
 
@@ -79,11 +118,11 @@ function PaymentReceived() {
         html2canvas(input, { scale: 2 }).then((canvas) => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF();
-            const imgWidth = 190; 
-            const pageHeight = pdf.internal.pageSize.height; 
+            const imgWidth = 190;
+            const pageHeight = pdf.internal.pageSize.height;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             let heightLeft = imgHeight;
-            let position = 10;  
+            let position = 10;
 
             pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
@@ -113,28 +152,71 @@ function PaymentReceived() {
             <div className="body">
                 <div className="container1">
 
-                    <form action="" className="order-form" style={{ margin: "0px" }}>
+                    <form action=""  className="order-form" style={{ margin: "0px" }}>
 
                         <div className="order-fields">
-                            <div className="order-input">
-                                <label htmlFor="">Client Name</label>
-                                <select value="">
-                                    <option disabled value="">Select Client Name</option>
-                                    <option value="">Vivek</option>
-                                    <option value="">Ramesh</option>
-                                    <option value="">Suresh</option>
-                                </select>
+                            <div className="input-field3" style={{ width: "500px" }}>
+                                <label htmlFor="">Customer</label>
+                                <Select
+                                    options={getCustomer.map(cust => ({
+                                        value: cust.Customer_Code,   // adjust keys from your API
+                                        label: cust.Customer_Name
+                                    }))}
+                                    value={
+                                        formData.customer
+                                            ? getCustomer.find(c => c.Customer_Code === formData.customer)
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            customer: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                    placeholder="Select Customer"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
+
                             </div>
 
-                            <div className="order-input">
+                            <div className="input-field3" style={{width:"150px"}}>
                                 <label htmlFor="">From Date</label>
-                                <input type="date" />
+                                <DatePicker
+                                    portalId="root-portal"
+                                    selected={formData.fromDate}
+                                    onChange={(date) => handleFormChange(date, "fromDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
                             </div>
 
-                            <div className="order-input">
+                            <div className="input-field3" style={{width:"150px"}}>
                                 <label htmlFor="">To Date</label>
-                                <input type="date" />
+                                <DatePicker
+                                    portalId="root-portal"
+                                    selected={formData.toDate}
+                                    onChange={(date) => handleFormChange(date, "toDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
                             </div>
+                            <div className="bottom-buttons input-field3" style={{marginTop:"22px"}}>
+                                <button className="ok-btn">Submit</button>
+                            </div>
+
                         </div>
                     </form>
 

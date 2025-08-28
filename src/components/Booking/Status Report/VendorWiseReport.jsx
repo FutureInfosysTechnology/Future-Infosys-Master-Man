@@ -1,300 +1,373 @@
-import React, { useState, useEffect } from 'react';
-import { getApi } from '../../Admin Master/Area Control/Zonemaster/ServicesApi';
-import './statusStyle.css';
-import Swal from 'sweetalert2';
+import React, { useEffect, useState } from "react";
+import { MdEmail } from "react-icons/md";
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import { saveAs } from "file-saver";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import Select from 'react-select'; // 🔹 You forgot this
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import axios from 'axios';
-
+import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 function VendorWiseReport() {
-
-    const [getCity, setGetCity] = useState([]);
     const [getVendor, setGetVendor] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [vendorData, setVendorData] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const getStatus = [{ value: "All Status", label: "All Status" },
+    { value: "Intransit", label: "Intransit" },
+    { value: "OutForDelivery", label: "OutForDelivery" },
+    { value: "Delivered", label: "Delivered" },
+    { value: "RTO", label: "RTO" },
+    ];
+    const allOptions = [
+        { label: "ALL VENDOR DATA", value: "ALL VENDOR DATA" },
+        ...getVendor.map(vendor => ({
+            value: vendor.Vendor_Code,   // adjust keys from your API
+            label: vendor.Vendor_Name
+        }))
+    ];
     const [formData, setFormData] = useState({
-        VendorName: "",
-        fromdt: "",
-        todt: ""
+        fromdt: firstDayOfMonth,
+        todt: today,
+        vendorCode: "",
+        status: "",
     });
 
-    const fetchData = async (endpoint, setData) => {
-        try {
-            const response = await getApi(endpoint);
-            setData(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
+    const [EmailData, setEmailData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [selectedDockets, setSelectedDockets] = useState([]);
+
+    const formatDate = (date) => {
+        if (!date) return "";
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${day}/${month}/${year}`;
     };
 
     useEffect(() => {
-        fetchData('/Master/getdomestic', setGetCity);
-        fetchData('/Master/getVendor', setGetVendor);
+        const fetchVendorData = async () => {
+            try {
+                const response = await getApi('/Master/getVendor');
+                if (response?.status === 1 && Array.isArray(response.Data)) {
+                    setGetVendor(response.Data);
+                }
+            } catch (err) {
+                console.error('Error loading customer data:', err);
+            }
+        };
+        fetchVendorData();
     }, []);
 
+    const handleSearchChange = (selectedOption) => {
+        setFormData({ ...formData, CustomerName: selectedOption ? selectedOption.value : "" });
+    };
 
     const handlesave = async (e) => {
         e.preventDefault();
+        const fromdt = formatDate(formData.fromdt);
+        const todt = formatDate(formData.todt);
+        const { vendorCode } = formData;
 
-        if (!formData.fromdt || !formData.todt) {
+        if (!fromdt || !todt) {
             Swal.fire('Error', 'Both From Date and To Date are required.', 'error');
             return;
         }
 
-        const { fromdt, todt, VendorName } = formData;
-
-        const params = new URLSearchParams({
-            fromdt: fromdt,
-            todt: todt,
-            Vendor_Name: VendorName
-        });
-
-        const url = `https://sunraise.in/JdCourierlablePrinting/Booking/VendorDeliveryReport?${params.toString()}`;
-
         try {
-            const response = await axios.get(url);
-            console.log(response.data);
-            if (response.data.status === 1) {
-                setVendorData(response.data.Data);
-                setFormData({ fromdt: "", todt: "", VendorName: "" });
-                Swal.fire('Saved!', response.message || 'Data have been fetched.', 'success');
+            const response = await getApi(`/Booking/AutoMailsend?CustomerName=${encodeURIComponent(vendorCode)}&fromdt=${fromdt}&todt=${todt}`);
+            if (response.status === 1) {
+                setEmailData(response.Data);
+                setSelectedDockets([]);
+                Swal.fire('Saved!', response.message || 'Data has been fetched.', 'success');
+            } else {
+                setEmailData([]);
+                Swal.fire('No Data', response.message || 'No records found.', 'info');
             }
         } catch (error) {
-            console.error("Unable to fetch Vendor Wise Report:", error);
-        }
-    }
-
-
-    const indexOfLastRecord = currentPage * rowsPerPage;
-    const indexOfFirstRecord = indexOfLastRecord - rowsPerPage;
-    const currentRecords = vendorData.slice(indexOfFirstRecord, indexOfLastRecord);
-    const totalPages = Math.ceil(vendorData.length / rowsPerPage);
-
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
+            console.error("API Error:", error);
+            setEmailData([]);
+            Swal.fire('Error', 'No Booking Available..', 'error');
         }
     };
 
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
+    const rowsPerPage = 10;
+    const indexOfLastRow = currentPage * rowsPerPage;
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+    const currentRows = EmailData.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.ceil(EmailData.length / rowsPerPage);
+
+    const handleCheckboxChange = (docketNo) => {
+        setSelectedDockets((prev) =>
+            prev.includes(docketNo) ? prev.filter((item) => item !== docketNo) : [...prev, docketNo]
+        );
+    };
+    const exportSelectedToPDF = () => {
+        if (selectedDockets.length === 0) {
+            Swal.fire("Error", "Please select at least one docket", "error");
+            return;
+        }
+
+        const selectedData = EmailData.filter((row) =>
+            selectedDockets.includes(row.DocketNo)
+        );
+
+        const doc = new jsPDF();
+
+        const headers = [
+            [
+                "DocketNo",
+                "Book Date",
+                "Customer",
+                "Consignee",
+                "Origin",
+                "Destination",
+                "Mode",
+                "Qty",
+                "Weight",
+            ],
+        ];
+
+        const body = selectedData.map((item) => [
+            item.DocketNo,
+            item.BookDate ? new Date(item.BookDate).toLocaleDateString("en-GB") : "",
+            item.Customer_Name,
+            item.Consignee_Name,
+            item.Origin_Name,
+            item.Destination_Name,
+            item.Mode_Name,
+            item.Qty,
+            item.ActualWt,
+        ]);
+
+        doc.text("Selected Booking Data", 14, 10);
+        doc.autoTable({
+            head: headers,
+            body,
+            startY: 20,
+        });
+
+        doc.save("SelectedDockets.pdf");
+    };
+
+    const exportSelectedToExcel = () => {
+        if (selectedDockets.length === 0) {
+            Swal.fire("Error", "Please select at least one docket", "error");
+            return;
+        }
+
+        // filter only selected rows
+        const selectedData = EmailData.filter((row) =>
+            selectedDockets.includes(row.DocketNo)
+        );
+
+        const worksheet = XLSX.utils.json_to_sheet(selectedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "SelectedData");
+
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+        saveAs(data, "SelectedDockets.xlsx");
+    };
+
+    const handleSelectAll = () => {
+        setSelectedDockets(
+            selectedDockets.length === currentRows.length ? [] : currentRows.map((item) => item.DocketNo)
+        );
+    };
+
+    const handleSendEmailWithAttachment = async (fileType) => {
+        const fromDate = formatDate(formData.fromdt);
+        const toDate = formatDate(formData.todt);
+        const vendorCode = formData.CustomerName;
+
+        if (!vendorCode || !fromDate || !toDate) {
+            Swal.fire('Error', 'Please fill all fields.', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `http://localhost:3200/Master/sendBookingExcelEmail?CustomerName=${encodeURIComponent(vendorCode)}&fromdt=${fromDate}&todt=${toDate}&recipientEmail=futureinfosyso@gmail.com&fileType=${fileType}`
+            );
+
+            const result = await response.json();
+            if (result.status === 1) {
+                Swal.fire('Success', result.message, 'success');
+            } else {
+                Swal.fire('Error', result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Email send failed:', error);
+            Swal.fire('Error', 'Server error occurred.', 'error');
         }
     };
 
     const handleDateChange = (date, field) => {
-        if (date) {
-            const formattedDate = date.toLocaleDateString('en-GB');
-            setFormData((prevState) => ({
-                ...prevState,
-                [field]: formattedDate,
-            }));
-        } else {
-            setFormData((prevState) => ({
-                ...prevState,
-                [field]: '',
-            }));
-        }
+        setFormData({ ...formData, [field]: date });
     };
 
-
     return (
-        <>
+        <div className="card shadow-sm p-3 mb-4 bg-white rounded">
+            <form onSubmit={handlesave}>
+                <div className="d-flex flex-wrap gap-3 mb-3 align-items-center">
+                    {/* 🔍 react-select Searchable Dropdown */}
+                    <div style={{ minWidth: "250px" }}>
 
-            <div className="body">
-                <div className="shadow-status">
+                        <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Vendor Name</h6>
 
-                    <div className="addNew">
-                        <div style={{ marginLeft: "10px" }}>
-                            <div className="dropdown">
-                                <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
-                                <div className="dropdown-content">
-                                    <button>Export to Excel</button>
-                                    <button>Export to PDF</button>
-                                </div>
-                            </div>
-                        </div>
+                        <Select
+                            options={allOptions}
+                            value={
+                                formData.vendorCode
+                                    ? allOptions    .find(c => c.Vendor_Code === formData.vendorCode) 
+                                    : null
+                            }
+                            onChange={(selectedOption) =>
+                                setFormData({
+                                    ...formData,
+                                    vendorCode: selectedOption ? selectedOption.value : ""
+                                })
+                            }
+                            menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                            styles={{
+                                placeholder: (base) => ({
+                                    ...base,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis"
+                                }),
+                                menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                            }}
+                            placeholder="Vendor Name"
+                            isSearchable
+                            classNamePrefix="blue-selectbooking"
+                            className="blue-selectbooking"
+                        />
+                    </div>
+                    <div style={{ minWidth: "200px" }}>
 
-                        <div className="search-input">
-                            <input className="add-input" type="text" placeholder="search" />
-                            <button type="submit" title="search">
-                                <i className="bi bi-search"></i>
-                            </button>
-                        </div>
+                        <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Status</h6>
+
+                        <Select
+                            className="blue-selectbooking"
+                            classNamePrefix="blue-selectbooking"
+                            options={getStatus}
+                            value={formData.status ? getStatus.find((item) => item.value === formData.status) : null}
+                            onChange={(selected) => {
+                                setFormData({ ...formData, status: selected ? selected.value : "" });
+                            }}
+                            placeholder="Search Status..."
+                            isSearchable
+                            styles={{
+                                control: (base) => ({ ...base, minHeight: "32px", fontSize: "0.85rem" }),
+                                menu: (base) => ({ ...base, zIndex: 9999 })
+                            }}
+                        />
                     </div>
 
-                    <form style={{ margin: "0px" }} onSubmit={handlesave}>
-                        <div className="fields2">
-
-                            {/* <div className="input-field3">
-                                <label htmlFor="">Type Of Report</label>
-                                <select >
-                                    <option value="" disabled>Select Report</option>
-                                    <option value="">Details Wise</option>
-                                    <option value="">Summary Wise</option>
-                                </select>
-                            </div> */}
-
-                            <div className="input-field3" style={{ width: "300px" }}>
-                                <label htmlFor="">Vendor Name</label>
-                                <select value={formData.VendorName} style={{ width: "300px" }}
-                                    onChange={(e) => setFormData({ ...formData, VendorName: e.target.value })}>
-                                    <option value="" disabled>Select Vendor</option>
-                                    {getVendor.map((vendor, index) => (
-                                        <option value={vendor.Vendor_Code} key={index}>{vendor.Vendor_Name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="input-field3">
-                                <label htmlFor="">From Date</label>
-                                <DatePicker
-                                    selected={formData.fromdt ? new Date(formData.fromdt.split('/').reverse().join('-')) : null}
-                                    onChange={(date) => handleDateChange(date, 'fromdt')}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="form-control"
-                                    placeholderText='From Date'
-                                />
-                            </div>
-
-                            <div className="input-field3">
-                                <label htmlFor="">To Date</label>
-                                <DatePicker
-                                    selected={formData.todt ? new Date(formData.todt.split('/').reverse().join('-')) : null}
-                                    onChange={(date) => handleDateChange(date, 'todt')}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="form-control"
-                                    placeholderText='To Date'
-                                />
-                            </div>
-
-                            <div className="bottom-buttons" style={{ marginTop: "18px" }}>
-                                <button className='ok-btn' type='submit'>Submit</button>
-                                <button className='ok-btn' style={{ width: "150px" }}>Status Report</button>
-                            </div>
-
-                            {/* <div className="input-field3">
-                                <label htmlFor="">Status</label>
-                                <select>
-                                    <option value="" disabled>Select Status</option>
-                                    <option value="Resolved">Resolved</option>
-                                    <option value="Pending">Pending</option>
-                                </select>
-                            </div>
-
-                            <div className="input-field3">
-                                <label htmlFor="">Destination</label>
-                                <select style={{ width: "250px" }}>
-                                    <option value="" disabled> Select Destination</option>
-                                    {getCity.map((city, index) => (
-                                        <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                    ))}
-                                </select>
-                            </div> */}
-                        </div>
-                    </form>
-
-                    <div className="table-container">
-                        <table className='table table-bordered table-sm'>
-                            <thead>
-                                <tr>
-                                    <th>Sr No</th>
-                                    <th>Docket No</th>
-                                    <th>Vendor Name</th>
-                                    <th>Vendor_Docket_No</th>
-                                    <th>Book Date</th>
-                                    <th>Customer_Name</th>
-                                    <th>RecvName</th>
-                                    <th>Consignee_Name</th>
-                                    <th>Status</th>
-                                    <th>Origin_Name</th>
-                                    <th>Destination</th>
-                                    <th>Mode_Name</th>
-                                    <th>T_Flag</th>
-                                    <th>Qty</th>
-                                    <th>ActualWt</th>
-                                    <th>DelvDT</th>
-                                    <th>DelvTime</th>
-                                    <th>Remark</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {currentRecords.length > 0 ? (
-                                    currentRecords.map((item, index) => (
-                                        <tr key={index} className="fontsizesmall">
-                                            <td>{index + 1}</td>
-                                            <td>{item.DocketNo}</td>
-                                            <td>{item.Vendor_Name}</td>
-                                            <td>{item.vendorAwbno}</td>
-                                            <td>{item.BookDate}</td>
-                                            <td>{item.Customer_Name}</td>
-                                            <td>{item.RecvName}</td>
-                                            <td>{item.Consignee_Name}</td>
-                                            <td>{item.Status}</td>
-                                            <td>{item.Origin_Name}</td>
-                                            <td>{item.Destination_Name}</td>
-                                            <td>{item.Mode_Name}</td>
-                                            <td>{item.T_Flag}</td>
-                                            <td>{item.Qty}</td>
-                                            <td>{item.ActualWt}</td>
-                                            <td>{item.DelvDT}</td>
-                                            <td>{item.DelvTime}</td>
-                                            <td>{item.Remark}</td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={16} className="text-center">
-                                            No data available.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                    <div>
+                        {/* <label className="form-label mb-0" style={{ fontSize: "0.85rem" }}></label> */}
+                        <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
+                        <DatePicker
+                            portalId="root-portal"
+                            selected={formData.fromdt}
+                            onChange={(date) => handleDateChange(date, "fromdt")}
+                            dateFormat="dd/MM/yyyy"
+                            className="form-control form-control-sm"
+                        />
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "row", padding: "10px" }}>
-                        <div className="pagination">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
-                        </div>
+                    <div>
+                        <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>To Date</h6>
+                        <DatePicker
+                            portalId="root-portal"
+                            selected={formData.todt}
+                            onChange={(date) => handleDateChange(date, "todt")}
+                            dateFormat="dd/MM/yyyy"
+                            className="form-control form-control-sm"
+                        />
+                    </div>
 
-                        <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
-                            <label htmlFor="rowsPerPage" style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "60px", marginTop: "10px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
+                    <div className="d-flex gap-2 align-items-end ms-auto mt-2">
+                        <button type="submit" className="btn btn-primary btn-sm">Search</button>
+                        <button type="button" className="btn" style={{
+                            background: "red", color: "white", fontSize: "20px", width: "50px", height: "30px",
+                            display: "flex", alignItems: "center", justifyContent: "center"
+                        }}><MdEmail /></button>
+                        <button type="button" className="btn btn-success btn-sm" onClick={exportSelectedToExcel}>Excel</button>
+                        <button type="button" className="btn btn-danger btn-sm" onClick={exportSelectedToPDF}>PDF</button>
                     </div>
                 </div>
+            </form>
+
+            {/* 📋 Table */}
+            <div className='table-container'>
+                <table className='table table-bordered table-sm'>
+                    <thead className='green-header'>
+                        <tr>
+                            <th><input type="checkbox" onChange={handleSelectAll} checked={currentRows.length > 0 && selectedDockets.length === currentRows.length} /></th>
+                            <th>Sr.No</th>
+                            <th>DocketNo</th>
+                            <th>Book_Date</th>
+                            <th>Customer</th>
+                            <th>Consignee</th>
+                            <th>Origin</th>
+                            <th>Destination</th>
+                            <th>Mode</th>
+                            <th>Vendor</th>
+                            <th>Vendor_Docket</th>
+                            <th>Flag</th>
+                            <th>Qty</th>
+                            <th>Weight</th>
+                            <th>Status</th>
+                            <th>Delivery_Date</th>
+                            <th>Delivery_Time</th>
+                            <th>Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentRows.length === 0 ? (
+                            <tr>
+                                <td colSpan="18" className="text-center text-danger">No Data Found</td>
+                            </tr>
+                        ) : (
+                            currentRows.map((item, index) => (
+                                <tr key={index}>
+                                    <td><input type="checkbox" checked={selectedDockets.includes(item.DocketNo)} onChange={() => handleCheckboxChange(item.DocketNo)} /></td>
+                                    <td>{indexOfFirstRow + index + 1}</td>
+                                    <td>{item.DocketNo}</td>
+                                    <td>{item.BookDate ? new Date(item.BookDate).toLocaleDateString('en-GB') : ''}</td>
+                                    <td>{item.Customer_Name}</td>
+                                    <td>{item.Consignee_Name}</td>
+                                    <td>{item.Origin_Name}</td>
+                                    <td>{item.Destination_Name}</td>
+                                    <td>{item.Mode_Name}</td>
+                                    <td>{item.Vendor_Name}</td>
+                                    <td>{item.vendorAwbno}</td>
+                                    <td>{item.T_Flag}</td>
+                                    <td>{item.Qty}</td>
+                                    <td>{item.ActualWt}</td>
+                                    <td>{item.Status}</td>
+                                    <td>{item.DelvDT}</td>
+                                    <td>{item.DelvTime}</td>
+                                    <td>{item.Remark}</td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
 
-        </>
-    )
+            {/* Pagination */}
+            <div className="pagination mt-2">
+                <button className="ok-btn" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>{'<'}</button>
+                <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
+                <button className="ok-btn" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>{'>'}</button>
+            </div>
+        </div>
+    );
 }
 
 export default VendorWiseReport;

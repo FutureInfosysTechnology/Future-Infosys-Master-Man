@@ -13,11 +13,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
 import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 
-function ViewInvoice() {
+function PendingInvoice() {
 
 
     const [zones, setZones] = useState([{ code: "INV001", date: "2025-08-25", shipper: "ABC Pvt Ltd", receiver: "XYZ Ltd", from: "Mumbai", to: "Delhi", pc: "5", weight: "50", invoiceno: "1001", invoicevalue: "5000" },
@@ -38,7 +37,6 @@ function ViewInvoice() {
     const handleFormChange = (value, key) => {
         setFormData({ ...formData, [key]: value })
     }
-    const [openRow, setOpenRow] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -54,7 +52,6 @@ function ViewInvoice() {
         fromDate: firstDayOfMonth,
         toDate: today,
         customer: "",
-        invoiceNo: "",
     });
     const fetchData = async (endpoint, setData) => {
         try {
@@ -237,10 +234,6 @@ function ViewInvoice() {
                                     className="form-control form-control-sm"
                                 />
                             </div>
-                            <div className="input-field3">
-                                <label htmlFor="">Invoice No</label>
-                                <input type="text" placeholder="Invoice No" value={formData.invoiceNo} onChange={(e) => handleFormChange(e.target.value, "invoiceNo")} />
-                            </div>
                             <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
                                 <button className="ok-btn" style={{ height: "35px" }} type="submit">Submit</button>
                             </div>
@@ -266,7 +259,6 @@ function ViewInvoice() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
-                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Customer Name</th>
                                     <th scope="col">City Name</th>
@@ -277,46 +269,13 @@ function ViewInvoice() {
                                     <th scope="col">Invoice Date</th>
                                     <th scope="col">From Date</th>
                                     <th scope="col">To Date</th>
-                                    
+                                    <th scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((zone, index) => (
-                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
-                                        <td><PiDotsThreeOutlineVerticalFill
-                                            style={{ fontSize: "20px", cursor: "pointer" }}
-                                            onClick={() =>
-                                                setOpenRow(openRow === index ? null : index) // toggle only this row
-                                            }
-                                        />
-
-                                            {openRow === index && (
-                                                <div
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent: "center",
-                                                        flexDirection: "row",
-                                                        position: "absolute",
-                                                        alignItems: "center",
-                                                        left: "70px",
-                                                        top: "0px",
-                                                        borderRadius: "10px",
-                                                        backgroundColor: "white",
-                                                        zIndex: "999999",
-                                                        height: "30px",
-                                                        width: "50px",
-                                                        padding: "10px"
-                                                    }}
-                                                >
-                                                     <button className='edit-btn' onClick={() => handleOpenInvoicePrint(zone)}>
-                                                    <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
-                                                </button>
-                                                <button onClick={() => handleDelete(index)} className='edit-btn'>
-                                                    <i className='bi bi-trash' style={{ fontSize: "18px" }}></i>
-                                                </button>
-                                                </div>
-                                            )}</td>
+                                    <tr key={index}>
                                         <td>{index + 1}</td>
                                         <td>{zone.receiver}</td>
                                         <td>{zone.from}</td>
@@ -328,6 +287,15 @@ function ViewInvoice() {
                                         <td>{zone.date}</td>
                                         <td>{zone.date}</td>
                                         <td>
+                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                <button className='edit-btn' onClick={() => handleOpenInvoicePrint(zone)}>
+                                                    <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "24px" }}></i>
+                                                </button>
+                                                <button onClick={() => handleDelete(index)} className='edit-btn'>
+                                                    <i className='bi bi-trash' style={{ fontSize: "24px" }}></i>
+                                                </button>
+                                            </div>
+
                                         </td>
                                     </tr>
                                 ))}
@@ -453,4 +421,4 @@ function ViewInvoice() {
     );
 };
 
-export default ViewInvoice;
+export default PendingInvoice;

@@ -6,6 +6,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 function ViewManifest() {
 
@@ -13,6 +14,7 @@ function ViewManifest() {
     //  const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [openRow, setOpenRow] = useState(null);
     const [error, setError] = useState(null);
     const formatDate = (date) => date ? date.toISOString().split("T")[0] : null;
     const today = new Date();
@@ -175,7 +177,7 @@ function ViewManifest() {
             <div className="body">
                 <div className="container1">
                     <form action="" onSubmit={handleSubmit}>
-                        <div className="fields2">
+                        <div className="fields2" >
                             <div className="input-field3">
                                 <label htmlFor="">Manifest No</label>
                                 <input type="tel" placeholder="Manifest No" value={formValues.manifestNo}
@@ -221,7 +223,7 @@ function ViewManifest() {
                             <div className="input-field3">
                                 <label htmlFor="">From</label>
                                 <DatePicker
-                                portalId="root-portal"   
+                                    portalId="root-portal"
                                     selected={formValues.fromDate}
                                     onChange={(date) => handleDateChange(date, "fromDate")}
                                     dateFormat="dd/MM/yyyy"
@@ -232,7 +234,7 @@ function ViewManifest() {
                             <div className="input-field3">
                                 <label htmlFor="">To</label>
                                 <DatePicker
-                                portalId="root-portal"   
+                                    portalId="root-portal"
                                     selected={formValues.toDate}
                                     onChange={(date) => handleDateChange(date, "toDate")}
                                     dateFormat="dd/MM/yyyy"
@@ -259,57 +261,93 @@ function ViewManifest() {
                     {isLoading ? (<div className="loader"></div>) : (
                         <div className='table-container'>
                             <table className='table table-bordered table-sm'>
-                                <thead className='table-sm'>
+                                <thead>
                                     <tr>
-                                        <th scope="col">Sr.No</th>
-                                        <th scope="col">Vendor.Name</th>
-                                        <th scope="col">Manifest.No</th>
-                                        <th scope="col">Customer.Name</th>
-                                        <th scope="col">Receiver.Name</th>
-                                        <th scope="col">Manifest.Date</th>
-                                        <th scope="col">From</th>
-                                        <th scope="col">To</th>
-                                        <th scope="col">Dkt.Count</th>
-                                        <th scope="col">Mode</th>
-                                        <th scope="col">Qty</th>
-                                        <th scope="col">Weight</th>
-                                        <th scope="col">Vehicle.No</th>
-                                        <th scope="col">Driver.Name</th>
-                                        <th scope="col">Driver.Mobile</th>
-                                        <th scope="col">Remark</th>
-                                        <th scope="col">Actions</th>
+                                        <th>Actions</th>
+                                        <th>Sr.No</th>
+                                        <th>Manifest.No</th>
+                                        <th>Manifest.Date</th>
+                                        <th>Customer.Name</th>
+                                        <th>Consignee.Name</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Vendor.Name</th>
+                                        <th>Dkt.Count</th>
+                                        <th>Mode</th>
+                                        <th>Qty</th>
+                                        <th>Weight</th>
+                                        <th>Vehicle.No</th>
+                                        <th>Driver.Name</th>
+                                        <th>Driver.Mobile</th>
+                                        <th>Remark</th>
                                     </tr>
                                 </thead>
-                                <tbody>
 
-                                    {currentRows.map((manifest, index) => (
-                                        <tr key={index} style={{ fontSize: "12px" }}>
+                                <tbody>
+                                    {getManifestData.map((manifest, index) => (
+                                        <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                            <td>
+                                                <PiDotsThreeOutlineVerticalFill
+                                                    style={{ fontSize: "20px", cursor: "pointer" }}
+                                                    onClick={() =>
+                                                        setOpenRow(openRow === index ? null : index) // toggle only this row
+                                                    }
+                                                />
+
+                                                {openRow === index && (
+                                                    <div
+                                                        style={{
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            flexDirection:"row",
+                                                            position: "absolute",
+                                                            alignItems:"center",
+                                                            left: "50px",
+                                                            top: "0px",
+                                                            borderRadius:"10px",
+                                                            backgroundColor:"white",
+                                                            zIndex:"9999",
+                                                            height:"30px",
+                                                            width:"50px",
+                                                            padding:"10px"
+                                                        }}
+                                                    >
+                                                        <button
+                                                            className="edit-btn"
+                                                            style={{marginLeft:"10px",backgroundColor:"transparent"}}
+                                                            onClick={() => handleOpenManifestPrint(manifest)}
+                                                        >
+                                                            <i
+                                                                className="bi bi-file-earmark-pdf-fill"
+                                                                style={{ fontSize: "18px" }}
+                                                            ></i>
+                                                        </button>
+                                                        <button 
+                                                        className="edit-btn"
+                                                        style={{backgroundColor:"transparent"}}
+                                                         onClick={handleOpenDeleteModal}
+                                                        >
+                                                            <i className="bi bi-trash" style={{ fontSize: "18px" }}></i>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
                                             <td>{index + 1}</td>
-                                            <td>{manifest.vendorName}</td>
                                             <td>{manifest.manifestNo}</td>
-                                            <td>{manifest.vendorName}</td>
-                                            <td>{manifest.vendorName}</td>
-                                            <td style={{ width: "100px" }}>{manifest.manifestDt}</td>
+                                            <td>{manifest.manifestDt}</td>
+                                            <td>{manifest.Client_Name}</td>
+                                            <td>{manifest.Consignee_Name}</td>
                                             <td>{manifest.fromDest}</td>
                                             <td>{manifest.toDest}</td>
+                                            <td>{manifest.vendorName}</td>
                                             <td>{manifest.shipment}</td>
-                                            <td>{manifest.mode}</td>
+                                            <td>{manifest.Mode_Name}</td>
                                             <td>{manifest.sumQty}</td>
                                             <td>{manifest.sumActualWt}</td>
                                             <td>{manifest.vehicleNo}</td>
                                             <td>{manifest.driverName}</td>
                                             <td>{manifest.driverMobile}</td>
                                             <td>{manifest.Remark}</td>
-                                            <td>
-                                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                    <button className='edit-btn' onClick={() => handleOpenManifestPrint(manifest)}>
-                                                        <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "24px" }}></i>
-                                                    </button>
-                                                    <button className="edit-btn" onClick={handleOpenDeleteModal}>
-                                                        <i className='bi bi-trash' style={{ fontSize: "24px" }}></i>
-                                                    </button>
-                                                </div>
-                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
