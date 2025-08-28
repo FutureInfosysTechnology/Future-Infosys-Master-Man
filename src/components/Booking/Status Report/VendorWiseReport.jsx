@@ -12,16 +12,28 @@ import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 function VendorWiseReport() {
     const [getVendor, setGetVendor] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [getCity, setGetCity] = useState([]);
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const getStatus = [{ value: "All Status", label: "All Status" },
+    const getStatus = [{ value: "ALL STATUS DATA", label: "ALL STATUS DATA" },
     { value: "Intransit", label: "Intransit" },
     { value: "OutForDelivery", label: "OutForDelivery" },
     { value: "Delivered", label: "Delivered" },
     { value: "RTO", label: "RTO" },
+    { value: "Shipment Booked", label: "Shipment Booked" },
     ];
+    const branchOptions = [
+        { value: "All BRANCH DATA", label: "All BRANCH DATA" }, // default option
+        ...getCity.map(city => ({
+            value: city.City_Code,   // adjust keys from your API
+            label: city.City_Name
+        }))
+    ];
+
     const allOptions = [
-        { label: "ALL VENDOR DATA", value: "ALL VENDOR DATA" },
+        { label: "ALL VENDOR TYPE", value: "ALL VENDOR TYPE" },
         ...getVendor.map(vendor => ({
             value: vendor.Vendor_Code,   // adjust keys from your API
             label: vendor.Vendor_Name
@@ -32,6 +44,7 @@ function VendorWiseReport() {
         todt: today,
         vendorCode: "",
         status: "",
+        branch: "",
     });
 
     const [EmailData, setEmailData] = useState([]);
@@ -46,18 +59,21 @@ function VendorWiseReport() {
         return `${day}/${month}/${year}`;
     };
 
+    const fetchData = async (endpoint, setData) => {
+        try {
+            const response = await getApi(endpoint);
+            setData(Array.isArray(response.Data) ? response.Data : []);
+        } catch (err) {
+            console.error('Fetch Error:', err);
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchVendorData = async () => {
-            try {
-                const response = await getApi('/Master/getVendor');
-                if (response?.status === 1 && Array.isArray(response.Data)) {
-                    setGetVendor(response.Data);
-                }
-            } catch (err) {
-                console.error('Error loading customer data:', err);
-            }
-        };
-        fetchVendorData();
+        fetchData('/Master/getVendor', setGetVendor);
+        fetchData('/Master/getdomestic', setGetCity);
     }, []);
 
     const handleSearchChange = (selectedOption) => {
@@ -68,15 +84,17 @@ function VendorWiseReport() {
         e.preventDefault();
         const fromdt = formatDate(formData.fromdt);
         const todt = formatDate(formData.todt);
-        const { vendorCode } = formData;
+        const vendorCode = formData.vendorCode || "ALL VENDOR TYPE";
+        const status = formData.status || "ALL STATUS DATA";
+        const branch = formData.branch || "All BRANCH DATA";
 
         if (!fromdt || !todt) {
             Swal.fire('Error', 'Both From Date and To Date are required.', 'error');
             return;
         }
-
         try {
-            const response = await getApi(`/Booking/AutoMailsend?CustomerName=${encodeURIComponent(vendorCode)}&fromdt=${fromdt}&todt=${todt}`);
+            const response = await getApi(`Booking/VendorDeliveryReport?Vendor_Name=${encodeURIComponent(vendorCode)}&Status=${encodeURIComponent(status)}&fromdt=${encodeURIComponent(fromdt)}&todt=${encodeURIComponent(todt)}&branchCode=${encodeURIComponent(branch)}&pageNumber=${encodeURIComponent(currentPage)}&pageSize=${encodeURIComponent(rowsPerPage)}&BookingType=ALL BOOKING TYPE`);
+
             if (response.status === 1) {
                 setEmailData(response.Data);
                 setSelectedDockets([]);
@@ -180,7 +198,7 @@ function VendorWiseReport() {
     const handleSendEmailWithAttachment = async (fileType) => {
         const fromDate = formatDate(formData.fromdt);
         const toDate = formatDate(formData.todt);
-        const vendorCode = formData.CustomerName;
+        const vendorCode = formData.vendorCode;
 
         if (!vendorCode || !fromDate || !toDate) {
             Swal.fire('Error', 'Please fill all fields.', 'error');
@@ -188,9 +206,7 @@ function VendorWiseReport() {
         }
 
         try {
-            const response = await fetch(
-                `http://localhost:3200/Master/sendBookingExcelEmail?CustomerName=${encodeURIComponent(vendorCode)}&fromdt=${fromDate}&todt=${toDate}&recipientEmail=futureinfosyso@gmail.com&fileType=${fileType}`
-            );
+            const response = await getApi(`/Master/sendBookingExcelEmail?CustomerName=${encodeURIComponent(vendorCode)}&fromdt=${fromDate}&todt=${toDate}&recipientEmail=futureinfosyso@gmail.com&fileType=${fileType}`);
 
             const result = await response.json();
             if (result.status === 1) {
@@ -213,7 +229,40 @@ function VendorWiseReport() {
             <form onSubmit={handlesave}>
                 <div className="d-flex flex-wrap gap-3 mb-3 align-items-center">
                     {/* 🔍 react-select Searchable Dropdown */}
-                    <div style={{ minWidth: "250px" }}>
+                    <div style={{ minWidth: "350px" }}>
+
+                        <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Branch</h6>
+
+                        <Select
+                            options={branchOptions}
+                            value={
+                                formData.branch
+                                    ? branchOptions.find(c => c.value === formData.branch)
+                                    : null
+                            }
+                            onChange={(selectedOption) =>
+                                setFormData({
+                                    ...formData,
+                                    branch: selectedOption ? selectedOption.value : ""
+                                })
+                            }
+                            menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                            styles={{
+                                placeholder: (base) => ({
+                                    ...base,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis"
+                                }),
+                                menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                            }}
+                            placeholder="Select Branch"
+                            isSearchable
+                            classNamePrefix="blue-selectbooking"
+                            className="blue-selectbooking"
+                        />
+                    </div>
+                    <div style={{ minWidth: "350px" }}>
 
                         <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Vendor Name</h6>
 
@@ -221,7 +270,7 @@ function VendorWiseReport() {
                             options={allOptions}
                             value={
                                 formData.vendorCode
-                                    ? allOptions    .find(c => c.Vendor_Code === formData.vendorCode) 
+                                    ? allOptions.find(c => c.value === formData.vendorCode)
                                     : null
                             }
                             onChange={(selectedOption) =>
@@ -246,7 +295,8 @@ function VendorWiseReport() {
                             className="blue-selectbooking"
                         />
                     </div>
-                    <div style={{ minWidth: "200px" }}>
+
+                    <div style={{ minWidth: "350px" }}>
 
                         <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Status</h6>
 

@@ -13,17 +13,29 @@ import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 function CustomerWiseReport() {
   const today = new Date();
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  const getStatus=[{value:"All Status",label:"All Status"},
-    {value:"Intransit",label:"Intransit"},
-    {value:"OutForDelivery",label:"OutForDelivery"},
-    {value:"Delivered",label:"Delivered"},
-    {value:"RTO",label:"RTO"},
+  const getStatus = [{ value: "ALL STATUS DATA", label: "ALL STATUS DATA" },
+  { value: "Intransit", label: "Intransit" },
+  { value: "OutForDelivery", label: "OutForDelivery" },
+  { value: "Delivered", label: "Delivered" },
+  { value: "RTO", label: "RTO" },
+  { value: "Shipment Booked", label: "Shipment Booked" },
   ]
+  const [error, setError] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [getCity, setGetCity] = useState([]);
+  const branchOptions = [
+        { value: "All BRANCH DATA", label: "All BRANCH DATA" }, // default option
+        ...getCity.map(city => ({
+            value: city.City_Code,   // adjust keys from your API
+            label: city.City_Name
+        }))
+    ];
   const [formData, setFormData] = useState({
     fromdt: firstDayOfMonth,
     todt: today,
     CustomerName: "",
-    status:"",
+    status: "",
+    branch: "",
   });
 
   const [EmailData, setEmailData] = useState([]);
@@ -39,19 +51,23 @@ function CustomerWiseReport() {
     return `${day}/${month}/${year}`;
   };
 
-  useEffect(() => {
-    const fetchCustomerData = async () => {
-      try {
-        const response = await getApi('/Master/getCustomerdata');
-        if (response?.status === 1 && Array.isArray(response.Data)) {
-          setGetCustomer(response.Data);
-        }
-      } catch (err) {
-        console.error('Error loading customer data:', err);
-      }
-    };
-    fetchCustomerData();
-  }, []);
+
+      const fetchData = async (endpoint, setData) => {
+          try {
+              const response = await getApi(endpoint);
+              setData(Array.isArray(response.Data) ? response.Data : []);
+          } catch (err) {
+              console.error('Fetch Error:', err);
+              setError(err);
+          } finally {
+              setLoading(false);
+          }
+      };
+  
+      useEffect(() => {
+          fetchData('/Master/getCustomerdata',setGetCustomer)
+          fetchData('/Master/getdomestic', setGetCity);
+      }, []);
 
   const allOptions = [
     { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
@@ -69,7 +85,9 @@ function CustomerWiseReport() {
     e.preventDefault();
     const fromdt = formatDate(formData.fromdt);
     const todt = formatDate(formData.todt);
-    const { CustomerName } = formData;
+    const CustomerName = formData.CustomerName || "ALL CLIENT DATA";
+    const status = formData.status || "ALL STATUS DATA";
+    const branch = formData.branch || "All BRANCH DATA";
 
     if (!fromdt || !todt) {
       Swal.fire('Error', 'Both From Date and To Date are required.', 'error');
@@ -77,7 +95,7 @@ function CustomerWiseReport() {
     }
 
     try {
-      const response = await getApi(`/Booking/AutoMailsend?CustomerName=${encodeURIComponent(CustomerName)}&fromdt=${fromdt}&todt=${todt}`);
+      const response = await getApi(`Booking/StatusReport?CustomerName=${encodeURIComponent(CustomerName)}&Status=${encodeURIComponent(status)}&fromdt=${encodeURIComponent(fromdt)}&todt=${encodeURIComponent(todt)}&branchCode=${encodeURIComponent(branch)}&pageNumber=${encodeURIComponent(currentPage)}&pageSize=${encodeURIComponent(rowsPerPage)}&BookingType=ALL BOOKING TYPE`);
       if (response.status === 1) {
         setEmailData(response.Data);
         setSelectedDockets([]);
@@ -104,73 +122,73 @@ function CustomerWiseReport() {
       prev.includes(docketNo) ? prev.filter((item) => item !== docketNo) : [...prev, docketNo]
     );
   };
-const exportSelectedToPDF = () => {
-  if (selectedDockets.length === 0) {
-    Swal.fire("Error", "Please select at least one docket", "error");
-    return;
-  }
+  const exportSelectedToPDF = () => {
+    if (selectedDockets.length === 0) {
+      Swal.fire("Error", "Please select at least one docket", "error");
+      return;
+    }
 
-  const selectedData = EmailData.filter((row) =>
-    selectedDockets.includes(row.DocketNo)
-  );
+    const selectedData = EmailData.filter((row) =>
+      selectedDockets.includes(row.DocketNo)
+    );
 
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  const headers = [
-    [
-      "DocketNo",
-      "Book Date",
-      "Customer",
-      "Consignee",
-      "Origin",
-      "Destination",
-      "Mode",
-      "Qty",
-      "Weight",
-    ],
-  ];
+    const headers = [
+      [
+        "DocketNo",
+        "Book Date",
+        "Customer",
+        "Consignee",
+        "Origin",
+        "Destination",
+        "Mode",
+        "Qty",
+        "Weight",
+      ],
+    ];
 
-  const body = selectedData.map((item) => [
-    item.DocketNo,
-    item.BookDate ? new Date(item.BookDate).toLocaleDateString("en-GB") : "",
-    item.Customer_Name,
-    item.Consignee_Name,
-    item.Origin_Name,
-    item.Destination_Name,
-    item.Mode_Name,
-    item.Qty,
-    item.ActualWt,
-  ]);
+    const body = selectedData.map((item) => [
+      item.DocketNo,
+      item.BookDate ? new Date(item.BookDate).toLocaleDateString("en-GB") : "",
+      item.Customer_Name,
+      item.Consignee_Name,
+      item.Origin_Name,
+      item.Destination_Name,
+      item.Mode_Name,
+      item.Qty,
+      item.ActualWt,
+    ]);
 
-  doc.text("Selected Booking Data", 14, 10);
-  doc.autoTable({
-    head: headers,
-    body,
-    startY: 20,
-  });
+    doc.text("Selected Booking Data", 14, 10);
+    doc.autoTable({
+      head: headers,
+      body,
+      startY: 20,
+    });
 
-  doc.save("SelectedDockets.pdf");
-};
+    doc.save("SelectedDockets.pdf");
+  };
 
-const exportSelectedToExcel = () => {
-  if (selectedDockets.length === 0) {
-    Swal.fire("Error", "Please select at least one docket", "error");
-    return;
-  }
+  const exportSelectedToExcel = () => {
+    if (selectedDockets.length === 0) {
+      Swal.fire("Error", "Please select at least one docket", "error");
+      return;
+    }
 
-  // filter only selected rows
-  const selectedData = EmailData.filter((row) =>
-    selectedDockets.includes(row.DocketNo)
-  );
+    // filter only selected rows
+    const selectedData = EmailData.filter((row) =>
+      selectedDockets.includes(row.DocketNo)
+    );
 
-  const worksheet = XLSX.utils.json_to_sheet(selectedData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "SelectedData");
+    const worksheet = XLSX.utils.json_to_sheet(selectedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "SelectedData");
 
-  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-  saveAs(data, "SelectedDockets.xlsx");
-};
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, "SelectedDockets.xlsx");
+  };
 
   const handleSelectAll = () => {
     setSelectedDockets(
@@ -183,15 +201,14 @@ const exportSelectedToExcel = () => {
     const toDate = formatDate(formData.todt);
     const customerName = formData.CustomerName;
 
+
     if (!customerName || !fromDate || !toDate) {
       Swal.fire('Error', 'Please fill all fields.', 'error');
       return;
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:3200/Master/sendBookingExcelEmail?CustomerName=${encodeURIComponent(customerName)}&fromdt=${fromDate}&todt=${toDate}&recipientEmail=futureinfosyso@gmail.com&fileType=${fileType}`
-      );
+      const response = await getApi(`/Master/sendBookingExcelEmail?CustomerName=${encodeURIComponent(customerName)}&fromdt=${fromDate}&todt=${toDate}&recipientEmail=futureinfosyso@gmail.com&fileType=${fileType}`);
 
       const result = await response.json();
       if (result.status === 1) {
@@ -214,7 +231,40 @@ const exportSelectedToExcel = () => {
       <form onSubmit={handlesave}>
         <div className="d-flex flex-wrap gap-3 mb-3 align-items-center">
           {/* 🔍 react-select Searchable Dropdown */}
-          <div style={{ minWidth: "250px" }}>
+          <div style={{ minWidth: "350px" }}>
+
+            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Branch</h6>
+
+            <Select
+              options={branchOptions}
+              value={
+                formData.branch
+                  ? branchOptions.find(c => c.value === formData.branch)
+                  : null
+              }
+              onChange={(selectedOption) =>
+                setFormData({
+                  ...formData,
+                  branch: selectedOption ? selectedOption.value : ""
+                })
+              }
+              menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+              styles={{
+                placeholder: (base) => ({
+                  ...base,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }),
+                menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+              }}
+              placeholder="Select Branch"
+              isSearchable
+              classNamePrefix="blue-selectbooking"
+              className="blue-selectbooking"
+            />
+          </div>
+          <div style={{ minWidth: "350px" }}>
 
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Client Name</h6>
 
@@ -233,7 +283,7 @@ const exportSelectedToExcel = () => {
               }}
             />
           </div>
-          <div style={{ minWidth: "200px" }}>
+          <div style={{ minWidth: "350px" }}>
 
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Status</h6>
 
@@ -241,9 +291,9 @@ const exportSelectedToExcel = () => {
               className="blue-selectbooking"
               classNamePrefix="blue-selectbooking"
               options={getStatus}
-              value={formData.status ? getStatus.find((item)=>item.value===formData.status) : null}
-              onChange={(selected)=>{
-                setFormData({ ...formData,status:selected?selected.value:""});
+              value={formData.status ? getStatus.find((item) => item.value === formData.status) : null}
+              onChange={(selected) => {
+                setFormData({ ...formData, status: selected ? selected.value : "" });
               }}
               placeholder="Search Status..."
               isSearchable
@@ -258,7 +308,7 @@ const exportSelectedToExcel = () => {
             {/* <label className="form-label mb-0" style={{ fontSize: "0.85rem" }}></label> */}
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
             <DatePicker
-            portalId="root-portal"   
+              portalId="root-portal"
               selected={formData.fromdt}
               onChange={(date) => handleDateChange(date, "fromdt")}
               dateFormat="dd/MM/yyyy"
@@ -269,7 +319,7 @@ const exportSelectedToExcel = () => {
           <div>
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>To Date</h6>
             <DatePicker
-            portalId="root-portal"   
+              portalId="root-portal"
               selected={formData.todt}
               onChange={(date) => handleDateChange(date, "todt")}
               dateFormat="dd/MM/yyyy"
@@ -279,8 +329,10 @@ const exportSelectedToExcel = () => {
 
           <div className="d-flex gap-2 align-items-end ms-auto mt-2">
             <button type="submit" className="btn btn-primary btn-sm">Search</button>
-            <button type="button" className="btn" style={{background:"red",color:"white",fontSize:"20px",width:"50px",height:"30px",
-            display:"flex", alignItems:"center",justifyContent:"center"}}><MdEmail /></button>
+            <button type="button" className="btn" style={{
+              background: "red", color: "white", fontSize: "20px", width: "50px", height: "30px",
+              display: "flex", alignItems: "center", justifyContent: "center"
+            }}><MdEmail /></button>
             <button type="button" className="btn btn-success btn-sm" onClick={exportSelectedToExcel}>Excel</button>
             <button type="button" className="btn btn-danger btn-sm" onClick={exportSelectedToPDF}>PDF</button>
           </div>
