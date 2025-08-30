@@ -119,7 +119,7 @@ function GenerateInvoice() {
                                     <option value="">Single</option>
                                 </select>
                             </div>
-                            <div className="input-field3" style={{ width: "450px" }}>
+                               <div className="input-field3 flex-fill" style={{ flex: "1 1 300px", minWidth: "240px", maxWidth: "100%" }}>
                                 <label htmlFor="">Customer</label>
                                 <Select
                                     options={getCustomer.map(cust => ({
@@ -139,13 +139,16 @@ function GenerateInvoice() {
                                     }
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
+                                        container: (base) => ({
+        ...base,
+        width: "100%", // ✅ full width always
+      }),
                                         placeholder: (base) => ({
                                             ...base,
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis"
                                         }),
-
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                     placeholder="Select Customer"

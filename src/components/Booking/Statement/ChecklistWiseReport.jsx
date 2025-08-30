@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getApi } from '../../Admin Master/Area Control/Zonemaster/ServicesApi';
-
-
+import Select from 'react-select'; // 🔹 You forgot this
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 function ChecklistWiseReport() {
 
     const [getMode, setGetMode] = useState([]);
@@ -9,7 +10,15 @@ function ChecklistWiseReport() {
     const [getCustomer, setGetCustomer] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+         const [formData, setFormData] = useState({
+                fromdt: firstDayOfMonth,
+                todt: today,
+                vendorCode: "",
+                status: "",
+                branch: "",
+            });
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -54,17 +63,6 @@ function ChecklistWiseReport() {
 
                     <form action="" style={{ margin: "0px" }}>
                         <div className="fields2">
-
-                            <div className="input-field3" style={{ marginLeft: "0px" }}>
-                                <label htmlFor="">Type Of Report</label>
-                                <select value="">
-                                    <option value="" disabled>Select Report</option>
-                                    <option value="">Customer Wise</option>
-                                    <option value="">Receiver Wise</option>
-                                    <option value="">Details Wise</option>
-                                    <option value="">Summary Wise</option>
-                                </select>
-                            </div>
 
                             <div className="input-field3" style={{ width: "300px" }}>
                                 <label htmlFor="">Customer Name</label>

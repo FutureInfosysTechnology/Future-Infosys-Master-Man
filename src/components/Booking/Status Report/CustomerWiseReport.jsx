@@ -21,15 +21,16 @@ function CustomerWiseReport() {
   { value: "Shipment Booked", label: "Shipment Booked" },
   ]
   const [error, setError] = useState(null);
-      const [loading, setLoading] = useState(true);
-      const [getCity, setGetCity] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [getBranch, setGetBranch] = useState([]);
   const branchOptions = [
-        { value: "All BRANCH DATA", label: "All BRANCH DATA" }, // default option
-        ...getCity.map(city => ({
-            value: city.City_Code,   // adjust keys from your API
-            label: city.City_Name
-        }))
-    ];
+    { value: "All BRANCH DATA", label: "All BRANCH DATA" }, // default option
+    ...getBranch.map(city => ({
+      value: city.Branch_Code,   // adjust keys from your API
+      label: city.Branch_Name,
+    }))
+  ];
+
   const [formData, setFormData] = useState({
     fromdt: firstDayOfMonth,
     todt: today,
@@ -41,6 +42,7 @@ function CustomerWiseReport() {
   const [EmailData, setEmailData] = useState([]);
   const [getCustomer, setGetCustomer] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(15);
   const [selectedDockets, setSelectedDockets] = useState([]);
 
   const formatDate = (date) => {
@@ -52,22 +54,22 @@ function CustomerWiseReport() {
   };
 
 
-      const fetchData = async (endpoint, setData) => {
-          try {
-              const response = await getApi(endpoint);
-              setData(Array.isArray(response.Data) ? response.Data : []);
-          } catch (err) {
-              console.error('Fetch Error:', err);
-              setError(err);
-          } finally {
-              setLoading(false);
-          }
-      };
-  
-      useEffect(() => {
-          fetchData('/Master/getCustomerdata',setGetCustomer)
-          fetchData('/Master/getdomestic', setGetCity);
-      }, []);
+  const fetchData = async (endpoint, setData) => {
+    try {
+      const response = await getApi(endpoint);
+      setData(Array.isArray(response.Data) ? response.Data : []);
+    } catch (err) {
+      console.error('Fetch Error:', err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData('/Master/getCustomerdata', setGetCustomer)
+    fetchData('/Master/getBranch', setGetBranch);
+  }, []);
 
   const allOptions = [
     { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
@@ -111,17 +113,11 @@ function CustomerWiseReport() {
     }
   };
 
-  const rowsPerPage = 10;
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = EmailData.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(EmailData.length / rowsPerPage);
 
-  const handleCheckboxChange = (docketNo) => {
-    setSelectedDockets((prev) =>
-      prev.includes(docketNo) ? prev.filter((item) => item !== docketNo) : [...prev, docketNo]
-    );
-  };
   const exportSelectedToPDF = () => {
     if (selectedDockets.length === 0) {
       Swal.fire("Error", "Please select at least one docket", "error");
@@ -171,29 +167,22 @@ function CustomerWiseReport() {
   };
 
   const exportSelectedToExcel = () => {
-    if (selectedDockets.length === 0) {
-      Swal.fire("Error", "Please select at least one docket", "error");
+    if (currentRows.length === 0) {
+      Swal.fire("Error", "No data available on this page to export", "error");
       return;
     }
 
-    // filter only selected rows
-    const selectedData = EmailData.filter((row) =>
-      selectedDockets.includes(row.DocketNo)
-    );
-
-    const worksheet = XLSX.utils.json_to_sheet(selectedData);
+    const formattedData = currentRows.map(row => ({
+        ...row,
+        BookDate: row.BookDate ? new Date(row.BookDate).toLocaleDateString("en-GB") : "",
+      }));
+            const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "SelectedData");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "CurrentPageData");
 
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, "SelectedDockets.xlsx");
-  };
-
-  const handleSelectAll = () => {
-    setSelectedDockets(
-      selectedDockets.length === currentRows.length ? [] : currentRows.map((item) => item.DocketNo)
-    );
+    saveAs(data, `CurrentPageData_Page${currentPage}.xlsx`);
   };
 
   const handleSendEmailWithAttachment = async (fileType) => {
@@ -229,25 +218,22 @@ function CustomerWiseReport() {
   return (
     <div className="card shadow-sm p-3 mb-4 bg-white rounded">
       <form onSubmit={handlesave}>
-        <div className="d-flex flex-wrap gap-3 mb-3 align-items-center">
-          {/* 🔍 react-select Searchable Dropdown */}
-          <div style={{ minWidth: "350px" }}>
-
+        {/* 🔹 First Row: Dropdowns */}
+        <div className="row g-3 mb-3">
+          {/* Branch */}
+          <div className="col-12 col-md-4">
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Branch</h6>
-
             <Select
+              required
               options={branchOptions}
-              value={
-                formData.branch
-                  ? branchOptions.find(c => c.value === formData.branch)
-                  : null
-              }
+              value={formData.branch ? branchOptions.find(c => c.value === formData.branch) : null}
               onChange={(selectedOption) =>
-                setFormData({
-                  ...formData,
-                  branch: selectedOption ? selectedOption.value : ""
-                })
+                setFormData({ ...formData, branch: selectedOption ? selectedOption.value : "" })
               }
+              placeholder="Select Branch"
+              isSearchable
+              classNamePrefix="blue-selectbooking"
+              className="blue-selectbooking"
               menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
               styles={{
                 placeholder: (base) => ({
@@ -258,17 +244,14 @@ function CustomerWiseReport() {
                 }),
                 menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
               }}
-              placeholder="Select Branch"
-              isSearchable
-              classNamePrefix="blue-selectbooking"
-              className="blue-selectbooking"
             />
           </div>
-          <div style={{ minWidth: "350px" }}>
 
+          {/* Client Name */}
+          <div className="col-12 col-md-4">
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Client Name</h6>
-
             <Select
+              required
               className="blue-selectbooking"
               classNamePrefix="blue-selectbooking"
               options={allOptions}
@@ -276,63 +259,74 @@ function CustomerWiseReport() {
               onChange={handleSearchChange}
               placeholder="Search Customer..."
               isClearable
-              noOptionsMessage={() => "Customer not found"}
+              menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
               styles={{
-                control: (base) => ({ ...base, minHeight: "32px", fontSize: "0.85rem" }),
-                menu: (base) => ({ ...base, zIndex: 9999 })
+                placeholder: (base) => ({
+                  ...base,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }),
+                menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
               }}
             />
           </div>
-          <div style={{ minWidth: "350px" }}>
 
+          {/* Status */}
+          <div className="col-12 col-md-4">
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Status</h6>
-
             <Select
               className="blue-selectbooking"
               classNamePrefix="blue-selectbooking"
               options={getStatus}
               value={formData.status ? getStatus.find((item) => item.value === formData.status) : null}
-              onChange={(selected) => {
-                setFormData({ ...formData, status: selected ? selected.value : "" });
-              }}
+              onChange={(selected) => setFormData({ ...formData, status: selected ? selected.value : "" })}
               placeholder="Search Status..."
               isSearchable
+              menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
               styles={{
-                control: (base) => ({ ...base, minHeight: "32px", fontSize: "0.85rem" }),
-                menu: (base) => ({ ...base, zIndex: 9999 })
+                placeholder: (base) => ({
+                  ...base,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }),
+                menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
               }}
             />
           </div>
+        </div>
 
-          <div>
-            {/* <label className="form-label mb-0" style={{ fontSize: "0.85rem" }}></label> */}
+        {/* 🔹 Second Row: Dates + Buttons */}
+        <div className="row g-3 mb-3 align-items-end">
+          {/* From Date */}
+          <div className="col-12 col-md-3">
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
             <DatePicker
-              portalId="root-portal"
               selected={formData.fromdt}
               onChange={(date) => handleDateChange(date, "fromdt")}
               dateFormat="dd/MM/yyyy"
               className="form-control form-control-sm"
+              portalId="root-portal"
             />
           </div>
 
-          <div>
+          {/* To Date */}
+          <div className="col-12 col-md-3">
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>To Date</h6>
             <DatePicker
-              portalId="root-portal"
               selected={formData.todt}
               onChange={(date) => handleDateChange(date, "todt")}
               dateFormat="dd/MM/yyyy"
               className="form-control form-control-sm"
+              portalId="root-portal"
             />
           </div>
 
-          <div className="d-flex gap-2 align-items-end ms-auto mt-2">
+          {/* Buttons */}
+          <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
             <button type="submit" className="btn btn-primary btn-sm">Search</button>
-            <button type="button" className="btn" style={{
-              background: "red", color: "white", fontSize: "20px", width: "50px", height: "30px",
-              display: "flex", alignItems: "center", justifyContent: "center"
-            }}><MdEmail /></button>
+            <button type="button" className="btn btn-danger btn-sm"><MdEmail /></button>
             <button type="button" className="btn btn-success btn-sm" onClick={exportSelectedToExcel}>Excel</button>
             <button type="button" className="btn btn-danger btn-sm" onClick={exportSelectedToPDF}>PDF</button>
           </div>
@@ -340,11 +334,10 @@ function CustomerWiseReport() {
       </form>
 
       {/* 📋 Table */}
-      <div className='table-container'>
-        <table className='table table-bordered table-sm'>
-          <thead className='green-header'>
+      <div className='table-responsive' style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <table className='table table-bordered table-sm text-nowrap'>
+          <thead className='green-header' style={{ position: "sticky", top: 0, zIndex: 2}}>
             <tr>
-              <th><input type="checkbox" onChange={handleSelectAll} checked={currentRows.length > 0 && selectedDockets.length === currentRows.length} /></th>
               <th>Sr.No</th>
               <th>DocketNo</th>
               <th>Book_Date</th>
@@ -372,7 +365,6 @@ function CustomerWiseReport() {
             ) : (
               currentRows.map((item, index) => (
                 <tr key={index}>
-                  <td><input type="checkbox" checked={selectedDockets.includes(item.DocketNo)} onChange={() => handleCheckboxChange(item.DocketNo)} /></td>
                   <td>{indexOfFirstRow + index + 1}</td>
                   <td>{item.DocketNo}</td>
                   <td>{item.BookDate ? new Date(item.BookDate).toLocaleDateString('en-GB') : ''}</td>
@@ -397,11 +389,48 @@ function CustomerWiseReport() {
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="pagination mt-2">
-        <button className="ok-btn" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>{'<'}</button>
-        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-        <button className="ok-btn" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>{'>'}</button>
+      <div className="d-flex justify-content-between align-items-center mt-2">
+        {/* Rows per page dropdown */}
+        <div className="d-flex align-items-center gap-2">
+          <label className="mb-0">Rows per page:</label>
+          <select
+            className="form-select form-select-sm"
+            style={{ width: "80px" }}
+            value={rowsPerPage}
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setCurrentPage(1); // reset to first page
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={EmailData.length}>All</option>
+          </select>
+        </div>
+
+        {/* Pagination */}
+        <div className="pagination">
+          <button
+            className="ok-btn"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            {"<"}
+          </button>
+          <span style={{ color: "#333", padding: "5px" }}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="ok-btn"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            {">"}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -32,8 +32,8 @@ function StatusReport() {
                         onChange={handleChange} />
 
                     <nav>
-                        <label htmlFor="delivered" className="delivered">Customer Wise Report</label>
-                        <label htmlFor="undelivered" className="undelivered">Vendor Wise Report</label>
+                        <label htmlFor="delivered" className="delivered">MIS Report</label>
+                        <label htmlFor="undelivered" className="undelivered">Vendor MIS Report</label>
                         <label htmlFor="upload" className="upload">Vehicle Wise Report</label>
 
 

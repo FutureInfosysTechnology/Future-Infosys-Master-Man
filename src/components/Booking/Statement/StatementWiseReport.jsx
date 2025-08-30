@@ -1,30 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import { getApi } from '../../Admin Master/Area Control/Zonemaster/ServicesApi';
-
-
+import Select from 'react-select'; // 🔹 You forgot this
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 function StatementWiseReport() {
 
     const [getCity, setGetCity] = useState([]);
     const [getCustomer, setGetCustomer] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    const fetchData = async (endpoint, setData) => {
-        try {
-            const response = await getApi(endpoint);
-            setData(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData('/Master/getdomestic', setGetCity);
-        fetchData('/Master/getCustomer', setGetCustomer);
-    }, []);
+      const branchOptions = [
+    { value: "All CITY DATA", label: "All CITY DATA" }, // default option
+    ...getCity.map(city => ({
+      value: city.City_Code,   // adjust keys from your API
+      label: city.City_Name,
+    }))
+  ];
+  const handleDateChange = (date, field) => {
+    setFormData({ ...formData, [field]: date });
+  };
+  const allOptions = [
+    { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
+    ...getCustomer.map((cust) => ({
+      label: cust.Customer_Name,
+      value: cust.Customer_Name,
+    })),
+  ];
+  const getbooking = [{ value: "ALL BOOKING DATA", label: "ALL BOOKING DATA" },
+  { value: "Pending", label: "Pending" },
+  { value: "Resolved", label: "Resolved" },
+  ]
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const [formData, setFormData] = useState({
+        fromdt: firstDayOfMonth,
+        todt: today,
+        CustomerName: "",
+        booking: "",
+        branch: "",
+    });
+    const handleSearchChange = (selectedOption) => {
+    setFormData({ ...formData, CustomerName: selectedOption ? selectedOption.value : "" });
+  };
+   const fetchData = async (endpoint, setData) => {
+       try {
+         const response = await getApi(endpoint);
+         setData(Array.isArray(response.Data) ? response.Data : []);
+       } catch (err) {
+         console.error('Fetch Error:', err);
+         setError(err);
+       } finally {
+         setLoading(false);
+       }
+     };
+   
+     useEffect(() => {
+       fetchData('/Master/getCustomerdata', setGetCustomer)
+       fetchData('/Master/getdomestic', setGetCity);
+     }, []);
 
 
     return (
@@ -52,60 +85,120 @@ function StatementWiseReport() {
                         </div>
                     </div>
 
-                    <form action="" style={{ margin: "0px" }}>
-                        <div className="fields2">
-
-                            <div className="input-field3" style={{ marginLeft: "0px" }}>
-                                <label htmlFor="">Type Of Report</label>
-                                <select value="">
-                                    <option value="" disabled>Select Report</option>
-                                    <option value="">Booking Date</option>
-                                    <option value="">Manifest Date</option>
-                                    <option value="">Details Wise</option>
-                                    <option value="">Summary Wise</option>
-                                </select>
+                    <form>
+                        <div className="row g-3 mb-3">
+                            <div className="col-12 col-md-4">
+                                <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Customer Name</h6>
+                                <Select
+                                    required
+                                    className="blue-selectbooking"
+                                    classNamePrefix="blue-selectbooking"
+                                    options={allOptions}
+                                    value={formData.CustomerName ? { label: formData.CustomerName, value: formData.CustomerName } : null}
+                                    onChange={handleSearchChange}
+                                    placeholder="Search Customer..."
+                                    isClearable
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
                             </div>
 
-                            <div className="input-field3" style={{ width: "300px" }}>
-                                <label htmlFor="">Customer Name</label>
-                                <select value="" style={{ width: "300px" }}>
-                                    <option value="" disabled>Select Customer</option>
-                                    {getCustomer.map((customer, index) => (
-                                        <option value={customer.Customer_Code} key={index}>{customer.Customer_Name}</option>
-                                    ))}
-                                </select>
+                            <div className="col-12 col-md-4">
+                                <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Booking Type</h6>
+                                <Select
+                                    required
+                                    options={getbooking}
+                                    value={
+                                        formData.booking
+                                            ? allOptions.find(c => c.value === formData.booking)
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            booking: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                    placeholder="Booking type"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
+                            </div>
+                            <div className="col-12 col-md-4">
+                                <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Destination</h6>
+                                <Select
+                                    required
+                                    options={branchOptions}
+                                    value={formData.branch ? branchOptions.find(c => c.value === formData.branch) : null}
+                                    onChange={(selectedOption) =>
+                                        setFormData({ ...formData, branch: selectedOption ? selectedOption.value : "" })
+                                    }
+                                    placeholder="Select Branch"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
                             </div>
 
-                            <div className="input-field3">
-                                <label htmlFor="">Customer Type</label>
-                                <select value="">
-                                    <option value="" disabled>Select Customer Type</option>
-                                    <option value="">Resolved</option>
-                                    <option value="">Pending</option>
-                                </select>
+                        </div>
+
+                        {/* 🔹 Second Row: Dates + Buttons */}
+                        <div className="row g-3 mb-3 align-items-end">
+                            {/* From Date */}
+                            <div className="col-12 col-md-3">
+                                <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
+                                <DatePicker
+                                    selected={formData.fromdt}
+                                    onChange={(date) => handleDateChange(date, "fromdt")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                    portalId="root-portal"
+                                />
                             </div>
 
-                            <div className="input-field3" style={{ width: "250px" }}>
-                                <label htmlFor="">Destination</label>
-                                <select value="" style={{ width: "250px" }}>
-                                    <option value="" disabled> Select Destination</option>
-                                    {getCity.map((city, index) => (
-                                        <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                    ))}
-                                </select>
+                            {/* To Date */}
+                            <div className="col-12 col-md-3">
+                                <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>To Date</h6>
+                                <DatePicker
+                                    selected={formData.todt}
+                                    onChange={(date) => handleDateChange(date, "todt")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                    portalId="root-portal"
+                                />
                             </div>
 
-                            <div className="input-field3" style={{ marginLeft: "0px" }}>
-                                <label htmlFor="">From Date</label>
-                                <input type="date" />
-                            </div>
-
-                            <div className="input-field3">
-                                <label htmlFor="">To Date</label>
-                                <input type="date" />
-                            </div>
-
-                            <div className="bottom-buttons" style={{ marginTop: "18px" }}>
+                            {/* Buttons */}
+                            <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
                                 <button className='ok-btn'>Submit</button>
                                 <button className='ok-btn' style={{ width: "110px" }}>Setup Report</button>
                             </div>
@@ -135,8 +228,8 @@ function StatementWiseReport() {
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
 
         </>
     )
