@@ -45,23 +45,15 @@ function NewLogin() {
             Swal.fire('Error', 'Username and Password are required', 'error');
             return;
         }
-        
-        const requestBody = {
-            username:userName,
-            password:password
-        }
-
         try {
-            const response = await getApi('/Master/UserLogin', requestBody, 'GET');
-            if (response && response.status === 1) {
+            const response = await getApi(`/Master/UserLogin?UserName=${encodeURIComponent(userName)}&Password=${encodeURIComponent(password)}`);
+            if (response.status === 1) {
                 Swal.fire('Success', 'Login successful!', 'success');
                 navigate('/dashboard');
-            } else {
-                Swal.fire('Error', response.message || 'Invalid username or password', 'error');
             }
         } catch (err) {
             console.error('Login Error:', err);
-            Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+            Swal.fire('Error', 'Invalid username or password. Please try again.', 'error');
         }
     };
 

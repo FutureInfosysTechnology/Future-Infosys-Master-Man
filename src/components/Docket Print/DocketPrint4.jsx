@@ -39,16 +39,7 @@ const DocketPrint4 = () => {
                                 <input type="text" placeholder='Enter To' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} />
                             </div>
     
-                            <div className="input-field3">
-                                <label htmlFor="">Date</label>
-                                <DatePicker
-                                    portalId="root-portal"
-                                    selected={formData.toDate}
-                                    onChange={(date) => handleFormChange(date, "toDate")}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="form-control form-control-sm"
-                                />
-                            </div>
+                            
     
                             <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "25px" }}>
                                 <button type='submit' className='ok-btn'>Submit</button>

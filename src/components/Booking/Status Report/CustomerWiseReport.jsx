@@ -101,15 +101,13 @@ function CustomerWiseReport() {
       if (response.status === 1) {
         setEmailData(response.Data);
         setSelectedDockets([]);
-        Swal.fire('Saved!', response.message || 'Data has been fetched.', 'success');
-      } else {
-        setEmailData([]);
-        Swal.fire('No Data', response.message || 'No records found.', 'info');
+        setCurrentPage(1);
+        Swal.fire('Saved!', 'Data has been fetched.', 'success');
       }
     } catch (error) {
       console.error("API Error:", error);
       setEmailData([]);
-      Swal.fire('Error', 'No Booking Available..', 'error');
+      Swal.fire('No Data','No records found.', 'info');
     }
   };
 
@@ -325,7 +323,7 @@ function CustomerWiseReport() {
 
           {/* Buttons */}
           <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
-            <button type="submit" className="btn btn-primary btn-sm">Search</button>
+            <button type="submit" className="btn btn-primary btn-sm">Submit</button>
             <button type="button" className="btn btn-danger btn-sm"><MdEmail /></button>
             <button type="button" className="btn btn-success btn-sm" onClick={exportSelectedToExcel}>Excel</button>
             <button type="button" className="btn btn-danger btn-sm" onClick={exportSelectedToPDF}>PDF</button>
@@ -389,49 +387,51 @@ function CustomerWiseReport() {
         </table>
       </div>
 
-      <div className="d-flex justify-content-between align-items-center mt-2">
-        {/* Rows per page dropdown */}
-        <div className="d-flex align-items-center gap-2">
-          <label className="mb-0">Rows per page:</label>
-          <select
-            className="form-select form-select-sm"
-            style={{ width: "80px" }}
-            value={rowsPerPage}
-            onChange={(e) => {
-              setRowsPerPage(Number(e.target.value));
-              setCurrentPage(1); // reset to first page
-            }}
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={EmailData.length}>All</option>
-          </select>
-        </div>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-2">
+                    {/* Rows per page dropdown */}
+                    <div className="d-flex align-items-center gap-2">
+                        <label className="mb-0">Rows per page:</label>
+                        <select
+                            className="form-select form-select-sm"
+                            style={{ width: "80px" }}
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                                setRowsPerPage(Number(e.target.value));
+                                setCurrentPage(1); // reset to first page
+                            }}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={15}>15</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value={EmailData.length}>All</option>
+                        </select>
+                    </div>
 
-        {/* Pagination */}
-        <div className="pagination">
-          <button
-            className="ok-btn"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            {"<"}
-          </button>
-          <span style={{ color: "#333", padding: "5px" }}>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="ok-btn"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            {">"}
-          </button>
-        </div>
-      </div>
+                    {/* Pagination */}
+                    <div className="d-flex align-items-center gap-2">
+                        <button
+                            className="ok-btn"
+                            style={{width:"30px"}}
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                            {"<"}
+                        </button>
+                        <span style={{ color: "#333", padding: "5px" }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            className="ok-btn"
+                            style={{width:"30px"}}
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            {">"}
+                        </button>
+                    </div>
+                </div>
     </div>
   );
 }

@@ -32,8 +32,8 @@ function Statement() {
                         onChange={handleChange} />
 
                     <nav>
-                        <label htmlFor="delivered" className="delivered">Statement Wise Report</label>
-                        <label htmlFor="undelivered" className="undelivered">Checklist Wise Report</label>
+                        <label htmlFor="delivered" className="delivered">Booking Detail</label>
+                        <label htmlFor="undelivered" className="undelivered">Total Charges Report</label>
                         <label htmlFor="upload" className="upload">Mode Wise Report</label>
 
 
