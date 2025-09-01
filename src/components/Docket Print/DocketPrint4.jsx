@@ -41,7 +41,7 @@ const DocketPrint4 = () => {
     
                             
     
-                            <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "25px" }}>
+                            <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "12px" }}>
                                 <button type='submit' className='ok-btn'>Submit</button>
                                 <button className='ok-btn'>Cancel</button>
                             </div>

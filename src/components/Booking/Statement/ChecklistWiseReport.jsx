@@ -9,6 +9,7 @@ import Select from 'react-select'; // 🔹 You forgot this
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { FaPaperPlane, FaFileExcel, FaFilePdf } from "react-icons/fa";
 function ChecklistWiseReport() {
 
     const [getCustomer, setGetCustomer] = useState([]);
@@ -300,12 +301,43 @@ function ChecklistWiseReport() {
                         </div>
 
                         {/* Buttons */}
-                        <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
-                            <button type="submit" className="btn btn-primary btn-sm">Submit</button>
-                            <button type="button" className="btn btn-danger btn-sm"><MdEmail /></button>
-                            <button type="button" className="btn btn-success btn-sm" onClick={exportSelectedToExcel}>Excel</button>
-                            <button type="button" className="btn btn-danger btn-sm" onClick={exportSelectedToPDF}>PDF</button>
-                        </div>
+                        <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end flex-wrap">
+          
+                                  {/* Submit Button */}
+                                  <button
+                                      type="submit"
+                                      className="btn btn-primary btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
+                                  >
+                                      <FaPaperPlane size={16} /><span style={{marginRight:"2px"}}>Submit</span>
+                                  </button>
+          
+                                  {/* Email Button */}
+                                  <button
+                                      type="button"
+                                      className="btn btn-info btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
+                                       // 🔹 send excel by default
+                                  >
+                                      <MdEmail size={16} /><span style={{marginRight:"2px"}}>Mail</span>
+                                  </button>
+          
+                                  {/* Excel Button */}
+                                  <button
+                                      type="button"
+                                      className="btn btn-success btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
+                                      onClick={exportSelectedToExcel}
+                                  >
+                                      <FaFileExcel size={16} /><span style={{marginRight:"2px"}}>Excel</span>
+                                  </button>
+          
+                                  {/* PDF Button */}
+                                  <button
+                                      type="button"
+                                      className="btn btn-danger btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
+                                      onClick={exportSelectedToPDF}
+                                  >
+                                      <FaFilePdf size={16} /><span style={{marginRight:"2px"}}>PDF</span>
+                                  </button>
+                              </div>
                     </div>
                 </form>
 

@@ -34,7 +34,7 @@ function StatusReport() {
                     <nav>
                         <label htmlFor="delivered" className="delivered">MIS Report</label>
                         <label htmlFor="undelivered" className="undelivered">Vendor MIS Report</label>
-                        <label htmlFor="upload" className="upload">Vehicle Wise Report</label>
+                        <label htmlFor="upload" className="upload">Booking Mode Report</label>
 
 
                         <div className="slider"></div>

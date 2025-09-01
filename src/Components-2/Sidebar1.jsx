@@ -180,7 +180,7 @@ function Sidebar1() {
                     <a href="#" className="nav-link collapsed"
                         onClick={() => toggleMenu('docket')}>
                         <i className="bi bi-printer-fill"></i>
-                        <span>Docket Print</span>
+                        <span>Docket Receipt</span>
                         <i className={`bi ${openMenu === 'docket' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
                     </a>
 
@@ -265,21 +265,21 @@ function Sidebar1() {
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/statusreport" className="link">
                                 <i className="bi bi-filter-square"></i>
-                                <span>Status Report</span>
+                                <span>Booking MIS Report</span>
                             </Link>
                         </li>
 
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/statement">
                                 <i className="bi bi-layout-text-sidebar-reverse"></i>
-                                <span>Statement Wise Report</span>
+                                <span>Booking Detail Report</span>
                             </Link>
                         </li>
 
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/salesregister">
                                 <i className="bi bi-filter-square"></i>
-                                <span>Sales Register Report</span>
+                                <span>Invoice Ledger Report</span>
                             </Link>
                         </li>
                     </ul>

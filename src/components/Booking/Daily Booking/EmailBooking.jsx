@@ -10,17 +10,17 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 // import './EmailBooking.css'; // Optional: for your custom styles
+import { FaPaperPlane, FaFileExcel, FaFilePdf } from "react-icons/fa";
 
 function EmailBooking() {
   const today = new Date();
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
   const [formData, setFormData] = useState({
     fromdt: firstDayOfMonth,
     todt: today,
     CustomerName: ""
   });
-
+  const [rowsPerPage, setRowsPerPage] = useState(15);
   const [EmailData, setEmailData] = useState([]);
   const [getCustomer, setGetCustomer] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,7 +88,6 @@ function EmailBooking() {
     }
   };
 
-  const rowsPerPage = 10;
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = EmailData.slice(indexOfFirstRow, indexOfLastRow);
@@ -99,73 +98,81 @@ function EmailBooking() {
       prev.includes(docketNo) ? prev.filter((item) => item !== docketNo) : [...prev, docketNo]
     );
   };
-const exportSelectedToPDF = () => {
-  if (selectedDockets.length === 0) {
-    Swal.fire("Error", "Please select at least one docket", "error");
-    return;
-  }
+  const exportSelectedToPDF = () => {
+    if (selectedDockets.length === 0) {
+      Swal.fire("Error", "Please select at least one docket", "error");
+      return;
+    }
 
-  const selectedData = EmailData.filter((row) =>
-    selectedDockets.includes(row.DocketNo)
-  );
+    const selectedData = EmailData.filter((row) =>
+      selectedDockets.includes(row.DocketNo)
+    );
 
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  const headers = [
-    [
-      "DocketNo",
-      "Book Date",
-      "Customer",
-      "Consignee",
-      "Origin",
-      "Destination",
-      "Mode",
-      "Qty",
-      "Weight",
-    ],
-  ];
+    const headers = [
+      [
+        "DocketNo",
+        "Book Date",
+        "Customer",
+        "Consignee",
+        "Origin",
+        "Destination",
+        "Mode",
+        "Qty",
+        "Weight",
+      ],
+    ];
 
-  const body = selectedData.map((item) => [
-    item.DocketNo,
-    item.BookDate ? new Date(item.BookDate).toLocaleDateString("en-GB") : "",
-    item.Customer_Name,
-    item.Consignee_Name,
-    item.Origin_Name,
-    item.Destination_Name,
-    item.Mode_Name,
-    item.Qty,
-    item.ActualWt,
-  ]);
+    const body = selectedData.map((item) => [
+      item.DocketNo,
+      item.BookDate ? new Date(item.BookDate).toLocaleDateString("en-GB") : "",
+      item.Customer_Name,
+      item.Consignee_Name,
+      item.Origin_Name,
+      item.Destination_Name,
+      item.Mode_Name,
+      item.Qty,
+      item.ActualWt,
+    ]);
 
-  doc.text("Selected Booking Data", 14, 10);
-  doc.autoTable({
-    head: headers,
-    body,
-    startY: 20,
-  });
+    doc.text("Selected Booking Data", 14, 10);
+    doc.autoTable({
+      head: headers,
+      body,
+      startY: 20,
+    });
 
-  doc.save("SelectedDockets.pdf");
-};
+    doc.save("SelectedDockets.pdf");
+  };
 
-const exportSelectedToExcel = () => {
-  if (selectedDockets.length === 0) {
+  const exportSelectedToExcel = () => {
+    {/*if (selectedDockets.length === 0) {
     Swal.fire("Error", "Please select at least one docket", "error");
     return;
   }
 
   // filter only selected rows
-  const selectedData = EmailData.filter((row) =>
-    selectedDockets.includes(row.DocketNo)
-  );
+   const selectedData = EmailData.filter((row) =>
+     selectedDockets.includes(row.DocketNo)
+  );*/}
+    if (currentRows.length === 0) {
+      Swal.fire("Error", "No data available on this page to export", "error");
+      return;
+    }
 
-  const worksheet = XLSX.utils.json_to_sheet(selectedData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "SelectedData");
+    const formattedData = currentRows.map(row => ({
+      ...row,
+      BookDate: row.BookDate ? new Date(row.BookDate).toLocaleDateString("en-GB") : "",
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "CurrentPageData");
 
-  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-  saveAs(data, "SelectedDockets.xlsx");
-};
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, `CurrentPageData_Page${currentPage}.xlsx`);
+  };
 
   const handleSelectAll = () => {
     setSelectedDockets(
@@ -207,9 +214,9 @@ const exportSelectedToExcel = () => {
   return (
     <div className="card shadow-sm p-3 mb-4 bg-white rounded">
       <form onSubmit={handlesave}>
-        <div className="d-flex flex-wrap gap-3 mb-3 align-items-center">
+        <div className="row g-3 mb-3">
           {/* 🔍 react-select Searchable Dropdown */}
-          <div style={{ minWidth: "260px" }}>
+          <div className="scol-12 col-md-3">
 
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Client Name</h6>
 
@@ -229,11 +236,11 @@ const exportSelectedToExcel = () => {
             />
           </div>
 
-          <div>
+          <div className="col-12 col-md-2">
             {/* <label className="form-label mb-0" style={{ fontSize: "0.85rem" }}></label> */}
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>From Date</h6>
             <DatePicker
-            portalId="root-portal"   
+              portalId="root-portal"
               selected={formData.fromdt}
               onChange={(date) => handleDateChange(date, "fromdt")}
               dateFormat="dd/MM/yyyy"
@@ -241,31 +248,60 @@ const exportSelectedToExcel = () => {
             />
           </div>
 
-          <div>
+          <div className="col-12 col-md-2">
             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>To Date</h6>
             <DatePicker
-            portalId="root-portal"   
+              portalId="root-portal"
               selected={formData.todt}
               onChange={(date) => handleDateChange(date, "todt")}
               dateFormat="dd/MM/yyyy"
               className="form-control form-control-sm"
             />
           </div>
+          <div className="col-12 col-md-5 mt-4 pt-1 gap-2 d-flex align-items-center justify-content-center justify-content-md-end flex-wrap">
+              <button
+                type="submit"
+                className="btn btn-primary btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
+              >
+                <FaPaperPlane size={10} /><span style={{ marginRight: "2px" }}>Submit</span>
+              </button>
 
-          <div className="d-flex gap-2 align-items-end ms-auto mt-2">
-            <button type="submit" className="btn btn-primary btn-sm">Search</button>
-            <button type="button" className="btn" style={{background:"red",color:"white",fontSize:"20px",width:"50px",height:"30px",
-            display:"flex", alignItems:"center",justifyContent:"center"}}><MdEmail /></button>
-            <button type="button" className="btn btn-success btn-sm" onClick={exportSelectedToExcel}>Excel</button>
-            <button type="button" className="btn btn-danger btn-sm" onClick={exportSelectedToPDF}>PDF</button>
+              {/* Email Button */}
+              <button
+                type="button"
+                className="btn btn-info btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
+              // 🔹 send excel by default
+              >
+                <MdEmail size={10} /><span style={{ marginRight: "2px" }}>Mail</span>
+              </button>
+
+              {/* Excel Button */}
+              <button
+                type="button"
+                className="btn btn-success btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
+                onClick={exportSelectedToExcel}
+              >
+                <FaFileExcel size={10} /><span style={{ marginRight: "2px" }}>Excel</span>
+              </button>
+
+              {/* PDF Button */}
+              <button
+                type="button"
+                className="btn btn-danger btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
+                onClick={exportSelectedToPDF}
+              >
+                <FaFilePdf size={10} /><span style={{ marginRight: "2px" }}>PDF</span>
+              </button>
           </div>
+
+
         </div>
       </form>
 
       {/* 📋 Table */}
-      <div className='table-container'>
-        <table className='table table-bordered table-sm'>
-          <thead className='green-header'>
+      <div className='table-responsive' style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <table className='table table-bordered table-sm text-nowrap'>
+          <thead className='green-header' style={{ position: "sticky", top: 0, zIndex: 2 }}>
             <tr>
               <th><input type="checkbox" onChange={handleSelectAll} checked={currentRows.length > 0 && selectedDockets.length === currentRows.length} /></th>
               <th>Sr.No</th>
@@ -321,10 +357,50 @@ const exportSelectedToExcel = () => {
       </div>
 
       {/* Pagination */}
-      <div className="pagination mt-2">
-        <button className="ok-btn" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>{'<'}</button>
-        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-        <button className="ok-btn" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>{'>'}</button>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-2">
+        {/* Rows per page dropdown */}
+        <div className="d-flex align-items-center gap-2">
+          <label className="mb-0">Rows per page:</label>
+          <select
+            className="form-select form-select-sm"
+            style={{ width: "80px" }}
+            value={rowsPerPage}
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setCurrentPage(1); // reset to first page
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={EmailData.length}>All</option>
+          </select>
+        </div>
+
+        {/* Pagination */}
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="ok-btn"
+            style={{ width: "30px" }}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            {"<"}
+          </button>
+          <span style={{ color: "#333", padding: "5px" }}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="ok-btn"
+            style={{ width: "30px" }}
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            {">"}
+          </button>
+        </div>
       </div>
     </div>
   );

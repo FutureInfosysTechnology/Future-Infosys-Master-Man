@@ -4,14 +4,17 @@ import Sidebar1 from '../../Components-2/Sidebar1';
 import barcode from '../../Assets/Images/barcode-svgrepo-com.png';
 import logo from '../../Assets/Images/AceLogo.jpeg';
 import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+import { useLocation } from 'react-router-dom';
 
 
 function Docketpdf() {
 
     const [getBranch, setGetBranch] = useState([]);
     const [loading, setLoading] = useState(true);
-
-
+    const location = useLocation();
+    const { data } = location.state || [];
+    const from = data[0];
+    const to = data[1];
     const fetchBranchData = async () => {
         try {
             const response = await getApi('/Master/getBranch');
@@ -27,10 +30,17 @@ function Docketpdf() {
     useEffect(() => {
         fetchBranchData();
     }, []);
-
+    const formateDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        if (isNaN(date)) return ""; // invalid date
+        return date.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    };
     const BranchData = getBranch.length > 0 ? getBranch[0] : {};
-
-
     return (
         <>
             <Header />
@@ -46,16 +56,16 @@ function Docketpdf() {
 
                                 <div className="header-box2" style={{
                                     width: "30%", border: "1px solid black",
-                                    display: "flex", flexDirection: "column", alignItems: "center",
+                                    display: "flex", flexDirection: "column", alignItems: "start",
                                     justifyContent: "center", padding: "5px"
                                 }}>
-                                    <b style={{ fontSize: "18px" }}>Aventure Cargo Express</b>
-                                    <span style={{ fontSize: "11px" }}><b>Offiice Address :</b>{BranchData.Branch_Add1}
+                                    <b style={{ fontSize: "18px", marginLeft: "10px" }}>Aventure Cargo Express</b>
+                                    <span style={{ fontSize: "11px", marginLeft: "25px" }}><b>Address :</b>{BranchData.Branch_Add1}
                                     </span>
-                                    <span style={{ fontSize: "10px", marginLeft: "5px" }}><b>Pin Code : {BranchData.Branch_PIN}</b></span>
-                                    <span style={{ fontSize: "10px" }}><b>Mob : {BranchData.MobileNo}</b></span>
-                                    <span style={{ fontSize: "10px" }}><b>Email : {BranchData.Email}</b></span>
-                                    <span style={{ fontSize: "10px" }}><b>GST No : {BranchData.GSTNo}</b></span>
+                                    <span style={{ fontSize: "10px", marginLeft: "25px" }}><b>Pin Code : {BranchData.Branch_PIN}</b></span>
+                                    <span style={{ fontSize: "10px", marginLeft: "25px" }}><b>Mob : {BranchData.MobileNo}</b></span>
+                                    <span style={{ fontSize: "10px", marginLeft: "25px" }}><b>Email : {BranchData.Email}</b></span>
+                                    <span style={{ fontSize: "10px", marginLeft: "25px" }}><b>GST No : {BranchData.GSTNo}</b></span>
                                 </div>
 
                                 <div className="header-box3" style={{
@@ -69,12 +79,12 @@ function Docketpdf() {
                                 </div>
                             </div>
 
-                            <div style={{ height: "30px", border: "1px solid black", display: "flex" }}>
-                                <b style={{ marginRight: "15%" }}>DATE OF BOOKING :</b>
-                                <b>MODE OF TRANSPORTATION:
-                                    AIR <input type="checkbox" style={{ marginRight: "10px" }} />
-                                    SURFACE <input type="checkbox" style={{ marginRight: "10px" }} />
-                                    TRAIN <input type="checkbox" /></b>
+                            <div style={{ height: "30px", border: "1px solid black", display: "flex", justifyContent: "space-between" }}>
+                                <b style={{ marginLeft: "5px" }}>DATE OF BOOKING : {from?.BookDate}</b>
+                                <b style={{ marginRight: "5px" }}>MODE OF TRANSPORTATION:
+                                    AIR <input type="checkbox" style={{ marginRight: "10px" }} checked={from.Mode_Name === "AIR"} />
+                                    SURFACE <input type="checkbox" style={{ marginRight: "10px" }} checked={from.Mode_Name === "SURFACE"} />
+                                    TRAIN <input type="checkbox" checked={from.Mode_Name === "TRAIN"} /></b>
                             </div>
 
                             <div className="table-container2">
@@ -119,11 +129,11 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}>A. Wt</td>
                                             <td style={{ backgroundColor: "white" }}>V. Wt</td>
                                             <td style={{ backgroundColor: "white" }}>DOCKET</td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{from.DocketChrgs}</td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }}></td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{from.ActualWt}</td>
+                                            <td style={{ backgroundColor: "white" }}>{from.ChargedWt}</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -131,11 +141,11 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}>FSC</td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{from.FuelCharges}</td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }}>INVOICE NO.:</td>
-                                            <td style={{ backgroundColor: "white" }}>INVOICE E-WAY BILL NO.:</td>
+                                            <td style={{ backgroundColor: "white" }}>INVOICE NO</td>
+                                            <td style={{ backgroundColor: "white" }}>INVOICE E-WAY BILL NO</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -143,11 +153,11 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}>ODA</td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{from.ODA_Chrgs}</td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }}></td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{from.InvoiceNo}</td>
+                                            <td style={{ backgroundColor: "white" }}>{from.EwayBill}</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -167,11 +177,11 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}>TOTAL</td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{from.TotalAmt}</td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }}></td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{from.InValue}</td>
+                                            <td style={{ backgroundColor: "white" }}>{from.InvDate}</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -194,22 +204,24 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}></td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }} rowSpan={2}>Signature</td>
+                                            <td style={{ backgroundColor: "white", alignContent: "end" }} rowSpan={2}>Signature</td>
                                             <td style={{ backgroundColor: "white" }} colSpan={7}>TOTAL BOXES</td>
                                             <td style={{ backgroundColor: "white" }} rowSpan={2} colSpan={2}>
-                                                CREDIT <input type="checkbox" style={{ marginRight: "8px" }} />
-                                                CASH <input type="checkbox" style={{ marginRight: "8px" }} />
-                                                TO PAY <input type="checkbox" />
+                                                <div style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center" }}>
+                                                    <label htmlFor="">CREDIT <input type="checkbox" style={{ marginRight: "8px" }} /></label>
+                                                    <label htmlFor="">CASH <input type="checkbox" style={{ marginRight: "8px" }} /></label>
+                                                    <label htmlFor="">TO PAY <input type="checkbox" /></label>
+                                                </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }} colSpan={7}>REMARKS :</td>
+                                            <td style={{ backgroundColor: "white" }} colSpan={7}>REMARKS : {from.Remark}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <div style={{ display: "flex", flexDirection: "row", height: "100px" }}>
+                            <div style={{ display: "flex", flexDirection: "row", height: "150px" }}>
                                 <div style={{ width: "30%", border: "1px solid black", padding: "5px" }}>
                                     <p style={{ fontSize: "9px" }}><b>Read Terms & Conditions Printed Overleaf Carefully </b>
                                         Any Stationary Tax as Levels shall be borne by the consignor or consignee,
@@ -251,16 +263,16 @@ function Docketpdf() {
 
                                 <div className="header-box2" style={{
                                     width: "30%", border: "1px solid black",
-                                    display: "flex", flexDirection: "column", alignItems: "center",
+                                    display: "flex", flexDirection: "column", alignItems: "start",
                                     justifyContent: "center", padding: "5px"
                                 }}>
-                                    <b style={{ fontSize: "18px" }}>Aventure Cargo Express</b>
-                                    <span style={{ fontSize: "11px" }}><b>Offiice Address :</b>{BranchData.Branch_Add1}
+                                    <b style={{ fontSize: "18px", marginLeft: "10px" }}>Aventure Cargo Express</b>
+                                    <span style={{ fontSize: "11px", marginLeft: "25px" }}><b>Address :</b>{BranchData.Branch_Add1}
                                     </span>
-                                    <span style={{ fontSize: "10px", marginLeft: "5px" }}><b>Pin Code : {BranchData.Branch_PIN}</b></span>
-                                    <span style={{ fontSize: "10px" }}><b>Mob : {BranchData.MobileNo}</b></span>
-                                    <span style={{ fontSize: "10px" }}><b>Email : {BranchData.Email}</b></span>
-                                    <span style={{ fontSize: "10px" }}><b>GST No : {BranchData.GSTNo}</b></span>
+                                    <span style={{ fontSize: "10px", marginLeft: "25px" }}><b>Pin Code : {BranchData.Branch_PIN}</b></span>
+                                    <span style={{ fontSize: "10px", marginLeft: "25px" }}><b>Mob : {BranchData.MobileNo}</b></span>
+                                    <span style={{ fontSize: "10px", marginLeft: "25px" }}><b>Email : {BranchData.Email}</b></span>
+                                    <span style={{ fontSize: "10px", marginLeft: "25px" }}><b>GST No : {BranchData.GSTNo}</b></span>
                                 </div>
 
                                 <div className="header-box3" style={{
@@ -274,12 +286,12 @@ function Docketpdf() {
                                 </div>
                             </div>
 
-                            <div style={{ height: "30px", border: "1px solid black", display: "flex" }}>
-                                <b style={{ marginRight: "15%" }}>DATE OF BOOKING :</b>
-                                <b>MODE OF TRANSPORTATION:
-                                    AIR <input type="checkbox" style={{ marginRight: "10px" }} />
-                                    SURFACE <input type="checkbox" style={{ marginRight: "10px" }} />
-                                    TRAIN <input type="checkbox" /></b>
+                            <div style={{ height: "30px", border: "1px solid black", display: "flex", justifyContent: "space-between" }}>
+                                <b style={{ marginLeft: "5px" }}>DATE OF BOOKING : {to?.BookDate}</b>
+                                <b style={{ marginRight: "5px" }}>MODE OF TRANSPORTATION:
+                                    AIR <input type="checkbox" style={{ marginRight: "10px" }} checked={from.Mode_Name === "AIR"} />
+                                    SURFACE <input type="checkbox" style={{ marginRight: "10px" }} checked={from.Mode_Name === "SURFACE"} />
+                                    TRAIN <input type="checkbox" checked={from.Mode_Name === "TRAIN"} /></b>
                             </div>
 
                             <div className="table-container2">
@@ -324,11 +336,11 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}>A. Wt</td>
                                             <td style={{ backgroundColor: "white" }}>V. Wt</td>
                                             <td style={{ backgroundColor: "white" }}>DOCKET</td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{to.DocketChrgs}</td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }}></td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{from.ActualWt}</td>
+                                            <td style={{ backgroundColor: "white" }}>{from.ChargedWt}</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -336,11 +348,11 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}>FSC</td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{to.FuelCharges}</td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }}>INVOICE NO.:</td>
-                                            <td style={{ backgroundColor: "white" }}>INVOICE E-WAY BILL NO.:</td>
+                                            <td style={{ backgroundColor: "white" }}>INVOICE NO</td>
+                                            <td style={{ backgroundColor: "white" }}>INVOICE E-WAY BILL NO</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -348,11 +360,11 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}>ODA</td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{to.ODA_Chrgs}</td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }}></td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{to.InvoiceNo}</td>
+                                            <td style={{ backgroundColor: "white" }}>{to.EwayBill}</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -364,7 +376,7 @@ function Docketpdf() {
                                         </tr>
                                         <tr>
                                             <td style={{ backgroundColor: "white" }}>INVOICE VALUE</td>
-                                            <td style={{ backgroundColor: "white" }}>E-WAY BILL VALID DT.</td>
+                                            <td style={{ backgroundColor: "white" }}>E-WAY BILL VALID DT</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -372,11 +384,11 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}>TOTAL</td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{to.TotalAmt}</td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }}></td>
-                                            <td style={{ backgroundColor: "white" }}></td>
+                                            <td style={{ backgroundColor: "white" }}>{to.InValue}</td>
+                                            <td style={{ backgroundColor: "white" }}>{to.InvDate}</td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
                                             <td style={{ backgroundColor: "white" }}></td>
@@ -399,22 +411,24 @@ function Docketpdf() {
                                             <td style={{ backgroundColor: "white" }}></td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }} rowSpan={2}>Signature</td>
+                                            <td style={{ backgroundColor: "white", alignContent: "end" }} rowSpan={2}>Signature</td>
                                             <td style={{ backgroundColor: "white" }} colSpan={7}>TOTAL BOXES</td>
                                             <td style={{ backgroundColor: "white" }} rowSpan={2} colSpan={2}>
-                                                CREDIT <input type="checkbox" style={{ marginRight: "8px" }} />
-                                                CASH <input type="checkbox" style={{ marginRight: "8px" }} />
-                                                TO PAY <input type="checkbox" />
+                                                <div style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center" }}>
+                                                    <label htmlFor="">CREDIT <input type="checkbox" style={{ marginRight: "8px" }} /></label>
+                                                    <label htmlFor="">CASH <input type="checkbox" style={{ marginRight: "8px" }} /></label>
+                                                    <label htmlFor="">TO PAY <input type="checkbox" /></label>
+                                                </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style={{ backgroundColor: "white" }} colSpan={7}>REMARKS :</td>
+                                            <td style={{ backgroundColor: "white" }} colSpan={7}>REMARKS : {to.Remark}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <div style={{ display: "flex", flexDirection: "row", height: "100px" }}>
+                            <div style={{ display: "flex", flexDirection: "row", height: "150px" }}>
                                 <div style={{ width: "30%", border: "1px solid black", padding: "5px" }}>
                                     <p style={{ fontSize: "9px" }}><b>Read Terms & Conditions Printed Overleaf Carefully </b>
                                         Any Stationary Tax as Levels shall be borne by the consignor or consignee,
@@ -426,7 +440,7 @@ function Docketpdf() {
                                 </div>
 
                                 <div style={{ width: "10%", border: "1px solid black", padding: "5px" }}>
-                                    <p style={{ fontSize: "12px" }}>Consignee's Signature & Contact No.:</p>
+                                    <p style={{ fontSize: "12px" }}>Consignee's Signature & Contact No:</p>
                                     <p style={{ fontSize: "12px" }}>Date :</p>
                                 </div>
 

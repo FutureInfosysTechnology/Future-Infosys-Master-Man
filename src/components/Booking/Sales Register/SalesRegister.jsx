@@ -34,7 +34,7 @@ function SalesRegister() {
                         onChange={handleChange} />
 
                     <nav>
-                        <label htmlFor="zone" className="zone">Sales Registers Report</label>
+                        <label htmlFor="zone" className="zone">Invoice Ledger Report</label>
                         <label htmlFor="multiple" className="multiple">Checklist Report</label>
                         <label htmlFor="state" className="state">Unbuild Report</label>
                         <label htmlFor="country" className="country">Bill View Report</label>
