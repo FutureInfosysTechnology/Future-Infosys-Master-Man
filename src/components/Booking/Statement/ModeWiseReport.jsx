@@ -339,6 +339,7 @@ function ModeWiseReport() {
                         <thead className='green-header' style={{ position: "sticky", top: 0, zIndex: 2 }}>
                             <tr>
                                 <th>Sr.No</th>
+                                 <th>Branch</th>
                                 <th>DocketNo</th>
                                 <th>BookDate</th>
                                 <th>Customer_Name</th>
@@ -387,7 +388,6 @@ function ModeWiseReport() {
                                 <th>EwayBill</th>
                                 <th>InvDate</th>
                                 <th>UserName</th>
-                                <th>Branch</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -399,6 +399,7 @@ function ModeWiseReport() {
                                 currentRows.map((item, index) => (
                                     <tr key={index}>
                                         <td>{indexOfFirstRow + index + 1}</td>
+                                        <td>{item.Branch_Name}</td>
                                         <td>{item.DocketNo}</td>
                                         <td>{item.BookDate ? new Date(item.BookDate).toLocaleDateString('en-GB') : ''}</td>
                                         <td>{item.Customer_Name}</td>
@@ -447,7 +448,6 @@ function ModeWiseReport() {
                                         <td>{item.EwayBill}</td>
                                         <td>{item.InvDate}</td>
                                         <td>{item.UserName}</td>
-                                        <td>{item.Branch_Name}</td>
 
                                     </tr>
                                 ))
