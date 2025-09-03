@@ -12,7 +12,7 @@ function MobileReceipt() {
     const [getBranch, setGetBranch] = useState([]);
     const [loading, setLoading] = useState(true);
     const location = useLocation();
-    const from=location.state.data[0] || [];
+    const from = location.state.data[0] || [];
     const fetchBranchData = async () => {
         try {
             const response = await getApi('/Master/getBranch');
@@ -54,15 +54,15 @@ function MobileReceipt() {
             <Sidebar1 />
             <div className="main-body" id="main-body">
                 <div className="container">
-                    <div className="container-2" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px" ,direction:"flex",flexDirection:"column",gap:"5px"}}>
-                        
+                    <div className="container-2" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
+
                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
                             <div className='div1' style={{ width: "100%", height: "90px", border: "2px solid black", display: "flex" }}>
                                 <div className='logo' style={{ width: "24%", height: "100%" }}></div>
                                 <div className='heading' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column", gap: "0px", alignItems: "start", marginTop: "5px" }}>
                                     <div style={{ fontSize: "14px", fontWeight: "bolder" }}>FUTRE INFOSYS TECHNOLOGIES</div>
                                     <div style={{ fontSize: "14px", fontWeight: "bolder" }}>PRIVATE LIMETED</div>
-                                    <div style={{ lineHeight: "1.2", fontSize: "10px" ,paddingRight:"10px"}}>24 A ASHOK INDUSTRIAL ESTATE ,OPP. 
+                                    <div style={{ lineHeight: "1.2", fontSize: "10px", paddingRight: "10px" }}>24 A ASHOK INDUSTRIAL ESTATE ,OPP.
                                         KALPATARU CREST BLDG LBS MARG  BHANDUP WEST , MOB.8655772686/84
                                         info@kandoliyalogistcs.com,www.kandoliyalogistcs.com</div>
                                 </div>
@@ -82,10 +82,11 @@ function MobileReceipt() {
                                                 <td style={cellsStyle}>Booking Mode:</td>
                                                 <td style={cellsStyle}>
                                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
-                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={from.Mode_Name==="RAIL"}/><span>RAIL</span></label>
-                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={from.Mode_Name==="AIR"}/><span>AIR</span></label>
-                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={from.Mode_Name==="MULTIMODEL"}/><span>MULTIMODEL</span></label>
-                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={from.Mode_Name==="FTL"}/><span>FTL</span></label></div></td>
+                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={from.Mode_Name === "RAIL"} /><span>RAIL</span></label>
+                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={from.Mode_Name === "AIR"} /><span>AIR</span></label>
+                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={from.Mode_Name === "SURFACE"} /><span>SURFACE</span></label>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -103,19 +104,19 @@ function MobileReceipt() {
                             </div>
                             <div className='div3' style={{ width: "100%", fontSize: "10px", height: "130px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
                                 <div className='consignor px-2' style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
-                                    <div style={{ fontWeight: "bold" }}>PCI ANALYTICS PVT.LTD</div>
-                                    <div style={{ height: "" }}> A-71 , ROAD NO. 22 WAGLE INDUSTRIAL
-                                        ESTATEOPP. LODHA GRANDEZZANEAR SPRAYTECH</div>
-                                    <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>PiN CODE : </div><span>400604</span></div>
-                                    <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span> 27AAECP1826E1ZN</span></div>
+                                    <div style={{ fontWeight: "bold" }}>{from.Customer_Name}</div>
+                                    <div style={{ height: "" }}> {from.Customer_Add1}</div>
+                                    <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>Phone No : </div><span>{from.Customer_Mob}</span></div>
+                                    <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>Pin CODE : </div><span>{from.Pin_Code}</span></div>
+                                    <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{from.Gst_No}</span></div>
                                 </div>
                                 <div className='consignee px-2' style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
                                     <div style={{ fontWeight: "bold" }}> {from.Consignee_Name}</div>
                                     <div style={{ height: "" }}>  AGILENT TECHNOLOGIES INTERNATIONAL
                                         PVT LTDPLOT NO. CP 11 , SECTOR- 8 , IMT
                                         MANESAR ,</div>
-                                        <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>Phone No : </div><span>{from.Consignee_Mob}</span></div>
-                                    <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>PiN CODE : </div><span> {from.Consignee_Pin}</span></div>
+                                    <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>Phone No : </div><span>{from.Consignee_Mob}</span></div>
+                                    <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>Pin CODE : </div><span> {from.Consignee_Pin}</span></div>
                                     <div style={{ display: "flex", gap: "2px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span> {from.Consignee_GST}</span></div>
                                 </div>
                                 <div className='docket px-2' style={{ width: "40%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
@@ -187,23 +188,23 @@ function MobileReceipt() {
                                             <span style={{ width: "20%", paddingTop: "2px", textAlign: "center" }}></span>
                                         </div>
                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>71</span>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>55</span>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>42</span>
-                                            <span style={{ borderRight: "2px solid black", width: "40%", paddingTop: "1px", textAlign: "center" }}>8</span>
-                                            <span style={{ width: "20%", paddingTop: "2px", textAlign: "center" }}></span>
-                                        </div>
-                                        <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}></span>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}></span>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}></span>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[0].Length}</span>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[0].Width}</span>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[0].Height}</span>
                                             <span style={{ borderRight: "2px solid black", width: "40%", paddingTop: "1px", textAlign: "center" }}></span>
                                             <span style={{ width: "20%", paddingTop: "2px", textAlign: "center" }}></span>
                                         </div>
                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}></span>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}></span>
-                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}></span>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[1].Length}</span>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[1].Width}</span>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[1].Height}</span>
+                                            <span style={{ borderRight: "2px solid black", width: "40%", paddingTop: "1px", textAlign: "center" }}></span>
+                                            <span style={{ width: "20%", paddingTop: "2px", textAlign: "center" }}></span>
+                                        </div>
+                                        <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[2].Length}</span>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[2].Width}</span>
+                                            <span style={{ borderRight: "2px solid black", width: "14%", paddingTop: "1px", textAlign: "center" }}>{from.VolumetriceData[2].Height}</span>
                                             <span style={{ borderRight: "2px solid black", width: "40%", paddingTop: "1px", textAlign: "center" }}></span>
                                             <span style={{ width: "20%", paddingTop: "2px", textAlign: "center" }}></span>
                                         </div>
@@ -244,29 +245,32 @@ function MobileReceipt() {
                                         </div>
                                     </div>
                                     <div className='total2' style={{ width: "45%", borderRight: "2px solid black" }}>
-                                        <div style={{ display: "flex", fontWeight: "bold", height: "19%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "60%", textAlign: "center", paddingTop: "10px" }}>DETAILS FREIGHT</span>
-                                            <span style={{ width: "40%", textAlign: "center", paddingTop: "10px" }}>AMOUNT</span>
+                                        <div style={{ display: "flex", height: "19%" }}>
+                                            <span style={{ borderRight: "2px solid black", fontWeight: "bold", width: "60%", textAlign: "center", whiteSpace: "wrap", fontSize: "12px" }}>DETAILS FREIGHT</span>
+                                            <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+                                                <span style={{ textAlign: "center", fontWeight: "bold", paddingTop: "2px", }}>AMOUNT</span>
+                                                <span style={{ textAlign: "center", paddingTop: "2px", }}>{from.Rate}</span>
+                                            </div>
                                         </div>
                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> FULE</span>
+                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> FUEL CHARGES</span>
                                             <span style={{ width: "40%", paddingLeft: "5px" }}>{from.FuelCharges}</span>
                                         </div>
                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> RISK CHARGES</span>
-                                            <span style={{ width: "40%", paddingLeft: "5px" }}>0.00</span>
+                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DKT CHARGES </span>
+                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{from.DocketChrgs}</span>
                                         </div>
                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DIC</span>
-                                            <span style={{ width: "40%", paddingLeft: "5px" }}>0.00</span>
+                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DOV CHARGES</span>
+                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{from.FuelCharges}</span>
                                         </div>
                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}>  DOC SERVICE CRG</span>
-                                            <span style={{ width: "40%", paddingLeft: "5px" }}>0.00</span>
+                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DELIVERY CHARGES</span>
+                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{from.HamaliChrgs}</span>
                                         </div>
                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
-                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> OSC</span>
-                                            <span style={{ width: "40%", paddingLeft: "5px" }}>0.00</span>
+                                            <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> OTHER CHARGES</span>
+                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{from.OtherCharges}</span>
                                         </div>
                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> TOTAL</span>
@@ -284,7 +288,7 @@ function MobileReceipt() {
                                 </div>
                                 <div className='payment' style={{ width: "29%" }}>
                                     <div style={{ height: "39%" }}>
-                                        <div style={{ fontWeight: "bold", textAlign: "center" }}> PAYMENT MODE</div>
+                                        <div style={{ fontWeight: "bold", textAlign: "center" }}>BOOKING TYPE</div>
                                         <div style={{ display: "flex", gap: "22px", paddingLeft: "25px" }}>
                                             <div style={{ display: "flex", flexDirection: "column", width: "45px", height: "45px" }}>
                                                 <span>To Pay</span>
@@ -292,9 +296,9 @@ function MobileReceipt() {
                                                 <span>TBB</span>
                                             </div>
                                             <div style={{ display: "flex", flexDirection: "column", width: "40px", height: "45px", border: "2px solid black" }}>
-                                                <span style={{ height: "35%", borderBottom: "2px solid black" }}></span>
-                                                <span style={{ height: "35%", borderBottom: "2px solid black" }}></span>
-                                                <span></span>
+                                                <span style={{ height: "35%", borderBottom: "2px solid black", textAlign: "center" }}>{from.T_Flag}</span>
+                                                <span style={{ height: "35%", borderBottom: "2px solid black", textAlign: "center" }}>{from.T_Flag}</span>
+                                                <span style={{ textAlign: "center" }}>{from.T_Flag}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -352,7 +356,7 @@ function MobileReceipt() {
                                 </div>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>

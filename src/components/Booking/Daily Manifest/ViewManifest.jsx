@@ -7,10 +7,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import {useNavigate} from "react-router-dom"
 
 function ViewManifest() {
-
-
+    const navigate=useNavigate()
     //  const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -39,6 +39,14 @@ function ViewManifest() {
     const handleDateChange = (date, field) => {
         setFormValues({ ...formValues, [field]: date });
     };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormValues({
+            ...formValues,
+            [name]: value
+        });
+    };
     const fetchData = async (endpoint, params) => {
         try {
             const response = await getApi(endpoint, { params });
@@ -60,15 +68,6 @@ function ViewManifest() {
             setIsLoading(false);
         }
     };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormValues({
-            ...formValues,
-            [name]: value
-        });
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -159,18 +158,7 @@ function ViewManifest() {
         setShowModal(true);
     };
     const handleOpenManifestPrint = (manifestData) => {
-        const manifestNo = manifestData.manifestNo;
-        const sumQty = manifestData.sumQty;
-        const sumActualWt = manifestData.sumActualWt;
-        const url = `/manifest?manifestNo=${encodeURIComponent(manifestNo)}&sumQty=${encodeURIComponent(sumQty)}&sumActualWt=${encodeURIComponent(sumActualWt)}`;
-        const newWindow = window.open(
-            url,
-            '_blank', 'width=900,height=600,fullscreen=yes'
-        );
-
-        if (newWindow) {
-            newWindow.focus();
-        }
+       navigate("/manifest",{state:{data:manifestData}});
     };
     return (
         <>

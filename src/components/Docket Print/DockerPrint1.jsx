@@ -2,41 +2,32 @@ import React, { useState } from 'react'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
-function DockerPrint1() {
+const DockerPrint1 = () => {
+    const [data,setData]=useState([]);
     const [formData, setFormData] = useState({
         from: "",
         to: "",
-        toDate: new Date(),
     })
-    const [data,setData]=useState([]);
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     const handleFormChange = (value, key) => {
         setFormData({ ...formData, [key]: value });
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const from =formData.from;
-        const to =formData.to;
-        if (!from || !to) {
-              Swal.fire('Error', 'Both From Docket and To Docket are required.', 'error');
-              return;
-            }
-            try{
-                const response=await getApi(`/Booking/DocketReceipt?FromDocket=${encodeURIComponent(from)}&ToDocket=${encodeURIComponent(to)}`);
-                if(response.status===1)
-                {
-                    setData(response.Data);
-                    console.log(response.Data);
-                    navigate("/docketpdf", { state: { data:response.Data } });
-                }
-            }catch (error) {
-                
-                      console.error("API Error:", error);
-                      setData([]);
-                      Swal.fire('No Data','No records found.', 'info');
-            }
+        try {
+            const response = await getApi(`/Booking/DocketReceipt?FromDocket=DKT0036859&ToDocket=DKT0037950`);
+            if (response.status === 1) {
+                console.log(response.Data);
+                setData(response.Data);
+                navigate("/MobileReceipt", { state: { data:response.Data } });
+        }}
+        catch (error) {
+            console.error("API Error:", error);
+            setData([]);
+            Swal.fire('No Data', 'No records found.', 'info');
+        }
     }
     return (
         <>
@@ -52,6 +43,8 @@ function DockerPrint1() {
                             <input type="text" placeholder='Enter To' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} />
                         </div>
 
+
+
                         <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "12px" }}>
                             <button type='submit' className='ok-btn'>Submit</button>
                             <button className='ok-btn'>Cancel</button>
@@ -63,4 +56,4 @@ function DockerPrint1() {
     )
 }
 
-export default DockerPrint1;
+export default DockerPrint1
