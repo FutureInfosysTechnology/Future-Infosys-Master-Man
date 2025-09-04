@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import logoimg from '../../Assets/Images/AceLogo.jpeg';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import 'jspdf-autotable';
 import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
 import html2canvas from 'html2canvas';
@@ -12,30 +12,52 @@ import Sidebar1 from '../../Components-2/Sidebar1';
 function Manifest() {
 
     const location = useLocation();
+    const navigate = useNavigate();
+    const manifest = location?.state?.data || {};
     const [getBranch, setGetBranch] = useState([]);
-    const manifest = location.state.data || [];
-    console.log(manifest);
-    useEffect(()=>
-    {
-        const fetchData=async ()=>
-        {
-            try
-            {
-                const response=await getApi("/Master/getBranch");
-                if(response.status===1)
-                {
+    const [manifestData, setGetManifestData] = useState([]);
+    console.log(location.state);
+    const manifestNo = manifest?.manifestNo || "";
+    const sumQty = manifest?.sumQty || 0;
+    const sumActualWt = manifest?.sumActualWt || 0;
+    const [loading, setLoading] = useState(true);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+    console.log(manifestNo, sumQty, sumActualWt);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getApi("/Master/getBranch");
+                if (response.status === 1) {
                     console.log(response.Data);
                     setGetBranch(response.Data);
                 }
             }
-            catch(error)
-            {
+            catch (error) {
                 console.log(error);
             }
         }
         fetchData();
-    },[])
+    }, [])
     const BranchData = getBranch.length > 0 ? getBranch[1] : {};
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getApi(`/Manifest/viewManifestPrint?sessionLocationCode=MUM&manifestNo=${manifestNo}`);
+                setGetManifestData(Array.isArray(response.data) ? response.data : []);
+                console.log(response);
+            } catch (err) {
+                console.error('Fetch Error:', err);
+            } finally {
+                setLoading(false);
+                setIsDataLoaded(true);
+                // generatePDF();
+            }
+        };
+        if (manifestNo) {
+            fetchData();
+        }
+    }, [manifestNo]);
 
     // useEffect(() => {
     //     if (!loading && manifestData.length > 0 && getBranch.length > 0) {
@@ -57,7 +79,23 @@ function Manifest() {
     // };
 
     // if (loading) return <p>Loading...</p>;
+    const handleDownloadPDF = async () => {
+        const element = document.querySelector("#pdf");
+        if (!element) return;
 
+        if (!element) return;
+
+        const canvas = await html2canvas(element, { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Create PDF with dynamic height = content height
+        const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.save(`Manifest_${manifestNo}.pdf`);
+    };
 
     return (
         <>
@@ -65,42 +103,43 @@ function Manifest() {
             <Sidebar1 />
             <div className="main-body" id="main-body">
                 <div className="container">
-                    <div className="container-2" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
+
+                    <div className="container-2" id="pdf" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
 
                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
 
-                            < div id="printable-section"  className="container-3" style={{ padding: "0px" }}>
+                            < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
                                 <div className="container-3" style={{ border: "7px double black" }}>
 
-                                    <div style={{ height: "130px", display: "flex", flexDirection: "row", borderBottom: "1px solid black", paddingBottom: "5px", marginBottom: "5px"}}>
+                                    <div style={{ height: "130px", display: "flex", flexDirection: "row", borderBottom: "1px solid black", paddingBottom: "5px", marginBottom: "5px" }}>
                                         <div style={{ width: "40%" }}>
                                             <img src={logoimg} alt="" style={{ height: "120px" }} />
                                         </div>
-                                        <div style={{ width: "60%",display:"flex",flexDirection:"column"}}>
-                                            <div style={{ textAlign: "center" ,height:"40%"}}>
+                                        <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
+                                            <div style={{ textAlign: "center", height: "40%" }}>
                                                 <p><b style={{ fontSize: "24px" }}>{BranchData.Company_Name}</b></p>
                                             </div>
-                                            <div style={{ textAlign: "center", display: "flex",paddingLeft:"5px",marginLeft:"50px"}}>
-                                                <div style={{display:"flex",flexDirection:"column",fontWeight:"bold",width:"20%",fontSize: "10px",textAlign:"start"}}>
+                                            <div style={{ textAlign: "center", display: "flex", paddingLeft: "5px", marginLeft: "50px" }}>
+                                                <div style={{ display: "flex", flexDirection: "column", fontWeight: "bold", width: "20%", fontSize: "10px", textAlign: "start" }}>
                                                     <span style={{}}>Address :</span>
                                                     <span style={{}}>Pin Code :</span>
                                                     <span style={{}}>Mob :</span>
-                                                    <span style={{}}>Mob :</span>
-                                                    <span style={{}}>Mob :</span>
+                                                    <span style={{}}>Email :</span>
+                                                    <span style={{}}>GST No :</span>
                                                 </div>
-                                                <div style={{display:"flex",flexDirection:"column",width:"70%",fontSize: "10px",textAlign:"start"}}>
-                                                <span>{BranchData.Branch_Add1}</span>
-                                                 <span>{BranchData.Branch_PIN}</span>
-                                                <span>{BranchData.MobileNo}</span>
-                                                <span>{BranchData.Email}</span>
-                                                 <span>{BranchData.GSTNo}</span>
+                                                <div style={{ display: "flex", flexDirection: "column", width: "70%", fontSize: "10px", textAlign: "start" }}>
+                                                    <span>{BranchData.Branch_Add1}</span>
+                                                    <span>{BranchData.Branch_PIN}</span>
+                                                    <span>{BranchData.MobileNo}</span>
+                                                    <span>{BranchData.Email}</span>
+                                                    <span>{BranchData.GSTNo}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div style={{ display: "flex", fontSize: "12px", border: "1px solid black", marginBottom: "5px", marginTop: "20px" }}>
-                                        <div style={{ display: "flex", flexDirection: "column",width:"50%", borderRight:"1px solid black" , padding: "10px"}}>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
                                             <div>
                                                 <label htmlFor=""><b>VENDOR NAME :</b></label>
                                                 <span style={{ marginLeft: "10px" }}>{manifest.vendorName}</span>
@@ -127,7 +166,7 @@ function Manifest() {
                                             </div>
                                         </div>
 
-                                        <div style={{ display: "flex", flexDirection: "column",width:"50%", padding: "10px"}}>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px" }}>
                                             <div>
                                                 <label htmlFor=""><b>MANIFEST NO :</b></label>
                                                 <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestNo}</label>
@@ -160,48 +199,55 @@ function Manifest() {
                                         </div>
                                     </div>
 
-                                    <div className="table-container2" style={{ borderBottom: "1px solid black"}}>
+                                    <div className="table-container2" style={{ borderBottom: "1px solid black" }}>
                                         <table className='table table-bordered table-sm' style={{ border: "1px solid black" }}>
                                             <thead className='thead'>
                                                 <tr className='tr'>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>Sr.No</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>Date</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>Docket.No</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>Customer.Name</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>Receiver</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>From</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>To</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>MODE</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>QTY</th>
-                                                    <th scope="col" className='th' style={{backgroundColor:"rgba(36, 98, 113, 1)"}}>Actual.Wt</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr.No</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Date</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket.No</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Customer Name</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Consignee Name</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>From</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>To</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>MODE</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>QTY</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Actual.Wt</th>
                                                 </tr>
                                             </thead>
 
                                             <tbody className='tbody'>
-                                                        <tr  className='tr'>
-                                                            <td className='td'>{1}</td>
-                                                            <td className='td'>{manifest.BookDate}</td>
+                                                {manifestData.length > 0 ?
+                                                    manifestData.map((manifest, index) => (
+                                                        <tr key={index} className='tr'>
+                                                            <td className='td'>{index + 1}</td>
+                                                            <td className='td'>{manifest.bookDate}</td>
                                                             <td className='td'>{manifest.DocketNo}</td>
-                                                            <td className='td'>{manifest.Client_Name}</td>
-                                                            <td className='td'>{manifest.Consignee_Name}</td>
-                                                            <td className='td'>{manifest.fromDest}</td>
-                                                            <td className='td'>{manifest.toDest}</td>
-                                                            <td className='td'>{manifest.Mode_Name}</td>
-                                                            <td className='td'>{manifest.sumQty}</td>
-                                                            <td className='td'>{manifest.sumActualWt}</td>
+                                                            <td className='td'>{manifest.customerName}</td>
+                                                            <td className='td'>{manifest.Consignee}</td>
+                                                            <td className='td'>{manifest.fromDestName}</td>
+                                                            <td className='td'>{manifest.toDestName}</td>
+                                                            <td className='td'>{manifest.modeName}</td>
+                                                            <td className='td'>{manifest.Qty}</td>
+                                                            <td className='td'>{manifest.ActualWt}</td>
                                                         </tr>
+                                                    )) : (
+                                                        <tr>
+                                                            <td colSpan="10">No data available</td>
+                                                        </tr>
+                                                    )}
                                             </tbody>
                                         </table>
 
                                         <div className='page'>
                                             <div>
                                                 <label htmlFor="">Total QTY :</label>
-                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{1}</label>
+                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{sumQty}</label>
                                             </div>
 
                                             <div>
                                                 <label htmlFor="">Total Wt :</label>
-                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{2}</label>
+                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{sumActualWt}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -211,9 +257,9 @@ function Manifest() {
                                     </div>
 
                                     <div className='page' style={{ justifyContent: "space-between" }}>
-                                        <div className='page'style={{ marginTop: "20px"}}>
+                                        <div className='page' style={{ marginTop: "20px" }}>
                                             <p>Prepared by :</p>
-                                            <p style={{textAlign:"start",paddingLeft:"5px"}}><b style={{ fontSize: "12px", marginRight: "10px" }}>{BranchData.Company_Name}</b></p>
+                                            <p style={{ textAlign: "start", paddingLeft: "5px" }}><b style={{ fontSize: "12px", marginRight: "10px" }}>{BranchData.Company_Name}</b></p>
                                         </div>
                                         <div className='page' style={{ marginTop: "20px" }}>
                                             <p>Checked by :</p>
@@ -227,6 +273,20 @@ function Manifest() {
                                 </div>
                             </div >
                         </div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", margin: "10px 20px" }}>
+                        <button
+                            onClick={handleDownloadPDF}
+                            style={{ padding: "8px 16px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Download PDF
+                        </button>
+                        <button
+                            onClick={() => navigate(-1)}
+                            style={{ padding: "8px 16px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Back
+                        </button>
                     </div>
                 </div>
             </div >

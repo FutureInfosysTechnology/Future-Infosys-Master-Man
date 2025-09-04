@@ -32,11 +32,11 @@ function DocketPrint3() {
                             <div className="fields2">
                                 <div className="input-field3">
                                     <label htmlFor="">From</label>
-                                    <input type="text" placeholder='Enter From' value={formData.from} onChange={(e) => handleFormChange(e.target.value, "from")} />
+                                    <input type="text" placeholder='From Docket' value={formData.from} onChange={(e) => handleFormChange(e.target.value, "from")} />
                                 </div>
                                 <div className="input-field3">
                                     <label htmlFor="">To</label>
-                                    <input type="text" placeholder='Enter To' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} />
+                                    <input type="text" placeholder='To Docket' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} />
                                 </div>
         
                                 

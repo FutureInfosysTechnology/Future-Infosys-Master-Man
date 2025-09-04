@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
-
+import "./permonce.css"
 
 function PerformanceBill() {
 
@@ -28,113 +28,113 @@ function PerformanceBill() {
                 <div className="container1">
 
                     <div className='container-2'>
-                        <div className="card left-card" >
+
+                        <div className="card left-card">
                             <div className="section-title">SHIPPER</div>
-                            <form action="" style={{margin:"0px", padding:"0px"}}>
-                                <div className="fields2">
-                                    <div className="input-field1">
-                                        <label htmlFor="">Shipper</label>
-                                        <select value="">
+                            <form>
+                                <div className="fields2 row mx-0">
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Shipper</label>
+                                        <select value="" className="form-control">
                                             <option value="" disabled>Select Shipper</option>
-                                            <option value=""></option>
+                                            <option value="" ></option>
                                         </select>
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Shipper Address</label>
-                                        <input type="text" placeholder='Shipper Address' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Shipper Address</label>
+                                        <input type="text" className="form-control" placeholder="Shipper Address" />
+                                    </div>
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Shipper Address</label>
+                                        <input type="text" className="form-control" placeholder="Shipper Address" />
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Shipper Address</label>
-                                        <input type="text" placeholder='Shipper Address' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Pin Code</label>
+                                        <input type="tel" className="form-control" maxLength={6} placeholder="Pin Code" />
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Shipper City</label>
-                                        <select value="">
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Shipper City</label>
+                                        <select value="" className="form-control">
                                             <option value="" disabled>Select City</option>
-                                            <option value=""></option>
                                         </select>
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Pin Code</label>
-                                        <input type="tel" maxLength={6} placeholder='Pin Code' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Aadhar No</label>
+                                        <input type="tel" className="form-control" maxLength={12} placeholder="Aadhar No" />
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Shipper State</label>
-                                        <select value="">
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Shipper State</label>
+                                        <select value="" className="form-control">
                                             <option value="" disabled>Select State</option>
-                                            <option value=""></option>
                                         </select>
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Aadhar No</label>
-                                        <input type="tel" maxLength={12} placeholder='Aadhar No' />
-                                    </div>
-
-                                    <div className="input-field1">
-                                        <label htmlFor="">GST No</label>
-                                        <input type="text" maxLength={16} placeholder='GST No' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">GST No</label>
+                                        <input type="text" className="form-control" maxLength={16} placeholder="GST No" />
                                     </div>
                                 </div>
                             </form>
                         </div>
 
+
+
                         <div className="card right-card">
                             <div className="section-title">RECEIVER</div>
-                            <form action="" style={{margin:"0px", padding:"0px"}}>
-                                <div className="fields2">
-                                    <div className="input-field1">
-                                        <label htmlFor="">Receiver</label>
-                                        <select value="">
+                            <form action="" style={{ margin: "0px", padding: "0px" }}>
+                                <div className="fields2 row mx-0">
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Receiver</label>
+                                        <select value="" className="form-control">
                                             <option value="" disabled>Select Receiver</option>
                                             <option value=""></option>
                                         </select>
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Receiver Address</label>
-                                        <input type="text" placeholder='Receiver Address' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Receiver Address</label>
+                                        <input type="text" className="form-control" placeholder='Receiver Address' />
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Receiver Address</label>
-                                        <input type="text" placeholder='Receiver Address' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Receiver Address</label>
+                                        <input type="text" className="form-control" placeholder='Receiver Address' />
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Receiver City</label>
-                                        <select value="">
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Receiver City</label>
+                                        <select value="" className="form-control">
                                             <option value="" disabled>Select City</option>
                                             <option value=""></option>
                                         </select>
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Pin Code</label>
-                                        <input type="tel" maxLength={6} placeholder='Pin Code' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Pin Code</label>
+                                        <input type="tel" className="form-control" maxLength={6} placeholder='Pin Code' />
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Receiver State</label>
-                                        <select value="">
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Receiver State</label>
+                                        <select value="" className="form-control">
                                             <option value="" disabled>Select State</option>
                                             <option value=""></option>
                                         </select>
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Mobile No</label>
-                                        <input type="tel" maxLength={10} placeholder='Mobile No' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">Mobile No</label>
+                                        <input type="tel" className="form-control" maxLength={10} placeholder='Mobile No' />
                                     </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">GST No</label>
-                                        <input type="text" maxLength={16} placeholder='GST No' />
+                                    <div className="input-field col-md-6">
+                                        <label className="form-label">GST No</label>
+                                        <input type="text" className="form-control" maxLength={16} placeholder='GST No' />
                                     </div>
                                 </div>
                             </form>
@@ -143,51 +143,52 @@ function PerformanceBill() {
                     </div>
 
                     <div className="card">
-                        <div className="section-title">Courier Details</div>
-                        <form style={{ margin: "0px", padding: "0px" }}>
-                            <div className="fields2">
-                                <div className="input-field3">
-                                    <label htmlFor="">Invoice No</label>
-                                    <input type="tel" placeholder='Invoice No' />
-                                </div>
-                                <div className="input-field3">
-                                    <label htmlFor="">Invoice Date</label>
-                                    <input type="date" />
-                                </div>
+  <div className="section-title">Courier Details</div>
+  <form style={{ margin: "0px", padding: "0px" }}>
+    <div className="row g-3 mx-0">
+      <div className="input-field col-md-4 col-sm-6">
+        <label className="form-label">Invoice No</label>
+        <input type="tel" className="form-control" placeholder="Invoice No" />
+      </div>
 
-                                <div className="input-field3">
-                                    <label htmlFor="">Docket No</label>
-                                    <input type="text" placeholder='Docket No' />
-                                </div>
+      <div className="input-field col-md-4 col-sm-6">
+        <label className="form-label">Invoice Date</label>
+        <input type="date" className="form-control" />
+      </div>
 
-                                <div className="input-field3">
-                                    <label htmlFor="">Country of Origin</label>
-                                    <select value="">
-                                        <option value="" disabled>Select Country</option>
-                                        <option value="">India</option>
-                                    </select>
-                                </div>
+      <div className="input-field col-md-4 col-sm-6">
+        <label className="form-label">Docket No</label>
+        <input type="text" className="form-control" placeholder="Docket No" />
+      </div>
 
-                                <div className="input-field3">
-                                    <label htmlFor="">Final Destination</label>
-                                    <select value="">
-                                        <option value="" disabled>Select Destination</option>
-                                        <option value=""></option>
-                                    </select>
-                                </div>
+      <div className="input-field col-md-4 col-sm-6">
+        <label className="form-label">Country of Origin</label>
+        <select value="" className="form-control"  style={{height:'35px'}}>
+          <option value="" disabled>Select Country</option>
+          <option>India</option>
+        </select>
+      </div>
 
-                                <div className="input-field3">
-                                    <label htmlFor="">No of Boxes</label>
-                                    <input type="tel" placeholder='No of Boxes' />
-                                </div>
+      <div className="input-field col-md-4 col-sm-6">
+        <label className="form-label">Final Destination</label>
+        <select value="" className="form-control" style={{height:'35px'}}>
+          <option value="" disabled>Select Destination</option>
+        </select>
+      </div>
 
-                                <div className="input-field3">
-                                    <label htmlFor="">Total Weight</label>
-                                    <input type="tel" placeholder='Total Weight' />
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+      <div className="input-field col-md-4 col-sm-6">
+        <label className="form-label">No of Boxes</label>
+        <input type="tel" className="form-control" placeholder="No of Boxes" />
+      </div>
+
+      <div className="input-field col-md-4 col-sm-6">
+        <label className="form-label">Total Weight</label>
+        <input type="tel" className="form-control" placeholder="Total Weight" />
+      </div>
+    </div>
+  </form>
+</div>
+
 
 
 

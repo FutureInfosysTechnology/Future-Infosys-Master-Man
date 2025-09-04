@@ -16,18 +16,7 @@ const DocketPrint4 = () => {
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const response = await getApi(`/Booking/DocketReceipt?FromDocket=DKT0036859&ToDocket=DKT0037950`);
-            if (response.status === 1) {
-                console.log(response.Data);
-                setData(response.Data);
-                navigate("/MobileReceipt", { state: { data:response.Data } });
-        }}
-        catch (error) {
-            console.error("API Error:", error);
-            setData([]);
-            Swal.fire('No Data', 'No records found.', 'info');
-        }
+                navigate("/MobileReceipt", { state: { from:formData.from,to:formData.to } });
     }
     return (
         <>
@@ -36,11 +25,11 @@ const DocketPrint4 = () => {
                     <div className="fields2">
                         <div className="input-field3">
                             <label htmlFor="">From</label>
-                            <input type="text" placeholder='Enter From' value={formData.from} onChange={(e) => handleFormChange(e.target.value, "from")} />
+                            <input type="text" placeholder='From Docket' value={formData.from} onChange={(e) => handleFormChange(e.target.value, "from")} />
                         </div>
                         <div className="input-field3">
                             <label htmlFor="">To</label>
-                            <input type="text" placeholder='Enter To' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} />
+                            <input type="text" placeholder='To Docket' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} />
                         </div>
 
 

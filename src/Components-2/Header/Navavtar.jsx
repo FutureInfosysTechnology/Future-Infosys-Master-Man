@@ -14,7 +14,7 @@ function Navavtar() {
         // Perform sign-out logic (e.g., clearing tokens)
         localStorage.removeItem('token');
 
-        navigate('/signout');
+        navigate('/login');
     }
 
     const handleProfile = () => {
