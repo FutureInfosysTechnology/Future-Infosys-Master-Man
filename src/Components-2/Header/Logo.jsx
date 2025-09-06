@@ -1,7 +1,7 @@
 import React from "react";
 import './Logo.css';
 import '../Dashboard/Mainstyle.css';
-import futurelogo from '../../Assets/Images/logo-img.png';
+import future from '../../Assets/Images/future.png';
 
 function Logo() {
     const handleToggleSidebar = () => {
@@ -13,7 +13,7 @@ function Logo() {
                 id="toggle-btn"
                 onClick={handleToggleSidebar}></i>
             <a href="/" className="logo d-flex align-items-center" style={{ textDecoration: "none" }}>
-            <img src={futurelogo} className="logo-img" alt="" />
+            <img src={future} className="logo-img" style={{width:"80px"}} />
             </a>
 
             

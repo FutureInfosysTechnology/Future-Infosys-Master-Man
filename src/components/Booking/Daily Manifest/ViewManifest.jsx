@@ -79,7 +79,7 @@ function ViewManifest() {
             fromDate: formValues.fromDate,
             toDate: formValues.toDate,
             pageNumber: currentPage,
-            pageSize: 10
+            pageSize: rowsPerPage
         };
         fetchData('/Manifest/viewManifestData', params);
     };

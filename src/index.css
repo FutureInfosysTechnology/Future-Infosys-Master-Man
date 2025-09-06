@@ -33,3 +33,6 @@ blue-selectbooking__input input:focus {
   outline: none !important;
   box-shadow: none !important;
 }
+#pdf {
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+}

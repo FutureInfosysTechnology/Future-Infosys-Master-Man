@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import '../../Tabs/tabs.css';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -7,11 +7,12 @@ import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
 import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { refeshPend } from "../../../App";
 
 
 
 function PendingDrs() {
-
+    const {ref}=useContext(refeshPend)
     const [getData, setGetData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -24,11 +25,11 @@ function PendingDrs() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=DEL&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
+                const response = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=All&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
                 const currentPageData = Array.isArray(response.data) ? response.data : [];
                 setGetData(currentPageData);
 
-                const allDataResponse = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=DEL&pageNumber=1&pageSize=10000`);
+                const allDataResponse = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=All&pageNumber=1&pageSize=10000`);
                 const allData = Array.isArray(allDataResponse.data) ? allDataResponse.data : [];
                 setTotalRecords(allData.length);
             } catch (error) {
@@ -39,7 +40,7 @@ function PendingDrs() {
         };
 
         fetchData();
-    }, [currentPage, rowsPerPage]);
+    }, [currentPage, rowsPerPage,ref]);
 
 
     const totalPages = Math.ceil(totalRecords / rowsPerPage);
@@ -131,14 +132,13 @@ function PendingDrs() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-info body-bordered table-sm'>
                                 <tr>
-                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Docket.No</th>
                                     <th scope="col">Booking.Date</th>
                                     <th scope="col">Manifest.No</th>
                                     <th scope="col">Manifest.Date</th>
                                     <th scope="col">Customer.Name</th>
-                                    <th scope="col">Receiver.Name</th>
+                                    <th scope="col">Consignee.Name</th>
                                     <th scope="col">Mobile.No</th>
                                     <th scope="col">Pin.Code</th>
                                     <th scope="col">From</th>
@@ -155,21 +155,15 @@ function PendingDrs() {
                             <tbody className='table-body'>
 
                                 {filteredgetData.map((runsheet, index) => (
-                                    <tr key={index}>
-                                        <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn'><i className='bi bi-pen'></i></button>
-                                                <button className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
-                                        </td>
+                                    <tr key={index} style={{whiteSpace:"nowrap"}}>
                                         <td>{index + 1}</td>
                                         <td>{runsheet.DocketNo}</td>
-                                        <td>{runsheet.bookDate}</td>
+                                        <td>{runsheet.Bookdate}</td>
                                         <td>{runsheet.manifestNo}</td>
-                                        <td>{runsheet.manifestDate}</td>
+                                        <td>{runsheet.ManifestDate}</td>
                                         <td>{runsheet.customerName}</td>
                                         <td>{runsheet.consigneeName}</td>
-                                        <td>{runsheet.consigneeTel}</td>
+                                        <td>{runsheet.Consignee_Mob}</td>
                                         <td>{runsheet.consigneePin}</td>
                                         <td>{runsheet.OriginName}</td>
                                         <td>{runsheet.DestinationName}</td>
@@ -179,7 +173,7 @@ function PendingDrs() {
                                         <td>{runsheet.modeType}</td>
                                         <td>{runsheet.Status}</td>
                                         <td>{runsheet.customerType}</td>
-                                        <td>{runsheet.inscanDt}</td>
+                                        <td>{runsheet.Inscan_Dt}</td>
                                     </tr>
                                 ))}
                             </tbody>

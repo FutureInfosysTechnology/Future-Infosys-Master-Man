@@ -4,6 +4,8 @@ import Select from 'react-select';
 import 'react-toggle/style.css';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
+import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 function Delivered() {
     const today = new Date();
@@ -31,26 +33,19 @@ function Delivered() {
     const getDelieveredData = async (awbNo, refNo) => {
         try {
             setIsLoading(true);
-            const response = await axios.get('https://sunraise.in/JdCourierlablePrinting/Delivery/getTrackingData', {
-                params: {
-                    awbNo: Array.isArray(formData.DocketNo) ? formData.DocketNo.join(",") : formData.DocketNo,
-                    refNo: Array.isArray(formData.ReferenceNo) ? formData.ReferenceNo.join(",") : formData.ReferenceNo,
-                }
-            })
-
-            if (response.data.status === 1) {
-                const data = response.data.Data;
-                setTimeout(() => {
-                    setIsLoading(false);
-                    setDeliveryData(data.length > 0 ? data : []);
-                }, 1000);
-            } else {
-                alert('Error fetching data.');
-                setIsLoading(false);
+            const response =await getApi(`/Master/getTrackingData?DocketNo=303330`);
+            if (response.status === 1) {
+                setDeliveryData(response.Data);
             }
         } catch (error) {
             console.error('Fetch Error:', error);
-            alert('Error fetching data. Please try again later.');
+            Swal.fire({
+                                icon: 'warning',
+                                title: 'No Data Found',
+                                text: 'No data available for the selected AWB NO or REf NO.',
+                                showConfirmButton: true,
+                            });
+        }finally{
             setIsLoading(false);
         }
     }
@@ -60,7 +55,7 @@ function Delivered() {
         getDelieveredData(formData.DocketNo, formData.ReferenceNo);
     };
 
-
+    console.log(deliveryData.length);
     return (
         <>
             <div className="body">
@@ -222,7 +217,7 @@ function Delivered() {
 
                                 <div className="input-field3">
                                     <label >Booking Date</label>
-                                    <input type="text" placeholder="Booking Date" value={deliveryData[0]?.bookdate || ''} readOnly />
+                                    <input type="text" placeholder="Booking Date" value={deliveryData[0]?.BookDate || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
@@ -272,13 +267,12 @@ function Delivered() {
                                 <div className="input-field3">
                                     <label >Origin</label>
                                     <input type="text" placeholder="Origin"
-                                        value={deliveryData[0]?.Origin_City || ''} readOnly />
+                                        value={deliveryData[0]?.OriginCity || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
                                     <label >Destination</label>
-                                    <input type="text" placeholder="Destination"
-                                        value={deliveryData[0]?.Destination_City || ''} readOnly />
+                                    <input type="text" placeholder="Destination" value={deliveryData[0]?.StatusEntry[0]?.Destination_name || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
@@ -298,17 +292,17 @@ function Delivered() {
 
                                 <div className="input-field3">
                                     <label >Delivery Date</label>
-                                    <input type="text" placeholder="Delivery Date" value={deliveryData[0]?.DelvDT || ''} readOnly />
+                                    <input type="text" placeholder="Delivery Date" value={deliveryData[0]?.StatusEntry[0]?.DelvDT || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
                                     <label >Delivery Time</label>
-                                    <input type="text" placeholder="Delivery Time" value={deliveryData[0]?.DelvTime || ''} readOnly />
+                                    <input type="text" placeholder="Delivery Time" value={deliveryData[0]?.StatusEntry[0]?.DelvTime || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
                                     <label >E Way Bill No</label>
-                                    <input type="text" placeholder="E Way Bill No" value={deliveryData[0]?.EwayBill || ''} readOnly />
+                                    <input type="text" placeholder="E Way Bill No" value={deliveryData[0]?.Ewaybill || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
@@ -323,7 +317,7 @@ function Delivered() {
 
                                 <div className="input-field3">
                                     <label >Stamp</label>
-                                    <input type="text" placeholder="Stamp" value={deliveryData[0]?.Stamp || ''} readOnly />
+                                    <input type="text" placeholder="Stamp" value={deliveryData[0]?.SignStamp || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">

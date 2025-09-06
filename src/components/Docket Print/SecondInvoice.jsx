@@ -1,430 +1,288 @@
-import React, { useState, useEffect } from 'react';
-import Footer from '../../Components-2/Footer';
-import Sidebar1 from '../../Components-2/Sidebar1';
-import Header from '../../Components-2/Header/Header';
+import React, { useRef, useState, useEffect } from 'react';
 import logoimg from '../../Assets/Images/AceLogo.jpeg';
+import { useLocation, useNavigate } from 'react-router-dom';
+import 'jspdf-autotable';
 import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import Header from '../../Components-2/Header/Header';
+import Sidebar1 from '../../Components-2/Sidebar1';
 
 
 function SecondInvoice() {
 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const manifest = location?.state?.data || {};
     const [getBranch, setGetBranch] = useState([]);
+    const [manifestData, setGetManifestData] = useState([]);
+    console.log(location.state);
+    const manifestNo = manifest?.manifestNo || "";
+    const sumQty = manifest?.sumQty || 0;
+    const sumActualWt = manifest?.sumActualWt || 0;
     const [loading, setLoading] = useState(true);
-
-
-    const fetchBranchData = async () => {
-        try {
-            const response = await getApi('/Master/getBranch');
-            setGetBranch(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+    console.log(manifestNo, sumQty, sumActualWt);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getApi("/Master/getBranch");
+                if (response.status === 1) {
+                    console.log(response.Data);
+                    setGetBranch(response.Data);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
         }
-        finally {
-            setLoading(false);
-        }
-    };
+        fetchData();
+    }, [])
+    const BranchData = getBranch.length > 0 ? getBranch[1] : {};
 
     useEffect(() => {
-        fetchBranchData();
-    }, []);
+        const fetchData = async () => {
+            try {
+                const response = await getApi(`/Manifest/viewManifestPrint?sessionLocationCode=MUM&manifestNo=${manifestNo}`);
+                setGetManifestData(Array.isArray(response.data) ? response.data : []);
+                console.log(response);
+            } catch (err) {
+                console.error('Fetch Error:', err);
+            } finally {
+                setLoading(false);
+                setIsDataLoaded(true);
+                // generatePDF();
+            }
+        };
+        if (manifestNo) {
+            fetchData();
+        }
+    }, [manifestNo]);
 
-    const BranchData = getBranch.length > 0 ? getBranch[0] : {};
+    // useEffect(() => {
+    //     if (!loading && manifestData.length > 0 && getBranch.length > 0) {
+    //         setTimeout(generatePDF, 1000);
+    //     }
+    // }, [loading, manifestData, getBranch]);
+
+    // const generatePDF = async () => {
+    //     if (!pageRef.current) return;
+    //     const canvas = await html2canvas(pageRef.current, { scale: 2 });
+    //     const imgData = canvas.toDataURL('image/png');
+
+    //     const pdf = new jsPDF('p', 'mm', 'a4');
+    //     const pdfWidth = pdf.internal.pageSize.getWidth();
+    //     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    //     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    //     pdf.save(`Manifest_${manifestNo}.pdf`);
+    // };
+
+    // if (loading) return <p>Loading...</p>;
+    const handleDownloadPDF = async () => {
+        const element = document.querySelector("#pdf");
+        if (!element) return;
+        
+        const canvas = await html2canvas(element, { scale: 4 });
+        const imgData = canvas.toDataURL("image/png");
+
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Create PDF with dynamic height = content height
+        const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.save(`Manifest_${manifestNo}.pdf`);
+    };
 
     return (
         <>
             <Header />
             <Sidebar1 />
             <div className="main-body" id="main-body">
-                <div className="container" style={{ padding: "30px" }}>
-                    <div className="container" style={{ border: "1px solid black", padding: "0px", width: "879px" }}>
+                <div className="container">
 
-                        <div style={{ height: "130px", display: "flex", flexDirection: "row", borderBottom: "1px solid black" }}>
-                            <div style={{ width: "70%", display: "flex", flexDirection: "row", border: "1px solid black" }}>
-                                <div style={{ marginRight: "9%" }}>
-                                    <img src={logoimg} alt="" style={{ height: "130px", paddingBottom: "2px" }} />
-                                </div>
-                                <div style={{ textAlign: "center", display: "flex", flexDirection: "column" }}>
-                                    <p><b style={{ fontSize: "24px" }}>Aventure Cargo Express</b></p>
-                                    <span style={{ fontSize: "10px" }}><b>Email : {BranchData.Email}</b></span>
-                                    <span style={{ fontSize: "10px", marginLeft: "10px" }}><b>GST No : {BranchData.GSTNo}</b></span>
-                                </div>
-                            </div>
-                            <div style={{ width: "30%", border: "1px solid black" }}>
-                                <div style={{ textAlign: "center", display: "flex", flexDirection: "column" }}>
-                                    <span style={{ fontSize: "13px", marginTop: "5px" }}><b>Office Address :</b>{BranchData.Branch_Add1}</span>
-                                    <span style={{ fontSize: "13px", marginTop: "5px" }}><b>Pin Code :</b>{BranchData.Branch_PIN}</span>
-                                    <span style={{ fontSize: "13px", color: "blue", marginTop: "5px" }}><b>Mob : {BranchData.MobileNo}</b></span>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="container-2" id="pdf" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
 
-                        <div style={{ display: "flex", flexDirection: "row", height: "150px" }}>
-                            <div style={{ display: "flex", flexDirection: "column", width: "65%", border: "1px solid black" }}>
-                                <p style={{ margin: "0px" }}><b style={{ fontSize: "10px" }}>To,</b></p>
-                                <p style={{ margin: "0px", marginLeft: "15px" }}><b style={{ fontSize: "12px" }}>CONVENTUS TECHNOLOGIES PVT LTD.</b></p>
-                                <p style={{ margin: "0px", marginLeft: "15px", fontSize: "12px" }}>UNIT 812 , NEELKANTH CORPORATE PARK,</p>
-                                <p style={{ margin: "0px", marginLeft: "15px", fontSize: "12px" }}>KIROL ROAD , VIDYAVIHAR WEST</p>
-                                <p style={{ margin: "0px", marginLeft: "15px", fontSize: "12px" }}>400086</p>
-                                <p style={{ margin: "0px", marginLeft: "15px", fontSize: "12px" }}>25103379    9594996804</p>
-                                <p style={{ margin: "0px", marginLeft: "15px" }}><b style={{ fontSize: "12px" }}>GSTIN .:27AADCC8181E1ZN</b></p>
-                            </div>
+                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
 
-                            <div style={{ display: "flex", flexDirection: "column", width: "35%" }}>
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>Invoice No.</b></label>
+                            < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
+                                <div className="container-3" style={{ border: "7px double black" }}>
+
+                                    <div style={{ height: "130px", display: "flex", flexDirection: "row", borderBottom: "1px solid black", paddingBottom: "5px", marginBottom: "5px" }}>
+                                        <div style={{ width: "40%" }}>
+                                            <img src={logoimg} alt="" style={{ height: "120px" }} />
+                                        </div>
+                                        <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
+                                            <div style={{ textAlign: "center", height: "40%" }}>
+                                                <p><b style={{ fontSize: "24px" }}>{BranchData.Company_Name}</b></p>
+                                            </div>
+                                            <div style={{ textAlign: "center", display: "flex", paddingLeft: "5px", marginLeft: "50px" }}>
+                                                <div style={{ display: "flex", flexDirection: "column", fontWeight: "bold", width: "20%", fontSize: "10px", textAlign: "start" }}>
+                                                    <span style={{}}>Address :</span>
+                                                    <span style={{}}>Pin Code :</span>
+                                                    <span style={{}}>Mob :</span>
+                                                    <span style={{}}>Email :</span>
+                                                    <span style={{}}>GST No :</span>
+                                                </div>
+                                                <div style={{ display: "flex", flexDirection: "column", width: "70%", fontSize: "10px", textAlign: "start" }}>
+                                                    <span>{BranchData.Branch_Add1}</span>
+                                                    <span>{BranchData.Branch_PIN}</span>
+                                                    <span>{BranchData.MobileNo}</span>
+                                                    <span>{BranchData.Email}</span>
+                                                    <span>{BranchData.GSTNo}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
+                                    <div style={{ display: "flex", fontSize: "12px", border: "1px solid black", marginBottom: "5px", marginTop: "20px" }}>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
+                                            <div style={{ fontWeight: "bold" }}>TO,</div>
+                                            <div>
+                                                <label htmlFor=""><b>CLIENT NAME :</b></label>
+                                                <span style={{ marginLeft: "10px" }}>{manifest.vendorName}</span>
+                                            </div>
 
-                                    </div>
-                                </div>
+                                            <div>
+                                                <label htmlFor=""><b>ADDRESS :</b></label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.vehicleNo}</label>
+                                            </div>
+                                            <div>
+                                                <label htmlFor=""><b>CLIENT MOBILE NO :</b></label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.driverMobile}</label>
+                                            </div>
 
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>From Date</b></label>
-                                    </div>
+                                            <div>
+                                                <label htmlFor=""><b>PIN CODE :</b></label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.Remark}</label>
+                                            </div>
+                                            <div>
+                                                <label htmlFor=""><b>GST NO :</b></label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.Remark}</label>
+                                            </div>
+                                        </div>
 
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px" }}>
+                                            <div>
+                                                <label htmlFor=""><b>INVOICE NO :</b></label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestNo}</label>
+                                            </div>
 
-                                    </div>
-                                </div>
+                                            <div>
+                                                <label htmlFor=""><b>INVOICE DATE :</b></label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestDt}</label>
+                                            </div>
 
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>To Date</b></label>
-                                    </div>
+                                            <div>
+                                                <label htmlFor=""><b>INVOICE FROM :</b></label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.fromDest}</label>
+                                            </div>
 
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>Invoice Date</b></label>
-                                    </div>
-
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%", border: "1px solid black", paddingLeft: "5px" }}>
-                                    <label htmlFor=""><b>Email.:</b></label>
-                                    <input type="text" style={{ border: "transparent" }} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="table-container2">
-                            <table className='table table-bordered m-0'>
-                                <thead>
-                                    <tr>
-                                        <th className='bg-white'>Sr No</th>
-                                        <th className='bg-white'>Date</th>
-                                        <th className='bg-white'>Docket No</th>
-                                        <th className='bg-white'>Destination</th>
-                                        <th className='bg-white'>Boxes</th>
-                                        <th className='bg-white'>QTY</th>
-                                        <th className='bg-white'>Freight</th>
-                                        <th className='bg-white'>Fuel</th>
-                                        <th className='bg-white'>Delivery</th>
-                                        <th className='bg-white'>Handle</th>
-                                        <th className='bg-white'>Green</th>
-                                        <th className='bg-white'>Docket</th>
-                                        <th className='bg-white'>Others</th>
-                                        <th className='bg-white'>Amount</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody className='table-body'>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>0</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>3</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>0</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>4</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>5</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>0</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>6</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>7</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>0</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>8</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>9</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>0</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>11</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>0</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>12</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div style={{ display: "flex", flexDirection: "row", height: "150px" }}>
-                            <div style={{ display: "flex", flexDirection: "column", width: "65%", border: "1px solid black", paddingTop: "10%" }}>
-
-                            </div>
-
-                            <div style={{ display: "flex", flexDirection: "column", width: "35%" }}>
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>TOTAL</b></label>
+                                            <div>
+                                                <label htmlFor=""><b>INVOICE TO:</b></label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.toDest}</label>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
+                                    <div className="table-container2" style={{ borderBottom: "1px solid black" }}>
+                                        <table className='table table-bordered table-sm' style={{ border: "1px solid black" }}>
+                                            <thead className='thead'>
+                                                <tr className='tr' style={{border:"2px solid black"}}>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr.No</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Date</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket No</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Destination</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Boxes</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>QTY</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Freight</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Fuel</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Delivery</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Handle</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Green</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Others</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Amount</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody className='tbody'>
+                                                {manifestData.length > 0 ?
+                                                    manifestData.map((manifest, index) => (
+                                                        <tr key={index} className='tr'>
+                                                            <td className='td'>{index + 1}</td>
+                                                            <td className='td'>{manifest.bookDate}</td>
+                                                            <td className='td'>{manifest.DocketNo}</td>
+                                                            <td className='td'>{manifest.customerName}</td>
+                                                            <td className='td'>{manifest.Consignee}</td>
+                                                            <td className='td'>{manifest.fromDestName}</td>
+                                                            <td className='td'>{manifest.toDestName}</td>
+                                                            <td className='td'>{manifest.modeName}</td>
+                                                            <td className='td'>{manifest.Qty}</td>
+                                                            <td className='td'>{manifest.ActualWt}</td>
+                                                            <td className='td'>{manifest.Qty}</td>
+                                                            <td className='td'>{manifest.ActualWt}</td>
+                                                            <td className='td'>{manifest.Qty}</td>
+                                                            <td className='td'>{manifest.ActualWt}</td>
+                                                        </tr>
+                                                    )) : (
+                                                        <tr>
+                                                            <td colSpan="14">No data available</td>
+                                                        </tr>
+                                                    )}
+                                            </tbody>
+                                        </table>
+
+                                        <div className='page'>
+                                            <div>
+                                                <label htmlFor="">Total QTY :</label>
+                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{sumQty}</label>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div className='page' style={{ marginTop: "20px" }}>
+                                        <p>Received by :</p><span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
+                                    </div>
+
+                                    <div className='page' style={{ justifyContent: "space-between" }}>
+                                        <div className='page' style={{ marginTop: "20px" }}>
+                                            <p>Prepared by :</p>
+                                            <p style={{ textAlign: "start", paddingLeft: "5px" }}><b style={{ fontSize: "12px", marginRight: "10px" }}>{BranchData.Company_Name}</b></p>
+                                        </div>
+                                        <div className='page' style={{ marginTop: "20px" }}>
+                                            <p>Checked by :</p>
+                                            <span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
+                                        </div>
+
+                                        <div className='page' style={{ marginTop: "20px" }}>
+                                            <p>Signature With Stamp :</p><span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>IGST @ of 18.00%</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>SGST @ of 9.00%</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>CGST @ of 9.00%</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>BILL AMOUNT</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ height: "30px", paddingLeft: "10px", border: "1px solid black" }}>
-                            <p><b>AMOUNT IN WORD-</b> <b>TWO LAKHS TWENTY-TWO THOUSAND SEVEN HUNDRED THIRTY-SIX ONLY</b></p>
-                        </div>
-
-                        <div style={{ height: "240px", border: "1px solid black", paddingLeft: "10px" }}>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>1. Cheque should be issued in the Favour of "Renu Supplychain"</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>2. Any delay to pay the Invoice within two weekswill atract 2% Interest per month.</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>3. GSTIN No :27BDPPP3527C1ZG</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>4. Pan No. :BDPPP3527C</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>5. Bank Details:</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>Company Name: Renu Supplychain Bank Name : Andhra Bank Account No. 270511100003624</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>IFSC Code : ANDB0002705</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>Branch : Vasai East -401208</p>
-                            <p style={{ margin: "0px", fontSize: "12px", marginTop: "15px" }}><b> Authorised Sign & Stamp</b> <span style={{ marginLeft: "65%" }}><b>Receiver Sign & Stamp </b></span> </p>
+                            </div >
                         </div>
                     </div>
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", margin: "10px 20px" }}>
+                        <button
+                            onClick={handleDownloadPDF}
+                            style={{ padding: "8px 16px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Download PDF
+                        </button>
+                        <button
+                            onClick={() => navigate(-1)}
+                            style={{ padding: "8px 16px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Back
+                        </button>
+                    </div>
                 </div>
-                <Footer />
-            </div>
+            </div >
         </>
-    )
+    );
 }
 
 export default SecondInvoice;

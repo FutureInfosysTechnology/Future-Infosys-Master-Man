@@ -74,7 +74,10 @@ function GenerateInvoice() {
                                     }))}
                                     value={
                                         formData.branch
-                                            ? getCity.find(c => c.City_Code === formData.branch)
+                                            ? {
+                                                value: formData.branch,
+                                                label: getCity.find(c => c.City_Code === formData.branch)?.City_Name
+                                            }
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -104,10 +107,10 @@ function GenerateInvoice() {
                                 <label htmlFor="">Type</label>
                                 <select value={formData.type} onChange={(e) => handleFormChange(e.target.value, "type")}>
                                     <option value="" disabled>Select Type</option>
-                                    <option value="client">Client Wise</option>
-                                    <option value="client">Shipper Wise</option>
-                                    <option value="client">Receiver Wise</option>
-                                    <option value="client">Alarm No Wise</option>
+                                    <option value="Client Wise">Client Wise</option>
+                                    <option value="Shipper Wise">Shipper Wise</option>
+                                    <option value="Receiver Wise">Receiver Wise</option>
+                                    <option value="Alarm No Wise">Alarm No Wise</option>
                                 </select>
                             </div>
 
@@ -115,11 +118,11 @@ function GenerateInvoice() {
                                 <label htmlFor="">Customer Type</label>
                                 <select value={formData.customerType} onChange={(e) => handleFormChange(e.target.value, "customerType")}>
                                     <option value="" disabled>Select Customer</option>
-                                    <option value="">All</option>
-                                    <option value="">Single</option>
+                                    <option value="All">All</option>
+                                    <option value="Single">Single</option>
                                 </select>
                             </div>
-                               <div className="input-field3 flex-fill" style={{ flex: "1 1 300px", minWidth: "240px", maxWidth: "100%" }}>
+                            <div className="input-field3 flex-fill" style={{ flex: "1 1 300px", minWidth: "240px", maxWidth: "100%" }}>
                                 <label htmlFor="">Customer</label>
                                 <Select
                                     options={getCustomer.map(cust => ({
@@ -128,9 +131,13 @@ function GenerateInvoice() {
                                     }))}
                                     value={
                                         formData.customer
-                                            ? getCustomer.find(c => c.Customer_Code === formData.customer)
+                                            ? {
+                                                value: formData.customer,
+                                                label: getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name
+                                            }
                                             : null
                                     }
+
                                     onChange={(selectedOption) =>
                                         setFormData({
                                             ...formData,
@@ -140,9 +147,9 @@ function GenerateInvoice() {
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                     styles={{
                                         container: (base) => ({
-        ...base,
-        width: "100%", // ✅ full width always
-      }),
+                                            ...base,
+                                            width: "100%", // ✅ full width always
+                                        }),
                                         placeholder: (base) => ({
                                             ...base,
                                             whiteSpace: "nowrap",
@@ -196,7 +203,7 @@ function GenerateInvoice() {
                                 <label htmlFor="">Billing Type</label>
                                 <select value={formData.billingType} onChange={(e) => handleFormChange(e.target.value, "billingType")}>
                                     <option value="" disabled>Billing Type</option>
-                                    <option value="">Client</option>
+                                    <option value="Client">Client</option>
                                 </select>
                             </div>
 

@@ -4,19 +4,59 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
+import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+
 import { use } from "react";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function ViewDrs() {
-    const [data, setData] = useState([
-        { id: 1, code: 'DRS001', name: 'Vivek' },
-        { id: 2, code: 'DRS002', name: 'Suresh' },
-        { id: 3, code: 'DRS003', name: 'Mahesh' },
-    ]);
+     const extractArray = (res) => {
+        if (Array.isArray(res?.Data)) return res.Data;
+        if (Array.isArray(res?.data)) return res.data;
+        return [];
+    };
+    const [data, setData] = useState([]);
+     const [isLoading, setIsLoading] = useState(false);
     const [openRow, setOpenRow] = useState(null);
-    const [zones, setZones] = useState(data);
+    const [zones, setZones] = useState([]);
     const [search, setSearch] = useState("");
+    const fetchData = async (endpoint, params) => {
+            try {
+                const response = await getApi(endpoint, { params });
+                console.log(response.Data);
+                const manifestData = extractArray(response);
+    
+                if (manifestData.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No Data Found',
+                        text: 'No data available for the selected date range.',
+                        showConfirmButton: true,
+                    });
+                }
+                setData(manifestData);
+            } catch (err) {
+                console.error('Fetch Manifest Error:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            setIsLoading(true);
+    
+            const params = {
+    sessionLocationCode: 'MUM',
+    drsNo: search,
+    fromDate: formData.fromDate,
+    toDate: formData.toDate,
+    employeeCode: selectedBoy?.value || null,
+    pageNumber: currentPage,
+    pageSize: rowsPerPage
+};
+fetchData('/Runsheet/getViewRunsheet', params);
+        };
     useEffect(() => {
         if (search === "") {
             setZones(data);
@@ -105,7 +145,7 @@ function ViewDrs() {
         <>
 
             <div className="container1">
-                <form action="">
+                <form onSubmit={handleSubmit}>
                     <div className="fields2" style={{ overflow: "visible" }}>
                         <div className="input-field3">
                             <label htmlFor="">From Date</label>

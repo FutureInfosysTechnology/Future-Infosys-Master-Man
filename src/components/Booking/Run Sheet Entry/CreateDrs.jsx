@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Modal from 'react-modal';
 import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Swal from "sweetalert2";
@@ -6,10 +6,11 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
+import { refeshPend } from "../../../App";
 
 
 function CreateDrs() {
-
+    const {refFun}=useContext(refeshPend)
     const [getData, setGetData] = useState([]);
     const [empData, setEmpData] = useState([]);
     const [getCity, setGetCity] = useState([]);
@@ -62,11 +63,12 @@ function CreateDrs() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=DEL&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
+                const response = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=All&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
                 const currentPageData = Array.isArray(response.data) ? response.data : [];
                 setGetData(currentPageData);
+                console.log(currentPageData);
 
-                const allDataResponse = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=DEL&pageNumber=1&pageSize=10000`);
+                const allDataResponse = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=All&pageNumber=1&pageSize=10000`);
                 const allData = Array.isArray(allDataResponse.data) ? allDataResponse.data : [];
                 setTotalRecords(allData.length);
             } catch (error) {
@@ -105,8 +107,12 @@ function CreateDrs() {
         setSelectAll(!selectAll);
         if (!selectAll) {
             setSelectedRows(getData.map((_, index) => index));
+            setSelectedManifestRows(getData);
+            setSelectedDocketNos(getData.map((row)=>row.DocketNo));
         } else {
             setSelectedRows([]);
+            setSelectedDocketNos([]);
+            setSelectedManifestRows([]);
         }
     };
 
@@ -159,7 +165,7 @@ function CreateDrs() {
             employeeCode: formData.empName,
             Area: formData.cityName,
             EmployeeMobile: formData.mobileNo,
-            DocketNo: formData.DocketNo
+            DocketNo: formData.DocketNo   
         };
 
         try {
@@ -171,7 +177,7 @@ function CreateDrs() {
                 timer: 2000,
                 showConfirmButton: true,
             });
-
+             refFun();
             setFormData({
                 vehicleNo: "",
                 empName: "",
@@ -355,7 +361,7 @@ function CreateDrs() {
                                 <th scope="col">Booking.Date</th>
                                 <th scope="col">Manifest.No</th>
                                 <th scope="col">Customer.Name</th>
-                                <th scope="col">Receiver.Name</th>
+                                <th scope="col">Consignee.Name</th>
                                 <th scope="col">From</th>
                                 <th scope="col">To</th>
                                 <th scope="col">Qty</th>
@@ -366,10 +372,10 @@ function CreateDrs() {
                         </thead>
                         <tbody className='table-body'>
                             {selectedManifestRows.map((runsheet, index) => (
-                                <tr key={index}>
+                                <tr key={index} style={{whiteSpace:"nowrap"}}>
                                     <td>{index + 1}</td>
                                     <td>{runsheet.DocketNo}</td>
-                                    <td>{runsheet.bookDate}</td>
+                                    <td>{runsheet.Bookdate}</td>
                                     <td>{runsheet.manifestNo}</td>
                                     <td>{runsheet.customerName}</td>
                                     <td>{runsheet.consigneeName}</td>
@@ -479,7 +485,7 @@ function CreateDrs() {
                                             <th scope="col">Booking.Date</th>
                                             <th scope="col">Manifest.No</th>
                                             <th scope="col">Customer.Name</th>
-                                            <th scope="col">Receiver.Name</th>
+                                            <th scope="col">Consignee.Name</th>
                                             <th scope="col">From</th>
                                             <th scope="col">To</th>
                                             <th scope="col">Qty</th>
@@ -490,7 +496,7 @@ function CreateDrs() {
                                     </thead>
                                     <tbody className='table-body'>
                                         {filteredgetData.map((runsheet, index) => (
-                                            <tr key={index}>
+                                            <tr key={index} style={{whiteSpace:"nowrap"}}>
                                                 <td scope="col">
                                                     <input type="checkbox" style={{ height: "15px", width: "15px" }}
                                                         checked={selectedRows.includes(index)}
@@ -498,7 +504,7 @@ function CreateDrs() {
                                                 </td>
                                                 <td>{index + 1}</td>
                                                 <td>{runsheet.DocketNo}</td>
-                                                <td>{runsheet.bookDate}</td>
+                                                <td>{runsheet.Bookdate}</td>
                                                 <td>{runsheet.manifestNo}</td>
                                                 <td>{runsheet.customerName}</td>
                                                 <td>{runsheet.consigneeName}</td>
