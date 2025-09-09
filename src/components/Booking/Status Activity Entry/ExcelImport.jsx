@@ -1,160 +1,159 @@
-import React, { useEffect, useState } from "react";
-import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
-import Select from 'react-select';
-import 'react-toggle/style.css';
+import React, { useState, useRef } from 'react';
+import * as XLSX from 'xlsx';
+import Swal from 'sweetalert2';
+import { postApi,putApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
-function ExcelImport() {
-    const today = new Date();
-    const time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");;
+const ExcelImport = () => {
+  const [excelData, setExcelData] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [errorFileUrl, setErrorFileUrl] = useState(null);
+  const fileInputRef = useRef(null);
+  const MAX_CALLS = 10;
 
+  // Convert Excel date or string to dd/MM/yyyy
+  const formatExcelDate = (value) => {
+    if (!value) return '';
+    if (typeof value === 'number') {
+      const dateCode = XLSX.SSF.parse_date_code(value);
+      if (dateCode) {
+        return `${String(dateCode.d).padStart(2, '0')}/${String(dateCode.m).padStart(2, '0')}/${dateCode.y}`;
+      }
+    }
+    if (typeof value === 'string') return value.trim();
+    return '';
+  };
 
-    const [getCity, setGetCity] = useState([]);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [formData, setFormData] = useState({
-        toDate: today,
-        time: time,
-        fromDest: '',
-        toDest: '',
-    });
-    const handleDateChange = (date, field) => {
-        setFormData({ ...formData, [field]: date });
+  const formatString = (value) => (value === null || value === undefined ? '' : String(value).trim());
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const bstr = evt.target?.result;
+      const workbook = XLSX.read(bstr, { type: 'binary' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+      const formattedData = rawData.map((row) => ({
+        ...row,
+        BOOK_DATE: formatExcelDate(row.BOOK_DATE),
+        DispatchDate: formatExcelDate(row.DispatchDate),
+        CUSTOMER_CODE: formatString(row.CUSTOMER_CODE),
+      }));
+
+      setExcelData(formattedData);
+      setProgress(0);
+      setErrorFileUrl(null);
     };
-    const fetchData = async (endpoint, setData) => {
-        try {
-            const response = await getApi(endpoint);
-            setData(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    reader.readAsBinaryString(file);
+  };
 
-    useEffect(() => {
-        fetchData('/Master/getdomestic', setGetCity);
+  const handleUpload = async () => {
+    if (excelData.length === 0) {
+      Swal.fire('No Data', 'Please select an Excel file first.', 'warning');
+      return;
+    }
 
-    }, []);
-    return (
-        <>
-            <div className="container1">
+    setUploading(true);
+    setProgress(0);
+    setErrorFileUrl(null);
 
-                <form action="">
-                    <div className="fields2">
-                        <div className="input-field3">
-                            <label htmlFor="">Date</label>
-                            <DatePicker
-                            portalId="root-portal" 
-                                selected={formData.toDate}
-                                onChange={(date) => handleDateChange(date, "toDate")}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm"
-                            />
-                        </div>
+    const chunkSize = Math.ceil(excelData.length / MAX_CALLS);
+    let successCount = 0;
+    let errorFile = null;
+    const seenDockets = new Map();
 
-                        <div className="input-field3">
-                            <label htmlFor="">AWB No</label>
-                            <input type="tel" placeholder="Enter Awb No" />
-                        </div>
+    for (let i = 0; i < MAX_CALLS; i++) {
+      const chunk = excelData.slice(i * chunkSize, (i + 1) * chunkSize);
+      if (chunk.length === 0) continue;
 
-                        <div className="input-field3">
-                            <label htmlFor="">Time</label>
-                            <input type="time" value={formData.time} onChange={(e)=>{setFormData({...formData,time:e.target.value})}}/>
-                        </div>
+      try {
+        const response = await putApi('/DocketBooking/StatusEntryBulk', { excelData: chunk });
 
-                        <div className="input-field3">
-                            <label htmlFor="">From</label>
-                            <Select
-                                    options={getCity.map(city => ({
-                                        value: city.City_Code,   // adjust keys from your API
-                                        label: city.City_Name
-                                    }))}
-                                    value={
-                                        formData.fromDest
-                                            ? { value: formData.fromDest, label: getCity.find(c => c.City_Code === formData.fromDest)?.City_Name || "" }
-                                            : null
-                                    }
-                                    onChange={(selectedOption) => {
-                                        console.log(selectedOption);
-                                        setFormData({
-                                            ...formData,
-                                            fromDest: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    }
-                                    placeholder="Select City"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                />
-                        </div>
+        if (response.errorFileUrl) errorFile = response.errorFileUrl;
+        if (response.status === 1) successCount += chunk.length;
 
-                        <div className="input-field3">
-                            <label htmlFor="">To</label>
-                            <Select
-                                    options={getCity.map(city => ({
-                                        value: city.City_Code,   // adjust keys from your API
-                                        label: city.City_Name
-                                    }))}
-                                    value={
-                                        formData.toDest
-                                            ? { value: formData.toDest, label: getCity.find(c => c.City_Code === formData.toDest)?.City_Name || "" }
-                                            : null
-                                    }
-                                    onChange={(selectedOption) =>
-                                        setFormData({
-                                            ...formData,
-                                            toDest: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    placeholder="Select City"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                />
-                        </div>
+      } catch (err) {
+        console.error(`Chunk ${i + 1} failed`, err);
+      }
 
-                        <div className="input-field3">
-                            <label htmlFor="">Remark</label>
-                            <input type="text" placeholder="Enter Remark" />
-                        </div>
+      setProgress(Math.min(100, ((i + 1) / MAX_CALLS) * 100));
+    }
 
-                        <div className="input-field3">
-                            <label htmlFor="">File</label>
-                            <input style={{ paddingTop: "7px" }} type="file" placeholder="" />
-                        </div>
-                    </div>
+    setUploading(false);
+    setErrorFileUrl(errorFile);
 
-                    <div className="bottom-buttons">
-                        <button type="submit" className="ok-btn">Submit</button>
-                    </div>
-                </form>
-            </div>
-        </>
+    Swal.fire(
+      successCount > 0 ? 'Upload Complete' : 'Upload Failed',
+      successCount > 0
+        ? `✅ ${successCount} of ${excelData.length} rows uploaded.` +
+          (errorFile ? " ⚠️ Some errors occurred, download error log." : "")
+        : '❌ All rows failed to upload.',
+      successCount > 0 ? 'success' : 'error'
     );
+
+    setExcelData([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDownloadErrorFile = () => {
+    if (errorFileUrl) {
+      const link = document.createElement("a");
+      link.href = errorFileUrl;
+      link.download = errorFileUrl.split("/").pop();
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  return (
+    <div style={{ padding: '30px', maxWidth: '500px', margin: 'auto' }}>
+      <h3>📤 Excel Upload (10 API Calls)</h3>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".xlsx, .xls"
+        onChange={handleFileChange}
+        className="form-control mb-3"
+      />
+      <button
+        onClick={handleUpload}
+        disabled={uploading || excelData.length === 0}
+        className="btn btn-primary mb-3"
+      >
+        {uploading ? 'Uploading...' : 'Start Upload'}
+      </button>
+
+      {uploading && (
+        <div>
+          <div style={{ background: '#e0e0e0', borderRadius: '4px', height: '20px' }}>
+            <div
+              style={{
+                width: `${progress}%`,
+                backgroundColor: '#4caf50',
+                height: '100%',
+                borderRadius: '4px',
+                transition: 'width 0.5s ease-in-out',
+              }}
+            />
+          </div>
+          <p className="text-center mt-2">{progress}% completed</p>
+        </div>
+      )}
+
+      {errorFileUrl && !uploading && (
+        <div className="mt-3 text-center">
+          <button onClick={handleDownloadErrorFile} className="btn btn-danger">
+            ⬇️ Download Error Log
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default ExcelImport;

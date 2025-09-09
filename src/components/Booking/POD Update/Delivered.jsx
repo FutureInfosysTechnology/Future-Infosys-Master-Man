@@ -5,7 +5,7 @@ import 'react-toggle/style.css';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
-import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, putApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 function Delivered() {
     const today = new Date();
@@ -19,13 +19,30 @@ function Delivered() {
         time: time,
         Status: "",
         Reciept: "",
+        image: null,
+        RecName: "",
+        RecMob: "",
+        Remark: "",
     })
+    const resetForm=()=>
+    {
+        setFormData((prev)=>({
+            ...prev,
+            DocketNo: '',
+        ReferenceNo: '',
+        toDate: today,
+        time: time,
+        Status: "",
+        Reciept: "",
+        image: null,
+        RecName: "",
+        RecMob: "",
+        Remark: "",
+        }))
+    }
     const statusOptions = [
-        { value: "Arrived", label: "Arrived" },
-        { value: "Schedule", label: "Schedule" },
-        { value: "Dispatch", label: "Dispatch" },
-        { value: "Delivered", label: "Delivered" },
-        { value: "Return", label: "Return" }  // (maybe you meant "Return"?)
+        { value: "Intransit", label: "Intransit" },
+        { value: "RTO", label: "RTO" },
     ];
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
@@ -33,25 +50,46 @@ function Delivered() {
     const getDelieveredData = async (awbNo, refNo) => {
         try {
             setIsLoading(true);
-            const response =await getApi(`/Master/getTrackingData?DocketNo=303330`);
+            const response = await getApi(`/Master/getTrackingData?DocketNo=${awbNo}`);
             if (response.status === 1) {
                 setDeliveryData(response.Data);
             }
         } catch (error) {
             console.error('Fetch Error:', error);
             Swal.fire({
-                                icon: 'warning',
-                                title: 'No Data Found',
-                                text: 'No data available for the selected AWB NO or REf NO.',
-                                showConfirmButton: true,
-                            });
-        }finally{
+                icon: 'warning',
+                title: 'No Data Found',
+                text: 'No data available for the selected AWB NO or REf NO.',
+                showConfirmButton: true,
+            });
+        } finally {
             setIsLoading(false);
         }
     }
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        const payload = {
+            DocketNo: formData.DocketNo,
+            Status: formData.Status,
+            Delv_Time: formData.time,
+            Receiver_Name: formData.RecName,
+            Receiver_Mob_No: formData.RecMob,
+            POD_Images: formData.image,
+            Stamp: formData.Reciept,
+        }
+        try{
+         const res = await putApi(`DocketBooking/Deliveryupdate?DocketNo=${formData.DocketNo}`, payload);
+              if (res.status === 1) {
+                Swal.fire('Updated!', res.message || 'Booking updated.', 'success');
+                 getDelieveredData(formData.DocketNo, formData.ReferenceNo);
+                resetForm();
+              } else Swal.fire('Error', res.message || 'Update failed.', 'error');
+            } catch (err) {
+              Swal.fire('Error', 'Something went wrong while updating.', 'error');
+            }
+    }
+    console.log(formData);
+    const handleSearch = (e) => {
         getDelieveredData(formData.DocketNo, formData.ReferenceNo);
     };
 
@@ -60,12 +98,21 @@ function Delivered() {
         <>
             <div className="body">
                 <div className="container1">
-                    <form action="" onSubmit={handleSubmit} style={{ marginBottom: "10px" }}>
+                    <form onSubmit={handleSubmit} style={{ marginBottom: "10px" }}>
                         <div className="fields2">
                             <div className="input-field3">
                                 <label >AWB Number</label>
                                 <input type="tel" placeholder="AWB Number" value={formData.DocketNo}
-                                    onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })} />
+                                    onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Tab') {
+                                            // Don't prevent tab, just trigger handleSearch after a short delay
+                                            setTimeout(() => {
+                                                handleSearch();
+                                            }, 100); // Adjust delay if needed
+                                        }
+                                    }}
+                                />
                             </div>
 
                             <div className="input-field3">
@@ -120,6 +167,27 @@ function Delivered() {
                             </div>
 
                             <div className="input-field3">
+                                <label >Receiver Name</label>
+                                <input type="text" placeholder="Enter Receiver Name" value={formData.RecName} onChange={(e) => { setFormData({ ...formData, RecName: e.target.value }) }} />
+                            </div>
+
+                            <div className="input-field3">
+                                <label >Mobile No</label>
+                                <input type="tel" maxLength="10" id="mobile"
+                                    name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No" value={formData.RecMob} onChange={(e) => { setFormData({ ...formData, RecMob: e.target.value }) }} />
+                            </div>
+
+                            <div className="input-field3">
+                                <label >Remark</label>
+                                <input type="text" placeholder="Enter Remark" value={formData.Remark} onChange={(e) => { setFormData({ ...formData, Remark: e.target.value }) }} />
+                            </div>
+
+                            <div className="input-field3">
+                                <label >Upload Image</label>
+                                <input style={{ padding: "5px" }} type="file" accept="image/*" onChange={(e)=>setFormData({...formData,image:e.target.files[0]})}  />
+                            </div>
+
+                            <div className="input-field3">
                                 <label >Nature Of Receipt</label>
                                 <Select
                                     options={statusOptions}
@@ -149,27 +217,6 @@ function Delivered() {
                             </div>
 
                             <div className="input-field3">
-                                <label >Receiver Name</label>
-                                <input type="text" placeholder="Enter Receiver Name" />
-                            </div>
-
-                            <div className="input-field3">
-                                <label >Mobile No</label>
-                                <input type="tel" maxLength="10" id="mobile"
-                                    name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No" />
-                            </div>
-
-                            <div className="input-field3">
-                                <label >Remark</label>
-                                <input type="text" placeholder="Enter Remark" />
-                            </div>
-
-                            <div className="input-field3">
-                                <label >Upload Image</label>
-                                <input style={{ padding: "5px" }} type="file" />
-                            </div>
-
-                            <div className="input-field3">
                                 <label style={{ marginBottom: "18px" }}></label>
                                 <div style={{ display: "flex", flexDirection: "row" }}>
                                     <button style={{ height: "40px", width: "48%" }} className="ok-btn" type="submit">Submit</button>
@@ -191,22 +238,28 @@ function Delivered() {
                                 </div>
 
                                 <div className="input-field3">
-                                    <label >Actual Weight</label>
-                                    <input type="tel" placeholder="Actual Wt." value={deliveryData[0]?.ActualWt || ''} readOnly />
+                                    <label >Booking Date</label>
+                                    <input type="text" placeholder="Booking Date" value={deliveryData[0]?.BookDate || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
-                                    <label >Charged Weight</label>
-                                    <input type="tel" placeholder="Charged Wt." value={deliveryData[0]?.ChargedWt || ''} readOnly />
+                                    <label >Origin</label>
+                                    <input type="text" placeholder="Origin"
+                                        value={deliveryData[0]?.OriginCity || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
-                                    <label >Customer Name</label>
+                                    <label >Destination</label>
+                                    <input type="text" placeholder="Destination" value={deliveryData[0]?.StatusEntry[0]?.Destination_name || ''} readOnly />
+                                </div>
+
+                                <div className="input-field3">
+                                    <label >Consignee Name</label>
                                     <input type="text" placeholder="Customer Name" value={deliveryData[0]?.Consignee_Name || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
-                                    <label >Customer Mobile No</label>
+                                    <label >Consignee Mob No</label>
                                     <input type="tel" placeholder="Mobile No" value={deliveryData[0]?.Consignee_Mob || ''} readOnly />
                                 </div>
 
@@ -216,18 +269,13 @@ function Delivered() {
                                 </div>
 
                                 <div className="input-field3">
-                                    <label >Booking Date</label>
-                                    <input type="text" placeholder="Booking Date" value={deliveryData[0]?.BookDate || ''} readOnly />
+                                    <label >Actual Weight</label>
+                                    <input type="tel" placeholder="Actual Wt." value={deliveryData[0]?.ActualWt || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
-                                    <label >Receiver Name</label>
-                                    <input type="text" placeholder="Receiver Name" value={deliveryData[0]?.RecvName || ''} readOnly />
-                                </div>
-
-                                <div className="input-field3">
-                                    <label >Receiver Mobile No</label>
-                                    <input type="tel" placeholder="Mobile No" value={deliveryData[0]?.ReceivedMo || ''} readOnly />
+                                    <label >Charged Weight</label>
+                                    <input type="tel" placeholder="Charged Wt." value={deliveryData[0]?.ChargedWt || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
@@ -265,17 +313,6 @@ function Delivered() {
                                 </div>
 
                                 <div className="input-field3">
-                                    <label >Origin</label>
-                                    <input type="text" placeholder="Origin"
-                                        value={deliveryData[0]?.OriginCity || ''} readOnly />
-                                </div>
-
-                                <div className="input-field3">
-                                    <label >Destination</label>
-                                    <input type="text" placeholder="Destination" value={deliveryData[0]?.StatusEntry[0]?.Destination_name || ''} readOnly />
-                                </div>
-
-                                <div className="input-field3">
                                     <label >Invoice No</label>
                                     <input type="tel" placeholder="Invoice No" value={deliveryData[0]?.InvoiceNo || ''} readOnly />
                                 </div>
@@ -288,6 +325,16 @@ function Delivered() {
                                 <div className="input-field3">
                                     <label >Quantity</label>
                                     <input type="text" placeholder="Qty" value={deliveryData[0]?.Qty || ''} readOnly />
+                                </div>
+
+                                <div className="input-field3">
+                                    <label >Receiver Name</label>
+                                    <input type="text" placeholder="Receiver Name" value={deliveryData[0]?.RecvName || ''} readOnly />
+                                </div>
+
+                                <div className="input-field3">
+                                    <label >Receiver Mob No</label>
+                                    <input type="tel" placeholder="Mobile No" value={deliveryData[0]?.ReceivedMo || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">

@@ -16,8 +16,8 @@ function MobileReceipt() {
     const navigate = useNavigate();
     const location = useLocation();
     const res = location?.state?.data || {};
-    const f = res?.from || "DKT0036859";
-    const t = res?.to || "DKT0037950";
+    const f = res?.from;
+    const t = res?.to;
     const [data, setData] = useState([]);
     useEffect(() => {
         const fetchData = async () => {

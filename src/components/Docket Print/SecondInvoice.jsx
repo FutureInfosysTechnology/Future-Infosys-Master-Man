@@ -97,10 +97,74 @@ function SecondInvoice() {
 
     return (
         <>
+                    <style>
+                {`@media print {
+  body * {
+  margin:0
+    visibility: hidden; /* Hide everything by default */
+  }
+  
+  #pdf, #pdf * {
+  margin:0
+    visibility: visible; /* Show only the PDF container */
+  }
+  
+  #pdf {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .table, .table th, .table td {
+    border: 1px solid black !important; /* Ensure borders show */
+    -webkit-print-color-adjust: exact; /* Keep background colors */
+    print-color-adjust: exact;
+  }
+
+  .th {
+    background-color: rgba(36, 98, 113, 1) !important;
+    color: white !important;
+  }
+
+  .container-2, .container-3 {
+    width: 100% !important; /* Fit page width */
+  }
+
+  button {
+    display: none !important; /* Hide buttons in print */
+  }
+}
+`}
+            </style>
             <Header />
             <Sidebar1 />
             <div className="main-body" id="main-body">
                 <div className="container">
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", margin: "10px 20px" }}>
+                        <button
+                            onClick={handleDownloadPDF}
+                            style={{ padding: "8px 10px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Download
+                        </button>
+                        <button
+                            onClick={() => window.print()}
+                            style={{ padding: "8px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Print
+                        </button>
+                        <button
+                            onClick={() => navigate(-1)}
+                            style={{ padding: "8px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" ,fontWeight:"bold"}}
+                        >
+                            Exit
+                        </button>
+                    </div>
+
 
                     <div className="container-2" id="pdf" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
 
@@ -136,7 +200,7 @@ function SecondInvoice() {
                                         </div>
                                     </div>
 
-                                    <div style={{ display: "flex", fontSize: "12px", border: "1px solid black", marginBottom: "5px", marginTop: "20px" }}>
+                                    <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px", marginTop: "20px" }}>
                                         <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
                                             <div style={{ fontWeight: "bold" }}>TO,</div>
                                             <div>
@@ -265,20 +329,7 @@ function SecondInvoice() {
                             </div >
                         </div>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", margin: "10px 20px" }}>
-                        <button
-                            onClick={handleDownloadPDF}
-                            style={{ padding: "8px 16px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
-                        >
-                            Download PDF
-                        </button>
-                        <button
-                            onClick={() => navigate(-1)}
-                            style={{ padding: "8px 16px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
-                        >
-                            Back
-                        </button>
-                    </div>
+                    
                 </div>
             </div >
         </>

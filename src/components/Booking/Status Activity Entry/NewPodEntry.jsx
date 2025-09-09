@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi"
+import { deleteApi, getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi"
 import Footer from "../../../Components-2/Footer";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
@@ -13,15 +13,13 @@ import Select from 'react-select';
 import 'react-toggle/style.css';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import "./table.css"
 
 
 function NewPodEntry() {
 
-    const [zones, setZones] = useState([]);
+    const [status, setStatus] = useState([]);
     const [editIndex, setEditIndex] = useState(null);
-    const [modalData, setModalData] = useState({ code: '', name: '' });
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [status, setStatus] = useState(null);
     const today = new Date();
     const time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");
 
@@ -29,11 +27,13 @@ function NewPodEntry() {
     const [getCity, setGetCity] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [docket, setDocket] = useState('');
     const [formData, setFormData] = useState({
         toDate: today,
         fromDest: '',
         toDest: '',
-        time: time
+        time: time,
+        status: "",
     });
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
@@ -51,74 +51,19 @@ function NewPodEntry() {
     };
 
     useEffect(() => {
-        console.log(today.toISOString().slice(11,16),"+",today.toLocaleTimeString().slice(0,5));
+        console.log(today.toISOString().slice(11, 16), "+", today.toLocaleTimeString().slice(0, 5));
         fetchData('/Master/getdomestic', setGetCity);
 
     }, []);
 
-    const statusOptions = [
-        { value: "delivered", label: "Delivered" },
-        { value: "undelivered", label: "Undelivered" },
-        { value: "return", label: "Return" }
-    ];
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;
-
-    const indexOfLastRow = currentPage * rowsPerPage;
-    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
-
-    const totalPages = Math.ceil(zones.length / rowsPerPage);
-
-    const handleEdit = (index) => {
-        setEditIndex(index);
-        setModalData({ code: zones[index].code, name: zones[index].name });
-        setModalIsOpen(true);
-    };
-
-
-    const handleDelete = (index) => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'You won’t be able to revert this!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const updatedZones = zones.filter((_, i) => i !== index);
-                setZones(updatedZones);
-                Swal.fire(
-                    'Deleted!',
-                    'Your zone has been deleted.',
-                    'success'
-                );
-            }
-        });
-    };
-
-    const handleSave = (index) => {
-        const updatedZones = [...zones];
-        updatedZones[editIndex] = { id: editIndex + 1, ...modalData };
-        setZones(updatedZones);
-        setEditIndex(null);
-        setModalIsOpen(false);
-        Swal.fire('Saved!', 'Your changes have been saved.', 'success');
-    };
-
-
-
     /**************** function to export table data in excel and pdf ************/
     const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(zones);
+        const worksheet = XLSX.utils.json_to_sheet(status);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Zones');
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'status');
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'zones.xlsx');
+        saveAs(file, 'status.xlsx');
     };
 
     const handleExportPDF = () => {
@@ -143,57 +88,105 @@ function NewPodEntry() {
                 heightLeft -= pageHeight;
             }
 
-            pdf.save('zones.pdf');
+            pdf.save('status.pdf');
         });
     };
+    const resetForm = () => {
+        setFormData((prev) => ({
+            ...prev,
+            toDate: today,
+            fromDest: '',
+            toDest: '',
+            time: time,
+            status: "",
 
-    // Handle changing page
-    const handlePreviousPage = () => {
-        if (currentPage > 1) setCurrentPage(currentPage - 1);
-    };
+        }))
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
+            if (res.status === 1) {
+                setStatus(res.data);
+                console.log(res.data);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Status Found',
+                    text: res.message,
+                })
+            }
 
-    const handleNextPage = () => {
-        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-    };
+        }
+        catch (error) {
+            console.log(error);
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Status Found',
+                text: 'No status available for this Docket.',
+                showConfirmButton: true,
+            });
+        }
 
+    }
+    const AddStatus = async (e) => {
+  e.preventDefault();
+  try {
+    const queryParams = new URLSearchParams({
+      docketNo: docket,
+      delvDt: formData.toDate.toISOString().slice(0, 10),
+      delvTime: formData.time,
+      destinationCode: "DEL",
+      destinationName: formData.toDest,
+      status: formData.status
+    });
+
+    const res = await postApi(`/DocketBooking/StatusEntry?${queryParams.toString()}`, {}); // empty body
+    console.log("POST response", res);
+
+    if (res.status === 1) {
+      Swal.fire({ icon: 'success', title: 'Status Added', text: res.message });
+      resetForm();
+      const getRes = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
+      if (getRes.status === 1) setStatus(getRes.data);
+    } else {
+      Swal.fire({ icon: 'warning', title: 'Failed', text: res.message });
+    }
+
+  } catch (error) {
+    console.log(error);
+    Swal.fire({ icon: 'error', title: 'Error', text: 'API failed' });
+  }
+};
+ const delStatus = async(id)=>
+    {
+        try{
+        const res=await deleteApi(`/DocketBooking/StatusEntryDelete?id=${id}`);
+        if (res.status === 1) {
+                  Swal.fire('Deleted!', res.message, 'success');
+                  const newList=status.flter((data)=>data.id!==id);
+                  setStatus(newList);
+                  resetForm();
+                } else {
+                  Swal.fire('Error', res.message, 'error');
+                }
+              } catch (err) {
+                Swal.fire('Error', 'Failed to delete status.', 'error');
+              }
+    }
 
     return (
         <>
 
             <div className="container1">
-                <form action="" className="order-form">
+                <form className="order-form" onSubmit={handleSubmit}>
                     <div className="order-fields" style={{ display: "flex", justifyContent: "start", alignItems: "center" }}>
-
-                        <div className="input-field3">
+                        <div className="input-field" style={{ width: "180px" }}>
                             <label htmlFor="">Docket No</label>
-                            <input type="text" placeholder="Enter Docket No" />
+                            <input type="text" placeholder="Enter Docket No" value={docket} onChange={(e) => setDocket(e.target.value)} />
                         </div>
-                        <div className="bottom-buttons" style={{ marginTop: "28px" }}>
+                        <div className="bottom-buttons" style={{ marginTop: "27px", marginLeft: "-1px", width: "60px" }}>
                             <button type="submit" className="ok-btn">Find</button>
                         </div>
-
-                        {/*<div className="order-input">
-                            <label htmlFor="">Status</label>
-                            <Select
-                                options={statusOptions}
-                                value={status}
-                                onChange={(option) => setStatus(option)}
-                                placeholder="Select Destination"
-                                isSearchable
-                                classNamePrefix="blue-selectbooking"
-                                className="blue-selectbooking"
-                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                styles={{
-                                    placeholder: (base) => ({
-                                        ...base,
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis"
-                                    }),
-                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                }}
-                            />
-                        </div>*/}
                     </div>
                 </form>
 
@@ -220,15 +213,15 @@ function NewPodEntry() {
                 </div>*/}
 
                 <div className='table-container'>
-                    <table className='table table-bordered table-sm'>
+                    <table className='table table-bordered table-sm tableSize'>
                         <thead className='table-info body-bordered table-sm'>
                             <tr>
                                 <th scope="col">Sr.No</th>
-                                <th scope="col">Date</th>
-                                <th scope="col">Time</th>
-                                <th scope="col">From</th>
-                                <th scope="col">To</th>
-                                <th scope="col">Remark</th>
+                                <th scope="col">Activity Date</th>
+                                <th scope="col">Activity Time</th>
+                                <th scope="col">From City</th>
+                                <th scope="col">To City</th>
+                                <th scope="col">Activity</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
@@ -236,14 +229,16 @@ function NewPodEntry() {
                             <tr>
                                 <td>1</td>
                                 <td><DatePicker
-                                portalId="root-portal" 
+                                    portalId="root-portal"
                                     selected={formData.toDate}
                                     onChange={(date) => handleDateChange(date, "toDate")}
                                     dateFormat="dd/MM/yyyy"
-                                    className="form-control form-control-sm"
+                                    className="form-control form-control-sm custom-datepicker"
                                 /></td>
                                 <td>
-                                    <input type="time" value={formData.time} onChange={(e) => { setFormData({ ...formData, time: e.target.value }) }} />
+                                    <input className="form-control"
+                                        style={{ height: "35px" }}
+                                        type="time" value={formData.time} onChange={(e) => { setFormData({ ...formData, time: e.target.value }) }} />
                                 </td>
                                 <td><Select
                                     options={getCity.map(city => ({
@@ -273,19 +268,19 @@ function NewPodEntry() {
                                             ...base,
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
-                                            textOverflow: "ellipsis"
+                                            textOverflow: "ellipsis",
                                         }),
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 /></td>
                                 <td><Select
                                     options={getCity.map(city => ({
-                                        value: city.City_Code,   // adjust keys from your API
+                                        value: city.City_Name,   // adjust keys from your API
                                         label: city.City_Name
                                     }))}
                                     value={
                                         formData.toDest
-                                            ? { value: formData.toDest, label: getCity.find(c => c.City_Code === formData.toDest)?.City_Name || "" }
+                                            ? {value: formData.fromDest, label: getCity.find(c => c.City_Code === formData.fromDest)?.City_Name || "" }
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -309,104 +304,33 @@ function NewPodEntry() {
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 /></td>
-                                <td><input type="text" /></td>
+                                <td><input type="text" className="form-control" style={{ height: "35px" }} value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} /></td>
                                 <td>
-                                    <button type="submit" className="ok-btn" style={{ width: "60px", height: "30px" }}>Add +</button>
+                                    <button className="ok-btn" style={{ width: "60px", height: "30px" }} onClick={AddStatus}>Add +</button>
                                 </td>
                             </tr>
-                            {currentRows.map((zone, index) => (
+                            {status.map((zone, index) => (
                                 <tr key={zone.id}>
-                                    <td>{zone.id}</td>
-                                    <td>{zone.code}</td>
-                                    <td>{zone.name}</td>
-                                    <td>{zone.name}</td>
-                                    <td>{zone.name}</td>
-                                    <td>{zone.name}</td>
+                                    <td>{index + 1}</td>
+                                    <td>{zone.DelvDt}</td>
+                                    <td>{zone.DelvTime}</td>
+                                    <td>{zone.Origin_name}</td>
+                                    <td>{zone.Destination_name}</td>
+                                    <td>{zone.status}</td>
                                     <td>
-                                        <button onClick={() => handleEdit(index)} className='edit-btn'>
-                                            <i className='bi bi-pen'></i></button>
-                                        <button onClick={() => handleDelete(index)} className='edit-btn'>
-                                            <i className='bi bi-trash'></i></button>
+                                        <button className='edit-btn' onClick={()=>delStatus(zone.id)}>
+                                            <i className='bi bi-trash'  style={{fontSize:"18px"}}></i></button>
                                     </td>
+
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="pagination">
-                    <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                        {'<'}
-                    </button>
-                    <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                    <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                        {'>'}
-                    </button>
-                </div>
-
-
-                <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                    style={{
-                        content: {
-                            top: '50%',
-                            left: '54%',
-                            right: 'auto',
-                            bottom: 'auto',
-                            marginRight: '-50%',
-                            transform: 'translate(-50%, -50%)',
-                            height: '202px',
-                            width: '650px',
-                            borderRadius: '10px',
-                            padding: "0px"
-                        },
-                    }}>
-                    <div>
-                        <div className="header-tittle">
-                            <header>Activity Entry</header>
-                        </div>
-                        <div className='container2'>
-                            <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} style={{ paddingBottom: "20px" }}>
-                                <div className="fields2">
-
-                                    <div className="input-field">
-                                        <label htmlFor="">From Station</label>
-                                        <input type="text" placeholder="Enter From Station" required />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label htmlFor="">To Station</label>
-                                        <input type="text" placeholder="Enter To Station" required />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label htmlFor="">Date</label>
-                                        <input type="date" required />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label htmlFor="">Time</label>
-                                        <input type="time" required />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label htmlFor="">Status</label>
-                                        <input type="text" placeholder="Enter Status" required />
-                                    </div>
-
-                                    <div className='bottom-buttons' style={{ marginLeft: "25px", marginTop: "17px" }}>
-                                        <button type='submit' className='ok-btn'>Submit</button>
-                                        <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
-                                    </div>
-                                </div>
-
-                            </form>
-                        </div>
-                    </div>
-                </Modal >
             </div>
 
         </>
     );
 };
-
 export default NewPodEntry;
