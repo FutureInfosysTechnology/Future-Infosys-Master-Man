@@ -50,7 +50,7 @@ function StatusActivity() {
                         </div>
 
                         <div className={`content content-2 ${activeTab === 'undelivered' ? 'active' : ''}`}>
-                            <ExcelImportBulk/>
+                            <ExcelImport/>
                         </div>
 
                         <div className={`content content-3 ${activeTab === 'upload' ? 'active' : ''}`}>

@@ -125,6 +125,7 @@ function Manifest() {
     border: 1px solid black !important; /* Ensure borders show */
     -webkit-print-color-adjust: exact; /* Keep background colors */
     print-color-adjust: exact;
+    white-space: nowrap;
   }
 
   .th {
@@ -135,7 +136,6 @@ function Manifest() {
   .container-2, .container-3 {
     width: 100% !important; /* Fit page width */
   }
-
   button {
     display: none !important; /* Hide buttons in print */
   }
@@ -270,8 +270,8 @@ function Manifest() {
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr.No</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Date</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket.No</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Customer Name</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Consignee Name</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Customer.Name</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Consignee.Name</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>From</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>To</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>MODE</th>

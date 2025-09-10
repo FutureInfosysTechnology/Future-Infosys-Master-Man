@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
-import { postApi,putApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { putApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 const ExcelImport = () => {
   const [excelData, setExcelData] = useState([]);
@@ -11,46 +11,83 @@ const ExcelImport = () => {
   const fileInputRef = useRef(null);
   const MAX_CALLS = 10;
 
-  // Convert Excel date or string to dd/MM/yyyy
-  const formatExcelDate = (value) => {
+  // Format Excel date to dd/MM/yyyy
+  const formatExcelDateForBackend = (value) => {
     if (!value) return '';
     if (typeof value === 'number') {
       const dateCode = XLSX.SSF.parse_date_code(value);
       if (dateCode) {
-        return `${String(dateCode.d).padStart(2, '0')}/${String(dateCode.m).padStart(2, '0')}/${dateCode.y}`;
+        return `${String(dateCode.d).padStart(2,'0')}/${String(dateCode.m).padStart(2,'0')}/${dateCode.y}`;
       }
     }
-    if (typeof value === 'string') return value.trim();
+    if (typeof value === 'string') {
+      const parsed = new Date(value);
+      if (!isNaN(parsed)) {
+        return `${String(parsed.getDate()).padStart(2,'0')}/${String(parsed.getMonth()+1).padStart(2,'0')}/${parsed.getFullYear()}`;
+      }
+      return value.trim();
+    }
     return '';
   };
 
+  // Format time to HH:mm
+// Format Excel time to HH:mm
+const formatTimeForBackend = (value) => {
+  if (!value) return '';
+
+  if (typeof value === 'number') {
+    // Excel time is fraction of a day
+    const totalMinutes = Math.round(value * 24 * 60); // convert fraction to total minutes
+    const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+    const minutes = String(totalMinutes % 60).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  if (typeof value === 'string') {
+    const parts = value.split(':');
+    const h = parts[0] ? parts[0].padStart(2,'0') : '00';
+    const m = parts[1] ? parts[1].padStart(2,'0') : '00';
+    return `${h}:${m}`;
+  }
+
+  return '';
+};
+
+
   const formatString = (value) => (value === null || value === undefined ? '' : String(value).trim());
 
+  // Handle file selection
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
+    reader.readAsBinaryString(file);
+
     reader.onload = (evt) => {
       const bstr = evt.target?.result;
       const workbook = XLSX.read(bstr, { type: 'binary' });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+      const rawData = XLSX.utils.sheet_to_json(worksheet);
 
-      const formattedData = rawData.map((row) => ({
-        ...row,
-        BOOK_DATE: formatExcelDate(row.BOOK_DATE),
-        DispatchDate: formatExcelDate(row.DispatchDate),
-        CUSTOMER_CODE: formatString(row.CUSTOMER_CODE),
-      }));
+      const mappedData = rawData
+        .map(row => ({
+          DocketNo: formatString(row['DocketNo'] || row['Docket No']),
+          DelvDt: formatExcelDateForBackend(row['DelvDt'] || row['Delv Date']),
+          DelvTime: formatTimeForBackend(row['DelvTime'] || row['Delivery Time']),
+          Origin_Name: formatString(row['Origin_Name'] || row['Origin']),
+          Destination_Name: formatString(row['Destination_Name'] || row['Destination']),
+          Status: formatString(row['Status'] || row['Current Status']),
+        }))
+        .filter(row => row.DocketNo && row.DelvDt && row.Status);
 
-      setExcelData(formattedData);
+      setExcelData(mappedData);
       setProgress(0);
       setErrorFileUrl(null);
     };
-    reader.readAsBinaryString(file);
   };
 
+  // Upload data to backend
   const handleUpload = async () => {
     if (excelData.length === 0) {
       Swal.fire('No Data', 'Please select an Excel file first.', 'warning');
@@ -64,7 +101,6 @@ const ExcelImport = () => {
     const chunkSize = Math.ceil(excelData.length / MAX_CALLS);
     let successCount = 0;
     let errorFile = null;
-    const seenDockets = new Map();
 
     for (let i = 0; i < MAX_CALLS; i++) {
       const chunk = excelData.slice(i * chunkSize, (i + 1) * chunkSize);
@@ -72,15 +108,18 @@ const ExcelImport = () => {
 
       try {
         const response = await putApi('/DocketBooking/StatusEntryBulk', { excelData: chunk });
-
         if (response.errorFileUrl) errorFile = response.errorFileUrl;
-        if (response.status === 1) successCount += chunk.length;
-
+        if (response.status === 1) {
+          successCount += chunk.length;
+        } else {
+          console.error(`API responded with error: ${response.message || 'Unknown error'}`);
+        }
       } catch (err) {
-        console.error(`Chunk ${i + 1} failed`, err);
+        console.error(`Chunk ${i + 1} failed with exception:`, err);
       }
 
-      setProgress(Math.min(100, ((i + 1) / MAX_CALLS) * 100));
+      const calculatedProgress = Math.min(100, Math.round(((i + 1) / MAX_CALLS) * 100));
+      setProgress(calculatedProgress);
     }
 
     setUploading(false);
@@ -90,7 +129,7 @@ const ExcelImport = () => {
       successCount > 0 ? 'Upload Complete' : 'Upload Failed',
       successCount > 0
         ? `✅ ${successCount} of ${excelData.length} rows uploaded.` +
-          (errorFile ? " ⚠️ Some errors occurred, download error log." : "")
+          (errorFile ? " ⚠️ Some errors occurred. You can download the error log." : "")
         : '❌ All rows failed to upload.',
       successCount > 0 ? 'success' : 'error'
     );

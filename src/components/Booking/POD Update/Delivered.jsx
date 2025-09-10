@@ -66,28 +66,53 @@ function Delivered() {
             setIsLoading(false);
         }
     }
+    const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData({ ...formData, image: reader.result }); // Base64 string
+    };
+    reader.readAsDataURL(file); // converts to base64
+  }
+};
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const payload = {
-            DocketNo: formData.DocketNo,
-            Status: formData.Status,
-            Delv_Time: formData.time,
-            Receiver_Name: formData.RecName,
-            Receiver_Mob_No: formData.RecMob,
-            POD_Images: formData.image,
-            Stamp: formData.Reciept,
-        }
-        try{
-         const res = await putApi(`DocketBooking/Deliveryupdate?DocketNo=${formData.DocketNo}`, payload);
-              if (res.status === 1) {
-                Swal.fire('Updated!', res.message || 'Booking updated.', 'success');
-                 getDelieveredData(formData.DocketNo, formData.ReferenceNo);
-                resetForm();
-              } else Swal.fire('Error', res.message || 'Update failed.', 'error');
-            } catch (err) {
-              Swal.fire('Error', 'Something went wrong while updating.', 'error');
-            }
+  e.preventDefault();
+
+  const payload = {
+    DocketNo: formData.DocketNo,
+    Status: formData.Status,
+    Delv_Time: formData.time,
+    Receiver_Name: formData.RecName,
+    Receiver_Mob_No: formData.RecMob,
+    POD_Images: formData.image,
+    Stamp: formData.Reciept,
+  };
+
+  try {
+    const res = await putApi(`DocketBooking/Deliveryupdate`, payload); // no query params
+    if (res.status === 1) {
+      Swal.fire('Updated!', res.message || 'Booking updated.', 'success');
+
+      await getDelieveredData(formData.DocketNo, formData.ReferenceNo);
+
+      setFormData(prev => ({
+        ...prev,
+        Status: '',
+        RecName: '',
+        RecMob: '',
+        Remark: '',
+        image: null,
+        Reciept: ''
+      }));
+    } else {
+      Swal.fire('Error', res.message || 'Update failed.', 'error');
     }
+  } catch (err) {
+    Swal.fire('Error', 'Something went wrong while updating.', 'error');
+  }
+};
+
     console.log(formData);
     const handleSearch = (e) => {
         getDelieveredData(formData.DocketNo, formData.ReferenceNo);
@@ -184,7 +209,7 @@ function Delivered() {
 
                             <div className="input-field3">
                                 <label >Upload Image</label>
-                                <input style={{ padding: "5px" }} type="file" accept="image/*" onChange={(e)=>setFormData({...formData,image:e.target.files[0]})}  />
+                                <input style={{ padding: "5px" }} type="file" accept="image/*" onChange={handleFileChange}  />
                             </div>
 
                             <div className="input-field3">
@@ -339,7 +364,7 @@ function Delivered() {
 
                                 <div className="input-field3">
                                     <label >Delivery Date</label>
-                                    <input type="text" placeholder="Delivery Date" value={deliveryData[0]?.StatusEntry[0]?.DelvDT || ''} readOnly />
+                                    <input type="text" placeholder="Delivery Date" value={deliveryData[0]?.DelvDT || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">
@@ -349,7 +374,7 @@ function Delivered() {
 
                                 <div className="input-field3">
                                     <label >E Way Bill No</label>
-                                    <input type="text" placeholder="E Way Bill No" value={deliveryData[0]?.Ewaybill || ''} readOnly />
+                                    <input type="text" placeholder="E Way Bill No" value={deliveryData[0]?.BillNo || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">

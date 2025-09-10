@@ -102,6 +102,14 @@ function NewPodEntry() {
 
         }))
     }
+ const formatExcelDateForBackend = (value) => {
+  if (!value) return "";
+  if (value instanceof Date && !isNaN(value)) {
+    return `${String(value.getDate()).padStart(2,'0')}/${String(value.getMonth()+1).padStart(2,'0')}/${value.getFullYear()}`;
+  }
+  return "";
+};
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -133,10 +141,10 @@ function NewPodEntry() {
   try {
     const queryParams = new URLSearchParams({
       docketNo: docket,
-      delvDt: formData.toDate.toISOString().slice(0, 10),
+      delvDt: formatExcelDateForBackend(formData.toDate),
       delvTime: formData.time,
-      destinationCode: "DEL",
-      destinationName: formData.toDest,
+      destinationCode: formData.fromDest,
+      destinationName: formData.toDest?getCity.find((city)=>city.City_Code===formData.toDest)?.City_Name:"",
       status: formData.status
     });
 
@@ -159,11 +167,12 @@ function NewPodEntry() {
 };
  const delStatus = async(id)=>
     {
+        console.log(id);
         try{
         const res=await deleteApi(`/DocketBooking/StatusEntryDelete?id=${id}`);
-        if (res.status === 1) {
+        if (res.success) {
                   Swal.fire('Deleted!', res.message, 'success');
-                  const newList=status.flter((data)=>data.id!==id);
+                  const newList = status.filter((data) => data.ID !== id);
                   setStatus(newList);
                   resetForm();
                 } else {
@@ -275,12 +284,12 @@ function NewPodEntry() {
                                 /></td>
                                 <td><Select
                                     options={getCity.map(city => ({
-                                        value: city.City_Name,   // adjust keys from your API
+                                        value: city.City_Code,   // adjust keys from your API
                                         label: city.City_Name
                                     }))}
                                     value={
                                         formData.toDest
-                                            ? {value: formData.fromDest, label: getCity.find(c => c.City_Code === formData.fromDest)?.City_Name || "" }
+                                            ? { value: formData.toDest, label: getCity.find(c => c.City_Code === formData.toDest)?.City_Name || "" }
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -309,16 +318,16 @@ function NewPodEntry() {
                                     <button className="ok-btn" style={{ width: "60px", height: "30px" }} onClick={AddStatus}>Add +</button>
                                 </td>
                             </tr>
-                            {status.map((zone, index) => (
-                                <tr key={zone.id}>
+                            {status.map((st, index) => (
+                                <tr key={st.ID}>
                                     <td>{index + 1}</td>
-                                    <td>{zone.DelvDt}</td>
-                                    <td>{zone.DelvTime}</td>
-                                    <td>{zone.Origin_name}</td>
-                                    <td>{zone.Destination_name}</td>
-                                    <td>{zone.status}</td>
+                                    <td>{st.DelvDt}</td>
+                                    <td>{st.DelvTime}</td>
+                                    <td>{st.City_Name}</td>
+                                    <td>{st.Destination_name}</td>
+                                    <td>{st.status}</td>
                                     <td>
-                                        <button className='edit-btn' onClick={()=>delStatus(zone.id)}>
+                                        <button className='edit-btn' onClick={()=>delStatus(st.ID)}>
                                             <i className='bi bi-trash'  style={{fontSize:"18px"}}></i></button>
                                     </td>
 
