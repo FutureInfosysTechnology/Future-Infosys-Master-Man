@@ -99,45 +99,63 @@ function SecondInvoice() {
         <>
                     <style>
                 {`@media print {
-  body * {
-  margin:0
-    visibility: hidden; /* Hide everything by default */
-  }
-  
-  #pdf, #pdf * {
-  margin:0
-    visibility: visible; /* Show only the PDF container */
-  }
-  
-  #pdf {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    padding: 0 !important;
-    margin: 0 !important;
-    box-sizing: border-box;
-  }
+    body * {
+        visibility: hidden;
+    }
 
-  .table, .table th, .table td {
-    border: 1px solid black !important; /* Ensure borders show */
-    -webkit-print-color-adjust: exact; /* Keep background colors */
-    print-color-adjust: exact;
-  }
+    #pdf, #pdf * {
+        visibility: visible;
+    }
 
-  .th {
-    background-color: rgba(36, 98, 113, 1) !important;
-    color: white !important;
-  }
+    #pdf {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box;
+    }
 
-  .container-2, .container-3 {
-    width: 100% !important; /* Fit page width */
-  }
+    table {
+        width: auto !important;  /* Let table auto-expand */
+        table-layout: auto;      /* Use auto layout */
+        border-collapse: collapse;
+        font-size: 10px !important;
+    }
 
-  button {
-    display: none !important; /* Hide buttons in print */
-  }
+    th, td {
+        white-space: nowrap !important;
+        border: 1px solid black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .th {
+        background-color: rgba(36, 98, 113, 1) !important;
+        color: white !important;
+    }
+
+    button {
+        display: none !important;
+    }
+
+    .container-2, .container-3 {
+        width: auto !important;
+    }
 }
+     th, td {
+        white-space: nowrap !important;
+        border: 1px solid black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .th {
+        background-color: rgba(36, 98, 113, 1) !important;
+        color: white !important;
+    }
+
 `}
             </style>
             <Header />

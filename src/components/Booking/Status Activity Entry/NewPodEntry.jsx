@@ -237,14 +237,14 @@ function NewPodEntry() {
                         <tbody className='table-body'>
                             <tr>
                                 <td>1</td>
-                                <td><DatePicker
+                                <td style={{width:"130px"}}><DatePicker
                                     portalId="root-portal"
                                     selected={formData.toDate}
                                     onChange={(date) => handleDateChange(date, "toDate")}
                                     dateFormat="dd/MM/yyyy"
                                     className="form-control form-control-sm custom-datepicker"
                                 /></td>
-                                <td>
+                                <td style={{width:"130px"}}>
                                     <input className="form-control"
                                         style={{ height: "35px" }}
                                         type="time" value={formData.time} onChange={(e) => { setFormData({ ...formData, time: e.target.value }) }} />
@@ -278,7 +278,14 @@ function NewPodEntry() {
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
+                                             width: '100px'  
                                         }),
+                                        input:(base)=>
+                                        ({
+                                            ...base,
+                                            width:"100px",
+                                        })
+                                        ,
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 /></td>
@@ -303,13 +310,20 @@ function NewPodEntry() {
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
+                                     styles={{
                                         placeholder: (base) => ({
                                             ...base,
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
-                                            textOverflow: "ellipsis"
+                                            textOverflow: "ellipsis",
+                                             width: '100px'  
                                         }),
+                                        input:(base)=>
+                                        ({
+                                            ...base,
+                                            width:"100px",
+                                        })
+                                        ,
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 /></td>
