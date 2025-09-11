@@ -1,0 +1,105 @@
+/* Manifest.css */
+.container {
+    width: 100%;
+    padding: 10px;
+}
+
+.pdf-container {
+    max-width: 100%;
+    margin: auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.printable-section {
+    border: 7px double black;
+    padding: 10px;
+    width: 100%;
+}
+
+.header-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.branch-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.manifest-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.manifest-detail {
+    flex: 1 1 45%;
+    min-width: 200px;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    border: 1px solid black;
+    white-space: nowrap;
+    font-size: 10px;
+    padding: 5px;
+}
+
+.table th {
+    background-color: rgba(36, 98, 113, 1);
+    color: white;
+}
+
+.page {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #pdf, #pdf * {
+        visibility: visible;
+    }
+
+    #pdf {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    button {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .manifest-details {
+        flex-direction: column;
+    }
+
+    .manifest-detail {
+        min-width: 100%;
+    }
+}

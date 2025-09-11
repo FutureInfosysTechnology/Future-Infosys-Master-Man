@@ -14,6 +14,7 @@ function Manifest() {
     const location = useLocation();
     const navigate = useNavigate();
     const manifest = location?.state?.data || {};
+     const fromPath = location?.state?.from || "/";
     const [getBranch, setGetBranch] = useState([]);
     const [manifestData, setGetManifestData] = useState([]);
     console.log(location.state);
@@ -163,30 +164,34 @@ function Manifest() {
 
             <Header />
             <Sidebar1 />
-            <div className="main-body" id="main-body">
-                <div className="container">
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", margin: "10px 20px" }}>
+            <div className="main-body" id="main-body"> 
+                
+                    <div className="container-2" style={{ borderRadius: "0px", paddingLeft: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", gap: "5px" }}>
+
+                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex",flexDirection:"row",border:"none" ,backgroundColor:"transparent" ,justifyContent:"end",gap:"10px",fontSize:"12px"}}>
                         <button
                             onClick={handleDownloadPDF}
-                            style={{ padding: "8px 10px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
+                            style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Download
                         </button>
                         <button
                             onClick={() => window.print()}
-                            style={{ padding: "8px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Print
                         </button>
                         <button
-                            onClick={() => navigate(-1)}
-                            style={{ padding: "8px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer", fontWeight: "bold" }}
+                            onClick={() => navigate(fromPath, { state: {tab:"viewmanifest"} })}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Exit
                         </button>
                     </div>
+                    </div>
 
-                    <div className="container-2" id="pdf" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
+                    <div className="container-2" id="pdf" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex",
+                         flexDirection: "column", gap: "5px" }}>
 
                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
 
@@ -355,10 +360,9 @@ function Manifest() {
                                 </div>
                             </div >
                         </div>
-                    </div>
+                    </div>  
 
 
-                </div>
             </div >
         </>
     );

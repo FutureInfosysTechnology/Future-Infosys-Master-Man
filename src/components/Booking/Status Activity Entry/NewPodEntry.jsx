@@ -112,28 +112,33 @@ function NewPodEntry() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const res = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
-            if (res.status === 1) {
-                setStatus(res.data);
-                console.log(res.data);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Status Found',
-                    text: res.message,
-                })
-            }
-
-        }
-        catch (error) {
-            console.log(error);
-            Swal.fire({
-                icon: 'warning',
-                title: 'No Status Found',
-                text: 'No status available for this Docket.',
-                showConfirmButton: true,
-            });
-        }
+       try {
+    const res = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
+    if (res.status === 1 && Array.isArray(res.data) && res.data.length > 0) {
+        setStatus(res.data);
+        console.log(res.data);
+        Swal.fire({
+            icon: 'success',
+            title: 'Status Found',
+            text: res.message,
+        });
+    } else {
+        setStatus([]);
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Status Found',
+            text: 'No status available for this Docket.',
+            showConfirmButton: true,
+        });
+    }
+} catch (error) {
+    console.log(error);
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'API failed or server error occurred.',
+    });
+}
 
     }
     const AddStatus = async (e) => {
@@ -165,23 +170,37 @@ function NewPodEntry() {
     Swal.fire({ icon: 'error', title: 'Error', text: 'API failed' });
   }
 };
- const delStatus = async(id)=>
-    {
-        console.log(id);
-        try{
-        const res=await deleteApi(`/DocketBooking/StatusEntryDelete?id=${id}`);
-        if (res.success) {
-                  Swal.fire('Deleted!', res.message, 'success');
-                  const newList = status.filter((data) => data.ID !== id);
-                  setStatus(newList);
-                  resetForm();
+const delStatus = async (id) => {
+    console.log(id);
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to delete this status entry? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const res = await deleteApi(`/DocketBooking/StatusEntryDelete?id=${id}`);
+                if (res.success) {
+                    Swal.fire('Deleted!', res.message, 'success');
+                    const newList = status.filter((data) => data.ID !== id);
+                    setStatus(newList);
+                    resetForm();
                 } else {
-                  Swal.fire('Error', res.message, 'error');
+                    Swal.fire('Error', res.message, 'error');
                 }
-              } catch (err) {
+            } catch (err) {
                 Swal.fire('Error', 'Failed to delete status.', 'error');
-              }
-    }
+            }
+        }
+    });
+};
+
 
     return (
         <>
@@ -191,7 +210,7 @@ function NewPodEntry() {
                     <div className="order-fields" style={{ display: "flex", justifyContent: "start", alignItems: "center" }}>
                         <div className="input-field" style={{ width: "180px" }}>
                             <label htmlFor="">Docket No</label>
-                            <input type="text" placeholder="Enter Docket No" value={docket} onChange={(e) => setDocket(e.target.value)} />
+                            <input type="text" required placeholder="Enter Docket No" value={docket} onChange={(e) => setDocket(e.target.value)} />
                         </div>
                         <div className="bottom-buttons" style={{ marginTop: "27px", marginLeft: "-1px", width: "60px" }}>
                             <button type="submit" className="ok-btn">Find</button>

@@ -10,8 +10,7 @@ const ExcelImport = () => {
   const [errorFileUrl, setErrorFileUrl] = useState(null);
   const fileInputRef = useRef(null);
   const MAX_CALLS = 10;
-
-  // Format Excel date to dd/MM/yyyy
+const headers = ['DocketNo', 'DelvDt', 'DelvTime', 'Origin_Name', 'Destination_Name', 'Status'];
   const formatExcelDateForBackend = (value) => {
     if (!value) return '';
     if (typeof value === 'number') {
@@ -30,33 +29,25 @@ const ExcelImport = () => {
     return '';
   };
 
-  // Format time to HH:mm
-// Format Excel time to HH:mm
-const formatTimeForBackend = (value) => {
-  if (!value) return '';
-
-  if (typeof value === 'number') {
-    // Excel time is fraction of a day
-    const totalMinutes = Math.round(value * 24 * 60); // convert fraction to total minutes
-    const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
-    const minutes = String(totalMinutes % 60).padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }
-
-  if (typeof value === 'string') {
-    const parts = value.split(':');
-    const h = parts[0] ? parts[0].padStart(2,'0') : '00';
-    const m = parts[1] ? parts[1].padStart(2,'0') : '00';
-    return `${h}:${m}`;
-  }
-
-  return '';
-};
-
+  const formatTimeForBackend = (value) => {
+    if (!value) return '';
+    if (typeof value === 'number') {
+      const totalMinutes = Math.round(value * 24 * 60);
+      const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+      const minutes = String(totalMinutes % 60).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+    if (typeof value === 'string') {
+      const parts = value.split(':');
+      const h = parts[0] ? parts[0].padStart(2,'0') : '00';
+      const m = parts[1] ? parts[1].padStart(2,'0') : '00';
+      return `${h}:${m}`;
+    }
+    return '';
+  };
 
   const formatString = (value) => (value === null || value === undefined ? '' : String(value).trim());
 
-  // Handle file selection
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -87,7 +78,16 @@ const formatTimeForBackend = (value) => {
     };
   };
 
-  // Upload data to backend
+  const showDuplicatePopup = (message) => {
+    Swal.fire({
+      icon: 'warning',
+      title: '⚠️ Duplicate Entry Detected',
+      text: message || 'Some rows already exist in the system.',
+      confirmButtonText: 'OK',
+      allowOutsideClick: false,
+    });
+  };
+
   const handleUpload = async () => {
     if (excelData.length === 0) {
       Swal.fire('No Data', 'Please select an Excel file first.', 'warning');
@@ -100,6 +100,7 @@ const formatTimeForBackend = (value) => {
 
     const chunkSize = Math.ceil(excelData.length / MAX_CALLS);
     let successCount = 0;
+    let duplicateCount = 0;
     let errorFile = null;
 
     for (let i = 0; i < MAX_CALLS; i++) {
@@ -108,11 +109,22 @@ const formatTimeForBackend = (value) => {
 
       try {
         const response = await putApi('/DocketBooking/StatusEntryBulk', { excelData: chunk });
+
         if (response.errorFileUrl) errorFile = response.errorFileUrl;
+
         if (response.status === 1) {
           successCount += chunk.length;
+        } else if (response.message && response.message.toLowerCase().includes('duplicate')) {
+          duplicateCount += chunk.length;
+          // showDuplicatePopup(response.message);
+          console.warn(`Duplicate entry: ${response.message}`);
         } else {
-          console.error(`API responded with error: ${response.message || 'Unknown error'}`);
+          Swal.fire({
+            icon: 'error',
+            title: 'Upload Failed',
+            text: response.message || 'Unknown error occurred',
+          });
+          console.error(`API responded with error: ${response.message}`);
         }
       } catch (err) {
         console.error(`Chunk ${i + 1} failed with exception:`, err);
@@ -125,19 +137,26 @@ const formatTimeForBackend = (value) => {
     setUploading(false);
     setErrorFileUrl(errorFile);
 
+    let summaryMessage = '';
+    if (successCount > 0) summaryMessage += `✅ ${successCount} rows uploaded successfully.\n`;
+    if (duplicateCount > 0) summaryMessage += `⚠️ ${duplicateCount} duplicate rows detected and skipped.\n`;
+    if (!summaryMessage) summaryMessage = '❌ All rows failed to upload.';
+
     Swal.fire(
-      successCount > 0 ? 'Upload Complete' : 'Upload Failed',
-      successCount > 0
-        ? `✅ ${successCount} of ${excelData.length} rows uploaded.` +
-          (errorFile ? " ⚠️ Some errors occurred. You can download the error log." : "")
-        : '❌ All rows failed to upload.',
-      successCount > 0 ? 'success' : 'error'
+      'Upload Summary',
+      summaryMessage,
+      (successCount > 0 || duplicateCount > 0) ? 'success' : 'error'
     );
 
     setExcelData([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
-
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([headers.reduce((acc, key) => ({ ...acc, [key]: '' }), {})]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template');
+    XLSX.writeFile(wb, 'StatusTemplate.xlsx');
+  };
   const handleDownloadErrorFile = () => {
     if (errorFileUrl) {
       const link = document.createElement("a");
@@ -159,13 +178,19 @@ const formatTimeForBackend = (value) => {
         onChange={handleFileChange}
         className="form-control mb-3"
       />
-      <button
+      <div className="row" style={{display:"flex",justifyContent:"center",alignItems:"center",gap:"10px"}}>
+         <button
         onClick={handleUpload}
         disabled={uploading || excelData.length === 0}
-        className="btn btn-primary mb-3"
+        className="btn btn-primary col-10 col-md-4"
       >
         {uploading ? 'Uploading...' : 'Start Upload'}
       </button>
+        <button onClick={handleDownloadTemplate} 
+        className="btn btn-success col-10 col-md-6">
+          ⬇️ Download Template
+        </button>
+      </div>
 
       {uploading && (
         <div>

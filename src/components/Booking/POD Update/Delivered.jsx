@@ -18,7 +18,6 @@ function Delivered() {
         toDate: today,
         time: time,
         Status: "",
-        Reciept: "",
         image: null,
         RecName: "",
         RecMob: "",
@@ -33,7 +32,6 @@ function Delivered() {
         toDate: today,
         time: time,
         Status: "",
-        Reciept: "",
         image: null,
         RecName: "",
         RecMob: "",
@@ -41,7 +39,7 @@ function Delivered() {
         }))
     }
     const statusOptions = [
-        { value: "Intransit", label: "Intransit" },
+        { value: "Delivered", label: "Delivered" },
         { value: "RTO", label: "RTO" },
     ];
     const handleDateChange = (date, field) => {
@@ -86,7 +84,7 @@ function Delivered() {
     Receiver_Name: formData.RecName,
     Receiver_Mob_No: formData.RecMob,
     POD_Images: formData.image,
-    Stamp: formData.Reciept,
+    stamp:"",
   };
 
   try {
@@ -96,15 +94,7 @@ function Delivered() {
 
       await getDelieveredData(formData.DocketNo, formData.ReferenceNo);
 
-      setFormData(prev => ({
-        ...prev,
-        Status: '',
-        RecName: '',
-        RecMob: '',
-        Remark: '',
-        image: null,
-        Reciept: ''
-      }));
+      resetForm();
     } else {
       Swal.fire('Error', res.message || 'Update failed.', 'error');
     }
@@ -126,7 +116,7 @@ function Delivered() {
                     <form onSubmit={handleSubmit} style={{ marginBottom: "10px" }}>
                         <div className="fields2">
                             <div className="input-field3">
-                                <label >AWB Number</label>
+                                <label >LR_NO</label>
                                 <input type="tel" placeholder="AWB Number" value={formData.DocketNo}
                                     onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })}
                                     onKeyDown={(e) => {
@@ -141,7 +131,7 @@ function Delivered() {
                             </div>
 
                             <div className="input-field3">
-                                <label >Reference Number</label>
+                                <label >AGENT LR_NO</label>
                                 <input type="tel" placeholder="Reference Number" value={formData.ReferenceNo}
                                     onChange={(e) => setFormData({ ...formData, ReferenceNo: e.target.value })} />
                             </div>
@@ -176,7 +166,7 @@ function Delivered() {
                             </div>
 
                             <div className="input-field3">
-                                <label >Date</label>
+                                <label >Delivery_Date</label>
                                 <DatePicker
                                     portalId="datepicker-portal"
                                     selected={formData.toDate}
@@ -187,7 +177,7 @@ function Delivered() {
                             </div>
 
                             <div className="input-field3">
-                                <label >Time</label>
+                                <label >Delivery_Time</label>
                                 <input type="time" value={formData.time} onChange={(e) => { setFormData({ ...formData, time: e.target.value }) }} />
                             </div>
 
@@ -203,42 +193,13 @@ function Delivered() {
                             </div>
 
                             <div className="input-field3">
-                                <label >Remark</label>
-                                <input type="text" placeholder="Enter Remark" value={formData.Remark} onChange={(e) => { setFormData({ ...formData, Remark: e.target.value }) }} />
-                            </div>
-
-                            <div className="input-field3">
-                                <label >Upload Image</label>
+                                <label >POD_IMG</label>
                                 <input style={{ padding: "5px" }} type="file" accept="image/*" onChange={handleFileChange}  />
                             </div>
 
                             <div className="input-field3">
-                                <label >Nature Of Receipt</label>
-                                <Select
-                                    options={statusOptions}
-                                    value={statusOptions.find(opt => opt.value === formData.Reciept) || null}
-                                    onChange={(selectedOption) =>
-                                        setFormData({
-                                            ...formData,
-                                            Reciept: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    placeholder="Select Reciept"
-                                    required
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                />
+                                <label >Remark</label>
+                                <input type="text" placeholder="Enter Remark" value={formData.Remark} onChange={(e) => { setFormData({ ...formData, Remark: e.target.value }) }} />
                             </div>
 
                             <div className="input-field3">

@@ -3,13 +3,25 @@ import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
 import { putApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
-const ExcelImport = () => {
+const BulkUpdate = () => {
   const [excelData, setExcelData] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [errorFileUrl, setErrorFileUrl] = useState(null);
   const fileInputRef = useRef(null);
   const MAX_CALLS = 10;
+// Define headers array at the top
+const headers = [
+  'LR_NO',
+  'Status',
+  'DelvDt',
+  'Delv_Time',
+  'Receiver_Name',
+  'Receiver_Mob_No',
+  'Receiver_Remark',
+  'Stamp'
+];
+
 
   // Format Excel date to dd/MM/yyyy
   const formatExcelDateForBackend = (value) => {
@@ -91,6 +103,12 @@ const formatTimeForBackend = (value) => {
 };
 
   // Upload data to backend
+    const handleDownloadTemplate = () => {
+      const ws = XLSX.utils.json_to_sheet([headers.reduce((acc, key) => ({ ...acc, [key]: '' }), {})]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Template');
+      XLSX.writeFile(wb, 'DeliveryTemplate.xlsx');
+    };
   const handleUpload = async () => {
     if (excelData.length === 0) {
       Swal.fire('No Data', 'Please select an Excel file first.', 'warning');
@@ -162,13 +180,19 @@ const formatTimeForBackend = (value) => {
         onChange={handleFileChange}
         className="form-control mb-3"
       />
-      <button
+     <div className="row" style={{display:"flex",justifyContent:"center",alignItems:"center",gap:"10px"}}>
+         <button
         onClick={handleUpload}
         disabled={uploading || excelData.length === 0}
-        className="btn btn-primary mb-3"
+        className="btn btn-primary col-10 col-md-4"
       >
         {uploading ? 'Uploading...' : 'Start Upload'}
       </button>
+        <button onClick={handleDownloadTemplate} 
+        className="btn btn-success col-10 col-md-6">
+          ⬇️ Download Template
+        </button>
+      </div>
 
       {uploading && (
         <div>
@@ -199,4 +223,4 @@ const formatTimeForBackend = (value) => {
   );
 };
 
-export default ExcelImport;
+export default BulkUpdate;

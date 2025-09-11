@@ -8,13 +8,13 @@ import CreateManifest from "./CreateManifest";
 import ViewManifest from "./ViewManifest";
 import ForwardingManifest from "./ForwardingManifest";
 import SendEmail from "./SendEmail";
+import { useLocation } from "react-router-dom";
 
 
 
 function DailyManifest() {
-
-    const [activeTab, setActiveTab] = useState('pendingmanifest');
-
+const location=useLocation();
+   const [activeTab, setActiveTab] = useState(location?.state?.tab || "pendingmanifest");
     const handleChange = (event) => {
         setActiveTab(event.target.id);
     };

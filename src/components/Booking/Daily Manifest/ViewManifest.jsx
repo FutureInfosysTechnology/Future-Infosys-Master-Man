@@ -7,10 +7,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import {useNavigate} from "react-router-dom"
+import {useLocation, useNavigate} from "react-router-dom"
 
 function ViewManifest() {
     const navigate=useNavigate()
+    const location=useLocation();
     //  const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -158,7 +159,7 @@ function ViewManifest() {
         setShowModal(true);
     };
     const handleOpenManifestPrint = (manifestData) => {
-       navigate("/manifest",{state:{data:manifestData}});
+       navigate("/manifest",{state:{data:manifestData,from: location.pathname}});
     };
     return (
         <>
@@ -248,7 +249,7 @@ function ViewManifest() {
 
                     {isLoading ? (<div className="loader"></div>) : (
                         <div className='table-container'>
-                            <table className='table table-bordered table-sm'>
+                            <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
                                 <thead>
                                     <tr>
                                         <th>Actions</th>
