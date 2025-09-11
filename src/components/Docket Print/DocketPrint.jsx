@@ -10,12 +10,12 @@ import DocketPrint4 from "./DocketPrint4";
 import BulkImport from "../Booking/Daily Manifest/BulkImport";
 import LabelPrinting from "./LabelPrinting";
 import "./DocketPrint.css"
+import { useLocation } from "react-router-dom";
 
 
 function DocketPrint() {
-
-    const [activeTab, setActiveTab] = useState('print1'); // Default to 'zone'
-
+    const location=useLocation();
+    const [activeTab, setActiveTab] = useState(location?.state?.tab||'print1'); // Default to 'zone'
     const handleChange = (event) => {
         setActiveTab(event.target.id);
     };

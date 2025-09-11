@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
 const DocketPrint4 = () => {
     const [data,setData]=useState([]);
@@ -10,13 +10,15 @@ const DocketPrint4 = () => {
         from: "",
         to: "",
     })
+    const location=useLocation();
+    console.log(formData);
     const navigate = useNavigate();
     const handleFormChange = (value, key) => {
         setFormData({ ...formData, [key]: value });
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
-                navigate("/MobileReceipt", { state: { from:formData.from,to:formData.to } });
+                navigate("/MobileReceipt", { state: { from:formData.from,to:formData.to,path:location.pathname } });
     }
     return (
         <>
