@@ -214,11 +214,11 @@ function Undelivered() {
                         </div>
                     </form>
 
-                    <span style={{ height: "1px", backgroundColor: "lightgray" }}></span>
+                    {deliveryData.length > 0 && (<div style={{width:"100%",border:"1px solid black" }}></div>)}
 
                     {isLoading && <div className="loader"></div>}
                     {deliveryData.length > 0 && (
-                        <form>
+                        <form style={{marginTop:"10px"}}>
                             <div className="fields2">
                                 <div className="input-field3">
                                     <label >Docket Number</label>

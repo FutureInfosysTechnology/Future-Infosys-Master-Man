@@ -166,9 +166,9 @@ function Manifest() {
             <Sidebar1 />
             <div className="main-body" id="main-body"> 
                 
-                    <div className="container-2" style={{ borderRadius: "0px", paddingLeft: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", gap: "5px" }}>
+                    <div className="container-2" style={{ borderRadius: "0px",width: "840px", height:"40px",border:"none" }}>
 
-                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex",flexDirection:"row",border:"none" ,backgroundColor:"transparent" ,justifyContent:"end",gap:"10px",fontSize:"12px"}}>
+                        <div className="container-2" style={{ borderRadius: "0px", width: "840px", display: "flex",flexDirection:"row",border:"none" ,justifyContent:"end",gap:"10px",fontSize:"12px",alignItems:"center"}}>
                         <button
                             onClick={handleDownloadPDF}
                             style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
@@ -196,9 +196,9 @@ function Manifest() {
                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
 
                             < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
-                                <div className="container-3" style={{ border: "7px double black" }}>
+                                <div className="container-3" style={{ border: "5px double black" }}>
 
-                                    <div style={{ height: "130px", display: "flex", flexDirection: "row", borderBottom: "1px solid black", paddingBottom: "5px", marginBottom: "5px" }}>
+                                    <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px" }}>
                                         <div style={{ width: "40%" }}>
                                             <img src={logoimg} alt="" style={{ height: "120px" }} />
                                         </div>
@@ -225,7 +225,7 @@ function Manifest() {
                                         </div>
                                     </div>
 
-                                    <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px", marginTop: "20px" }}>
+                                    <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px", marginTop: "" }}>
                                         <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
                                             <div>
                                                 <label htmlFor=""><b>VENDOR NAME :</b></label>

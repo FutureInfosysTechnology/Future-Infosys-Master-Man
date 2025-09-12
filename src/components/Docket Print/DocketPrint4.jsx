@@ -18,7 +18,20 @@ const DocketPrint4 = () => {
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
-                navigate("/MobileReceipt", { state: { from:formData.from,to:formData.to,path:location.pathname } });
+        try {
+                    const response = await getApi(`/Booking/DocketReceipt?FromDocket=${formData.from}&ToDocket=${formData.to}`);
+                    if (response.status === 1) {
+                        console.log(response);
+                        console.log(response.Data);
+                        setData(response.Data);
+                        response.Data && navigate("/MobileReceipt", { state: { data:response.Data,path:location.pathname } });
+                    }
+                }
+                catch (error) {
+                    console.error("API Error:", error);
+                }
+                finally {
+                }
     }
     return (
         <>

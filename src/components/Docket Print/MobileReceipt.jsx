@@ -15,31 +15,9 @@ function MobileReceipt() {
     const navigate = useNavigate();
     const location = useLocation();
     console.log(location);
-    const res = location?.state;
     console.log(location.state);
-    const f = res?.from;
-    const t = res?.to;
-    const fromPath = res?.path;
+    const fromPath =location?.state?.path || "/";
     const [data, setData] = useState([]);
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getApi(`/Booking/DocketReceipt?FromDocket=${f}&ToDocket=${t}`);
-                if (response.status === 1) {
-                    console.log(response);
-                    console.log(response.Data);
-                    setData(response.Data);
-                }
-            }
-            catch (error) {
-                console.error("API Error:", error);
-            }
-            finally {
-                setLoading(false);
-            }
-        }
-        fetchData();
-    }, [f, t])
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -53,6 +31,7 @@ function MobileReceipt() {
                 console.log(error);
             }
         }
+        setData(location?.state?.data || []);
         fetchData();
     }, [])
     const formateDate = (dateString) => {
@@ -136,8 +115,8 @@ function MobileReceipt() {
 </style>
             <Header />
             <Sidebar1 />
-            {loading && <div>Loading...</div>}
-                   { data.length > 0 && (
+            {loading && <div style={{fontSize:"30px" ,color:"black"}}>Loading...</div>}
+                   { data?.length > 0 && (
                         <div className="main-body" id="main-body">
                             <div className="container">
                                 <div className="container-2" style={{ borderRadius: "0px", paddingLeft: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", gap: "5px" }}>
