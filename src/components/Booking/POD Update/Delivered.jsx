@@ -42,6 +42,14 @@ function Delivered() {
         { value: "Delivered", label: "Delivered" },
         { value: "RTO", label: "RTO" },
     ];
+    const formatDate = (date) => {
+        if (!date) return null;
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`; // ✅ yyyy-MM-dd format
+    };
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
@@ -65,43 +73,44 @@ function Delivered() {
         }
     }
     const handleFileChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData({ ...formData, image: reader.result }); // Base64 string
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData({ ...formData, image: reader.result }); // Base64 string
+            };
+            reader.readAsDataURL(file);
+        }
     };
-    reader.readAsDataURL(file); // converts to base64
-  }
-};
-    const handleSubmit = async (e) => {
-  e.preventDefault();
+ const handleSubmit = async (e) => {
+        e.preventDefault();
 
-  const payload = {
-    DocketNo: formData.DocketNo,
-    Status: formData.Status,
-    Delv_Time: formData.time,
-    Receiver_Name: formData.RecName,
-    Receiver_Mob_No: formData.RecMob,
-    POD_Images: formData.image,
-    stamp:"",
-  };
+        const payload = {
+            DocketNo: formData.DocketNo,
+            Status: formData.Status,
+            DelvDT: formatDate(formData.toDate), // ✅ formatted date
+            DelvTime: formData.time,
+            Receiver_Name: formData.RecName,
+            Receiver_Mob_No: formData.RecMob,
+            POD_Images: formData.image,
+            Remark: formData.Remark,
+            Stamp: "USR01", // change as per login user
+        };
 
-  try {
-    const res = await putApi(`DocketBooking/Deliveryupdate`, payload); // no query params
-    if (res.status === 1) {
-      Swal.fire('Updated!', res.message || 'Booking updated.', 'success');
+        try {
+            const res = await putApi("DocketBooking/Deliveryupdate", payload);
 
-      await getDelieveredData(formData.DocketNo, formData.ReferenceNo);
-
-      resetForm();
-    } else {
-      Swal.fire('Error', res.message || 'Update failed.', 'error');
-    }
-  } catch (err) {
-    Swal.fire('Error', 'Something went wrong while updating.', 'error');
-  }
-};
+            if (res.status === 1) {
+                Swal.fire("Success", res.message, "success");
+                await getDelieveredData(formData.DocketNo, formData.ReferenceNo);
+                resetForm();
+            } else {
+                Swal.fire("Error", res.message, "error");
+            }
+        } catch (err) {
+            Swal.fire("Error", "Something went wrong while updating", "error");
+        }
+    };
 
     console.log(formData);
     const handleSearch = (e) => {
@@ -119,14 +128,7 @@ function Delivered() {
                                 <label >LR_NO</label>
                                 <input type="tel" placeholder="AWB Number" value={formData.DocketNo}
                                     onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Tab') {
-                                            // Don't prevent tab, just trigger handleSearch after a short delay
-                                            setTimeout(() => {
-                                                handleSearch();
-                                            }, 100); // Adjust delay if needed
-                                        }
-                                    }}
+                                     onBlur={handleSearch}
                                 />
                             </div>
 
@@ -206,7 +208,7 @@ function Delivered() {
                                 <label style={{ marginBottom: "18px" }}></label>
                                 <div style={{ display: "flex", flexDirection: "row" }}>
                                     <button style={{ height: "40px", width: "48%" }} className="ok-btn" type="submit">Submit</button>
-                                    <button style={{ height: "40px", width: "48%", marginLeft: "10px" }} className="ok-btn">Cancel</button>
+                                    <button style={{ height: "40px", width: "48%", marginLeft: "10px" }} className="ok-btn" onClick={resetForm}>Cancel</button>
                                 </div>
                             </div>
                         </div>

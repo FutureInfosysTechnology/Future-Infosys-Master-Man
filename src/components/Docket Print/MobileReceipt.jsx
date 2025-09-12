@@ -26,6 +26,7 @@ function MobileReceipt() {
             try {
                 const response = await getApi(`/Booking/DocketReceipt?FromDocket=${f}&ToDocket=${t}`);
                 if (response.status === 1) {
+                    console.log(response);
                     console.log(response.Data);
                     setData(response.Data);
                 }
@@ -135,12 +136,8 @@ function MobileReceipt() {
 </style>
             <Header />
             <Sidebar1 />
-            {
-                loading ?
-                    (
-                        <div>Loading...</div>
-                    ) :
-                    data.length > 0 && (
+            {loading && <div>Loading...</div>}
+                   { data.length > 0 && (
                         <div className="main-body" id="main-body">
                             <div className="container">
                                 <div className="container-2" style={{ borderRadius: "0px", paddingLeft: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", gap: "5px" }}>
