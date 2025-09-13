@@ -17,17 +17,26 @@ function ViewDrs() {
         return [];
     };
     const [data, setData] = useState([]);
-     const [isLoading, setIsLoading] = useState(false);
+    const [empData, setEmpData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [openRow, setOpenRow] = useState(null);
-    const [zones, setZones] = useState([]);
-    const [search, setSearch] = useState("");
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const [formData, setFormData] = useState({
+        toDate: today,
+        fromDate: firstDayOfMonth,
+        empName:"",
+        drsNo:"",
+    })
     const fetchData = async (endpoint, params) => {
             try {
                 const response = await getApi(endpoint, { params });
-                console.log(response.Data);
-                const manifestData = extractArray(response);
+                console.log(response.data);
+                const drsData = extractArray(response);
     
-                if (manifestData.length === 0) {
+                if (drsData.length === 0) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'No Data Found',
@@ -35,7 +44,7 @@ function ViewDrs() {
                         showConfirmButton: true,
                     });
                 }
-                setData(manifestData);
+                setData(drsData);
             } catch (err) {
                 console.error('Fetch Manifest Error:', err);
             } finally {
@@ -48,37 +57,29 @@ function ViewDrs() {
     
             const params = {
     sessionLocationCode: 'MUM',
-    drsNo: search,
+    drsNo: formData.drsNo,
     fromDate: formData.fromDate,
     toDate: formData.toDate,
-    employeeCode: selectedBoy?.value || null,
+    employeeCode: formData.empName,
     pageNumber: currentPage,
     pageSize: rowsPerPage
 };
-fetchData('/Runsheet/getViewRunsheet', params);
-        };
-    useEffect(() => {
-        if (search === "") {
-            setZones(data);
-        } else {
-            setZones(
-                data.filter(
-                    (item) =>
-                        item.name.toLowerCase().includes(search.toLowerCase()) ||
-                        item.code.toLowerCase().includes(search.toLowerCase())
-                )
-            );
+fetchData('/Runsheet/getViewRunsheet',params);
+};
+  const fetchEmp = async (endpoint, setData) => {
+        try {
+            const response = await getApi(endpoint);
+            setData(Array.isArray(response.Data) ? response.Data : []);
+        } catch (err) {
+            console.error('Fetch Error:', err);
         }
-    }, [search, data]);
+    };
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [selectedBoy, setSelectedBoy] = useState(null);
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const [formData, setFormData] = useState({
-        toDate: today,
-        fromDate: firstDayOfMonth,
-    })
+    useEffect(() => {
+        fetchEmp('/Master/GetEmployee', setEmpData);
+    }, [])
+
+    
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
@@ -87,14 +88,16 @@ fetchData('/Runsheet/getViewRunsheet', params);
         { value: "suresh", label: "Suresh" },
         { value: "mahesh", label: "Mahesh" }
     ];
-    const rowsPerPage = 10;
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
+    const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
 
-    const totalPages = Math.ceil(zones.length / rowsPerPage);
+    const totalPages = Math.ceil(data.length / rowsPerPage);
 
-
+     const handleRowsPerPageChange = (event) => {
+        setRowsPerPage(Number(event.target.value));
+        setCurrentPage(1);
+    };
     const handleDelete = (index) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -106,8 +109,8 @@ fetchData('/Runsheet/getViewRunsheet', params);
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                const updatedZones = zones.filter((_, i) => i !== index);
-                setZones(updatedZones);
+                const updatedData = data.filter((_, i) => i !== index);
+                setData(updatedData);
                 Swal.fire(
                     'Deleted!',
                     'Your zone has been deleted.',
@@ -175,11 +178,23 @@ fetchData('/Runsheet/getViewRunsheet', params);
 
                         <div className="input-field3">
                             <label htmlFor="">Delivery Boy</label>
-                            <Select
-                                options={deliveryBoyOptions}
-                                value={selectedBoy}
-                                onChange={(option) => setSelectedBoy(option)}
-                                placeholder="Select Delivery Boy"
+                           <Select
+                                options={empData.map(emp => ({
+                                    value: emp.Employee_Code,   // adjust keys from your API
+                                    label: emp.Employee_Name
+                                }))}
+                                value={
+                                    formData.empName
+                                        ? { value: formData.empName, label: empData.find(c => c.Employee_Code === formData.empName)?.Employee_Name || "" }
+                                        : null
+                                }
+                                onChange={(selectedOption) =>
+                                    setFormData({
+                                        ...formData,
+                                        empName: selectedOption ? selectedOption.value : ""
+                                    })
+                                }
+                                placeholder="Select Employee"
                                 isSearchable
                                 classNamePrefix="blue-selectbooking"
                                 className="blue-selectbooking"
@@ -198,7 +213,7 @@ fetchData('/Runsheet/getViewRunsheet', params);
 
                         <div className="input-field3">
                             <label htmlFor="">DRS No</label>
-                            <input type="tel" placeholder="Enter DRS No" value={search} onChange={(e) => setSearch(e.target.value)} />
+                            <input type="tel" placeholder="Enter DRS No" value={formData.drsNo} onChange={(e) => setFormData({...formData,drsNo:e.target.value})} />
                         </div>
 
                         <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "11px" }}>
@@ -218,7 +233,7 @@ fetchData('/Runsheet/getViewRunsheet', params);
                         </button>
                     </div>
                 </div> */}
-
+                {isLoading ? (<div className="loader"></div>) : (
                 <div className='table-container'>
                     <table className='table table-bordered table-sm'>
                         <thead className='table-info body-bordered table-sm'>
@@ -229,15 +244,16 @@ fetchData('/Runsheet/getViewRunsheet', params);
                                 <th scope="col">Drs Date</th>
                                 <th scope="col">Employee Name</th>
                                 <th scope="col">Employee Contact No</th>
+                                <th scope="col">Vehicle No</th>
                                 <th scope="col">Area</th>
-                                <th scope="col">Total Awb</th>
+                                <th scope="col">Counting</th>
 
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
-                            {currentRows.map((zone, index) => (
-                                <tr key={zone.id} style={{ fontSize: "12px", position: "relative" }}>
+                            {currentRows.map((drsData, index) => (
+                                <tr key={drsData.id} style={{ fontSize: "12px", position: "relative" }}>
                                     <td>
                                         <PiDotsThreeOutlineVerticalFill
                                             style={{ fontSize: "20px", cursor: "pointer" }}
@@ -264,7 +280,7 @@ fetchData('/Runsheet/getViewRunsheet', params);
                                                     padding:"10px"
                                                 }}
                                             >
-                                                <button className='edit-btn' onClick={() => handleOpenDrsPrint(zone)}>
+                                                <button className='edit-btn' onClick={() => handleOpenDrsPrint(drsData)}>
                                                 <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" ,marginLeft:"20px"}}></i>
                                             </button>
                                             <button className='edit-btn' style={{ fontSize: "18px"}}>
@@ -276,28 +292,49 @@ fetchData('/Runsheet/getViewRunsheet', params);
                                             </div>
                                         )}
                                     </td>
-                                    <td>{zone.id}</td>
-                                    <td>{zone.code}</td>
-                                    <td>{zone.code}</td>
-                                    <td>{zone.name}</td>
-                                    <td>{zone.name}</td>
-                                    <td>{zone.name}</td>
-                                    <td>{zone.name}</td>
+                                    <td>{index+1}</td>
+                                    <td>{drsData.DrsNo}</td>
+                                    <td>{drsData.DrsDate}</td>
+                                    <td>{drsData.employeeName}</td>
+                                    <td>{}</td>
+                                    <td>{drsData.VehicleNo}</td>
+                                    <td>{drsData.Area}</td>
+                                    <td>{drsData.counting}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                </div>
+                </div>)}
 
-                <div className="pagination">
-                    <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                        {'<'}
-                    </button>
-                    <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                    <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                        {'>'}
-                    </button>
-                </div>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                                <div className="pagination">
+                                    <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                                        {'<'}
+                                    </button>
+                                    <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
+                                    <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                                        {'>'}
+                                    </button>
+                                </div>
+
+                                <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
+                                    <label htmlFor="rowsPerPage" style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
+                                    <select
+                                        style={{ height: "40px", width: "60px", marginTop: "10px" }}
+                                        id="rowsPerPage"
+                                        value={rowsPerPage}
+                                        onChange={handleRowsPerPageChange}
+                                    >
+                                        <option value={5}>5</option>
+                                        <option value={10}>10</option>
+                                        <option value={25}>25</option>
+                                        <option value={50}>50</option>
+                                        <option value={100}>100</option>
+                                        <option value={200}>200</option>
+                                        <option value={500}>500</option>
+                                    </select>
+                                </div>
+                            </div>
 
             </div>
         </>

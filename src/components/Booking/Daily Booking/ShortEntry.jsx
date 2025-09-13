@@ -286,7 +286,7 @@ function ShortEntry() {
               />
             </div>
 
-            <div className="col-md-4">
+            <div className="col-md-6 col-lg-4">
               <label className="form-label">Docket No</label>
               <input
                 type="text"

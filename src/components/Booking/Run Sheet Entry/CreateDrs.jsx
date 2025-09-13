@@ -10,7 +10,7 @@ import { refeshPend } from "../../../App";
 
 
 function CreateDrs() {
-    const {refFun}=useContext(refeshPend)
+    const {refFun,ref}=useContext(refeshPend)
     const [getData, setGetData] = useState([]);
     const [empData, setEmpData] = useState([]);
     const [getCity, setGetCity] = useState([]);
@@ -30,14 +30,14 @@ function CreateDrs() {
     const [selectedManifestRows, setSelectedManifestRows] = useState([]);
     const [selectedDocketNos, setSelectedDocketNos] = useState([]);
     const [formData, setFormData] = useState({
-        DocketNo: "",
+        DocketNo:[],
         vehicleNo: "",
         empName: "",
         cityName: "",
         mobileNo: "",
-        toDate: today,
-        fromDate: firstDayOfMonth,
+        drsDate: today,
     })
+    console.log(formData);
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
@@ -79,7 +79,7 @@ function CreateDrs() {
         };
 
         fetchData();
-    }, [currentPage, rowsPerPage]);
+    }, [currentPage, rowsPerPage,ref]);
 
 
     const totalPages = Math.ceil(totalRecords / rowsPerPage);
@@ -146,7 +146,13 @@ function CreateDrs() {
         }));
         setModalIsOpen(false);
     };
-
+    const formatDate = (date) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${day}/${month}/${year}`;
+};
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -163,30 +169,38 @@ function CreateDrs() {
             sessionLocationCode: "DEL",
             VehicleNo: formData.vehicleNo,
             employeeCode: formData.empName,
-            Area: formData.cityName,
+            Area: formData.cityName?getCity.find((city)=>city.City_Code===formData.cityName)?.City_Name:"",
             EmployeeMobile: formData.mobileNo,
-            DocketNo: formData.DocketNo   
+            DocketNo: formData.DocketNo,
+            DrsDate:formatDate(formData.drsDate),   
         };
+        console.log(payload);
 
         try {
             const response = await postApi('Runsheet/generateRunsheet', payload);
-            Swal.fire({
+            console.log(response);
+            if(response.status===1)
+            {
+                 Swal.fire({
                 icon: 'success',
                 title: 'Success',
                 text: 'Data has been successfully generated!',
                 timer: 2000,
                 showConfirmButton: true,
             });
-             refFun();
+            refFun();
             setFormData({
                 vehicleNo: "",
                 empName: "",
                 cityName: "",
                 mobileNo: "",
-                DocketNo: []
+                DocketNo: [],
+                drsDate:today
             });
             setSelectedManifestRows([]);
             setSelectedRows([]);
+            }
+           
         } catch (error) {
             console.error("error submitting DRS:", error);
             Swal.fire({
@@ -272,22 +286,12 @@ function CreateDrs() {
                                 }}
                             />
                         </div>
-                        <div className="input-field3">
-                            <label htmlFor="">From</label>
-                            <DatePicker
-                                selected={formData.fromDate}
-                                onChange={(date) => handleDateChange(date, "fromDate")}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm"
-                                portalId="root-portal"   
-                            />
-                        </div>
 
                         <div className="input-field3">
-                            <label htmlFor="">To</label>
+                            <label htmlFor="">Drs Date</label>
                             <DatePicker
-                                selected={formData.toDate}
-                                onChange={(date) => handleDateChange(date, "toDate")}
+                                selected={formData.drsDate}
+                                onChange={(date) => handleDateChange(date, "drsDate")}
                                 dateFormat="dd/MM/yyyy"
                                 className="form-control form-control-sm"
                                 portalId="root-portal"   
@@ -301,14 +305,14 @@ function CreateDrs() {
                                     label: city.City_Name
                                 }))}
                                 value={
-                                    formData.toDest
-                                        ? { value: formData.toDest, label: getCity.find(c => c.City_Code === formData.toDest)?.City_Name || "" }
+                                    formData.cityName
+                                        ? { value: formData.cityName, label: getCity.find(c => c.City_Code === formData.cityName)?.City_Name || "" }
                                         : null
                                 }
                                 onChange={(selectedOption) =>
                                     setFormData({
                                         ...formData,
-                                        toDest: selectedOption ? selectedOption.value : ""
+                                        cityName: selectedOption ? selectedOption.value : ""
                                     })
                                 }
                                 placeholder="Select City"
@@ -346,7 +350,14 @@ function CreateDrs() {
                             <label htmlFor=""></label>
                             <div style={{ display: "flex", flexDirection: "row", marginTop: "18px", justifyContent: "center", alignItems: "center", gap: "10px", width: "150px" }}>
                                 <button type="submit" className="ok-btn" style={{ width: "55%" }}>Generate</button>
-                                <button type="button" className="ok-btn" style={{ width: "45%" }}>Reset</button>
+                                <button type="button" className="ok-btn" style={{ width: "45%" }} onClick={()=>setFormData({
+                vehicleNo: "",
+                empName: "",
+                cityName: "",
+                mobileNo: "",
+                DocketNo: [],
+                drsDate:today
+            })}>Reset</button>
                             </div>
                         </div>
                     </div>

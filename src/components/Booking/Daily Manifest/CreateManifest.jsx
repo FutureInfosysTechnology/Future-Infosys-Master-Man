@@ -44,7 +44,7 @@ function CreateManifest() {
         driverName: '',
         driverMobile: '',
         vendorCode: '',
-        vendorMobile: '',
+        vendorAwbNo: '',
         remark: '',
         bookingWeight: '',
         manifestWeight: '',
@@ -193,7 +193,13 @@ function CreateManifest() {
         }));
         setModalIsOpen(false);
     };
-
+ const formatDate = (date) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${day}/${month}/${year}`;
+};
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -205,9 +211,9 @@ function CreateManifest() {
             });
             return;
         }
-
         const requestPayload = {
             DocketNo: selectedDocketNos,
+            sessionLocationCode: "MUM",
             fromDest: formData.fromDest,
             toDest: formData.toDest,
             Mode: formData.mode,
@@ -216,9 +222,11 @@ function CreateManifest() {
             Vehicletype: formData.vehicleType,
             VehicleNo: formData.vehicleNo,
             VendorCode: formData.vendorCode,
+            VendorAwbNo: formData.vendorAwbNo,
             driverName: formData.driverName,
             driverMobile: formData.driverMobile,
-            DispatchFlag: "0",
+            ManifestDate:formatDate(formData.maniDate),
+            DispatchFlag: "1",
         };
         try {
             const response = await postApi('/Manifest/generateManifest', requestPayload);
@@ -239,7 +247,7 @@ function CreateManifest() {
                 driverName: '',
                 driverMobile: '',
                 vendorCode: '',
-                vendorMobile: '',
+                vendorAwbNo: '',
                 remark: '',
                 bookingWeight: '',
                 manifestWeight: '',
@@ -573,9 +581,9 @@ function CreateManifest() {
                             </div>
 
                             <div className="input-field3" >
-                                <label htmlFor="">Vendor Number</label>
-                                <input type="text" placeholder="Vendor Number" maxLength={10}
-                                    value={formData.vendorMobile} onChange={(e) => setFormData({ ...formData, vendorMobile: e.target.value })} />
+                                <label htmlFor="">Vendor Awb No</label>
+                                <input type="text" placeholder="Vendor Awb No" maxLength={10}
+                                    value={formData.vendorAwbNo} onChange={(e) => setFormData({ ...formData, vendorAwbNo: e.target.value })} />
                             </div>
 
                             <div className="input-field3" >

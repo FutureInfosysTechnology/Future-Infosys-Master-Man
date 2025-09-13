@@ -1350,11 +1350,11 @@ function Booking() {
     return (
         <>
 
-            <div className="body">
+            <div className="body" style={{margin:"0px",padding:"0px"}}>
 
-                <div className="container1">
-                    <div className="container-2" style={{ border: "transparent" }}>
-                        <div className="left-card" >
+                <div className="container1"  style={{padding:"0px",margin:"0px",paddingBottom:"0.8rem"}}>
+                    <div className="container-2" style={{border: "transparent",padding:"0px"}}>
+                        <div className="left-card " style={{margin:"0px"}} >
 
 
                             <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}  style={{backgroundColor:"white"}}>
@@ -1394,11 +1394,11 @@ function Booking() {
                                     </div>
                                 </div>
 
-                                <div className="fields2">
+                                <div className="fields2" >
                                     <div style={{ display: "flex", flexDirection: "row", width: "98%" }}>
 
 
-                                        <div className="input-field" style={{ width: "90%", position: "relative" }}>
+                                        <div className="input-field" style={{ width: "80%", position: "relative" }}>
                                             <label>Customer Name</label>
                                             <Select
                                                 className="blue-selectbooking"
@@ -1424,7 +1424,7 @@ function Booking() {
                                                         }}
                                             />
                                         </div>
-                                        <div className="input-field" style={{ width: "18%" }}>
+                                        <div className="input-field" style={{ width: "25%" }}>
                                             <label>Code</label>
                                             <input
                                                 type="tel"
@@ -1437,7 +1437,7 @@ function Booking() {
                                 </div>
 
 
-                                <div className="container-fluid">
+                                <div className="container-fluid" style={{paddingLeft:"1rem"}}>
                                     <div className="row g-2 align-items-end">
                                         {/* Shipper Name Input */}
                                         <div className="col-md-10 col-sm-9 col-12">
@@ -1485,7 +1485,7 @@ function Booking() {
 
 
 
-                                <div className="container-fluid">
+                                <div className="container-fluid" style={{paddingLeft:"1rem"}}>
                                     <div className="row g-2">
                                         <div className="col-12">
                                             <div className="input-field">
@@ -1536,8 +1536,8 @@ function Booking() {
                                     </div>
 
                                     {/* Origin Row */}
-                                    <div style={{ display: "flex", gap: "-5rem" ,marginBottom: "1rem",width: "100%",gap:"10px" }}>
-                                        <div className="input-field1" style={{ width: "25%" }}>
+                                    <div style={{ whiteSpace:"nowrap", display: "flex" ,width: "100%",gap:"2px" }}>
+                                        <div className="input-field1" style={{ width: "21%"}}>
                                             <label>Pincode</label>
                                             <input
                                                 type="tel"
@@ -1549,7 +1549,7 @@ function Booking() {
                                             />
                                         </div>
 
-                                        <div className="input-field1" style={{ width: "50%" }}>
+                                        <div className="input-field1" style={{ width: "40%" }}>
                                             <label>Origin Name</label>
                                             <Select
                                                 className="blue-selectbooking"
@@ -1575,14 +1575,14 @@ function Booking() {
                                         </div>
 
                                         <div className="input-field1" style={{ width: "25%" }}>
-                                            <label>Origin Zone</label>
+                                            <label style={{}}>Origin Zone</label>
                                             <input type="text" placeholder="Zone_Name" value={formData.Origin_zone} readOnly />
                                         </div>
                                     </div>
 
                                     {/* Destination Row */}
-                                    <div style={{ display: "flex", gap: "-5rem", marginBottom: "1rem",width: "100%",gap:"10px"}}>
-                                        <div className="input-field1" style={{ width: "25%" }}>
+                                    <div style={{whiteSpace:"nowrap", display: "flex", marginBottom: "1rem",width: "100%",gap:"2px"}}>
+                                        <div className="input-field1" style={{ width: "21%" }}>
                                             <label>Pincode</label>
                                             <input
                                                 type="tel"
@@ -1594,7 +1594,7 @@ function Booking() {
                                             />
                                         </div>
 
-                                        <div className="input-field1" style={{ width: "50%" }}>
+                                        <div className="input-field1" style={{ width: "40%" }}>
                                             <label>Destination Name</label>
                                             <Select
                                                 className="blue-selectbooking"
@@ -1635,12 +1635,12 @@ function Booking() {
                                     </div>
 
 
-                                    <div className="card border p-1">
+                                    <div className="card border p-1 mx-0" style={{overflowX:"hidden"}}>
                                         <div className="section-title">Vendor Information</div>
 
-                                        <div className="fields2">
-                                            <div style={{ display: "flex", flexDirection: "row", width: "100%",gap:"10px" }}>
-                                                <div className="input-field" style={{ flex:"3",position: "relative" }}>
+                                        <div className="fields2" style={{whiteSpace:"nowrap",paddingRight:"0.5rem"}}>
+                                            <div style={{ display: "flex", flexDirection: "row", width: "100%",gap:"5px" }}>
+                                                <div className="input-field" style={{ flex:"5",position: "relative"}}>
                                                     <label>Mode Name</label>
 
                                                     <Select
@@ -1667,7 +1667,7 @@ function Booking() {
                                                         }}
                                                     />
                                                 </div>
-                                                <div className="input-field" style={{ width: "25%" }}>
+                                                <div className="input-field" style={{ flex:"2" }}>
                                                     <label>Code</label>
                                                     <input
                                                         type="tel"
@@ -1678,9 +1678,9 @@ function Booking() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="fields2" style={{ overflowX: "hidden" }}>
-                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "10px" }}>
-                                                <div className="input-field" style={{ flex: "3", position: "relative" }}>
+                                        <div className="fields2" style={{whiteSpace:"nowrap",paddingRight:"0.5rem" }}>
+                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px"}}>
+                                                <div className="input-field" style={{ flex: "5", position: "relative" }}>
                                                     <label>Vendor Name</label>
                                                     <Select
                                                         className="blue-selectbooking"
@@ -1707,8 +1707,7 @@ function Booking() {
                                                     />
 
                                                 </div>
-
-                                                <div className="input-field" style={{ flex: "1" }}>
+                                                <div className="input-field" style={{ flex: "2" }}>
                                                     <label>Code</label>
                                                     <input
                                                         type="tel"
@@ -1718,7 +1717,6 @@ function Booking() {
                                                     />
                                                 </div>
                                             </div>
-
                                             <div className="row g-2" style={{ marginLeft: "7px" }}>
                                                 <div className="col-md-6 col-12">
                                                     <label className="form-label">Vendor Docket No</label>
@@ -1761,7 +1759,7 @@ function Booking() {
 
 
 
-                        <div className="right-card">
+                        <div className="right-card" style={{margin:"0px"}}>
                             <div className="section-title">Receiver Docket Information</div>
 
 
@@ -1925,7 +1923,7 @@ function Booking() {
                                                 onChange={(e) => setFormData({ ...formData, ConsigneeEmail: e.target.value })}
                                                 style={{ flex: 1 }}
                                             />
-                                            <button style={{ backgroundColor: '#28a745', color: '#fff', fontWeight: 'bold', padding: '0.5rem 1.5rem', borderRadius: '5px', border: 'none', marginLeft: "6px" }}>Save</button>
+                                            <button style={{ backgroundColor: '#28a745', color: '#fff', fontWeight: 'bold', padding: '0.4rem 1.4rem', borderRadius: '5px', border: 'none', marginLeft: "6px" }}>Save</button>
                                         </div>
                                     </div>
 
@@ -2310,20 +2308,22 @@ function Booking() {
 
                     </div>
 
-                    <div className="bottom-card" style={{ display: 'flex', gap: '1rem',alignItems:"center" ,justifyContent:"center"}}>
-                        <button style={{ backgroundColor: '#28a745', color: '#fff', fontWeight: 'bold', padding: '0.2rem 1.5rem', borderRadius: '5px', border: 'none', marginTop: "5px" }} onClick={handleSubmit} type="button">Save</button>
-                        <button style={{ backgroundColor: '#007bff', color: '#fff', fontWeight: 'bold', padding: '0.3rem 0.5rem', borderRadius: '5px', border: 'none', marginTop: "5px" }} onClick={handleUpdate} type="button">Update</button>
-                        <button style={{ backgroundColor: '#ef0751ff', color: '#fff', fontWeight: 'bold', padding: '0.3rem 0.5rem', borderRadius: '5px', border: 'none', marginTop: "5px" }} onClick={handleSearch} type="button">Search</button>
+                    <div className="bottom-card" style={{width:"100%", display: 'flex',marginTop:"0.5rem", gap: '0.5rem',alignItems:"center" ,justifyContent:"center",textAlign:"center",padding:"0.5rem"}}>
+
+                        <button style={{ backgroundColor: '#28a745', color: '#fff', fontWeight: 'bold', padding: '0.3rem 1rem', borderRadius: '5px', border: 'none'}} onClick={handleSubmit} type="button">Save</button>
+                        <button style={{ backgroundColor: '#007bff', color: '#fff', fontWeight: 'bold', padding: '0.3rem 0.5rem', borderRadius: '5px', border: 'none' }} onClick={handleUpdate} type="button">Update</button>
+                        <button style={{ backgroundColor: '#ef0751ff', color: '#fff', fontWeight: 'bold', padding: '0.3rem 0.5rem', borderRadius: '5px', border: 'none'}} onClick={handleSearch} type="button">Search</button>
                         <PiDotsThreeOutlineVerticalFill 
-                        style={{fontSize:"30px",cursor:"pointer"}}
+                        style={{height:"30px",width:"30px",fontSize:"25px",cursor:"pointer", backgroundColor:"black" ,color:"white",borderRadius: '5px'}}
                         onClick={() => setOpen(!open)}/>
 
-                        <div style={{ position: "relative", display: "inline-block" }}>
+                        <div style={{ position: "relative", display: "inline-block" ,backgroundColor:"yellow"}}>
                             {open && (
                                 <div
                                     style={{
                                         position: "absolute",
-                                        bottom: "0px",
+                                        bottom: "20px",
+                                        right:"7px",
                                         marginTop: "10px",
                                         background: "#fff",
                                         boxShadow: "0 2px 8px rgba(3, 44, 71, 0.15)",
