@@ -46,9 +46,10 @@ function NewLogin() {
             return;
         }
         try {
-            const response = await getApi(`/Master/UserLogin?UserName=${encodeURIComponent(userName)}&Password=${encodeURIComponent(password)}`);
+            const response = await getApi(`/Master/UserContllor?UserName=${encodeURIComponent(userName)}&Password=${encodeURIComponent(password)}`);
             if (response.status === 1) {
                 Swal.fire('Success', 'Login successful!', 'success');
+                localStorage.setItem("Login",JSON.stringify(response.userData));
                 navigate('/dashboard');
             }
         } catch (err) {

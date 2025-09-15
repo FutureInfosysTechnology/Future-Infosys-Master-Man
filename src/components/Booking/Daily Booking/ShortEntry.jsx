@@ -10,7 +10,8 @@ function ShortEntry() {
   const [getCustomer, setGetCustomer] = useState([]);
   const [getMode, setGetMode] = useState([]);
   const [getDest, setGetDestination] = useState([]);
-  const [bookingDate, setBookingDate] = useState('');
+  const today=new Date();
+  const [bookingDate, setBookingDate] = useState(today);
   const [selectedMode, setSelectedMode] = useState(null);
   const [selectedOrigin, setSelectedOrigin] = useState(null);
   const [selectedDestination, setSelectedDestination] = useState(null);
@@ -59,26 +60,29 @@ function ShortEntry() {
   const resetForm = () => {
     setFormData((prev) => ({
       ...prev,
-      Origin_code: '',
-      Docket_No: '',
-      Consignee_Pin: '',
-      Cityname: '',
-      Consignee_Name: '',
-      Pcs: '',
-      DoxSpx: '',
-      ActualWt: '',
-      Chargablewt: '',
-      Amount: '',
-      ShipperName: '',
-      ShipperPhone: '',
-      Consignee_Mob: '',
-      volumetricWt: ''
+     Customer_Code: '',
+    Customer_Name: '',
+    Origin_code: '',
+    Destination_Code: '',
+    Docket_No: '',
+    Consignee_Pin: '',
+    Cityname: '',
+    Consignee_Name: '',
+    Pcs: '',
+    DoxSpx: '',
+    ActualWt: '',
+    Chargablewt: '',
+    Amount: '',
+    Mode_code: '',
+    Mode_Name: '',
+    ShipperName: '',
+    ShipperPhone: '',
+    Consignee_Mob: '',
+    volumetricWt: ''
+      
     }));
     setSelectedDestination(null);
   };
-
-
-
   const handleSave = async (e) => {
     e.preventDefault();
     if (formData.ShipperPhone.length !== 10 || formData.Consignee_Mob.length !== 10) {
@@ -87,22 +91,24 @@ function ShortEntry() {
     }
     const payload = {
       docketNo: formData.Docket_No,
-      bookDate: bookingDate,
+      bookDate: bookingDate ? bookingDate.toISOString().split('T')[0] : null,
       customerCode: formData.Customer_Code,
       shipperName: formData.ShipperName,
       shipperPhone: formData.ShipperPhone,
       consigneeName: formData.Consignee_Name,
-      Consignee_Pin: formData.Consignee_Pin,
-      Consignee_Mob: formData.Consignee_Mob,
+      consigneePin: formData.Consignee_Pin,
+      consigneeMob: formData.Consignee_Mob,
       modeCode: formData.Mode_code,
       originCode: formData.Origin_code,
       destinationCode: formData.Destination_Code,
       DoxSpx: formData.DoxSpx,
       qty: formData.Pcs?.toString() || '0',
-      ActualWt: parseFloat(formData.ActualWt),
+      actualWt: formData.ActualWt || "0",
       volumetricWt: formData.volumetricWt || '0',
-      ChargedWt: formData.Chargablewt,
-      rate: formData.Amount
+      chargedWt: formData.Chargablewt,
+      rate: formData.Amount,
+      branchCode:JSON.parse(localStorage.getItem("Login")).Branch_Code,
+      
     };
     try {
       const res = await postApi("/Booking/ShortBooking", payload);
@@ -111,6 +117,7 @@ function ShortEntry() {
       } else Swal.fire('Error', res.message, 'error');
     } catch (err) {
       Swal.fire('Error', 'Failed to save booking.', 'error');
+      console.log(err);
     }
   };
 
@@ -121,7 +128,7 @@ function ShortEntry() {
       return;
     }
     const payload = {
-      BookDate: bookingDate,
+      BookDate: bookingDate ? bookingDate.toISOString().split('T')[0] : null,
       Customer_Code: formData.Customer_Code,
       Shipper_Name: formData.ShipperName,
       ShipperPhone: formData.ShipperPhone,
@@ -136,7 +143,8 @@ function ShortEntry() {
       ActualWt: String(formData.ActualWt),
       VolumetricWt: String(formData.volumetricWt || '0'),
       ChargedWt: String(formData.Chargablewt),
-      Rate: String(formData.Amount)
+      Rate: String(formData.Amount),
+      Branch_Code:JSON.parse(localStorage.getItem("Login")).Branch_Code,
     };
     try {
       const res = await putApi(`/Booking/UpdateShortBooking?docketNo=${formData.Docket_No}`, payload);
@@ -146,6 +154,7 @@ function ShortEntry() {
       } else Swal.fire('Error', res.message || 'Update failed.', 'error');
     } catch (err) {
       Swal.fire('Error', 'Something went wrong while updating.', 'error');
+      console.log(err);
     }
   };
 

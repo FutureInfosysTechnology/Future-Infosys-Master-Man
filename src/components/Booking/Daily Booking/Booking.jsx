@@ -1799,7 +1799,7 @@ function Booking() {
                                                 />
 
                                             </div> */}
-                                            <div className="input-field" style={{ width: "95%", position: "relative" }}>
+                                            <div className="input-field" style={{ width: "100%", position: "relative" }}>
                                                 <label>Receiver Name</label>
                                                 <Select
                                                     className="blue-selectbooking"

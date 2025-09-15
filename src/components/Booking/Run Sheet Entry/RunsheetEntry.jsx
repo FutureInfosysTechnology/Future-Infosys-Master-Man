@@ -6,12 +6,13 @@ import PendingDrs from "./PendingDrs";
 import CreateDrs from "./CreateDrs";
 import ViewDrs from "./ViewDrs";
 import ImportDrs from "./ImportDrs";
+import { useLocation } from "react-router-dom";
 
 
 
 function RunsheetEntry() {
-
-    const [activeTab, setActiveTab] = useState('zone'); // Default to 'zone'
+    const location=useLocation();
+    const [activeTab, setActiveTab] = useState(location?.state?.tab||'zone'); // Default to 'zone'
 
     const handleChange = (event) => {
         setActiveTab(event.target.id);

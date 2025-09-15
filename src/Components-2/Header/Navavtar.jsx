@@ -16,15 +16,15 @@ function Navavtar() {
 
         navigate('/login');
     }
-
     const handleProfile = () => {
         navigate('/profile')
     }
+    const EmployeeName = JSON.parse(localStorage.getItem("Login"))?.Employee_Name;
     return (
         <li className="nav-item dropdown pe-3">
             <a href="#" className="nav-link nav-profile d-flex align-items-center pe-0" data-bs-toggle="dropdown">
                 <img src={profileImg} alt="Profile" className="rounded-circle" />
-                <span className="d-none d-md-block dropdown-toggle ps-2">Vivek Singh</span>
+                <span className="d-none d-md-block dropdown-toggle ps-2">{EmployeeName}</span>
             </a>
 
             <ul style={{ position: "fixed", right: "0%" }} className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
@@ -33,7 +33,7 @@ function Navavtar() {
                         <img style={{ height: "40px", width: "40px" }} src={profileImg} alt="" />
                     </div>
                     <div className="box2" style={{ display: "flex", flexDirection: "column" }}>
-                        <h6>Vivek Singh</h6>
+                        <h6>{EmployeeName}</h6>
                         <span>Web Developer</span>
                     </div>
                 </li>

@@ -8,6 +8,7 @@ import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/Serv
 
 import { use } from "react";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 function ViewDrs() {
@@ -16,6 +17,8 @@ function ViewDrs() {
         if (Array.isArray(res?.data)) return res.data;
         return [];
     };
+    const navigate=useNavigate();
+    const location=useLocation();
     const [data, setData] = useState([]);
     const [empData, setEmpData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -129,19 +132,8 @@ fetchData('/Runsheet/getViewRunsheet',params);
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
-    const handleOpenDrsPrint = (zone) => {
-        const id = zone.id;
-        const code = zone.code;
-        const name = zone.name;
-        const url = `/drsrunsheet?manifestNo=${encodeURIComponent(id)}&sumQty=${encodeURIComponent(code)}&sumActualWt=${encodeURIComponent(name)}`;
-        const newWindow = window.open(
-            url,
-            '_blank', 'width=900,height=600,fullscreen=yes'
-        );
-
-        if (newWindow) {
-            newWindow.focus();
-        }
+    const handleOpenDrsPrint = (drsData) => {
+        navigate("/drsrunsheet",{state:{data:drsData,from: location.pathname}})
     };
 
     return (

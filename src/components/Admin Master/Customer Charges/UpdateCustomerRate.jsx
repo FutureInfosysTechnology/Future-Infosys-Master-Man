@@ -23,7 +23,7 @@ function UpdateCustomerRate() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi('/Master/getCustomer');
+                const response = await getApi('/Master/getCustomerData');
                 setGetCustomer(Array.isArray(response.Data) ? response.Data : []);
             } catch (err) {
                 setError(err);

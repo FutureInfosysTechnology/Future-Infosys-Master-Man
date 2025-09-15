@@ -25,6 +25,7 @@ function VendorRate() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
 
     const fetchVendorData = async () => {
@@ -120,7 +121,6 @@ function VendorRate() {
         }
     };
 
-    const rowsPerPage = 10;
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
@@ -230,14 +230,36 @@ function VendorRate() {
                         </table>
                     </div>
 
-                    <div className="pagination">
-                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            {'<'}
-                        </button>
-                        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                            {'>'}
-                        </button>
+                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                                {'<'}
+                            </button>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                                {'>'}
+                            </button>
+                        </div>
+
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <select
+                                id="rowsPerPage"
+                                value={rowsPerPage}
+                                onChange={(e) => {
+                                    setRowsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                style={{ height: "40px", width: "50px" }}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
                     </div>
 
 

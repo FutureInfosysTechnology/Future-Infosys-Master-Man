@@ -177,6 +177,7 @@ function EmployeeName() {
     };
 
     const handleGenerateCode = () => {
+        if (addEmp.empCode !== '') return;
         const newCode = `${Math.floor(Math.random() * 1000)}`;
         setAddEmp({ ...addEmp, empCode: newCode });
     };
@@ -308,19 +309,21 @@ function EmployeeName() {
                         </table>
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "row", padding: "10px" }}>
-                        <div className="pagination">
+                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
                             </button>
-                            <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
                             <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
                                 {'>'}
                             </button>
                         </div>
 
-                        <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
-                            <label htmlFor="rowsPerPage" style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -328,7 +331,7 @@ function EmployeeName() {
                                     setRowsPerPage(Number(e.target.value));
                                     setCurrentPage(1);
                                 }}
-                                style={{ height: "40px", width: "60px", marginTop: "10px" }}
+                                style={{ height: "40px", width: "50px" }}
                             >
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
@@ -340,7 +343,15 @@ function EmployeeName() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-volumetric" contentLabel="Modal">
+                        className="custom-modal-volumetric" contentLabel="Modal"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Employee Master</header>
@@ -409,11 +420,12 @@ function EmployeeName() {
                                                             placeholder="Enter Password"
                                                             required
                                                         />
-                                                        <span
+                                                        <div
+                                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}
                                                             onClick={togglePasswordVisibility}
                                                             className="fa-eye">
                                                             {passwordVisible ? <FaEyeSlash /> : <FaEye />}
-                                                        </span>
+                                                        </div>
                                                     </div>
                                                 </div>
 

@@ -36,16 +36,16 @@ function ReceiverName() {
         receiverEmail: '',
         gstNo: '',
         hsnNo: '',
-        sms: '',
-        emailId: '',
-        whatsApp: ''
+        sms: false,
+        emailId: false,
+        whatsApp: false
     })
 
 
     const filteredgetReceiver = getReceiver.filter((receiver) =>
         (receiver && receiver.Receiver_Code && receiver.Receiver_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
         (receiver && receiver.Receiver_Name && receiver.Receiver_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.Receiver_Add1 && receiver.Receiver_add1.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
+        (receiver && receiver.Receiver_Add1 && receiver.Receiver_Add1.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
         (receiver && receiver.Receiver_Pin && receiver.Receiver_Pin.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
         (receiver && receiver.City_Code && receiver.City_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
         (receiver && receiver.State_Code && receiver.State_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
@@ -146,15 +146,18 @@ function ReceiverName() {
                 setAddReceiver({
                     receiverCode: '',
                     receiverName: '',
-                    gstNo: '',
                     receiverAdd1: '',
                     receiverAdd2: '',
                     receiverPin: '',
-                    receiverMob: '',
+                    cityCode: '',
                     stateCode: '',
+                    receiverMob: '',
                     receiverEmail: '',
+                    gstNo: '',
                     hsnNo: '',
-                    cityCode: ''
+                    sms: false,
+                    emailId: false,
+                    whatsApp: false
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -204,9 +207,9 @@ function ReceiverName() {
                     receiverEmail: '',
                     gstNo: '',
                     hsnNo: '',
-                    sms: '',
-                    emailId: '',
-                    whatApp: ''
+                    sms: false,
+                    emailId: false,
+                    whatApp: false
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -299,7 +302,7 @@ function ReceiverName() {
                                 setAddReceiver({
                                     receiverCode: '', receiverName: '', receiverAdd1: '', receiverAdd2: '',
                                     receiverPin: '', cityCode: '', stateCode: '', receiverMob: '', receiverEmail: '',
-                                    gstNo: '', hsnNo: '', sms: '', emailId: '', whatsApp: ''
+                                    gstNo: '', hsnNo: '', sms: false, emailId: false, whatsApp: false
                                 })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -372,7 +375,11 @@ function ReceiverName() {
                                                         stateCode: receiver.State_Code,
                                                         receiverEmail: receiver.Receiver_Email,
                                                         hsnNo: receiver.HSNNo,
-                                                        cityCode: receiver.City_Name
+                                                        cityCode: receiver.City_Name,
+                                                        sms: false,
+                                                        emailId: false,
+                                                        whatApp: false
+                                                        
                                                     });
                                                     setModalIsOpen(true);
                                                 }}>
@@ -387,19 +394,21 @@ function ReceiverName() {
                         </table>
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "row", padding: "10px" }}>
-                        <div className="pagination">
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
                             </button>
-                            <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
                             <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
                                 {'>'}
                             </button>
                         </div>
 
-                        <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
-                            <label htmlFor="rowsPerPage" style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -407,7 +416,7 @@ function ReceiverName() {
                                     setRowsPerPage(Number(e.target.value));
                                     setCurrentPage(1);
                                 }}
-                                style={{ height: "40px", width: "60px", marginTop: "10px" }}
+                                style={{ height: "40px", width: "50px" }}
                             >
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
@@ -419,7 +428,15 @@ function ReceiverName() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-receiver" contentLabel="Modal">
+                        className="custom-modal-receiver" contentLabel="Modal"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Receiver Name Master</header>
@@ -455,6 +472,13 @@ function ReceiverName() {
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addReceiver.receiverAdd1}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverAdd1: e.target.value })}
+                                                placeholder="Address" required />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Address</label>
+                                            <input type="text" value={addReceiver.receiverAdd2}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, receiverAdd2: e.target.value })}
                                                 placeholder="Address" required />
                                         </div>
 
@@ -520,18 +544,18 @@ function ReceiverName() {
                                         <div className="input-field3">
                                             <div className="select-radio">
                                                 <input type="checkbox" name="mode" id="SMS"
-                                                    value={addReceiver.sms}
-                                                    onChange={(e) => setAddReceiver({ ...addReceiver, sms: e.target.value })} />
+                                                    checked={addReceiver.sms}
+                                                    onChange={(e) => setAddReceiver({ ...addReceiver, sms: e.target.checked })} />
                                                 <img src={sms} />
 
                                                 <input type="checkbox" name="mode" id="E-mail"
-                                                    value={addReceiver.emailId}
-                                                    onChange={(e) => setAddReceiver({ ...addReceiver, emailId: e.target.value })} />
+                                                    checked={addReceiver.emailId}
+                                                    onChange={(e) => setAddReceiver({ ...addReceiver, emailId: e.target.checked })} />
                                                 <img src={mail} />
 
                                                 <input type="checkbox" name="mode" id="WHATSAPP"
-                                                    value={addReceiver.whatsApp}
-                                                    onChange={(e) => setAddReceiver({ ...addReceiver, whatsApp: e.target.value })} />
+                                                    checked={addReceiver.whatsApp}
+                                                    onChange={(e) => setAddReceiver({ ...addReceiver, whatsApp: e.target.checked })} />
                                                 <img src={whatsapp} />
                                             </div>
                                         </div>

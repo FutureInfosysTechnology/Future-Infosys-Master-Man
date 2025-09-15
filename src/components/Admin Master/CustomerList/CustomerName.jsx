@@ -12,6 +12,8 @@ import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
 import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 import 'react-toastify/dist/ReactToastify.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 
 function CustomerName() {
@@ -28,15 +30,19 @@ function CustomerName() {
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
     const [modalIsOpen2, setModalIsOpen2] = useState(false);
     const [discountOption, setDiscountOption] = useState("Yes");
-    const [discountOption1, setDiscountOption1] = useState("Yes");
+    const [gstOption, setGstOption] = useState("Yes");
+    const [fuelOption, setFuelOption] = useState("Yes");
     const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
-    const [isDiscountEnabled1, setIsDiscountEnabled1] = useState(true);
+    const [isGstEnabled, setIsGstEnabled] = useState(true);
+    const [isFuelEnabled, setIsFuelEnabled] = useState(true);
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [contractData, setContractData] = useState({
-        creditDate: '',
-        dueDate: '',
+        creditDate: firstDayOfMonth,
+        dueDate: today,
         contractAmount: '',
         depositAmount: '',
         balance: '',
@@ -56,6 +62,8 @@ function CustomerName() {
         gstNo: '',
         hsnNo: '',
         gstType: '',
+        gst: '',
+        fuel: '',
         discount: '',
         billPeriod: '',
         custStatus: '',
@@ -64,14 +72,14 @@ function CustomerName() {
         cityCode: '',
         bankBranch: '',
         description: '',
-        sms: '',
-        email: '',
-        whatApp: '',
+        sms: false,
+        email: false,
+        whatApp: false,
         userName: '',
         Password: '',
         DepartmentCode: ''
     })
-
+    console.log(addCustData);
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
     };
@@ -83,14 +91,21 @@ function CustomerName() {
     };
 
 
-    const handleDiscountChange1 = (e) => {
+    const handleGstChange = (e) => {
         const value = e.target.value;
-        setDiscountOption1(value);
-        setIsDiscountEnabled1(value === "Yes");
+        setGstOption(value);
+        setIsGstEnabled(value === "Yes");
+    };
+
+    const handleFuelChange = (e) => {
+        const value = e.target.value;
+        setFuelOption(value);
+        setIsFuelEnabled(value === "Yes");
     };
 
 
     const handleGenerateCode = () => {
+        if (addCustData.custCode !== '') return;
         const newCode = `${Math.floor(Math.random() * 1000)}`;
         setAddCustData({ ...addCustData, custCode: newCode });
     };
@@ -99,7 +114,7 @@ function CustomerName() {
 
     const fetchCustomerData = async () => {
         try {
-            const response = await getApi('/Master/getCustomer');
+            const response = await getApi('/Master/getCustomerData');
             setGetCustomer(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             setError(err);
@@ -224,6 +239,8 @@ function CustomerName() {
                     gstNo: '',
                     hsnNo: '',
                     gstType: '',
+                    gst: '',
+                    fuel: '',
                     discount: '',
                     billPeriod: '',
                     custStatus: '',
@@ -232,20 +249,22 @@ function CustomerName() {
                     cityCode: '',
                     bankBranch: '',
                     description: '',
-                    sms: '',
-                    email: '',
-                    whatApp: '',
+                    sms: false,
+                    email: false,
+                    whatApp: false,
                     userName: '',
                     Password: '',
                     DepartmentCode: ''
                 });
                 setContractData({
+                    creditDate: firstDayOfMonth,
+                    dueDate: today,
                     contractAmount: '',
-                    creditDate: '',
-                    dueDate: '',
-                    advAmt: '',
-                    balance: ''
+                    depositAmount: '',
+                    balance: '',
+                    advAmt: ''
                 });
+                setPasswordVisible(false);
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
                 await fetchCustomerData();
@@ -276,6 +295,10 @@ function CustomerName() {
             gstNo: addCustData.gstNo,
             hsnNo: addCustData.hsnNo,
             gstType: addCustData.gstType,
+            customerGst: addCustData.gst,
+            gst_Yes_No: gstOption,
+            customerFuel: addCustData.fuel,
+            fuel_Yes_No1: fuelOption,
             discount: addCustData.discount,
             billingPeriod: addCustData.billPeriod,
             customerStatus: addCustData.custStatus,
@@ -316,6 +339,8 @@ function CustomerName() {
                     gstNo: '',
                     hsnNo: '',
                     gstType: '',
+                    gst: '',
+                    fuel: '',
                     discount: '',
                     billPeriod: '',
                     custStatus: '',
@@ -323,9 +348,9 @@ function CustomerName() {
                     contactPersonMob: '',
                     bankBranch: '',
                     description: '',
-                    sms: '',
-                    email: '',
-                    whatsapp: '',
+                    sms: false,
+                    email: false,
+                    whatsapp: false,
                     cityCode: '',
                     userName: '',
                     Password: '',
@@ -342,9 +367,9 @@ function CustomerName() {
             Swal.fire('Error', 'Failed to add Customer data', 'error');
         }
     };
-
-
-
+    const handleDateChange = (field,date) => {
+    setContractData({ ...contractData, [field]: date });
+  };
     const handleDeleteCustName = async (Customer_Code) => {
         try {
             const confirmation = await Swal.fire({
@@ -421,6 +446,7 @@ function CustomerName() {
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = filteredgetCustomer.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(filteredgetCustomer.length / rowsPerPage);
+    console.log(currentRows);
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
@@ -443,15 +469,46 @@ function CustomerName() {
                     <div className="addNew">
                         <div>
                             <button className='add-btn' onClick={() => {
-                                setModalIsOpen(true); setIsEditMode(false);
                                 setAddCustData({
-                                    custCode: '', custName: '', bookingType: '', custMob: '', emailID: '',
-                                    custAdd1: '', custAdd2: '', custAdd3: '', pinCode: '', stateCode: '', gstNo: '',
-                                    hsnNo: '', gstType: '', discount: '', billPeriod: '', custStatus: '',
-                                    contactPerson: '', contactPersonMob: '', cityCode: '', bankBranch: '',
-                                    description: '', sms: '', email: '', whatApp: '', userName: '', Password: '',
+                                    custCode: '',
+                                    custName: '',
+                                    bookingType: '',
+                                    custMob: '',
+                                    emailID: '',
+                                    custAdd1: '',
+                                    custAdd2: '',
+                                    custAdd3: '',
+                                    pinCode: '',
+                                    stateCode: '',
+                                    gstNo: '',
+                                    hsnNo: '',
+                                    gstType: '',
+                                    gst: '',
+                                    fuel: '',
+                                    discount: '',
+                                    billPeriod: '',
+                                    custStatus: '',
+                                    contactPerson: '',
+                                    contactPersonMob: '',
+                                    cityCode: '',
+                                    bankBranch: '',
+                                    description: '',
+                                    sms: false,
+                                    email: false,
+                                    whatApp: false,
+                                    userName: '',
+                                    Password: '',
                                     DepartmentCode: ''
-                                })
+                                });
+                                setContractData({
+                                    creditDate: firstDayOfMonth,
+                                    dueDate: today,
+                                    contractAmount: '',
+                                    depositAmount: '',
+                                    balance: '',
+                                    advAmt: ''
+                                });
+                                setModalIsOpen(true); setIsEditMode(false);
                             }}>
                                 <i className="bi bi-plus-lg"></i>
                                 <span>ADD NEW</span>
@@ -530,6 +587,8 @@ function CustomerName() {
                                                         description: cust.Description,
                                                         stateCode: cust.State_Code,
                                                         discount: cust.Discount,
+                                                        gst: cust.CustomerGst,
+                                                        fuel: cust.CustomerFuel,
                                                         sms: cust.SMS,
                                                         whatApp: cust.WhatApp,
                                                         email: cust.Email,
@@ -537,10 +596,12 @@ function CustomerName() {
                                                         Password: cust.Password,
                                                         DepartmentCode: cust.DepartmentCode
                                                     });
+                                                    setGstOption(cust.Gst_Yes_No);
+                                                    setFuelOption(cust.Fuel_Yes_No1);
                                                     setContractData({
                                                         contractAmount: cust.Contact_Amount,
-                                                        creditDate: cust.Credit_Date,
-                                                        dueDate: cust.Due_Date,
+                                                        creditDate: cust.Credit_Date===null?firstDayOfMonth:cust.Credit_Date,
+                                                        dueDate: cust.Due_Date===null?today:cust.Due_Date,
                                                         advAmt: cust.AdvanceAmt,
                                                         balance: cust.Balance_Amount,
                                                         depositAmount: cust.Deposit_Amount
@@ -559,19 +620,21 @@ function CustomerName() {
                         </table>
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "row", padding: "10px" }}>
-                        <div className="pagination">
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
                             </button>
-                            <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
                             <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
                                 {'>'}
                             </button>
                         </div>
 
-                        <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
-                            <label htmlFor="rowsPerPage" style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -579,7 +642,7 @@ function CustomerName() {
                                     setRowsPerPage(Number(e.target.value));
                                     setCurrentPage(1);
                                 }}
-                                style={{ height: "40px", width: "60px", marginTop: "10px" }}
+                                style={{ height: "40px", width: "50px" }}
                             >
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
@@ -591,310 +654,342 @@ function CustomerName() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal" contentLabel="Modal">
-                        <div className="custom-modal-content">
+                        className="custom-modal"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}
+                        contentLabel="Modal">
+                        <div className="custom-modal-content" style={{ width: "100%" }}>
                             <div className="header-tittle">
                                 <header>Customer Name Master</header>
                             </div>
 
-                            <div className='container2'>
+                            <div className='container2' style={{ whiteSpace: "nowrap" }}>
                                 <form onSubmit={handleSaveCustomerName}>
-                                    <div className="fields2">
+                                    <div className="form first">
+                                        <div className="details personal">
+                                            <div className="fields2" style={{}}>
 
-                                        <div className="input-field3">
-                                            <label htmlFor="">Code</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter Code/ Generate Code"
-                                                value={addCustData.custCode}
-                                                onChange={(e) => setAddCustData({ ...addCustData, custCode: e.target.value })}
-                                                maxLength="3" required readOnly={isEditMode} />
-                                        </div>
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Code</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Code/ Generate Code"
+                                                        value={addCustData.custCode}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, custCode: e.target.value })}
+                                                        maxLength="3" required readOnly={isEditMode} />
+                                                </div>
 
-                                        {!isEditMode && (
-                                            <div className="input-field3">
-                                                <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
-                                                    onClick={handleGenerateCode}>Generate Code</button>
+                                                {!isEditMode && (
+                                                    <div className="input-field3">
+                                                        <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                                            onClick={handleGenerateCode}>Generate Code</button>
+                                                    </div>
+                                                )}
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Customer Name</label>
+                                                    <input type="text" placeholder="Customer Name" required
+                                                        value={addCustData.custName}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, custName: e.target.value })} />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Cash / Credit</label>
+                                                    <select value={addCustData.bookingType}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, bookingType: e.target.value })} required>
+                                                        <option value="" disabled >Cash/ Credit</option>
+                                                        <option value="Cash">Cash</option>
+                                                        <option value="Credit">Credit</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Customer Mobile No</label>
+                                                    <input type="tel" maxLength="10" id="mobile"
+                                                        name="mobile" pattern="[0-9]{10}" placeholder="Customer Mobile No"
+                                                        value={addCustData.custMob} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, custMob: e.target.value })} />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Email ID</label>
+                                                    <input type="email" placeholder="Email Id"
+                                                        value={addCustData.emailID} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, emailID: e.target.value })} />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Address</label>
+                                                    <input type="text" placeholder="Address"
+                                                        value={addCustData.custAdd1} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, custAdd1: e.target.value })} />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Address</label>
+                                                    <input type="text" placeholder="Address"
+                                                        value={addCustData.custAdd2} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, custAdd2: e.target.value })} />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Address</label>
+                                                    <input type="text" placeholder="Address"
+                                                        value={addCustData.custAdd3} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, custAdd3: e.target.value })} />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Pin code</label>
+                                                    <input type="tel" id="pincode" name="pincode" maxLength="6"
+                                                        placeholder="Pin Code" value={addCustData.pinCode} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, pinCode: e.target.value })} />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">State Name</label>
+                                                    <select required value={addCustData.stateCode}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, stateCode: e.target.value })}>
+                                                        <option value="" disabled >State Name</option>
+                                                        {getState.map((state, index) => (
+                                                            <option value={state.State_Code} key={index}>{state.State_Name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">City Name</label>
+                                                    <select required
+                                                        value={addCustData.cityCode}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, cityCode: e.target.value })}>
+                                                        <option value="" disabled>City Name</option>
+                                                        {getCity.map((city, index) => (
+                                                            <option value={city.City_Code} key={index}>{city.City_Name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Brnach Name</label>
+                                                    <select value={addCustData.bankBranch}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, bankBranch: e.target.value })} required>
+                                                        <option value="">Branch Name</option>
+                                                        {getBranchName.map((branch, index) => (
+                                                            <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">GST No</label>
+                                                    <input type="tel" value={addCustData.gstNo}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, gstNo: e.target.value })}
+                                                        placeholder="Gst No." required />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">HSN No</label>
+                                                    <input type="text" value={addCustData.hsnNo}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, hsnNo: e.target.value })}
+                                                        placeholder="HSN No" required />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">GST Type</label>
+                                                    <select value={addCustData.gstType} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, gstType: e.target.value })}>
+                                                        <option value="" disabled >GST Type</option>
+                                                        <option value="Transport">Transport</option>
+                                                        <option value="Client">Client</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">GST %</label>
+                                                    <div style={{ display: "flex", flexDirection: "row" }}>
+                                                        <input style={{
+                                                            width: "70%", borderRight: "transparent",
+                                                            borderTopRightRadius: "0px", borderBottomRightRadius: "0px"
+                                                        }} type="text" placeholder="GST" value={addCustData.gst}
+                                                            onChange={(e) => setAddCustData({ ...addCustData, gst: e.target.value })}
+                                                            disabled={!isGstEnabled} required />
+                                                        <select style={{
+                                                            width: "30%", borderLeft: "transparent",
+                                                            borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
+                                                            padding: "0px",
+                                                            textAlign: "center"
+                                                        }} value={gstOption} onChange={handleGstChange}>
+                                                            <option value="Yes">Yes</option>
+                                                            <option value="No">No</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Fuel</label>
+                                                    <div style={{ display: "flex", flexDirection: "row" }}>
+                                                        <input style={{
+                                                            width: "70%", borderRight: "transparent",
+                                                            borderTopRightRadius: "0px", borderBottomRightRadius: "0px"
+                                                        }} type="text" placeholder="Fuel" value={addCustData.fuel}
+                                                            onChange={(e) => setAddCustData({ ...addCustData, fuel: e.target.value })}
+                                                            disabled={!isFuelEnabled} required />
+                                                        <select style={{
+                                                            width: "30%", borderLeft: "transparent",
+                                                            borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
+                                                            padding: "0px",
+                                                            textAlign: "center"
+                                                        }} value={fuelOption} onChange={handleFuelChange}>
+                                                            <option value="Yes">Yes</option>
+                                                            <option value="No">No</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Discount</label>
+                                                    <div style={{ display: "flex", flexDirection: "row" }}>
+                                                        <input style={{
+                                                            width: "70%", borderRight: "transparent",
+                                                            borderTopRightRadius: "0px", borderBottomRightRadius: "0px"
+                                                        }} type="text" placeholder="Discount" value={addCustData.discount}
+                                                            onChange={(e) => setAddCustData({ ...addCustData, discount: e.target.value })}
+                                                            disabled={!isDiscountEnabled} required />
+                                                        <select style={{
+                                                            width: "30%", borderLeft: "transparent",
+                                                            borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
+                                                            padding: "0px",
+                                                            textAlign: "center"
+                                                        }} value={discountOption} onChange={handleDiscountChange}>
+                                                            <option value="Yes">Yes</option>
+                                                            <option value="No">No</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Billing Period</label>
+                                                    <select value={addCustData.billPeriod} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, billPeriod: e.target.value })}>
+                                                        <option value="" disabled >Billing Period</option>
+                                                        <option>Monthly</option>
+                                                        <option>Quaterly</option>
+                                                        <option>Half Yearly</option>
+                                                        <option>Yearly</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Contract Amount</label>
+                                                    <div className="dropdown">
+                                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(true); }} type="button" className="ok-btn"
+                                                            style={{ height: "35px", fontSize: "14px", width: "100%" }}>
+                                                            {contractData.contractAmount ? `Amount: ${contractData.contractAmount}` : 'Contract Amount'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Customer Status</label>
+                                                    <select value={addCustData.custStatus} required
+                                                        onChange={(e) => setAddCustData({ ...addCustData, custStatus: e.target.value })}>
+                                                        <option value="" disabled >Customer Status</option>
+                                                        <option>Active</option>
+                                                        <option>Inactive</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Contant Person</label>
+                                                    <input type="text" value={addCustData.contactPerson}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, contactPerson: e.target.value })}
+                                                        placeholder="Contact Person" required />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Contact Person Mobile No</label>
+                                                    <input type="tel" maxLength="10"
+                                                        value={addCustData.contactPersonMob}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, contactPersonMob: e.target.value })}
+                                                        name="contactPersonMob" pattern="[0-9]{10}" placeholder="Mobile No" required />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Description</label>
+                                                    <input type="text" placeholder="Description"
+                                                        value={addCustData.description}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, description: e.target.value })} required />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">User Name</label>
+                                                    <input type="text" placeholder="User Name" value={addCustData.userName}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, userName: e.target.value })} />
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Password</label>
+                                                    <div className="password-container" style={{ position: 'relative' }}>
+                                                        <input
+                                                            type={passwordVisible ? 'text' : 'password'}
+                                                            placeholder="Password"
+                                                            required value={addCustData.Password}
+                                                            onChange={(e) => setAddCustData({ ...addCustData, Password: e.target.value })}
+                                                        />
+                                                        <div
+                                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}
+                                                            onClick={togglePasswordVisibility}
+                                                            className="fa-eye" >
+                                                            {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Department</label>
+                                                    <select value={addCustData.DepartmentCode}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, DepartmentCode: e.target.value })}>
+                                                        <option value="" disabled>Select Department</option>
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="input-field1">
+                                                    <div className="select-radio">
+                                                        <input type="checkbox" name="sms" id="sms"
+                                                            checked={addCustData.sms}
+                                                            onChange={(e) => setAddCustData({ ...addCustData, sms: e.target.checked })} />
+
+                                                        <img src={sms} />
+
+                                                        <input type="checkbox" name="email" id="email"
+                                                            checked={addCustData.email}
+                                                            onChange={(e) => setAddCustData({ ...addCustData, email: e.target.checked })} />
+
+                                                        <img src={mail} />
+
+                                                        <input type="checkbox" name="whatApp" id="whatsapp"
+                                                            checked={addCustData.whatApp}
+                                                            onChange={(e) => setAddCustData({ ...addCustData, whatApp: e.target.checked })} />
+
+                                                        <img src={whatsapp} />
+                                                    </div>
+                                                </div>
+
                                             </div>
-                                        )}
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Customer Name</label>
-                                            <input type="text" placeholder="Customer Name" required
-                                                value={addCustData.custName}
-                                                onChange={(e) => setAddCustData({ ...addCustData, custName: e.target.value })} />
                                         </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Cash / Credit</label>
-                                            <select value={addCustData.bookingType}
-                                                onChange={(e) => setAddCustData({ ...addCustData, bookingType: e.target.value })} required>
-                                                <option value="" disabled >Cash/ Credit</option>
-                                                <option value="Cash">Cash</option>
-                                                <option value="Credit">Credit</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Customer Mobile No</label>
-                                            <input type="tel" maxLength="10" id="mobile"
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Customer Mobile No"
-                                                value={addCustData.custMob} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, custMob: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Email ID</label>
-                                            <input type="email" placeholder="Email Id"
-                                                value={addCustData.emailID} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, emailID: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Address</label>
-                                            <input type="text" placeholder="Address"
-                                                value={addCustData.custAdd1} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, custAdd1: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Address</label>
-                                            <input type="text" placeholder="Address"
-                                                value={addCustData.custAdd2} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, custAdd2: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Address</label>
-                                            <input type="text" placeholder="Address"
-                                                value={addCustData.custAdd3} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, custAdd3: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Pin code</label>
-                                            <input type="tel" id="pincode" name="pincode" maxLength="6"
-                                                placeholder="Pin Code" value={addCustData.pinCode} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, pinCode: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">State Name</label>
-                                            <select required value={addCustData.stateCode}
-                                                onChange={(e) => setAddCustData({ ...addCustData, stateCode: e.target.value })}>
-                                                <option value="" disabled >State Name</option>
-                                                {getState.map((state, index) => (
-                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">City Name</label>
-                                            <select required
-                                                value={addCustData.cityCode}
-                                                onChange={(e) => setAddCustData({ ...addCustData, cityCode: e.target.value })}>
-                                                <option value="" disabled>City Name</option>
-                                                {getCity.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Brnach Name</label>
-                                            <select value={addCustData.bankBranch}
-                                                onChange={(e) => setAddCustData({ ...addCustData, bankBranch: e.target.value })} required>
-                                                <option value="">Branch Name</option>
-                                                {getBranchName.map((branch, index) => (
-                                                    <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">GST No</label>
-                                            <input type="tel" value={addCustData.gstNo}
-                                                onChange={(e) => setAddCustData({ ...addCustData, gstNo: e.target.value })}
-                                                placeholder="Gst No." required />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">HSN No</label>
-                                            <input type="text" value={addCustData.hsnNo}
-                                                onChange={(e) => setAddCustData({ ...addCustData, hsnNo: e.target.value })}
-                                                placeholder="HSN No" required />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">GST Type</label>
-                                            <select value={addCustData.gstType} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, gstType: e.target.value })}>
-                                                <option value="" disabled >GST Type</option>
-                                                <option value="Transport">Transport</option>
-                                                <option value="Client">Client</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">GST %</label>
-                                            <div style={{ display: "flex", flexDirection: "row" }}>
-                                                <input style={{
-                                                    width: "70%", borderRight: "transparent",
-                                                    borderTopRightRadius: "0px", borderBottomRightRadius: "0px"
-                                                }} type="text" placeholder="Discount"
-                                                    disabled={!isDiscountEnabled1} required />
-                                                <select style={{
-                                                    width: "30%", borderLeft: "transparent",
-                                                    borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
-                                                    padding: "0px"
-                                                }} value={discountOption1} onChange={handleDiscountChange1}>
-                                                    <option value="Yes">Yes</option>
-                                                    <option value="No">No</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Fuel %</label>
-                                            <input type="text" placeholder="Fuel %" required />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Discount</label>
-                                            <div style={{ display: "flex", flexDirection: "row" }}>
-                                                <input style={{
-                                                    width: "70%", borderRight: "transparent",
-                                                    borderTopRightRadius: "0px", borderBottomRightRadius: "0px"
-                                                }} type="text" placeholder="Discount" value={addCustData.discount}
-                                                    onChange={(e) => setAddCustData({ ...addCustData, discount: e.target.value })}
-                                                    disabled={!isDiscountEnabled} required />
-                                                <select style={{
-                                                    width: "30%", borderLeft: "transparent",
-                                                    borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
-                                                    padding: "0px"
-                                                }} value={discountOption} onChange={handleDiscountChange}>
-                                                    <option value="Yes">Yes</option>
-                                                    <option value="No">No</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Billing Period</label>
-                                            <select value={addCustData.billPeriod} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, billPeriod: e.target.value })}>
-                                                <option value="" disabled >Billing Period</option>
-                                                <option>Monthly</option>
-                                                <option>Quaterly</option>
-                                                <option>Half Yearly</option>
-                                                <option>Yearly</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Contract Amount</label>
-                                            <div className="dropdown">
-                                                <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(true); }} type="button" className="ok-btn"
-                                                    style={{ height: "35px", fontSize: "14px", width: "100%" }}>
-                                                    {contractData.contractAmount ? `Amount: ${contractData.contractAmount}` : 'Enter Contract Amount'}
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Customer Status</label>
-                                            <select value={addCustData.custStatus} required
-                                                onChange={(e) => setAddCustData({ ...addCustData, custStatus: e.target.value })}>
-                                                <option value="" disabled >Customer Status</option>
-                                                <option>Active</option>
-                                                <option>Inactive</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Contant Person</label>
-                                            <input type="text" value={addCustData.contactPerson}
-                                                onChange={(e) => setAddCustData({ ...addCustData, contactPerson: e.target.value })}
-                                                placeholder="Contact Person" required />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Contact Person Mobile No</label>
-                                            <input type="tel" maxLength="10"
-                                                value={addCustData.contactPersonMob}
-                                                onChange={(e) => setAddCustData({ ...addCustData, contactPersonMob: e.target.value })}
-                                                name="contactPersonMob" pattern="[0-9]{10}" placeholder="Mobile No" required />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Description</label>
-                                            <input type="text" placeholder="Description"
-                                                value={addCustData.description}
-                                                onChange={(e) => setAddCustData({ ...addCustData, description: e.target.value })} required />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">User Name</label>
-                                            <input type="text" placeholder="User Name" value={addCustData.userName}
-                                                onChange={(e) => setAddCustData({ ...addCustData, userName: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Password</label>
-                                            <div className="password-container" style={{ position: 'relative' }}>
-                                                <input
-                                                    type={passwordVisible ? 'text' : 'password'}
-                                                    placeholder="Password"
-                                                    required value={addCustData.Password}
-                                                    onChange={(e) => setAddCustData({ ...addCustData, Password: e.target.value })}
-                                                />
-                                                <span
-                                                    onClick={togglePasswordVisibility}
-                                                    className="fa-eye" >
-                                                    {passwordVisible ? <FaEyeSlash /> : <FaEye />}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Department</label>
-                                            <select value={addCustData.DepartmentCode}
-                                                onChange={(e) => setAddCustData({ ...addCustData, DepartmentCode: e.target.value })}>
-                                                <option value="" disabled>Select Department</option>
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <div className="select-radio">
-                                                <input type="checkbox" name="sms" id="sms"
-                                                    value={addCustData.sms}
-                                                    onChange={(e) => setAddCustData({ ...addCustData, sms: e.target.value })} />
-
-                                                <img src={sms} />
-
-                                                <input type="checkbox" name="email" id="email"
-                                                    value={addCustData.email}
-                                                    onChange={(e) => setAddCustData({ ...addCustData, email: e.target.value })} />
-
-                                                <img src={mail} />
-
-                                                <input type="checkbox" name="whatApp" id="whatsapp"
-                                                    value={addCustData.whatApp}
-                                                    onChange={(e) => setAddCustData({ ...addCustData, whatApp: e.target.value })} />
-
-                                                <img src={whatsapp} />
-                                            </div>
-                                        </div>
-
-                                        <div className='bottom-buttons' style={{ marginLeft: "25px", marginTop: "18px" }}>
+                                        <div className='bottom-buttons' style={{}}>
                                             {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
                                             {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
                                             <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                         </div>
-
                                     </div>
                                 </form>
                             </div>
@@ -903,22 +998,16 @@ function CustomerName() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen1}
+                        className="custom-modal"
                         style={{
                             content: {
-                                top: '54%',
-                                left: '55%',
-                                right: 'auto',
-                                bottom: 'auto',
-                                marginRight: '-50%',
-                                transform: 'translate(-50%, -50%)',
-                                height: '251px',
-                                width: '660px',
-                                backgroundColor: "#c8cdd1",
-                                borderRadius: "10px",
-                                padding: "0px"
+
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
                             },
                         }}>
-                        <div>
+                        <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Contract Details</header>
                             </div>
@@ -927,58 +1016,67 @@ function CustomerName() {
                                 <form onSubmit={handleContractSubmit}>
                                     <div className="fields2">
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">Credit Date</label>
-                                            <input type="date" required value={contractData.creditDate}
-                                                onChange={(e) => setContractData({ ...contractData, creditDate: e.target.value })} />
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={contractData.creditDate}
+                                                onChange={(date) => handleDateChange("creditDate",date)}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
                                         </div>
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">Due Date</label>
-                                            <input type="date" required value={contractData.dueDate}
-                                                onChange={(e) => setContractData({ ...contractData, dueDate: e.target.value })} />
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={contractData.dueDate}
+                                                onChange={(date) => handleDateChange("dueDate",date)}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
                                         </div>
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">Contract Amount</label>
                                             <input type="text" placeholder="Enter Contract Amount" required
                                                 value={contractData.contractAmount}
                                                 onChange={(e) => setContractData({ ...contractData, contractAmount: e.target.value })} />
                                         </div>
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">Advance Amount</label>
                                             <input type="text" placeholder="Advance Amount"
                                                 value={contractData.advAmt}
                                                 onChange={(e) => setContractData({ ...contractData, advAmt: e.target.value })} required />
                                         </div>
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">Deposit Amount</label>
                                             <input type="text" placeholder="Enter Deposit Amount" required
                                                 value={contractData.depositAmount}
                                                 onChange={(e) => setContractData({ ...contractData, depositAmount: e.target.value })} />
                                         </div>
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">Balance</label>
                                             <input type="text" placeholder="Enter Balance" required
                                                 value={contractData.balance}
                                                 onChange={(e) => setContractData({ ...contractData, balance: e.target.value })} />
                                         </div>
-
-                                        <div className='bottom-buttons' style={{ marginLeft: "25px", marginTop: "18px" }}>
-                                            <button type='submit' className='ok-btn'>Submit</button>
-                                            <button onClick={() => setModalIsOpen1(false)} className='ok-btn'>close</button>
-                                        </div>
-
                                     </div>
+                                    <div className='bottom-buttons'>
+                                        <button type='submit' className='ok-btn'>Submit</button>
+                                        <button onClick={() => setModalIsOpen1(false)} className='ok-btn'>close</button>
+                                    </div>
+
                                 </form>
                             </div>
                         </div>
                     </Modal >
-                </div>
-            </div>
+                </div >
+            </div >
         </>
     )
 }

@@ -326,7 +326,7 @@ function BranchName() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Sr.No</th>
@@ -397,19 +397,21 @@ function BranchName() {
                         </table>
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "row", padding: "10px" }}>
-                        <div className="pagination">
+                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
                             </button>
-                            <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
                             <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
                                 {'>'}
                             </button>
                         </div>
 
-                        <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
-                            <label htmlFor="rowsPerPage" style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -417,7 +419,7 @@ function BranchName() {
                                     setRowsPerPage(Number(e.target.value));
                                     setCurrentPage(1);
                                 }}
-                                style={{ height: "40px", width: "60px", marginTop: "10px" }}
+                                style={{ height: "40px", width: "50px" }}
                             >
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
@@ -429,7 +431,13 @@ function BranchName() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-branchName" contentLabel="Modal">
+                        className="custom-modal-branchName" contentLabel="Modal" 
+                        style={{content: {
+      width: '90%',     
+      top: '50%',             // Center vertically
+      left: '50%',
+      whiteSpace:"nowrap"
+    },}}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Branch Master</header>
@@ -458,9 +466,20 @@ function BranchName() {
 
                                         <div className="input-field3">
                                             <label htmlFor="">Branch Name</label>
-                                            <input type="text" value={branchData.branchName}
-                                                onChange={(e) => setBranchData({ ...branchData, branchName: e.target.value })}
-                                                placeholder="Enter Name" required />
+                                            <select value={branchData.branchName}
+                                                onChange={(e) => setBranchData({ ...branchData,branchName: e.target.value,branchCode:e.target.value })} required>
+                                                <option value="" disabled >Select Branch</option>
+                                                {getCity.map((city, index) => (
+                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                         <div className="input-field3">
+                                            <label htmlFor="">Start Invoice No.</label>
+                                            <input type="tel" placeholder="Enter Start Invoice No"
+                                                value={branchData.invoiceNo}
+                                                onChange={(e) => setBranchData({ ...branchData, invoiceNo: e.target.value })} required />
                                         </div>
 
                                         <div className="input-field3">
@@ -471,17 +490,10 @@ function BranchName() {
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Start Bill No.</label>
+                                            <label htmlFor="">Start Runsheet No.</label>
                                             <input type="tel" value={branchData.runsheetNo}
                                                 onChange={(e) => setBranchData({ ...branchData, runsheetNo: e.target.value })}
                                                 placeholder="Enter Start Bill No" required />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Start Invoice No.</label>
-                                            <input type="tel" placeholder="Enter Start Invoice No"
-                                                value={branchData.invoiceNo}
-                                                onChange={(e) => setBranchData({ ...branchData, invoiceNo: e.target.value })} required />
                                         </div>
 
                                         <div className="input-field3">
