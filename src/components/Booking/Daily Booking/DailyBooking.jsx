@@ -86,7 +86,7 @@ function DailyBooking() {
               Auto Mail
             </label>
             <label htmlFor="entry" className="entry">
-              Short Entry
+              Smart Booking
             </label>
             {/*<label htmlFor="vendorgst" className="vendorgst">
               Bulk Import Data

@@ -115,6 +115,7 @@ function ReceiverName() {
     }, []);
 
     const handleGenerateCode = () => {
+        if(addReceiver.receiverCode!=='') return;
         const newCode = `${Math.floor(Math.random() * 1000)}`;
         setAddReceiver({ ...addReceiver, receiverCode: newCode });
     };
@@ -379,7 +380,6 @@ function ReceiverName() {
                                                         sms: false,
                                                         emailId: false,
                                                         whatApp: false
-                                                        
                                                     });
                                                     setModalIsOpen(true);
                                                 }}>

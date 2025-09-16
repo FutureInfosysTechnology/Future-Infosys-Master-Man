@@ -9,6 +9,7 @@ import ViewManifest from "./ViewManifest";
 import ForwardingManifest from "./ForwardingManifest";
 import SendEmail from "./SendEmail";
 import { useLocation } from "react-router-dom";
+import "./glow.css"
 
 
 
@@ -26,7 +27,7 @@ const location=useLocation();
         <Sidebar1/>
 
             <div className="main-body" id="main-body">
-                <div className="container-vendor">
+                <div className="container-vendor" >
                     <input type="radio" name="slider" id="pendingmanifest" checked={activeTab === 'pendingmanifest'}
                         onChange={handleChange}/>
 
@@ -39,38 +40,27 @@ const location=useLocation();
                     <input type="radio" name="slider" id="forwardingmanifest" checked={activeTab === 'forwardingmanifest'}
                         onChange={handleChange}/>
 
-                    <input type="radio" name="slider" id="importmanifest" checked={activeTab === 'importmanifest'}
-                        onChange={handleChange}/>
+                    {/* <input type="radio" name="slider" id="importmanifest" checked={activeTab === 'importmanifest'}
+                        onChange={handleChange}/> */}
 
                     <nav>
                         <label htmlFor="pendingmanifest" className="pendingmanifest">Pending Manifest</label>
                         <label htmlFor="createmanifest" className="createmanifest">Outgoing Manifest</label>
                         <label htmlFor="viewmanifest" className="viewmanifest">View Manifest</label>
-                        <label htmlFor="forwardingmanifest" className="forwardingmanifest">Forwarding Manifest</label>
-                        <label htmlFor="importmanifest" className="importmanifest">Bulk Import Manifest</label>
+                        <label htmlFor="forwardingmanifest" className="forwardingmanifest">Bulk Import Manifest</label>
+                        {/* <label htmlFor="importmanifest" className="importmanifest">Bulk Import Manifest</label> */}
 
                         <div className="slider"></div>
                     </nav>
                     <section>
-                        <div className={`content content-1 ${activeTab === 'pendingmanifest' ? 'active' : ''}`}>
-                            <PendingManifest />
-                        </div>
+                        {activeTab === 'pendingmanifest' && <PendingManifest />}
+                        {activeTab === 'createmanifest' && <CreateManifest />}
+                        {activeTab === 'viewmanifest' && <ViewManifest /> }
+                        {activeTab === 'forwardingmanifest' && <ForwardingManifest />}
 
-                        <div className={`content content-2 ${activeTab === 'createmanifest' ? 'active' : ''}`}>
-                            <CreateManifest />
-                        </div>
-
-                        <div className={`content content-3 ${activeTab === 'viewmanifest' ? 'active' : ''}`}>
-                            <ViewManifest />
-                        </div>
-
-                        <div className={`content content-4 ${activeTab === 'forwardingmanifest' ? 'active' : ''}`}>
-                            <ForwardingManifest />
-                        </div>
-
-                        <div className={`content content-5 ${activeTab === 'importmanifest' ? 'active' : ''}`}>
+                        {/* <div className={`content content-5 ${activeTab === 'importmanifest' ? 'active' : ''}`}>
                             <SendEmail />
-                        </div>
+                        </div> */}
                     </section>
                 </div>
                 <Footer />

@@ -8,6 +8,9 @@ import Swal from "sweetalert2";
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import sms from '../../../Assets/Images/sms-svgrepo-com.png';
+import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
+import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 function Booking() {
@@ -27,7 +30,7 @@ function Booking() {
     const [getCountry, setGetCountry] = useState([]);
     const [getVendor, setGetVendor] = useState([]);
     const [getState, setGetState] = useState([]);
-    const [getCity, setGetCity] = useState([]);  
+    const [getCity, setGetCity] = useState([]);
     const [getMode, setGetMode] = useState([]);
     const [selectedMode_Code, setSelectedMode_Code] = useState('');
     const [selectedModeName, setSelectedModeName] = useState('');
@@ -39,6 +42,7 @@ function Booking() {
     const [error, setError] = useState(null);
     const [toggleActive, setToggleActive] = useState(false);
     const [isFovChecked, setIsFovChecked] = useState(false);
+    const [isAllChecked, setIsAllChecked] = useState(false);
     const [isDocketChecked, setIsDocketChecked] = useState(false);
     const [isDeliveryChecked, setIsDeliveryChecked] = useState(false);
     const [isPackingChecked, setIsPackingChecked] = useState(false);
@@ -69,14 +73,16 @@ function Booking() {
     const [selectedDestZoneName, setSelectedDestZoneName] = useState("");
     const [bookingDate, setBookingDate] = useState('');
     const [open, setOpen] = useState(false);
+    const [allReceiverOption, setAllReceiverOption] = useState([])
 
-     const handleDateChange = (date, field) => {
-    setFormData({ ...formData, [field]: date });
-  };
+
+    const handleDateChange = (date, field) => {
+        setFormData({ ...formData, [field]: date });
+    };
 
     const getTodayDate = () => {
-  const today = new Date();
-  return today;
+        const today = new Date();
+        return today;
     };
 
     // ===============================Enter Block =============================
@@ -163,18 +169,23 @@ function Booking() {
         ShipperPhone: "",
         ShipperEmail: ""
     });
-    const [receiverData, setReceiverData] = useState({
-        ConsigneeName: "",
-        ConsigneeAdd1: "",
-        ConsigneeAdd2: "",
-        ConsigneeState: "",
-        ConsigneePin: "",
-        Consignee_City: "",
-        ConsigneeMob: "",
-        ConsigneeEmail: "",
-        ConsigneeGST: "",
-        ConsigneeCountry: ""
-    });
+    const [addReceiver, setAddReceiver] = useState({
+        receiverCode: '',
+        receiverName: '',
+        receiverAdd1: '',
+        receiverAdd2: '',
+        receiverPin: '',
+        cityCode: '',
+        stateCode: '',
+        receiverMob: '',
+        receiverEmail: '',
+        gstNo: '',
+        hsnNo: '',
+        sms: false,
+        emailId: false,
+        whatsApp: false
+    })
+
     const [vendorData, setVendorData] = useState({
         Vendor_Code1: "",
         Vendor_Code2: "",
@@ -372,7 +383,11 @@ function Booking() {
 
 
 
-
+    const handleGenerateCode = () => {
+        if (addReceiver.receiverCode !== '') return;
+        const newCode = `${Math.floor(Math.random() * 1000)}`;
+        setAddReceiver({ ...addReceiver, receiverCode: newCode });
+    };
     // Fetch receiver list from API and clean data
     const handleSaveReceiverFromBooking = async (e) => {
         e.preventDefault(); // Prevent page reload
@@ -420,9 +435,7 @@ function Booking() {
             Swal.fire("Error", "Something went wrong", "error");
         }
     };
-
-
-
+    console.log(formData);
     const fetchReceivers = async () => {
         try {
             const response = await getApi("/Master/GetReceiver");
@@ -441,12 +454,13 @@ function Booking() {
                     City_Code: receiver.City_Code?.trim() || "",
                     City_Name: receiver.City_Name?.trim() || "",
                     State_Name: receiver.State_Name?.trim() || "",
-                }));
 
-                allReceiverOption(cleanedData);
+                }));
+                console.log(cleanedData);
+                setAllReceiverOption(cleanedData);
             } else {
                 console.warn("Receiver API returned no data.");
-                allReceiverOption([]);
+                setAllReceiverOption([]);
             }
         } catch (error) {
             console.error("Error fetching receiver data:", error);
@@ -534,6 +548,7 @@ function Booking() {
             setIsInvoiceNo(savedState.isInvoiceNo || false);
             SetdispatchDate(savedState.dispatchDate || false);
         }
+        fetchReceivers();
     }, []);
 
     const handleCheckboxChange = (field, value) => {
@@ -543,7 +558,43 @@ function Booking() {
         const currentState = JSON.parse(localStorage.getItem("bookingState")) || {};
         localStorage.setItem("bookingState", JSON.stringify({ ...currentState, ...newState }));
     };
-
+    const handleAllChange = (e) => {
+        if (!isAllChecked) {
+            setIsFovChecked(true);
+            setIsDocketChecked(true);
+            setIsDeliveryChecked(true);
+            setIsPackingChecked(true);
+            setIsGreenChecked(true);
+            setIsHamaliChecked(true);
+            setIsOtherChecked(true);
+            setIsInsuranceChecked(true);
+            setIsODAChecked(true);
+            setIsFuelChecked(true);
+            setIsRemarkChecked(true);
+            setIsEWayChecked(true);
+            setIsInvoiceValue(true);
+            setIsInvoiceNo(true);
+            SetdispatchDate(true);
+        }
+        else {
+            setIsFovChecked(false);
+            setIsDocketChecked(false);
+            setIsDeliveryChecked(false);
+            setIsPackingChecked(false);
+            setIsGreenChecked(false);
+            setIsHamaliChecked(false);
+            setIsOtherChecked(false);
+            setIsInsuranceChecked(false);
+            setIsODAChecked(false);
+            setIsFuelChecked(false);
+            setIsRemarkChecked(false);
+            setIsEWayChecked(false);
+            setIsInvoiceValue(false);
+            setIsInvoiceNo(false);
+            SetdispatchDate(false);
+        }
+        setIsAllChecked(!isAllChecked);
+    }
     const handleFovChange = (e) => {
         setIsFovChecked(e.target.checked);
         handleCheckboxChange('isFovChecked', e.target.checked);
@@ -642,7 +693,57 @@ function Booking() {
     };
 
 
+    const handleSaveReceiver = async (e) => {
+        e.preventDefault();
 
+        const requestBody = {
+            receiverCode: addReceiver.receiverCode,
+            receiverName: addReceiver.receiverName,
+            receiverAdd1: addReceiver.receiverAdd1,
+            receiverAdd2: addReceiver.receiverAdd2,
+            receiverPin: addReceiver.receiverPin,
+            cityCode: addReceiver.cityCode,
+            stateCode: addReceiver.stateCode,
+            receiverMob: addReceiver.receiverMob,
+            receiverEmail: addReceiver.receiverEmail,
+            gstNo: addReceiver.gstNo,
+            hsnNo: addReceiver.hsnNo,
+            sms: addReceiver.sms,
+            emailId: addReceiver.emailId,
+            whatsApp: addReceiver.whatsApp
+        }
+
+        try {
+            const response = await postApi('/Master/AddReceiver', requestBody, 'POST')
+            if (response.status === 1) {
+                setGetReceiver([...getReceiver, response.Data]);
+                setAddReceiver({
+                    receiverCode: '',
+                    receiverName: '',
+                    receiverAdd1: '',
+                    receiverAdd2: '',
+                    receiverPin: '',
+                    cityCode: '',
+                    stateCode: '',
+                    receiverMob: '',
+                    receiverEmail: '',
+                    gstNo: '',
+                    hsnNo: '',
+                    sms: false,
+                    emailId: false,
+                    whatApp: false
+                });
+                Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
+                setModalIsOpen1(false);
+                await fetchReceivers();
+            } else {
+                Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
+            }
+        } catch (err) {
+            console.error('Save Error:', err);
+            Swal.fire('Error', 'Failed to add branch data', 'error');
+        }
+    };
 
     // Fetch data for each category using useEffect
     useEffect(() => {
@@ -1337,10 +1438,10 @@ function Booking() {
         zone: dest.Zone_Name           // Zone
     }));
     const allVendorOption = getVendor.map(Vendr => ({ label: Vendr.Vendor_Name, value: Vendr.Vendor_Code }));
-    const allReceiverOption = getReceiver.map(receiver => ({
-        label: receiver.Receiver_Name,
-        value: receiver.Receiver_Code
-    }));
+    // const allReceiverOption = getReceiver.map(receiver => ({
+    //     label: receiver.Receiver_Name,
+    //     value: receiver.Receiver_Code
+    // }));
 
     const allCustomerOptions = getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString() }));
 
@@ -1350,14 +1451,14 @@ function Booking() {
     return (
         <>
 
-            <div className="body" style={{margin:"0px",padding:"0px"}}>
+            <div className="body" style={{ margin: "0px", padding: "0px" }}>
 
-                <div className="container1"  style={{padding:"0px",margin:"0px",paddingBottom:"0.8rem"}}>
-                    <div className="container-2" style={{border: "transparent",padding:"0px"}}>
-                        <div className="left-card " style={{margin:"0px"}} >
+                <div className="container1" style={{ padding: "0px", margin: "0px", paddingBottom: "0.8rem" }}>
+                    <div className="container-2" style={{ border: "transparent", padding: "0px" }}>
+                        <div className="left-card " style={{ margin: "0px" }} >
 
 
-                            <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}  style={{backgroundColor:"white"}}>
+                            <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} style={{ backgroundColor: "white" }}>
                                 <div className="section-title">Customer Docket Information</div>
 
                                 <div className="fields2" >
@@ -1386,11 +1487,11 @@ function Booking() {
                                     <div className="input-field">
                                         <label htmlFor="booking-date">Booking Date</label>
                                         <DatePicker
-                                                      selected={formData.BookDate}
-                                                      onChange={(date) => handleDateChange(date, "BookDate")}
-                                                      dateFormat="dd/MM/yyyy"
-                                                      className="form-control form-control-sm"
-                                                    />
+                                            selected={formData.BookDate}
+                                            onChange={(date) => handleDateChange(date, "BookDate")}
+                                            dateFormat="dd/MM/yyyy"
+                                            className="form-control form-control-sm"
+                                        />
                                     </div>
                                 </div>
 
@@ -1419,9 +1520,9 @@ function Booking() {
                                                 placeholder="Select Customer"
                                                 isSearchable
                                                 menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                        styles={{
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                        }}
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
                                             />
                                         </div>
                                         <div className="input-field" style={{ width: "25%" }}>
@@ -1437,35 +1538,38 @@ function Booking() {
                                 </div>
 
 
-                                <div className="container-fluid" style={{paddingLeft:"1rem"}}>
+                                <div className="container-fluid" style={{ paddingLeft: "1rem" }}>
                                     <div className="row g-2 align-items-end">
                                         {/* Shipper Name Input */}
                                         <div className="col-md-10 col-sm-9 col-12">
                                             <div className="input-field">
                                                 <label htmlFor="shipper">Shipper Name</label>
-                                                <input
-                                                    type="text"
-                                                    id="shipper-name"
-                                                    name="Shipper_Name"
-                                                    value={formData.Shipper_Name}
-                                                    onChange={handleShipperNameChange}
-                                                    onKeyDown={handleKeyDown}
-                                                    placeholder="Shipper Name"
-                                                    className="form-control custom-input"
+                                                <Select className="blue-selectbooking"
+                                                    classNamePrefix="blue-selectbooking"
+                                                    options={allReceiverOption}
+                                                    value={
+                                                        formData.Shipper_Name ?
+                                                            {
+                                                                value: formData.Shipper_Name, label: allReceiverOption.find(opt => opt.value === formData.Shipper_Name)?.label
+                                                            }
+                                                            : null
+                                                    }
+                                                    onChange={(selectedOption) => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            Shipper_Name: selectedOption.value,
+                                                            ShipperPin: selectedOption.Receiver_Pin,
+                                                            ShipperPhone: selectedOption.Receiver_Mob,
+                                                            ShipperAdd: selectedOption.Receiver_Add1,
+                                                        }));
+                                                    }}
+                                                    placeholder="Select Shipper Name"
+                                                    isSearchable
+                                                    menuPortalTarget={document.body}
+                                                    styles={{
+                                                        menuPortal: base => ({ ...base, zIndex: 9999 })
+                                                    }}
                                                 />
-                                                {shipperSuggestions.length > 0 && (
-                                                    <div className="dropdown1">
-                                                        {shipperSuggestions.map((shipper) => (
-                                                            <div
-                                                                key={shipper.Receiver_Name}
-                                                                onClick={() => handleShipperSelect(shipper)}
-                                                                style={{ cursor: 'pointer' }}
-                                                            >
-                                                                {shipper.Receiver_Name}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
 
@@ -1485,7 +1589,7 @@ function Booking() {
 
 
 
-                                <div className="container-fluid" style={{paddingLeft:"1rem"}}>
+                                <div className="container-fluid" style={{ paddingLeft: "1rem" }}>
                                     <div className="row g-2">
                                         <div className="col-12">
                                             <div className="input-field">
@@ -1536,8 +1640,8 @@ function Booking() {
                                     </div>
 
                                     {/* Origin Row */}
-                                    <div style={{ whiteSpace:"nowrap", display: "flex" ,width: "100%",gap:"2px" }}>
-                                        <div className="input-field1" style={{ width: "21%"}}>
+                                    <div style={{ whiteSpace: "nowrap", display: "flex", width: "100%", gap: "2px" }}>
+                                        <div className="input-field1" style={{ width: "21%" }}>
                                             <label>Pincode</label>
                                             <input
                                                 type="tel"
@@ -1581,7 +1685,7 @@ function Booking() {
                                     </div>
 
                                     {/* Destination Row */}
-                                    <div style={{whiteSpace:"nowrap", display: "flex", marginBottom: "1rem",width: "100%",gap:"2px"}}>
+                                    <div style={{ whiteSpace: "nowrap", display: "flex", marginBottom: "1rem", width: "100%", gap: "2px" }}>
                                         <div className="input-field1" style={{ width: "21%" }}>
                                             <label>Pincode</label>
                                             <input
@@ -1635,12 +1739,12 @@ function Booking() {
                                     </div>
 
 
-                                    <div className="card border p-1 mx-0" style={{overflowX:"hidden"}}>
+                                    <div className="card border p-1 mx-0" style={{ overflowX: "hidden" }}>
                                         <div className="section-title">Vendor Information</div>
 
-                                        <div className="fields2" style={{whiteSpace:"nowrap",paddingRight:"0.5rem"}}>
-                                            <div style={{ display: "flex", flexDirection: "row", width: "100%",gap:"5px" }}>
-                                                <div className="input-field" style={{ flex:"5",position: "relative"}}>
+                                        <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
+                                                <div className="input-field" style={{ flex: "5", position: "relative" }}>
                                                     <label>Mode Name</label>
 
                                                     <Select
@@ -1667,7 +1771,7 @@ function Booking() {
                                                         }}
                                                     />
                                                 </div>
-                                                <div className="input-field" style={{ flex:"2" }}>
+                                                <div className="input-field" style={{ flex: "2" }}>
                                                     <label>Code</label>
                                                     <input
                                                         type="tel"
@@ -1678,8 +1782,8 @@ function Booking() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="fields2" style={{whiteSpace:"nowrap",paddingRight:"0.5rem" }}>
-                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px"}}>
+                                        <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
                                                 <div className="input-field" style={{ flex: "5", position: "relative" }}>
                                                     <label>Vendor Name</label>
                                                     <Select
@@ -1759,46 +1863,17 @@ function Booking() {
 
 
 
-                        <div className="right-card" style={{margin:"0px"}}>
+                        <div className="right-card" style={{ margin: "0px" }}>
                             <div className="section-title">Receiver Docket Information</div>
-
-
-
                             <form
                                 onSubmit={handleSaveReceiverFromBooking}
-                                style={{ padding: 0, margin: 0,backgroundColor:"white" }}
+                                style={{ padding: 0, margin: 0, backgroundColor: "white" }}
                                 onKeyDown={handleKeyDown}
                             >
                                 {/* Receiver Name Row */}
                                 <div className="container-fluid mb-2">
                                     <div className="row g-2 align-items-end">
                                         <div className="col-md-10 col-sm-9 col-12">
-                                            {/* <div className="input-field" style={{ width: "95%", position: "relative" }}>
-                                                <label>Receiver Name</label>
-                                                <Select
-                                                    className="blue-selectbooking"
-                                                    classNamePrefix="blue-selectbooking"
-                                                    options={allReceiverOption}
-                                                    value={
-                                                        formData.ConsigneeName
-                                                            ? allReceiverOption.find(opt => opt.label === formData.ConsigneeName)
-                                                            : null
-                                                    }
-                                                    onChange={(selectedOption) => {
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            ConsigneeName: selectedOption.label
-                                                        }));
-                                                    }}
-                                                    placeholder="Select Receiver Name"
-                                                    isSearchable
-                                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                    styles={{
-                                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                    }}
-                                                />
-
-                                            </div> */}
                                             <div className="input-field" style={{ width: "100%", position: "relative" }}>
                                                 <label>Receiver Name</label>
                                                 <Select
@@ -1806,14 +1881,16 @@ function Booking() {
                                                     classNamePrefix="blue-selectbooking"
                                                     options={allReceiverOption}
                                                     value={
-                                                        formData.ConsigneeName
-                                                            ? allReceiverOption.find(opt => opt.label === formData.ConsigneeName)
+                                                        formData.ConsigneeName ?
+                                                            {
+                                                                value: formData.ConsigneeName, label: allReceiverOption.find(opt => opt.value === formData.ConsigneeName)?.label
+                                                            }
                                                             : null
                                                     }
                                                     onChange={(selectedOption) => {
                                                         setFormData(prev => ({
                                                             ...prev,
-                                                            ConsigneeName: selectedOption.label,
+                                                            ConsigneeName: selectedOption.value,
                                                             Consignee_City: selectedOption.City_Code,
                                                             ConsigneeState: selectedOption.State_Code,
                                                             ConsigneePin: selectedOption.Receiver_Pin,
@@ -1915,7 +1992,7 @@ function Booking() {
 
                                     <div className="input-field">
                                         <label>Email ID</label>
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <div>
                                             <input
                                                 type="email"
                                                 placeholder="Email ID"
@@ -1923,85 +2000,87 @@ function Booking() {
                                                 onChange={(e) => setFormData({ ...formData, ConsigneeEmail: e.target.value })}
                                                 style={{ flex: 1 }}
                                             />
-                                            <button style={{ backgroundColor: '#28a745', color: '#fff', fontWeight: 'bold', padding: '0.4rem 1.4rem', borderRadius: '5px', border: 'none', marginLeft: "6px" }}>Save</button>
                                         </div>
                                     </div>
+                                    <div className="input-field3" style={{marginTop:"23px"}}>
+                                            <button className="btn btn-success" style={{}}>Save</button>
+                                    </div>
 
-                                    {/* Conditional Sections */}
-                                    {isInvoiceValue && (
-                                        <>
+                                        {/* Conditional Sections */}
+                                        {isInvoiceValue && (
+                                            <>
+                                                <div className="input-field1">
+                                                    <label>Invoice Details</label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setModalIsOpen6(true)}
+                                                        className="ok-btn w-100"
+                                                        style={{ color: "black" }}
+                                                    >
+                                                        <i className="bi bi-receipt-cutoff"></i>
+                                                    </button>
+                                                </div>
+                                                <div className="input-field1">
+                                                    <label>Invoice Value</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Invoice Value"
+                                                        value={formData.InvValue}
+                                                        onChange={(e) => setFormData({ ...formData, InvValue: e.target.value })}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {isRemarkChecked && (
                                             <div className="input-field1">
-                                                <label>Invoice Details</label>
+                                                <label>Alarm No</label>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setModalIsOpen6(true)}
-                                                    className="ok-btn w-100"
-                                                    style={{ color: "black" }}
+                                                    className="ok-btn"
+                                                    style={{ height: "35px" }}
+                                                    onClick={() => setModalIsOpen4(true)}
                                                 >
-                                                    <i className="bi bi-receipt-cutoff"></i>
+                                                    <i className="bi bi-plus"></i>
                                                 </button>
                                             </div>
+                                        )}
+
+                                        {isEWayChecked && (
                                             <div className="input-field1">
-                                                <label>Invoice Value</label>
+                                                <label>E-Way Bill No</label>
                                                 <input
                                                     type="text"
-                                                    placeholder="Invoice Value"
-                                                    value={formData.InvValue}
-                                                    onChange={(e) => setFormData({ ...formData, InvValue: e.target.value })}
+                                                    placeholder="E-Way Bill No"
+                                                    value={formData.EwayBill}
+                                                    onChange={(e) => setFormData({ ...formData, EwayBill: e.target.value })}
                                                 />
                                             </div>
-                                        </>
-                                    )}
+                                        )}
 
-                                    {isRemarkChecked && (
-                                        <div className="input-field1">
-                                            <label>Alarm No</label>
-                                            <button
-                                                type="button"
-                                                className="ok-btn"
-                                                style={{ height: "35px" }}
-                                                onClick={() => setModalIsOpen4(true)}
-                                            >
-                                                <i className="bi bi-plus"></i>
-                                            </button>
-                                        </div>
-                                    )}
+                                        {isInvoiceNo && (
+                                            <div className="input-field1">
+                                                <label>Invoice No</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Invoice No"
+                                                    value={formData.InvoiceNo}
+                                                    onChange={(e) => setFormData({ ...formData, InvoiceNo: e.target.value })}
+                                                />
+                                            </div>
+                                        )}
 
-                                    {isEWayChecked && (
-                                        <div className="input-field1">
-                                            <label>E-Way Bill No</label>
-                                            <input
-                                                type="text"
-                                                placeholder="E-Way Bill No"
-                                                value={formData.EwayBill}
-                                                onChange={(e) => setFormData({ ...formData, EwayBill: e.target.value })}
-                                            />
-                                        </div>
-                                    )}
-
-                                    {isInvoiceNo && (
-                                        <div className="input-field1">
-                                            <label>Invoice No</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Invoice No"
-                                                value={formData.InvoiceNo}
-                                                onChange={(e) => setFormData({ ...formData, InvoiceNo: e.target.value })}
-                                            />
-                                        </div>
-                                    )}
-
-                                    {dispatchDate && (
-                                        <div className="input-field1">
-                                            <label>Dispatch Date</label>
-                                            <input
-                                                type="date"
-                                                value={formData.DispatchDate}
-                                                onChange={(e) => setFormData({ ...formData, DispatchDate: e.target.value })}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                                        {dispatchDate && (
+                                            <div className="input-field1">
+                                                <label>Dispatch Date</label>
+                                                <input
+                                                    type="date"
+                                                    value={formData.DispatchDate}
+                                                    onChange={(e) => setFormData({ ...formData, DispatchDate: e.target.value })}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                             </form>
 
 
@@ -2012,7 +2091,7 @@ function Booking() {
 
                                 <form
                                     action=""
-                                    style={{ padding: "0px", margin: "0px",backgroundColor:"white" }}
+                                    style={{ padding: "0px", margin: "0px", backgroundColor: "white" }}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") e.preventDefault();
                                     }}
@@ -2308,57 +2387,44 @@ function Booking() {
 
                     </div>
 
-                    <div className="bottom-card" style={{width:"100%", display: 'flex',marginTop:"0.5rem", gap: '0.5rem',alignItems:"center" ,justifyContent:"center",textAlign:"center",padding:"0.5rem"}}>
+                    <div className="bottom-card" style={{ width: "100%", display: 'flex', marginTop: "0.5rem", gap: '0.5rem', alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0.5rem" }}>
 
-                        <button style={{ backgroundColor: '#28a745', color: '#fff', fontWeight: 'bold', padding: '0.3rem 1rem', borderRadius: '5px', border: 'none'}} onClick={handleSubmit} type="button">Save</button>
-                        <button style={{ backgroundColor: '#007bff', color: '#fff', fontWeight: 'bold', padding: '0.3rem 0.5rem', borderRadius: '5px', border: 'none' }} onClick={handleUpdate} type="button">Update</button>
-                        <button style={{ backgroundColor: '#ef0751ff', color: '#fff', fontWeight: 'bold', padding: '0.3rem 0.5rem', borderRadius: '5px', border: 'none'}} onClick={handleSearch} type="button">Search</button>
-                        <PiDotsThreeOutlineVerticalFill 
-                        style={{height:"30px",width:"30px",fontSize:"25px",cursor:"pointer", backgroundColor:"black" ,color:"white",borderRadius: '5px'}}
-                        onClick={() => setOpen(!open)}/>
+                        <button className="btn btn-success w-100" style={{}} onClick={handleSubmit} type="button">Save</button>
+                        <button className="btn btn-primary w-100" style={{}} onClick={handleUpdate} type="button">Update</button>
+                        <button className="btn btn-warning w-100" style={{}} onClick={handleSearch} type="button">Search</button>
+                        <PiDotsThreeOutlineVerticalFill
+                            style={{ fontSize: "40px", width: "130px",cursor:"pointer" }}
+                            onClick={() => setOpen(!open)} />
 
-                        <div style={{ position: "relative", display: "inline-block" ,backgroundColor:"yellow"}}>
+                        <div style={{ position: "relative", display: "inline-block" }}>
                             {open && (
                                 <div
                                     style={{
                                         position: "absolute",
-                                        bottom: "20px",
-                                        right:"7px",
+                                        width: "100px",
+                                        bottom: "30px",
+                                        right: "2px",
                                         marginTop: "10px",
-                                        background: "#fff",
-                                        boxShadow: "0 2px 8px rgba(3, 44, 71, 0.15)",
+                                        backgroundColor: "transparent",
                                         borderRadius: "5px",
                                         zIndex: 9999,
                                         minWidth: "50px",
-                                        overflow: "hidden", // keeps buttons tight
+                                        overflow: "hidden",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "2px"
                                     }}
                                 >
                                     <button
-                                        style={{
-                                            backgroundColor: "#28a745",
-                                            color: "#fff",
-                                            fontWeight: "bold",
-                                            padding: "0.2rem 0.5rem",
-                                            border: "none",
-                                            width: "100%",
-                                            display: "block",
-                                        }}
-                                        onClick={() => setModalIsOpen7(true)}
+                                        className="btn btn-info w-100"
+                                        onClick={() => { setModalIsOpen7(true); setOpen(false) }}
                                     >
                                         Setup
                                     </button>
 
                                     <button
-                                        style={{
-                                            backgroundColor: "#dc3545",
-                                            color: "#fff",
-                                            fontWeight: "bold",
-                                            padding: "0.2rem 0.5rem",
-                                            border: "none",
-                                            width: "100%",
-                                            display: "block",
-                                        }}
-                                        onClick={handleDelete}
+                                        className="btn btn-danger w-100"
+                                        onClick={() => { setOpen(false); handleDelete() }}
                                         type="button"
                                     >
                                         Delete
@@ -2444,87 +2510,141 @@ function Booking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen1}
-                        className="custom-modal-volumetric" contentLabel="Modal">
+                        className="custom-modal-receiver" contentLabel="Modal"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
-                                <header>Receiver Name</header>
+                                <header>Receiver Name Master</header>
                             </div>
+
                             <div className='container2'>
-                                <form>
+                                <form onSubmit={handleSaveReceiver}>
                                     <div className="fields2">
-                                        <div className="input-field1">
-                                            <label htmlFor="">Receiver Name</label>
-                                            <input type="text" placeholder="Receiver Name" value={formData.ConsigneeName}
-                                                onChange={(e) => setFormData({ ...formData, ConsigneeName: e.target.value })} />
+                                        <div className="input-field3">
+                                            <label htmlFor="">Code </label>
+                                            <input
+                                                type="text" value={addReceiver.receiverCode}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, receiverCode: e.target.value })}
+                                                placeholder="Enter Code/ Generate Code"
+                                                maxLength="3" />
                                         </div>
 
-                                        <div className="input-field1">
+                                        <div className="input-field3">
+                                            <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                                onClick={handleGenerateCode}>Generate Code</button>
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Customer Name</label>
+                                            <input type="text" value={addReceiver.receiverName}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, receiverName: e.target.value })}
+                                                placeholder="Customer Name" required />
+                                        </div>
+
+                                        <div className="input-field3">
                                             <label htmlFor="">Address</label>
-                                            <input type="text" placeholder="Address" value={receiverData.ConsigneeAdd1}
-                                                onChange={(e) => setReceiverData({ ...receiverData, ConsigneeAdd1: e.target.value })} />
+                                            <input type="text" value={addReceiver.receiverAdd1}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, receiverAdd1: e.target.value })}
+                                                placeholder="Address" required />
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">Pin Code</label>
-                                            <input type="tel" placeholder="Pin Code" maxLength={6} value={receiverData.ConsigneePin}
-                                                onChange={(e) => setReceiverData({ ...receiverData, ConsigneePin: e.target.value })} />
+                                        <div className="input-field3">
+                                            <label htmlFor="">Address</label>
+                                            <input type="text" value={addReceiver.receiverAdd2}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, receiverAdd2: e.target.value })}
+                                                placeholder="Address" required />
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">City</label>
-                                            <select value={receiverData.Consignee_City}
-                                                onChange={(e) => setReceiverData({ ...receiverData, Consignee_City: e.target.value })}>
-                                                <option disabled value="">City Name</option>
+                                        <div className="input-field3">
+                                            <label htmlFor="">Pin code</label>
+                                            <input type="tel" id="pincode" name="pincode" maxLength="6"
+                                                value={addReceiver.receiverPin}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, receiverPin: e.target.value })}
+                                                placeholder="Pin Code" required />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">City Name</label>
+                                            <select value={addReceiver.cityCode}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, cityCode: e.target.value })} required>
+                                                <option value="" disabled >Select City</option>
                                                 {getCity.map((city, index) => (
-                                                    <option value={receiverData.City_Code} key={index}>{city.City_Name}</option>
+                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
                                                 ))}
                                             </select>
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">State</label>
-                                            <select value={receiverData.ConsigneeState}
-                                                onChange={(e) => setReceiverData({ ...receiverData, ConsigneeState: e.target.value })}>
-                                                <option disabled value="">State Name</option>
+                                        <div className="input-field3">
+                                            <label htmlFor="">State Name</label>
+                                            <select value={addReceiver.stateCode} required
+                                                onChange={(e) => { setAddReceiver({ ...addReceiver, stateCode: e.target.value }) }}>
+                                                <option value="" disabled >Select State</option>
                                                 {getState.map((state, index) => (
                                                     <option value={state.State_Code} key={index}>{state.State_Name}</option>
                                                 ))}
                                             </select>
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">Country</label>
-                                            <select value={receiverData.ConsigneeCountry}
-                                                onChange={(e) => setReceiverData({ ...receiverData, ConsigneeCountry: e.target.value })}>
-                                                <option disabled value="">Country Name</option>
-                                                {getCountry.map((country, index) => (
-                                                    <option value={country.Country_Code} key={index}>{country.Country_Name}</option>
-                                                ))}
-                                            </select>
+                                        <div className="input-field3">
+                                            <label htmlFor="">Mobile No</label>
+                                            <input type="tel" maxLength="10" id="mobile"
+                                                value={addReceiver.receiverMob}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, receiverMob: e.target.value })}
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" required />
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">Mobile Number</label>
-                                            <input type="tel" maxLength={10} placeholder=" Mobile No" value={receiverData.ConsigneeMob}
-                                                onChange={(e) => setReceiverData({ ...receiverData, ConsigneeMob: e.target.value })} />
+                                        <div className="input-field3">
+                                            <label htmlFor="">Email ID</label>
+                                            <input type="email" value={addReceiver.receiverEmail}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, receiverEmail: e.target.value })}
+                                                placeholder="Email Id" required />
                                         </div>
 
-                                        <div className="input-field1">
+                                        <div className="input-field3">
                                             <label htmlFor="">GST No</label>
-                                            <input type="tel" placeholder=" GST No" value={receiverData.ConsigneeGST}
-                                                onChange={(e) => setReceiverData({ ...receiverData, ConsigneeGST: e.target.value })} />
+                                            <input type="text" value={addReceiver.gstNo}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, gstNo: e.target.value })}
+                                                placeholder="Gst No" required />
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">Email</label>
-                                            <input type="email" placeholder=" Email" value={receiverData.ConsigneeEmail}
-                                                onChange={(e) => setReceiverData({ ...receiverData, ConsigneeEmail: e.target.value })} />
+                                        <div className="input-field3">
+                                            <label htmlFor="">HSN No</label>
+                                            <input type="text" value={addReceiver.hsnNo}
+                                                onChange={(e) => setAddReceiver({ ...addReceiver, hsnNo: e.target.value })}
+                                                placeholder="HSN No" required />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <div className="select-radio">
+                                                <input type="checkbox" name="mode" id="SMS"
+                                                    checked={addReceiver.sms}
+                                                    onChange={(e) => setAddReceiver({ ...addReceiver, sms: e.target.checked })} />
+                                                <img src={sms} />
+
+                                                <input type="checkbox" name="mode" id="E-mail"
+                                                    checked={addReceiver.emailId}
+                                                    onChange={(e) => setAddReceiver({ ...addReceiver, emailId: e.target.checked })} />
+                                                <img src={mail} />
+
+                                                <input type="checkbox" name="mode" id="WHATSAPP"
+                                                    checked={addReceiver.whatsApp}
+                                                    onChange={(e) => setAddReceiver({ ...addReceiver, whatsApp: e.target.checked })} />
+                                                <img src={whatsapp} />
+                                            </div>
                                         </div>
 
                                     </div>
-                                    <div className="bottom-buttons">
-                                        <button className="ok-btn" onClick={() => setModalIsOpen1(false)}>Submit</button>
-                                        <button className="ok-btn" onClick={() => setModalIsOpen1(false)}>Cancel</button>
+
+                                    <div className='bottom-buttons'>
+                                        <button type='submit' className='ok-btn'>Submit</button>
+                                        <button onClick={() => setModalIsOpen1(false)} className='ok-btn'>close</button>
                                     </div>
                                 </form>
                             </div>
@@ -3054,25 +3174,36 @@ function Booking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen7}
-                        className="custom-modal-setup" contentLabel="Modal" 
+                        className="custom-modal-setup" contentLabel="Modal"
                         style={{
-          content: {
-           
-            transform: "translate(-50%, -50%)", // Center the modal
-            height:"320px",
-            // overflowY:"hidden"
-          },
-        }}>
-                        <div className="custom modal-content">
+                            content: {
+                                width: '80%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap",
+                                minHeight: "60%",
+                                display: "flex",
+                                justifyContent: "center",
 
+                            },
+                        }}>
+                        <div className="custom modal-content">
                             <div className="header-tittle">
                                 <header>Charges</header>
                             </div>
 
                             <div className='container2'>
                                 <form>
-                                    <div className="fields2" style={{paddingLeft:"10px"}}>
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row"}}>
+                                    <div className="fields2">
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isAllChecked}
+                                                onChange={handleAllChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                All Select</label>
+                                        </div>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isFovChecked}
                                                 onChange={handleFovChange}
@@ -3081,7 +3212,7 @@ function Booking() {
                                                 Fov Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isDocketChecked}
                                                 onChange={handleDocketChange}
@@ -3090,7 +3221,7 @@ function Booking() {
                                                 Docket Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isDeliveryChecked}
                                                 onChange={handleDeliveryChange}
@@ -3099,7 +3230,7 @@ function Booking() {
                                                 Delivery Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isPackingChecked}
                                                 onChange={handlePackingChange}
@@ -3108,7 +3239,7 @@ function Booking() {
                                                 Packing Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isGreenChecked}
                                                 onChange={handleGreenChange}
@@ -3117,7 +3248,7 @@ function Booking() {
                                                 Green Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isHamaliChecked}
                                                 onChange={handleHamaliChange}
@@ -3126,7 +3257,7 @@ function Booking() {
                                                 Hamali Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isOtherChecked}
                                                 onChange={handleOtherChange}
@@ -3135,7 +3266,7 @@ function Booking() {
                                                 Other Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isInsuranceChecked}
                                                 onChange={handleInsuranceChange}
@@ -3144,7 +3275,7 @@ function Booking() {
                                                 Insurance Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isODAChecked}
                                                 onChange={handleODAChange}
@@ -3153,7 +3284,7 @@ function Booking() {
                                                 ODA Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isFuelChecked}
                                                 onChange={handleFuelChange}
@@ -3162,7 +3293,7 @@ function Booking() {
                                                 Fuel Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isRemarkChecked}
                                                 onChange={handleRemark}
@@ -3171,7 +3302,7 @@ function Booking() {
                                                 Remark / SR No</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isEWayChecked}
                                                 onChange={handleEWayBill}
@@ -3180,7 +3311,7 @@ function Booking() {
                                                 E-Way Bill No</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isInvoiceValue}
                                                 onChange={handleInvoiceValue}
@@ -3189,7 +3320,7 @@ function Booking() {
                                                 Invoice Value</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isInvoiceNo}
                                                 onChange={handleInvoiceNo}
@@ -3198,7 +3329,7 @@ function Booking() {
                                                 Invoice No</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={dispatchDate}
                                                 onChange={handledispatch}
@@ -3206,11 +3337,9 @@ function Booking() {
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Dispatch Date</label>
                                         </div>
-
-                                        <div className='bottom-buttons' style={{ marginLeft: "25px" }}>
-                                            <button onClick={(e) => { e.preventDefault(); setModalIsOpen7(false) }} className='ok-btn'>close</button>
-                                        </div>
-
+                                    </div>
+                                    <div className='bottom-buttons'>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen7(false) }} className='ok-btn'>close</button>
                                     </div>
                                 </form>
                             </div>

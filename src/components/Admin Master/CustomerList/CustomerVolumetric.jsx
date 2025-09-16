@@ -175,9 +175,18 @@ function CustomerVolumetric() {
     }
 
 
-
+console.log(addVolumteric);
     const handleSaveVolumetric = async (e) => {
         e.preventDefault();
+          if (!addVolumteric.CustomerCode) {
+        Swal.fire('Error!', 'Please select a Customer Name.', 'error');
+        return;
+    }
+
+    if (!addVolumteric.ModeCode) {
+        Swal.fire('Error!', 'Please select a Mode.', 'error');
+        return;
+    }
 
         const requestBody = {
             CustomerCode: addVolumteric.CustomerCode,
@@ -399,8 +408,14 @@ function CustomerVolumetric() {
                     </div>
 
                     <Modal id="modal" overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-volumetric" contentLabel="Modal">
-                        <div className="custom-modal-content">
+                        className="custom-modal-volumetric" contentLabel="Modal"
+                        style={{
+                            content:
+                            {
+                                whiteSpace:"nowrap",
+                            }
+                        }}>
+                        <div className="custom-modal-content" style={{}}>
                             <div className="header-tittle">
                                 <header>Customer Volumetric</header>
                             </div>
@@ -409,12 +424,12 @@ function CustomerVolumetric() {
                                 <form onSubmit={handleSaveVolumetric}>
 
                                     <div className="fields2">
-                                        <div className="input-field1">
+                                        <div className="input-field">
                                             <label htmlFor="">Code </label>
                                             <input
                                                 type="text" value={selectedCustCode}
                                                 placeholder="enter your code/ generate code"
-                                                maxLength="3" readOnly />
+                                                readOnly />
                                         </div>
 
                                         <div className="input-field">
@@ -428,7 +443,7 @@ function CustomerVolumetric() {
                                         </div>
 
 
-                                        <div className="input-field1">
+                                        <div className="input-field">
                                             <label htmlFor="">Mode Code</label>
                                             <input
                                                 type="text"
@@ -449,39 +464,39 @@ function CustomerVolumetric() {
                                         </div>
                                     </div>
 
-                                    <div className="fields2">
-                                        <div className="input-field1">
+                                    <div className="fields2 mt-2 mb-1" style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
+                                        <div className="input-field1" style={{fontWeight:"bold",fontSize:"100px",textAlign:"center"}}>
                                             <label htmlFor="">Volumetric Calculation Formula</label>
                                         </div>
                                     </div>
 
-                                    <div className="fields2">
-                                        <div className="input-field3">
+                                    <div className="fields2" style={{display:"flex",gap:"4px"}}>
+                                        <div className="input-field1">
                                             <label htmlFor="">Centimeter</label>
                                             <input type="tel" value={addVolumteric.Centimeter}
                                                 onChange={(e) => setAddVolumetric({ ...addVolumteric, Centimeter: e.target.value })}
                                                 placeholder="Enter Centimeters" required />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field2">
                                             <label htmlFor="">Feet</label>
                                             <input type="tel" value={addVolumteric.Feet}
                                                 onChange={(e) => setAddVolumetric({ ...addVolumteric, Feet: e.target.value })}
                                                 placeholder="Enter Feet" />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field2">
                                             <label htmlFor="">Inches</label>
                                             <input type="tel" value={addVolumteric.Inches}
                                                 onChange={(e) => setAddVolumetric({ ...addVolumteric, Inches: e.target.value })}
                                                 placeholder="Enter Inches" />
                                         </div>
 
-                                        <div className="input-field3">
-                                            <label htmlFor="">Feet</label>
+                                        <div className="input-field1">
+                                            <label htmlFor="">Inches Feet</label>
                                             <input type="tel" value={addVolumteric.InchesFeet}
                                                 onChange={(e) => setAddVolumetric({ ...addVolumteric, InchesFeet: e.target.value })}
-                                                placeholder="Enter Feet" />
+                                                placeholder="Enter Inches Feet" />
                                         </div>
                                     </div>
 

@@ -10,3 +10,27 @@
   box-shadow: none !important;
   border-color: #0aa5a5 !important; /* change as per design */
 }
+.slider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 25%;
+  height: 3px;
+  background-color: #007bff;
+  transition: all 0.3s ease;
+}
+#pendingmanifest:checked ~ nav .slider {
+    left: 4.5%;
+}
+
+#createmanifest:checked ~ nav .slider {
+    left: 29.5%;
+}
+
+#viewmanifest:checked ~ nav .slider {
+    left: 54.5%;
+}
+
+#forwardingmanifest:checked ~ nav .slider {
+    left: 79.5%;
+}
