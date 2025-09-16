@@ -44,7 +44,7 @@ function DrsRunsheet() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi(`/Manifest/viewManifestPrint?sessionLocationCode=MUM&manifestNo=${manifestNo}`);
+                const response = await getApi(`/Runsheet/viewRunsheetPrint?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&RunsheetNo=6`);
                 setGetManifestData(Array.isArray(response.data) ? response.data : []);
                 console.log(response);
             } catch (err) {

@@ -59,7 +59,7 @@ function ViewDrs() {
             setIsLoading(true);
     
             const params = {
-    sessionLocationCode: 'MUM',
+    sessionLocationCode: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
     drsNo: formData.drsNo,
     fromDate: formData.fromDate,
     toDate: formData.toDate,

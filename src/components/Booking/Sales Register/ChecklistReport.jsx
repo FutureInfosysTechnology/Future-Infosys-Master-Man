@@ -25,7 +25,7 @@ function ChecklistReport() {
     useEffect(() => {
         fetchData('/Master/getMode', setGetMode);
         fetchData('/Master/getdomestic', setGetCity);
-        fetchData('/Master/getCustomer', setGetCustomer);
+        fetchData('/Master/getCustomerData', setGetCustomer);
     }, []);
 
     return (

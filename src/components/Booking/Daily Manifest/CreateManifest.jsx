@@ -58,12 +58,12 @@ function CreateManifest() {
         setLoading(true);
         try {
             // Current page data
-            const response = await getApi(`/Manifest/getPendingManifest?branchCode=MUM&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
+            const response = await getApi(`/Manifest/getPendingManifest?branchCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
             const currentPageData = response?.Data || [];  // <-- remove extra .Data
             setGetManifest(currentPageData);
 
             // Total records for pagination
-            const allDataResponse = await getApi(`/Manifest/getPendingManifest?branchCode=MUM&pageNumber=1&pageSize=10000`);
+            const allDataResponse = await getApi(`/Manifest/getPendingManifest?branchCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=1&pageSize=10000`);
             const allData = allDataResponse?.Data || [];   // <-- remove extra .Data
             setTotalRecords(allData.length);
         } catch (error) {
@@ -213,7 +213,7 @@ function CreateManifest() {
         }
         const requestPayload = {
             DocketNo: selectedDocketNos,
-            sessionLocationCode: "MUM",
+            sessionLocationCode:JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             fromDest: formData.fromDest,
             toDest: formData.toDest,
             Mode: formData.mode,

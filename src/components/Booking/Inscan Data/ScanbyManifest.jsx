@@ -16,12 +16,12 @@ function ScanbyManifest() {
 
     const fetchData = async () => {
         try {
-            const response = await getApi(`/Inscan/viewInscanData?SessionLocationCode=DEL&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
+            const response = await getApi(`/Inscan/viewInscanData?SessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
             const currentPageData = Array.isArray(response.data) ? response.data : [];
             setGetData(currentPageData);
             console.log(getData);
 
-            const allDataResponse = await getApi(`/Inscan/viewInscanData?SessionLocationCode=DEL&pageNumber=1&pageSize=10000`);
+            const allDataResponse = await getApi(`/Inscan/viewInscanData?SessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=1&pageSize=10000`);
             const allData = Array.isArray(allDataResponse.data) ? allDataResponse.data : [];
             setTotalRecords(allData.length);
         } catch (error) {

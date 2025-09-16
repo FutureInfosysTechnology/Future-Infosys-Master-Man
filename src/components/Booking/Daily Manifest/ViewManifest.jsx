@@ -136,7 +136,7 @@ function ViewManifest() {
             setShowModal(false);
 
             fetchData("/Manifest/viewManifestData", {
-                sessionLocationCode: "MUM",
+                sessionLocationCode:JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
                 manifestNo: formValues.manifestNo,
                 manifestDest: formValues.manifestDest,
                 fromDate: formValues.fromDate,

@@ -44,7 +44,7 @@ function Manifest() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi(`/Manifest/viewManifestPrint?sessionLocationCode=MUM&manifestNo=${manifestNo}`);
+                const response = await getApi(`/Manifest/viewManifestPrint?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&manifestNo=${manifestNo}`);
                 setGetManifestData(Array.isArray(response.data) ? response.data : []);
                 console.log(response);
             } catch (err) {

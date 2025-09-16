@@ -25,11 +25,11 @@ function PendingDrs() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=All&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
+                const response = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
                 const currentPageData = Array.isArray(response.data) ? response.data : [];
                 setGetData(currentPageData);
 
-                const allDataResponse = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=All&pageNumber=1&pageSize=10000`);
+                const allDataResponse = await getApi(`/Runsheet/getPendingRunsheet?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=1&pageSize=10000`);
                 const allData = Array.isArray(allDataResponse.data) ? allDataResponse.data : [];
                 setTotalRecords(allData.length);
             } catch (error) {

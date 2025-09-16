@@ -91,7 +91,7 @@ function ShortEntry() {
     }
     const payload = {
       docketNo: formData.Docket_No,
-      bookDate: bookingDate ? bookingDate.toISOString().split('T')[0] : null,
+      bookDate: bookingDate,
       customerCode: formData.Customer_Code,
       shipperName: formData.ShipperName,
       shipperPhone: formData.ShipperPhone,
@@ -107,7 +107,7 @@ function ShortEntry() {
       volumetricWt: formData.volumetricWt || '0',
       chargedWt: formData.Chargablewt,
       rate: formData.Amount,
-      branchCode:JSON.parse(localStorage.getItem("Login")).Branch_Code,
+      branchCode:JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
       
     };
     try {
