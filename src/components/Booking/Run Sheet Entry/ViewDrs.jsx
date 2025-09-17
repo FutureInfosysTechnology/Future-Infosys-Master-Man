@@ -238,7 +238,7 @@ fetchData('/Runsheet/getViewRunsheet',params);
                                 <th scope="col">Employee Contact No</th>
                                 <th scope="col">Vehicle No</th>
                                 <th scope="col">Area</th>
-                                <th scope="col">Counting</th>
+                                <th scope="col">Dkt.Count</th>
 
                             </tr>
                         </thead>

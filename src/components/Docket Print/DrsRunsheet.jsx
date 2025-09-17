@@ -13,17 +13,14 @@ function DrsRunsheet() {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const manifest = location?.state?.data || {};
+    const runsheet = location?.state?.data || {};
     const fromPath = location?.state?.from || "/";
     const [getBranch, setGetBranch] = useState([]);
-    const [manifestData, setGetManifestData] = useState([]);
+    const [runsheetData, setRunsheetData] = useState([]);
     console.log(location.state);
-    const manifestNo = manifest?.manifestNo || "";
-    const sumQty = manifest?.sumQty || 0;
-    const sumActualWt = manifest?.sumActualWt || 0;
+    const drsNo = runsheet?.DrsNo || "";
     const [loading, setLoading] = useState(true);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
-    console.log(manifestNo, sumQty, sumActualWt);
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -44,8 +41,8 @@ function DrsRunsheet() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi(`/Runsheet/viewRunsheetPrint?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&RunsheetNo=6`);
-                setGetManifestData(Array.isArray(response.data) ? response.data : []);
+                const response = await getApi(`/Runsheet/viewRunsheetPrint?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&RunsheetNo=${drsNo}`);
+                setRunsheetData(Array.isArray(response.data) ? response.data : []);
                 console.log(response);
             } catch (err) {
                 console.error('Fetch Error:', err);
@@ -55,31 +52,11 @@ function DrsRunsheet() {
                 // generatePDF();
             }
         };
-        if (manifestNo) {
+        if (drsNo) {
             fetchData();
         }
-    }, [manifestNo]);
+    }, [drsNo]);
 
-    // useEffect(() => {
-    //     if (!loading && manifestData.length > 0 && getBranch.length > 0) {
-    //         setTimeout(generatePDF, 1000);
-    //     }
-    // }, [loading, manifestData, getBranch]);
-
-    // const generatePDF = async () => {
-    //     if (!pageRef.current) return;
-    //     const canvas = await html2canvas(pageRef.current, { scale: 2 });
-    //     const imgData = canvas.toDataURL('image/png');
-
-    //     const pdf = new jsPDF('p', 'mm', 'a4');
-    //     const pdfWidth = pdf.internal.pageSize.getWidth();
-    //     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    //     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    //     pdf.save(`Manifest_${manifestNo}.pdf`);
-    // };
-
-    // if (loading) return <p>Loading...</p>;
     const handleDownloadPDF = async () => {
         const element = document.querySelector("#pdf");
         if (!element) return;
@@ -95,7 +72,7 @@ function DrsRunsheet() {
         // Create PDF with dynamic height = content height
         const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-        pdf.save(`Manifest_${manifestNo}.pdf`);
+        pdf.save(`Runsheet_${drsNo}.pdf`);
     };
 
     return (
@@ -229,44 +206,44 @@ function DrsRunsheet() {
                                         <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
                                             <div>
                                                 <label htmlFor=""><b>DELIVERY BOY NAME :</b></label>
-                                                <span style={{ marginLeft: "10px" }}>{manifest.vendorName}</span>
+                                                <span style={{ marginLeft: "10px" }}>{runsheetData[0]?.boyname}</span>
                                             </div>
 
                                             <div>
                                                 <label htmlFor=""><b>DELIVERY BOY NO :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.vehicleNo}</label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.vehicleNo}</label>
                                             </div>
 
                                             <div>
                                                 <label htmlFor=""><b>VEHICLE NO :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.driverName}</label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.VehicleNo}</label>
                                             </div>
 
                                             <div>
                                                 <label htmlFor=""><b>VEHICLE IN :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.driverMobile}</label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.driverMobile}</label>
                                             </div>
                                         </div>
 
                                         <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px" }}>
                                             <div>
                                                 <label htmlFor=""><b>RUNSHEET NO :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestNo}</label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{drsNo}</label>
                                             </div>
 
                                             <div>
                                                 <label htmlFor=""><b>RUNSHEET DATE :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestDt}</label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.DrsDate}</label>
                                             </div>
 
                                             <div>
                                                 <label htmlFor=""><b>AREA NAME :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.fromDest}</label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.Area}</label>
                                             </div>
 
                                             <div>
                                                 <label htmlFor=""><b>VEHICLE OUT :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.toDest}</label>
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.toDest}</label>
                                             </div>
 
                                         </div>
@@ -280,27 +257,27 @@ function DrsRunsheet() {
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Booking.Date</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket.No</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Receiver</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>QTY</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Origin</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Destination</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>QTY</th>
+                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Actual.wt</th>
                                                     <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Receiver.Signature</th>
                                                 </tr>
                                             </thead>
 
                                             <tbody className='tbody'>
-                                                {manifestData.length > 0 ?
-                                                    manifestData.map((manifest, index) => (
+                                                {runsheetData.length > 0 ?
+                                                    runsheetData.map((runsheet, index) => (
                                                         <tr key={index} className='tr'>
                                                             <td className='td'>{index + 1}</td>
-                                                            <td className='td'>{manifest.bookDate}</td>
-                                                            <td className='td'>{manifest.DocketNo}</td>
-                                                            <td className='td'>{manifest.customerName}</td>
-                                                            <td className='td'>{manifest.Consignee}</td>
-                                                            <td className='td'>{manifest.fromDestName}</td>
-                                                            <td className='td'>{manifest.toDestName}</td>
-                                                            <td className='td'>{manifest.modeName}</td>
-                                                            <td className='td'>{manifest.Qty}</td>
-                                                            <td className='td'>{manifest.ActualWt}</td>
+                                                            <td className='td'>{runsheet.BookDate}</td>
+                                                            <td className='td'>{runsheet.DocketNo}</td>
+                                                            <td className='td'>{runsheet.Consignee}</td>
+                                                            <td className='td'>{runsheet.OriginName}</td>
+                                                            <td className='td'>{runsheet.DestName}</td>
+                                                            <td className='td'>{runsheet.Qty}</td>
+                                                            <td className='td'>{runsheet.ActualWt}</td>
+                                                            <td></td>
                                                         </tr>
                                                     )) : (
                                                         <tr>
@@ -313,12 +290,12 @@ function DrsRunsheet() {
                                         <div className='page'>
                                             <div>
                                                 <label htmlFor="">Total QTY :</label>
-                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{sumQty}</label>
+                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{runsheetData?.length*runsheetData[0]?.Qty}</label>
                                             </div>
 
                                             <div>
                                                 <label htmlFor="">Total Wt :</label>
-                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{sumActualWt}</label>
+                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{runsheetData?.length*runsheetData[0]?.ActualWt}</label>
                                             </div>
                                         </div>
                                     </div>

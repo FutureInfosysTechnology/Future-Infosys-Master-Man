@@ -12,9 +12,11 @@ import sms from '../../../Assets/Images/sms-svgrepo-com.png';
 import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
 import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function Booking() {
-
+    const navigate=useNavigate();
+    const location=useLocation();
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
     const [modalIsOpen2, setModalIsOpen2] = useState(false);
@@ -1022,7 +1024,7 @@ function Booking() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Step 1: Basic Validation Logic
+        // Step 1: Basic Validation Logic 
         const errors = [];
         // if (!formData.DocketNo) errors.push("DocketNo is required");
         if (!formData.BookDate) errors.push("Booking Date is required");
@@ -1162,6 +1164,29 @@ function Booking() {
         try {
             const response = await postApi('/Booking/OderEntry', requestBody, 'POST');
             if (response.Success === 1) {
+                const result = await Swal.fire({
+                    title: 'Saved Successfully!',
+                    text: "Do you want to print the docket now?",
+                    icon: 'success',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, print it!',
+                    cancelButtonText: 'No, later'
+                });
+                if (result.isConfirmed) {
+                     try {
+                    const response = await getApi(`/Booking/DocketReceipt?FromDocket=${formData.DocketNo}&ToDocket=${formData.DocketNo}`);
+                    if (response.status === 1) {
+                        console.log(response);
+                        console.log(response.Data);
+                        response.Data && navigate("/MobileReceipt", { state: { data: response.Data, path: location.pathname } });
+                    }
+                }
+                catch (error) {
+                    console.error("API Error:", error);
+                }
+                finally {
+                }
+                }
                 // Clear all data
                 resetAllForms(); // Optional: extract form resetting to its own function
                 Swal.fire('Saved!', response.Message || 'Your changes have been saved.', 'success');
@@ -1428,16 +1453,16 @@ function Booking() {
 
 
 
-    const allModeOptions = getMode.map(mode => ({ label: mode.Mode_Name, value: mode.Mode_Code }));
-    const allCityOptions = getCity.map(dest => ({
+    const allModeOptions = getMode.length>0 ? getMode.map(mode => ({ label: mode.Mode_Name, value: mode.Mode_Code })):null;
+    const allCityOptions = getCity.length>0 ? getCity.map(dest => ({
         label: dest.City_Name,         // Display name in dropdown
         value: dest.City_Code,         // City code for backend
         originName: dest.origin_Name,  // Additional origin name
         originCode: dest.Origin_code,  // Origin code
         pincode: dest.Pincode,         // Pincode
         zone: dest.Zone_Name           // Zone
-    }));
-    const allVendorOption = getVendor.map(Vendr => ({ label: Vendr.Vendor_Name, value: Vendr.Vendor_Code }));
+    })):null;
+    const allVendorOption = getMode.length>0 ?getVendor.map(Vendr => ({ label: Vendr.Vendor_Name, value: Vendr.Vendor_Code })):null;
     // const allReceiverOption = getReceiver.map(receiver => ({
     //     label: receiver.Receiver_Name,
     //     value: receiver.Receiver_Code
@@ -2002,85 +2027,85 @@ function Booking() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="input-field3" style={{marginTop:"23px"}}>
-                                            <button className="btn btn-success" style={{}}>Save</button>
+                                    <div className="input-field3" style={{ marginTop: "23px" }}>
+                                        <button className="btn btn-success" style={{}}>Save</button>
                                     </div>
 
-                                        {/* Conditional Sections */}
-                                        {isInvoiceValue && (
-                                            <>
-                                                <div className="input-field1">
-                                                    <label>Invoice Details</label>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setModalIsOpen6(true)}
-                                                        className="ok-btn w-100"
-                                                        style={{ color: "black" }}
-                                                    >
-                                                        <i className="bi bi-receipt-cutoff"></i>
-                                                    </button>
-                                                </div>
-                                                <div className="input-field1">
-                                                    <label>Invoice Value</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Invoice Value"
-                                                        value={formData.InvValue}
-                                                        onChange={(e) => setFormData({ ...formData, InvValue: e.target.value })}
-                                                    />
-                                                </div>
-                                            </>
-                                        )}
-
-                                        {isRemarkChecked && (
+                                    {/* Conditional Sections */}
+                                    {isInvoiceValue && (
+                                        <>
                                             <div className="input-field1">
-                                                <label>Alarm No</label>
+                                                <label>Invoice Details</label>
                                                 <button
                                                     type="button"
-                                                    className="ok-btn"
-                                                    style={{ height: "35px" }}
-                                                    onClick={() => setModalIsOpen4(true)}
+                                                    onClick={() => setModalIsOpen6(true)}
+                                                    className="ok-btn w-100"
+                                                    style={{ color: "black" }}
                                                 >
-                                                    <i className="bi bi-plus"></i>
+                                                    <i className="bi bi-receipt-cutoff"></i>
                                                 </button>
                                             </div>
-                                        )}
-
-                                        {isEWayChecked && (
                                             <div className="input-field1">
-                                                <label>E-Way Bill No</label>
+                                                <label>Invoice Value</label>
                                                 <input
                                                     type="text"
-                                                    placeholder="E-Way Bill No"
-                                                    value={formData.EwayBill}
-                                                    onChange={(e) => setFormData({ ...formData, EwayBill: e.target.value })}
+                                                    placeholder="Invoice Value"
+                                                    value={formData.InvValue}
+                                                    onChange={(e) => setFormData({ ...formData, InvValue: e.target.value })}
                                                 />
                                             </div>
-                                        )}
+                                        </>
+                                    )}
 
-                                        {isInvoiceNo && (
-                                            <div className="input-field1">
-                                                <label>Invoice No</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Invoice No"
-                                                    value={formData.InvoiceNo}
-                                                    onChange={(e) => setFormData({ ...formData, InvoiceNo: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
+                                    {isRemarkChecked && (
+                                        <div className="input-field1">
+                                            <label>Alarm No</label>
+                                            <button
+                                                type="button"
+                                                className="ok-btn"
+                                                style={{ height: "35px" }}
+                                                onClick={() => setModalIsOpen4(true)}
+                                            >
+                                                <i className="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    )}
 
-                                        {dispatchDate && (
-                                            <div className="input-field1">
-                                                <label>Dispatch Date</label>
-                                                <input
-                                                    type="date"
-                                                    value={formData.DispatchDate}
-                                                    onChange={(e) => setFormData({ ...formData, DispatchDate: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
+                                    {isEWayChecked && (
+                                        <div className="input-field1">
+                                            <label>E-Way Bill No</label>
+                                            <input
+                                                type="text"
+                                                placeholder="E-Way Bill No"
+                                                value={formData.EwayBill}
+                                                onChange={(e) => setFormData({ ...formData, EwayBill: e.target.value })}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {isInvoiceNo && (
+                                        <div className="input-field1">
+                                            <label>Invoice No</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Invoice No"
+                                                value={formData.InvoiceNo}
+                                                onChange={(e) => setFormData({ ...formData, InvoiceNo: e.target.value })}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {dispatchDate && (
+                                        <div className="input-field1">
+                                            <label>Dispatch Date</label>
+                                            <input
+                                                type="date"
+                                                value={formData.DispatchDate}
+                                                onChange={(e) => setFormData({ ...formData, DispatchDate: e.target.value })}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
                             </form>
 
 
@@ -2393,7 +2418,7 @@ function Booking() {
                         <button className="btn btn-primary w-100" style={{}} onClick={handleUpdate} type="button">Update</button>
                         <button className="btn btn-warning w-100" style={{}} onClick={handleSearch} type="button">Search</button>
                         <PiDotsThreeOutlineVerticalFill
-                            style={{ fontSize: "40px", width: "130px",cursor:"pointer" }}
+                            style={{ fontSize: "40px", width: "130px", cursor: "pointer" }}
                             onClick={() => setOpen(!open)} />
 
                         <div style={{ position: "relative", display: "inline-block" }}>
@@ -2488,7 +2513,7 @@ function Booking() {
                                             <select value={shipperData.ShipperCity}
                                                 onChange={(e) => setShipperData({ ...shipperData, ShipperCity: e.target.value })}>
                                                 <option disabled value="">Select City Name</option>
-                                                {getCity.map((city, index) => (
+                                                {getCity.length>0 && getCity.map((city, index) => (
                                                     <option value={city.City_Code} key={index}>{city.City_Name}</option>
                                                 ))}
                                             </select>
@@ -2575,7 +2600,7 @@ function Booking() {
                                             <select value={addReceiver.cityCode}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, cityCode: e.target.value })} required>
                                                 <option value="" disabled >Select City</option>
-                                                {getCity.map((city, index) => (
+                                                {getCity.length>0 && getCity.map((city, index) => (
                                                     <option value={city.City_Code} key={index}>{city.City_Name}</option>
                                                 ))}
                                             </select>

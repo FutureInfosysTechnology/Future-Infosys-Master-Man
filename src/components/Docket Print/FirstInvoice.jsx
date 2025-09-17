@@ -1,441 +1,359 @@
-import React, { useState, useEffect } from 'react';
-import Footer from '../../Components-2/Footer';
-import Sidebar1 from '../../Components-2/Sidebar1';
-import Header from '../../Components-2/Header/Header';
+import React, { useRef, useState, useEffect } from 'react';
 import logoimg from '../../Assets/Images/AceLogo.jpeg';
+import { useLocation, useNavigate } from 'react-router-dom';
+import 'jspdf-autotable';
 import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import Header from '../../Components-2/Header/Header';
+import Sidebar1 from '../../Components-2/Sidebar1';
 
 
 function FirstInvoice() {
 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const runsheet = location?.state?.data || {};
+    const fromPath = location?.state?.from || "/";
     const [getBranch, setGetBranch] = useState([]);
+    const [runsheetData, setRunsheetData] = useState([]);
+    console.log(location.state);
+    const drsNo = runsheet?.DrsNo || "";
     const [loading, setLoading] = useState(true);
-
-
-    const fetchBranchData = async () => {
-        try {
-            const response = await getApi('/Master/getBranch');
-            setGetBranch(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getApi("/Master/getBranch");
+                if (response.status === 1) {
+                    console.log(response.Data);
+                    setGetBranch(response.Data);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
         }
-        finally {
-            setLoading(false);
-        }
-    };
+        fetchData();
+    }, [])
+    const BranchData = getBranch.length > 0 ? getBranch[1] : {};
 
     useEffect(() => {
-        fetchBranchData();
-    }, []);
+        const fetchData = async () => {
+            try {
+                const response = await getApi(`/Runsheet/viewRunsheetPrint?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&RunsheetNo=${drsNo}`);
+                setRunsheetData(Array.isArray(response.data) ? response.data : []);
+                console.log(response);
+            } catch (err) {
+                console.error('Fetch Error:', err);
+            } finally {
+                setLoading(false);
+                setIsDataLoaded(true);
+                // generatePDF();
+            }
+        };
+        if (drsNo) {
+            fetchData();
+        }
+    }, [drsNo]);
 
-    const BranchData = getBranch.length > 0 ? getBranch[0] : {};
+    const handleDownloadPDF = async () => {
+        const element = document.querySelector("#pdf");
+        if (!element) return;
 
+        if (!element) return;
+
+        const canvas = await html2canvas(element, { scale: 4 });
+        const imgData = canvas.toDataURL("image/png");
+
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Create PDF with dynamic height = content height
+        const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.save(`Runsheet_${drsNo}.pdf`);
+    };
 
     return (
         <>
+            <style>
+                {`@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #pdf, #pdf * {
+        visibility: visible;
+    }
+
+    #pdf {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box;
+    }
+
+    table {
+        width: auto !important;  /* Let table auto-expand */
+        table-layout: auto;      /* Use auto layout */
+        border-collapse: collapse;
+        font-size: 10px !important;
+    }
+
+    th, td {
+        white-space: nowrap !important;
+        border: 1px solid black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .th {
+        background-color: rgba(36, 98, 113, 1) !important;
+        color: white !important;
+    }
+
+    button {
+        display: none !important;
+    }
+
+    .container-2, .container-3 {
+        width: auto !important;
+    }
+}
+   th, td {
+        white-space: nowrap !important;
+        border: 1px solid black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .th {
+        background-color: rgba(36, 98, 113, 1) !important;
+        color: white !important;
+    }
+ 
+`}
+            </style>
+
             <Header />
             <Sidebar1 />
             <div className="main-body" id="main-body">
-                <div className="container" style={{ padding: "30px" }}>
-                    <div className="container" style={{ border: "1px solid black", padding: "0px", width: "879px" }}>
 
-                        <div style={{ height: "130px", display: "flex", flexDirection: "row", borderBottom: "1px solid black" }}>
-                            <div style={{ width: "30%" }}>
-                                <img src={logoimg} alt="" style={{ height: "130px", paddingBottom: "2px" }} />
-                            </div>
-                            <div style={{ width: "70%" }}>
-                                <div style={{ textAlign: "center" }}>
-                                    <p><b style={{ fontSize: "24px" }}>Aventure Cargo Express</b></p>
-                                </div>
-                                <div style={{ textAlign: "center", display: "flex", flexDirection: "column" }}>
-                                    <span style={{ fontSize: "11px" }}><b>Office Address :</b>{BranchData.Branch_Add1}
-                                    </span>
-                                    <span style={{ fontSize: "10px", marginLeft: "5px" }}><b>Pin Code : {BranchData.Branch_PIN}</b></span>
-                                    <span style={{ fontSize: "10px", marginLeft: "5px" }}><b>Mob : {BranchData.MobileNo}</b></span>
-                                    <span style={{ fontSize: "10px", marginLeft: "5px" }}><b>Email : {BranchData.Email}</b></span>
-                                    <span style={{ fontSize: "10px", marginLeft: "5px" }}><b>GST No : {BranchData.GSTNo}</b></span>
-                                </div>
-                            </div>
-                        </div>
+                <div className="container-2" style={{ borderRadius: "0px", width: "1100px", height: "40px", border: "none" }}>
 
-                        <div style={{ display: "flex", flexDirection: "row", height: "150px" }}>
-                            <div style={{ display: "flex", flexDirection: "column", width: "65%", border: "1px solid black" }}>
-                                <p style={{ margin: "0px" }}><b style={{ fontSize: "10px" }}>To,</b></p>
-                                <p style={{ margin: "0px", marginLeft: "15px" }}><b style={{ fontSize: "12px" }}>CONVENTUS TECHNOLOGIES PVT LTD.</b></p>
-                                <p style={{ margin: "0px", marginLeft: "15px", fontSize: "12px" }}>UNIT 812 , NEELKANTH CORPORATE PARK,</p>
-                                <p style={{ margin: "0px", marginLeft: "15px", fontSize: "12px" }}>KIROL ROAD , VIDYAVIHAR WEST</p>
-                                <p style={{ margin: "0px", marginLeft: "15px", fontSize: "12px" }}>400086</p>
-                                <p style={{ margin: "0px", marginLeft: "15px", fontSize: "12px" }}>25103379    9594996804</p>
-                                <p style={{ margin: "0px", marginLeft: "15px" }}><b style={{ fontSize: "12px" }}>GSTIN .:27AADCC8181E1ZN</b></p>
-                            </div>
-
-                            <div style={{ display: "flex", flexDirection: "column", width: "35%" }}>
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>Invoice No.</b></label>
-                                    </div>
-
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>From Date</b></label>
-                                    </div>
-
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>To Date</b></label>
-                                    </div>
-
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%" }}>
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>Invoice Date</b></label>
-                                    </div>
-
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "20%", border: "1px solid black", paddingLeft: "5px" }}>
-                                    <label htmlFor=""><b>Email.:</b></label>
-                                    <input type="text" style={{ border: "transparent" }} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="table-container2">
-                            <table className='table table-bordered m-0'>
-                                <thead>
-                                    <tr>
-                                        <th className='bg-white'>Sr No</th>
-                                        <th className='bg-white'>Date</th>
-                                        <th className='bg-white'>Docket No</th>
-                                        <th className='bg-white'>Destination</th>
-                                        <th className='bg-white'>Boxes</th>
-                                        <th className='bg-white'>Weight</th>
-                                        <th className='bg-white'>Freight</th>
-                                        <th className='bg-white'>Fov</th>
-                                        <th className='bg-white'>Docket</th>
-                                        <th className='bg-white'>OtherCharges</th>
-                                        <th className='bg-white'>Mode</th>
-                                        <th className='bg-white'>Network</th>
-                                        <th className='bg-white'>Amount</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody className='table-body'>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>3</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>4</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>5</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>6</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>7</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>8</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>9</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>11</td>
-                                        <td>02/01/2024</td>
-                                        <td>12345</td>
-                                        <td>ANDHERI</td>
-                                        <td>2</td>
-                                        <td>10</td>
-                                        <td>2</td>
-                                        <td>1</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>SFC</td>
-                                        <td>BD</td>
-                                        <td>500</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td className='bg-white'>12</td>
-                                        <td className='bg-white'>02/01/2024</td>
-                                        <td className='bg-white'>12345</td>
-                                        <td className='bg-white'>ANDHERI</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>10</td>
-                                        <td className='bg-white'>2</td>
-                                        <td className='bg-white'>1</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>0</td>
-                                        <td className='bg-white'>SFC</td>
-                                        <td className='bg-white'>BD</td>
-                                        <td className='bg-white'>500</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div style={{ display: "flex", flexDirection: "row", height: "220px" }}>
-                            <div style={{ display: "flex", flexDirection: "column", width: "65%", border: "1px solid black", paddingTop: "10%" }}>
-                                <p style={{ margin: "0px", marginLeft: "15px" }}><b style={{ fontSize: "12px" }}>GST NO.: 27ACQPA9420Q1Z0</b></p>
-                                <p style={{ margin: "0px", marginLeft: "15px" }}><b style={{ fontSize: "12px" }}>SAC CODE.: ACQPA9420Q</b></p>
-                                <p style={{ margin: "0px", marginLeft: "15px" }}><b style={{ fontSize: "12px" }}>PAN NO .: </b></p>
-                            </div>
-
-                            <div style={{ display: "flex", flexDirection: "column", width: "35%" }}>
-                                <div style={{ display: "flex", flexDirection: "row", height: "10%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b style={{ fontSize: "12px" }}>TOTAL</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "15%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>FUEL @ of 40.00%</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "15%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>SUB TOTAL</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "15%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>IGST @ of 18.00%</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "15%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>SGST @ of 9.00%</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "15%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>CGST @ of 9.00%</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "15%" }}>
-                                    <div style={{ width: "60%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <label htmlFor=""><b>BILL AMOUNT</b></label>
-                                    </div>
-
-                                    <div style={{ width: "40%", border: "1px solid black", paddingLeft: "5px" }}>
-                                        <input type="text" style={{ border: "transparent", width: "100%" }} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ height: "30px", paddingLeft: "10px", border: "1px solid black" }}>
-                            <p><b>AMOUNT IN WORD-</b> <b>TWO LAKHS TWENTY-TWO THOUSAND SEVEN HUNDRED THIRTY-SIX ONLY</b></p>
-                        </div>
-
-                        <div style={{ height: "200px", border: "1px solid black", paddingLeft: "10px" }}>
-                            <p style={{ margin: "0px" }}><b>TERMS & CONDITIONS</b></p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>Subject To Mumbai Jurisdicaton only</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>1. All bills should be normally be setled within one week of the date of the bill unless otherwise arranged.The company
-                                reserves the right to charge interest at the rate of 24% per annum on all</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>2 . All the Cheques should be drawn cross A/c payee in favour " SHRI SAI LOGISTICS "</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>3 . Green Dart Logistcs Pvt.Ltd. liability is as per the clause specifed in Consignment Note.</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>4 . Receipt of ofcial duly signed will be considered valid</p>
-                            <p style={{ margin: "0px", fontSize: "12px" }}>5.This is a computer generated bill & is valid even though not signed. In case of any discrepancy of whatsoever nature in the bill,
-                                please inform in writng
-                                within 10 days from the date of this bill,failing which it would be deemed that this bill has been accepted by you in all respects and it is good for
-                                payment,as per the terms & conditons the contract and no further claim will be accepted.</p>
-                        </div>
+                    <div className="container-2" style={{ borderRadius: "0px", width: "1100px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px", alignItems: "center" }}>
+                        <button
+                            onClick={handleDownloadPDF}
+                            style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Download
+                        </button>
+                        <button
+                            onClick={() => window.print()}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Print
+                        </button>
+                        <button
+                            onClick={() => navigate(fromPath, { state: { tab: "state" } })}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Exit
+                        </button>
                     </div>
                 </div>
-                <Footer />
-            </div>
+
+                <div className="container-2" id="pdf" style={{
+                    borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "1100px", direction: "flex",
+                    flexDirection: "column", gap: "5px"
+                }}>
+
+                    <div className="container-2" style={{ borderRadius: "0px", width: "1082px", display: "flex", flexDirection: "column" }}>
+
+                        < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
+                            <div className="container-3" style={{ border: "5px double black" }}>
+
+                                <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px" }}>
+                                    <div style={{ width: "40%" }}>
+                                        <img src={logoimg} alt="" style={{ height: "120px" }} />
+                                    </div>
+                                    <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
+                                        <div style={{ textAlign: "center", height: "40%" }}>
+                                            <p><b style={{ fontSize: "24px" }}>{BranchData.Company_Name}</b></p>
+                                        </div>
+                                        <div style={{ textAlign: "center", display: "flex", paddingLeft: "5px", marginLeft: "50px" }}>
+                                            <div style={{ display: "flex", flexDirection: "column", fontWeight: "bold", width: "20%", fontSize: "10px", textAlign: "start" }}>
+                                                <span style={{}}>Address :</span>
+                                                <span style={{}}>Pin Code :</span>
+                                                <span style={{}}>Mob :</span>
+                                                <span style={{}}>Email :</span>
+                                                <span style={{}}>GST No :</span>
+                                            </div>
+                                            <div style={{ display: "flex", flexDirection: "column", width: "70%", fontSize: "10px", textAlign: "start" }}>
+                                                <span>{BranchData.Branch_Add1}</span>
+                                                <span>{BranchData.Branch_PIN}</span>
+                                                <span>{BranchData.MobileNo}</span>
+                                                <span>{BranchData.Email}</span>
+                                                <span>{BranchData.GSTNo}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px", marginTop: "" }}>
+                                    <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
+                                        <div style={{ fontWeight: "bold" }}>TO,</div>
+                                        <div>
+                                            <label htmlFor=""><b>CLIENT NAME :</b></label>
+                                            <span style={{ marginLeft: "10px" }}>{runsheetData[0]?.vendorName}</span>
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor=""><b>ADDRESS :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.vehicleNo}</label>
+                                        </div>
+                                        <div>
+                                            <label htmlFor=""><b>CLIENT MOBILE NO :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.driverMobile}</label>
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor=""><b>PIN CODE :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.Remark}</label>
+                                        </div>
+                                        <div>
+                                            <label htmlFor=""><b>GST NO :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.Remark}</label>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px",paddingTop:"20px" }}>
+                                        <div>
+                                            <label htmlFor=""><b>INVOICE NO :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{drsNo}</label>
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor=""><b>INVOICE DATE :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.DrsDate}</label>
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor=""><b>INVOICE FROM :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.Area}</label>
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor=""><b>INVOICE TO :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.toDest}</label>
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor=""><b>INVOICE MODE :</b></label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.toDest}</label>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div className="table-container2" style={{ borderBottom: "1px solid black"}}>
+                                    <table className='table table-bordered table-sm' style={{ border: "1px solid black"}}>
+                                        <thead className='thead'>
+                                            <tr className='tr'>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr.No</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>C.Note</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Date</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Origin</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Destination</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Mode</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Flight No</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Pieces</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Weight</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Rate</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Dkt.Chrgs</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Pickup.Chrgs</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Delivery.Chrgs</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>FOV.Chrgs</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Fuel.Chrgs</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Airline F.Chrgs</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Freight Amount</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody className='tbody'>
+                                            {runsheetData.length > 0 ?
+                                                runsheetData.map((runsheet, index) => (
+                                                    <tr key={index} className='tr'>
+                                                        <td className='td'>{index + 1}</td>
+                                                        <td className='td'>{runsheet.BookDate}</td>
+                                                        <td className='td'>{runsheet.DocketNo}</td>
+                                                        <td className='td'>{runsheet.CustomerName}</td>
+                                                        <td className='td'>{runsheet.OriginName}</td>
+                                                        <td className='td'>{runsheet.DestName}</td>
+                                                        <td className='td'>{runsheet.Qty}</td>
+                                                        <td className='td'>{runsheet.ActualWt}</td>
+                                                        <td className='td'>{index + 1}</td>
+                                                        <td className='td'>{runsheet.BookDate}</td>
+                                                        <td className='td'>{runsheet.DocketNo}</td>
+                                                        <td className='td'>{runsheet.CustomerName}</td>
+                                                        <td className='td'>{runsheet.OriginName}</td>
+                                                        <td className='td'>{runsheet.DestName}</td>
+                                                        <td className='td'>{runsheet.Qty}</td>
+                                                        <td className='td'>{runsheet.ActualWt}</td>
+                                                        <td></td>
+                                                    </tr>
+                                                )) : (
+                                                    <tr>
+                                                        <td colSpan="17">No data available</td>
+                                                    </tr>
+                                                )}
+                                        </tbody>
+                                    </table>
+
+                                    <div className='page'>
+                                        <div>
+                                            <label htmlFor="">Total QTY :</label>
+                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{runsheetData?.length * runsheetData[0]?.Qty}</label>
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor="">Total Wt :</label>
+                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{runsheetData?.length * runsheetData[0]?.ActualWt}</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className='page' style={{ marginTop: "20px" }}>
+                                    <p>Received by :</p><span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
+                                </div>
+
+                                <div className='page' style={{ justifyContent: "space-between" }}>
+                                    <div className='page' style={{ marginTop: "20px" }}>
+                                        <p>Prepared by :</p>
+                                        <p style={{ textAlign: "start", paddingLeft: "5px" }}><b style={{ fontSize: "12px", marginRight: "10px" }}>{BranchData.Company_Name}</b></p>
+                                    </div>
+                                    <div className='page' style={{ marginTop: "20px" }}>
+                                        <p>Checked by :</p>
+                                        <span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
+                                    </div>
+
+                                    <div className='page' style={{ marginTop: "20px" }}>
+                                        <p>Signature With Stamp :</p><span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div >
+                    </div>
+                </div>
+
+
+            </div >
         </>
-    )
+    );
 }
 
 export default FirstInvoice;
