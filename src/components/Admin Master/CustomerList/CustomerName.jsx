@@ -533,7 +533,7 @@ function CustomerName() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Sr.No</th>

@@ -6,6 +6,8 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
+import Select from 'react-select';
+import 'react-toggle/style.css';
 import { postApi, getApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
@@ -94,8 +96,9 @@ function CustomerVolumetric() {
 
 
     const handleCustNameChange = (e) => {
-        const custName = e.target.value;
+        const custName = e.value;
         setSelectedCustName(custName);
+
 
         const selectedCust = getCustomerName.find((cust) => cust.Customer_Name === custName);
         if (selectedCust) {
@@ -108,7 +111,7 @@ function CustomerVolumetric() {
     };
 
     const handleModeNameChange = (e) => {
-        const modeName = e.target.value;
+        const modeName = e.value;
         setSelectedModeName(modeName);
 
         const selectedMode = getMode.find((mode) => mode.Mode_Name === modeName);
@@ -318,7 +321,7 @@ console.log(addVolumteric);
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Sr.No</th>
@@ -434,12 +437,28 @@ console.log(addVolumteric);
 
                                         <div className="input-field">
                                             <label htmlFor="">Customer Name</label>
-                                            <select value={selectedCustName} onChange={handleCustNameChange} required aria-readonly={readOnly}>
-                                                <option value="" disabled >Select Customer Name</option>
-                                                {getCustomerName.map((cust, index) => (
-                                                    <option value={cust.Customer_Name} key={index}>{cust.Customer_Name}</option>
-                                                ))}
-                                            </select>
+                                                 <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCustomerName.map(cust => ({
+                                                    value: cust.Customer_Name,   // adjust keys from your API
+                                                    label: cust.Customer_Name
+                                                }))}
+                                                value={
+                                                    selectedCustName
+                                                        ? { value: selectedCustName, label:selectedCustName}
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    handleCustNameChange(selectedOption);
+                                                }}
+                                                placeholder="Select Customer"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
+                                            />
                                         </div>
 
 
@@ -455,12 +474,27 @@ console.log(addVolumteric);
 
                                         <div className="input-field">
                                             <label htmlFor="">Mode</label>
-                                            <select value={selectedModeName} onChange={handleModeNameChange} required>
-                                                <option value="" disabled >Select Mode</option>
-                                                {getMode.map((mode, index) => (
-                                                    <option value={mode.Mode_Name} key={index}>{mode.Mode_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getMode.map(mode => ({
+                                                    value: mode.Mode_Name,   // adjust keys from your API
+                                                    label: mode.Mode_Name
+                                                }))}
+                                                value={
+                                                    selectedModeName
+                                                        ? { value: selectedModeName, label:selectedModeName}
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    handleModeNameChange(selectedOption);
+                                                }}
+                                                placeholder="Select Mode"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}/>
                                         </div>
                                     </div>
 

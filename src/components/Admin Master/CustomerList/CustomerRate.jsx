@@ -6,10 +6,37 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
+import { deleteApi, getApi, postApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import Select from 'react-select';
+import 'react-toggle/style.css';
 
 
 function CustomerRate() {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const methodOptions = [
+        { value: "Express", label: "Express" },
+        { value: "Domestic", label: "Domestic" },
+    ];
+    const rateModeOptions = [
+        { value: "Addition", label: "Addition" },
+        { value: "Subtraction", label: "Subtraction" },
+    ];
+    const slabOptions = [
+        { value: "5 Kg", label: "5 Kg" },
+        { value: "10 Kg", label: "10 Kg" },
+        { value: "20 Kg", label: "20 Kg" },
+        { value: "50 Kg", label: "50 Kg" },
+        { value: "100 Kg", label: "100 Kg" },
+        { value: "200 Kg", label: "200 Kg" },
+        { value: "500 Kg", label: "500 Kg" },
+    ];
+    const flagOptions = [
+        { value: "Active", label: "Active" },
+        { value: "Inactive", label: "Inactive" },
+    ];
 
     const [getCustRate, setGetCustRate] = useState([]);
     const [getCustomer, setGetCustomer] = useState([]);       // To Get Customer Data
@@ -35,13 +62,14 @@ function CustomerRate() {
         Destination_Code: "",
         Method: "",
         Slab: "",
-        Active_Date: "",
-        Closing_Date: "",
+        Active_Date: firstDayOfMonth,
+        Closing_Date: today,
         RatePer: "",
         Amount: "",
         Weight: "",
         ConnectingHub: ""
     });
+    console.log(formdata);
     const [submittedData, setSubmittedData] = useState([]);
     const [tableRowData, setTableRowData] = useState({
         On_Addition: "",
@@ -51,7 +79,9 @@ function CustomerRate() {
         Rate_Flag: ""
     })
 
-
+    const handleDateChange = (date, field) => {
+        setFormdata({ ...formdata, [field]: date });
+    };
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = getCustRate.slice(indexOfFirstRow, indexOfLastRow);
@@ -70,7 +100,7 @@ function CustomerRate() {
 
     const fetchCustomerData = async () => {
         try {
-            const response = await getApi('/Master/getCustomer');
+            const response = await getApi('/Master/getCustomerData');
             setGetCustomer(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             setError(err);
@@ -196,7 +226,7 @@ function CustomerRate() {
         e.preventDefault();
 
         const requestBody = {
-            Client_Code: formdata.Client_Code,
+            Client_Code: formdata.Client_Code.toString(),
             Vendor_Code: formdata.Vendor_Code,
             Flag: formdata.Flag,
             Mode_Code: formdata.Mode_Code,
@@ -261,7 +291,7 @@ function CustomerRate() {
         e.preventDefault();
 
         const requestBody = {
-            Client_Code: formdata.Client_Code,
+            Client_Code: formdata.Client_Code.toString(),
             Vendor_Code: formdata.Vendor_Code,
             Flag: formdata.Flag,
             Mode_Code: formdata.Mode_Code,
@@ -286,7 +316,7 @@ function CustomerRate() {
         }
 
         try {
-            const response = await postApi('/Master/updateRateMaster', requestBody, 'POST');
+            const response = await putApi('/Master/updateRateMaster', requestBody, 'POST');
             if (response.status === 1) {
                 setGetCustRate(getCustRate.map((cust) => cust.Client_Code === formdata.Client_Code ? response.data : cust));
                 setFormdata({
@@ -394,7 +424,26 @@ function CustomerRate() {
                 <div className="container1">
                     <div className="addNew">
                         <div>
-                            <button className='add-btn' onClick={() => { setModalIsOpen(true); setIsEditMode(false); }}>
+                            <button className='add-btn' onClick={() => {
+                                setModalIsOpen(true); setIsEditMode(false);
+                                setFormdata({
+                                    Client_Code: "",
+                                    Vendor_Code: "",
+                                    Flag: "",
+                                    Mode_Code: "",
+                                    Zone_Code: "",
+                                    State_Code: "",
+                                    Destination_Code: "",
+                                    Method: "",
+                                    Slab: "",
+                                    Active_Date: firstDayOfMonth,
+                                    Closing_Date: today,
+                                    RatePer: "",
+                                    Amount: "",
+                                    Weight: "",
+                                    ConnectingHub: ""
+                                })
+                            }}>
                                 <i className="bi bi-plus-lg"></i>
                                 <span>ADD NEW</span>
                             </button>
@@ -417,7 +466,7 @@ function CustomerRate() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Sr.No</th>
@@ -439,17 +488,17 @@ function CustomerRate() {
                                 {currentRows.map((rate, index) => (
                                     <tr key={index}>
                                         <td>{index + 1}</td>
-                                        <td>{rate.Customer_Name}</td>
-                                        <td>{rate.Mode_Name}</td>
-                                        <td>{rate.Zone_Name}</td>
-                                        <td>{rate.Origin_Name}</td>
-                                        <td>{rate.Destination_Name}</td>
-                                        <td>{rate.State_Name}</td>
-                                        <td>{rate.Method}</td>
-                                        <td>{rate.Slab}</td>
-                                        <td>{rate.RatePer}</td>
-                                        <td>{rate.Amount}</td>
-                                        <td>{rate.Weight}</td>
+                                        <td>{rate?.Customer_Name}</td>
+                                        <td>{rate?.Mode_Name}</td>
+                                        <td>{rate?.Zone_Name}</td>
+                                        <td>{rate?.Origin_Name}</td>
+                                        <td>{rate?.Destination_Name}</td>
+                                        <td>{rate?.State_Name}</td>
+                                        <td>{rate?.Method}</td>
+                                        <td>{rate?.Slab}</td>
+                                        <td>{rate?.RatePer}</td>
+                                        <td>{rate?.Amount}</td>
+                                        <td>{rate?.Weight}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -484,7 +533,7 @@ function CustomerRate() {
                         </table>
                     </div>
 
-                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -498,7 +547,7 @@ function CustomerRate() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -525,134 +574,318 @@ function CustomerRate() {
 
                             <div className='container2'>
                                 <form onSubmit={handlesave}>
-
                                     <div className="fields2">
                                         <div className="input-field1">
                                             <label htmlFor="">Customer Name</label>
-                                            <select required value={formdata.Client_Code}
-                                                onChange={(e) => setFormdata({ ...formdata, Client_Code: e.target.value })}>
-                                                <option value="" disabled >Select Customer Name</option>
-                                                {getCustomer.map((cust, index) => (
-                                                    <option value={cust.Customer_Code} key={index}>{cust.Customer_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCustomer.map(cust => ({
+                                                    value: cust.Customer_Code,   // adjust keys from your API
+                                                    label: cust.Customer_Name
+                                                }))}
+                                                value={
+                                                    formdata.Client_Code
+                                                        ? { value: formdata.Client_Code, label: getCustomer.find(cust => cust.Customer_Code === formdata.Client_Code)?.Customer_Name || "" }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setFormdata({
+                                                        ...formdata,
+                                                        Client_Code: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }}
+                                                placeholder="Select Customer"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
+                                            />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field1">
                                             <label htmlFor="">Vendor Name</label>
-                                            <select value={formdata.Vendor_Code}
-                                                onChange={(e) => setFormdata({ ...formdata, Vendor_Code: e.target.value })}>
-                                                <option value="" disabled>Vendor Name</option>
-                                                {getVendor.map((vendor, index) => (
-                                                    <option value={vendor.Vendor_Code} key={index}>{vendor.Vendor_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                options={getVendor.map(vendor => ({
+                                                    value: vendor.Vendor_Code,   // adjust keys from your API
+                                                    label: vendor.Vendor_Name
+                                                }))}
+                                                value={
+                                                    formdata.Vendor_Code
+                                                        ? { value: formdata.Vendor_Code, label: getVendor.find(c => c.Vendor_Code === formdata.Vendor_Code)?.Vendor_Name || "" }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({
+                                                        ...formdata,
+                                                        Vendor_Code: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }
+                                                placeholder="Vendor Name"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
+
                                         </div>
 
 
-                                        <div className="input-field3">
+                                        <div className="input-field1">
                                             <label htmlFor="">Mode</label>
-                                            <select value={formdata.Mode_Code}
-                                                onChange={(e) => setFormdata({ ...formdata, Mode_Code: e.target.value })} required>
-                                                <option value="" disabled>Select Mode</option>
-                                                {getMode.map((mode, index) => (
-                                                    <option value={mode.Mode_Code} key={index}>{mode.Mode_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                options={getMode.map(mode => ({
+                                                    value: mode.Mode_Code,   // adjust keys from your API
+                                                    label: mode.Mode_Name
+                                                }))}
+                                                value={
+                                                    formdata.Mode_Code
+                                                        ? { value: formdata.Mode_Code, label: getMode.find(c => c.Mode_Code === formdata.Mode_Code)?.Mode_Name || "" }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({
+                                                        ...formdata,
+                                                        Mode_Code: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }
+                                                placeholder="Select Mode"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
+
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field1">
                                             <label htmlFor="">Zone Name</label>
-                                            <select value={formdata.Zone_Code}
-                                                onChange={(e) => setFormdata({ ...formdata, Zone_Code: e.target.value })} required>
-                                                <option value="" disabled >Select Zone Name</option>
-                                                {getZone.map((zone, index) => (
-                                                    <option value={zone.Zone_Code} key={index}>{zone.Zone_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                options={getZone.map((zone) => ({
+                                                    value: zone.Zone_Code,   // adjust keys from your API
+                                                    label: zone.Zone_Name
+                                                }))}
+                                                value={
+                                                    formdata.Zone_Code
+                                                        ? { value: formdata.Zone_Code, label: getZone.find(c => c.Zone_Code === formdata.Zone_Code)?.Zone_Name || "" }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({
+                                                        ...formdata,
+                                                        Zone_Code: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }
+                                                placeholder="Select Zone"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field1">
                                             <label htmlFor="">State Name</label>
-                                            <select value={formdata.State_Code}
-                                                onChange={(e) => setFormdata({ ...formdata, State_Code: e.target.value })} required>
-                                                <option value="" disabled >Select State Name</option>
-                                                {getState.map((state, index) => (
-                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                options={getState.map((state) => ({
+                                                    value: state.State_Code,   // adjust keys from your API
+                                                    label: state.State_Name
+                                                }))}
+                                                value={
+                                                    formdata.State_Code
+                                                        ? { value: formdata.State_Code, label: getState.find(c => c.State_Code === formdata.State_Code)?.State_Name || "" }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({
+                                                        ...formdata,
+                                                        State_Code: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field1">
                                             <label htmlFor="">Destination</label>
-                                            <select value={formdata.Destination_Code}
-                                                onChange={(e) => setFormdata({ ...formdata, Destination_Code: e.target.value })} required>
-                                                <option value="" disabled >Select Destination</option>
-                                                {getCity.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                options={getCity.map(city => ({
+                                                    value: city.City_Code,   // adjust keys from your API
+                                                    label: city.City_Name
+                                                }))}
+                                                value={
+                                                    formdata.Destination_Code
+                                                        ? { value: formdata.Destination_Code, label: getCity.find(c => c.City_Code === formdata.Destination_Code)?.City_Name || "" }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    console.log(selectedOption);
+                                                    setFormdata({
+                                                        ...formdata,
+                                                        Destination_Code: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }
+                                                }
+                                                placeholder="Select Destination"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field1">
                                             <label htmlFor="">Method</label>
-                                            <select value={formdata.Method}
-                                                onChange={(e) => setFormdata({ ...formdata, Method: e.target.value })}>
-                                                <option value="" disabled>Select Method</option>
-                                                <option value="Express">Express</option>
-                                                <option value="Domestic">Domestic</option>
-                                            </select>
+                                            <Select
+                                                options={methodOptions}
+                                                value={methodOptions.find((opt) => opt.value === formdata.Method) || null}
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({ ...formdata, Method: selectedOption?.value || "" })
+                                                }
+                                                placeholder="Select Method"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
                                         </div>
-
-                                        <div className="input-field3">
+                                        <div className="input-field1">
+                                            <label htmlFor="">Rate Mode</label>
+                                            <Select
+                                                options={rateModeOptions}
+                                                value={rateModeOptions.find((opt) => opt.value === formdata.RateMode) || null}
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({ ...formdata, RateMode: selectedOption?.value || "" })
+                                                }
+                                                placeholder="Select Rate Mode"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="input-field1">
                                             <label htmlFor="">Slab</label>
-                                            <select value={formdata.Slab}
-                                                onChange={(e) => setFormdata({ ...formdata, Slab: e.target.value })}>
-                                                <option value="" disabled>Select Slab</option>
-                                                <option value="5 Kg">5 Kg</option>
-                                                <option value="10 Kg">10 Kg</option>
-                                                <option value="20 Kg">20 Kg</option>
-                                                <option value="50 Kg">50 Kg</option>
-                                                <option value="100 Kg">100 Kg</option>
-                                                <option value="200 Kg">200 Kg</option>
-                                                <option value="500 Kg">500 Kg</option>
-                                            </select>
+                                            <Select
+                                                options={slabOptions}
+                                                value={slabOptions.find((opt) => opt.value === formdata.Slab) || null}
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({ ...formdata, Slab: selectedOption?.value || "" })
+                                                }
+                                                placeholder="Select Slab"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Active Date</label>
-                                            <input type="date" value={formdata.Active_Date}
-                                                onChange={(e) => setFormdata({ ...formdata, Active_Date: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Closing Date</label>
-                                            <input type="date" value={formdata.Closing_Date}
-                                                onChange={(e) => setFormdata({ ...formdata, Closing_Date: e.target.value })} />
+                                            <label htmlFor="">Flag</label>
+                                            <Select
+                                                options={flagOptions}
+                                                value={flagOptions.find((opt) => opt.value === formdata.Flag) || null}
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({ ...formdata, Flag: selectedOption?.value || "" })
+                                                }
+                                                placeholder="Select Flag"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                styles={{
+                                                    placeholder: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
+                                                    }),
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                }}
+                                            />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Rate/Kg</label>
                                             <input type="tel" placeholder="Rate/Kg" value={formdata.RatePer}
                                                 onChange={(e) => setFormdata({ ...formdata, RatePer: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Flag</label>
-                                            <select value={formdata.Flag}
-                                                onChange={(e) => setFormdata({ ...formdata, Flag: e.target.value })}>
-                                                <option value="" disabled>Select Flag</option>
-                                                <option value="Active">Active</option>
-                                                <option value="Inactive">Inactive</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Rate Mode</label>
-                                            <select value="">
-                                                <option value="" disabled>Select Rate Mode</option>
-                                                <option value="Addition">Addition</option>
-                                            </select>
                                         </div>
 
                                         <div className="input-field3">
@@ -671,8 +904,31 @@ function CustomerRate() {
                                             <input type="tel" placeholder="Amount" value={formdata.Amount}
                                                 onChange={(e) => setFormdata({ ...formdata, Amount: e.target.value })} />
                                         </div>
+                                        <div className="input-field1" >
+                                            <label htmlFor="">Active Date</label>
+                                            <DatePicker
+                                            required
+                                                portalId="root-portal"
+                                                selected={formdata.Active_Date}
+                                                onChange={(date) => handleDateChange("Active_Date", date)}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
+                                        </div>
 
-                                        <div className='bottom-buttons' style={{ marginTop: "18px", marginLeft: "25px" }}>
+                                        <div className="input-field1">
+                                            <label htmlFor="">Closing Date</label>
+
+                                            <DatePicker
+                                            required
+                                                portalId="root-portal"
+                                                selected={formdata.Closing_Date}
+                                                onChange={(date) => handleDateChange("Closing_Date", date)}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
+                                        </div>
+                                        <div className='bottom-buttons' style={{ marginTop: "22px", marginLeft: "10px" }}>
                                             {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
                                             {isEditMode && (<button type='button' onClick={handleupdate} className='ok-btn'>Update</button>)}
                                             <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
@@ -680,77 +936,78 @@ function CustomerRate() {
 
                                     </div>
                                 </form>
-
+                            </div>
+                            <div className='container2' style={{}}>
                                 <div className="table-container1">
-                                    <table className="table table-bordered table-sm">
+                                    <table className="table table-bordered table-sm" style={{ whiteSpace: "nowrap" }}>
                                         <thead>
                                             <tr>
-                                                <th>Rate_Mode</th>
+                                                <th>Sr No</th>
                                                 <th>Document Rate</th>
                                                 <th>Min Weight</th>
                                                 <th>Max Weight</th>
                                                 <th>Rate</th>
                                                 <th>Rate Flag</th>
-                                                <th>Save</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
+                                                <td></td>
                                                 <td>
-                                                    <select value="">
-                                                        <option value="" disabled>Rate Mode</option>
-                                                        <option value="Document Rate">Document Rate</option>
-                                                        <option value="Box Rate">Box Rate</option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <input type="text" placeholder="Document Rate" value={tableRowData.On_Addition}
+                                                    <input type="text" className="form-control" placeholder="Document Rate" value={tableRowData.On_Addition}
                                                         name="On_Addition" onChange={handleChange} />
                                                 </td>
                                                 <td>
-                                                    <input type="text" placeholder="Min Weight" value={tableRowData.Lower_Wt}
+                                                    <input type="text" className="form-control" placeholder="Min Weight" value={tableRowData.Lower_Wt}
                                                         name="Lower_Wt" onChange={handleChange} />
                                                 </td>
                                                 <td>
-                                                    <input type="text" placeholder="Max Weight" value={tableRowData.Upper_Wt}
+                                                    <input type="text" className="form-control" placeholder="Max Weight" value={tableRowData.Upper_Wt}
                                                         name="Upper_Wt" onChange={handleChange} />
                                                 </td>
                                                 <td>
-                                                    <input type="text" placeholder="Rate" value={tableRowData.Rate}
+                                                    <input type="text" className="form-control" placeholder="Rate" value={tableRowData.Rate}
                                                         name="Rate" onChange={handleChange} />
                                                 </td>
                                                 <td>
-                                                    <select value={tableRowData.Rate_Flag}
-                                                        onChange={handleChange} name="Rate_Flag">
-                                                        <option value="" disabled>Select Rate Flag</option>
-                                                        <option value="Active">Active</option>
-                                                        <option value="Inactive">Inactive</option>
-                                                    </select>
+                                                    <Select
+                                                        options={flagOptions}
+                                                        value={flagOptions.find((opt) => opt.value === tableRowData.Rate_Flag) || null}
+                                                        onChange={(selectedOption) =>
+                                                            setTableRowData({ ...tableRowData, Rate_Flag: selectedOption?.value || "" })
+                                                        }
+                                                        placeholder="Select Flag"
+                                                        isSearchable
+                                                        classNamePrefix="blue-selectbooking"
+                                                        className="blue-selectbooking"
+                                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                        styles={{
+                                                            placeholder: (base) => ({
+                                                                ...base,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                                width: "100px",
+                                                                marginLeft: "5px"
+                                                            }),
+                                                            input: (base) =>
+                                                            ({
+                                                                ...base,
+                                                                width: "100px",
+                                                                paddingLeft: "10px"
+                                                            }),
+                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                        }}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <button className="ok-btn" style={{ padding: "2px", fontSize: "20px" }}
+                                                    <button className="ok-btn" style={{ padding: "2px", fontSize: "30px", width: "40px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center" }}
                                                         onClick={handleAddRow}>
                                                         <i className="bi bi-plus"></i>
                                                     </button>
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div className="table-container1">
-                                    <table className="table table-bordered table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Sr No</th>
-                                                <th>Addition</th>
-                                                <th>Min Weight</th>
-                                                <th>Max Weight</th>
-                                                <th>Rate</th>
-                                                <th>Rate Flag</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
                                             {submittedData.map((data, index) => (
                                                 <tr key={index}>
                                                     <td>{index + 1}</td>
@@ -764,6 +1021,7 @@ function CustomerRate() {
                                         </tbody>
                                     </table>
                                 </div>
+
                             </div>
                         </div>
                     </Modal >

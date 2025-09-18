@@ -81,9 +81,6 @@ function PerformanceBill() {
                                 </div>
                             </form>
                         </div>
-
-
-
                         <div className="card right-card">
                             <div className="section-title">RECEIVER</div>
                             <form action="" style={{ margin: "0px", padding: "0px" }}>
@@ -143,54 +140,51 @@ function PerformanceBill() {
                     </div>
 
                     <div className="card">
-  <div className="section-title">Courier Details</div>
-  <form style={{ margin: "0px", padding: "0px" }}>
-    <div className="row g-3 mx-0">
-      <div className="input-field col-md-4 col-sm-6">
-        <label className="form-label">Invoice No</label>
-        <input type="tel" className="form-control" placeholder="Invoice No" />
-      </div>
+                        <div className="section-title">Courier Details</div>
+                        <form style={{ margin: "0px", padding: "0px" }}>
+                            <div className="row g-3 mx-0">
+                                <div className="input-field col-md-4 col-sm-6">
+                                    <label className="form-label">Invoice No</label>
+                                    <input type="tel" className="form-control" placeholder="Invoice No" />
+                                </div>
 
-      <div className="input-field col-md-4 col-sm-6">
-        <label className="form-label">Invoice Date</label>
-        <input type="date" className="form-control" />
-      </div>
+                                <div className="input-field col-md-4 col-sm-6">
+                                    <label className="form-label">Invoice Date</label>
+                                    <input type="date" className="form-control" />
+                                </div>
 
-      <div className="input-field col-md-4 col-sm-6">
-        <label className="form-label">Docket No</label>
-        <input type="text" className="form-control" placeholder="Docket No" />
-      </div>
+                                <div className="input-field col-md-4 col-sm-6">
+                                    <label className="form-label">Docket No</label>
+                                    <input type="text" className="form-control" placeholder="Docket No" />
+                                </div>
 
-      <div className="input-field col-md-4 col-sm-6">
-        <label className="form-label">Country of Origin</label>
-        <select value="" className="form-control"  style={{height:'35px'}}>
-          <option value="" disabled>Select Country</option>
-          <option>India</option>
-        </select>
-      </div>
+                                <div className="input-field col-md-4 col-sm-6">
+                                    <label className="form-label">Country of Origin</label>
+                                    <select value="" className="form-control" style={{ height: '35px' }}>
+                                        <option value="" disabled>Select Country</option>
+                                        <option>India</option>
+                                    </select>
+                                </div>
 
-      <div className="input-field col-md-4 col-sm-6">
-        <label className="form-label">Final Destination</label>
-        <select value="" className="form-control" style={{height:'35px'}}>
-          <option value="" disabled>Select Destination</option>
-        </select>
-      </div>
+                                <div className="input-field col-md-4 col-sm-6">
+                                    <label className="form-label">Final Destination</label>
+                                    <select value="" className="form-control" style={{ height: '35px' }}>
+                                        <option value="" disabled>Select Destination</option>
+                                    </select>
+                                </div>
 
-      <div className="input-field col-md-4 col-sm-6">
-        <label className="form-label">No of Boxes</label>
-        <input type="tel" className="form-control" placeholder="No of Boxes" />
-      </div>
+                                <div className="input-field col-md-4 col-sm-6">
+                                    <label className="form-label">No of Boxes</label>
+                                    <input type="tel" className="form-control" placeholder="No of Boxes" />
+                                </div>
 
-      <div className="input-field col-md-4 col-sm-6">
-        <label className="form-label">Total Weight</label>
-        <input type="tel" className="form-control" placeholder="Total Weight" />
-      </div>
-    </div>
-  </form>
-</div>
-
-
-
+                                <div className="input-field col-md-4 col-sm-6">
+                                    <label className="form-label">Total Weight</label>
+                                    <input type="tel" className="form-control" placeholder="Total Weight" />
+                                </div>
+                            </div>
+                        </form>
+                    </div>
 
                     <div className='table-container' style={{ margin: "0px" }}>
                         <table className='table table-bordered table-sm'>

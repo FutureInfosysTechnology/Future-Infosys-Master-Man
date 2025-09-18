@@ -15,8 +15,8 @@ import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function Booking() {
-    const navigate=useNavigate();
-    const location=useLocation();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
     const [modalIsOpen2, setModalIsOpen2] = useState(false);
@@ -1051,7 +1051,7 @@ function Booking() {
 
         // Step 3: Continue if no errors
         const requestBody = {
-            Location_Code: "MUM",
+            Location_Code:JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             DocketNo: formData.DocketNo,
             BookDate: formData.BookDate,
             Customer_Code: formData.Customer_Code,
@@ -1115,9 +1115,9 @@ function Booking() {
             ShipperCity: shipperData.ShipperCity,
             Shipper_StateCode: shipperData.Shipper_StateCode,
             Shipper_GstNo: shipperData.Shipper_GstNo,
+            
             ShipperPin: formData.ShipperPin,
             ShipperPhone: formData.ShipperPhone,
-            ShipperEmail: shipperData.ShipperEmail,
             UserName: formData.UserName,
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
@@ -1173,19 +1173,19 @@ function Booking() {
                     cancelButtonText: 'No, later'
                 });
                 if (result.isConfirmed) {
-                     try {
-                    const response = await getApi(`/Booking/DocketReceipt?FromDocket=${formData.DocketNo}&ToDocket=${formData.DocketNo}`);
-                    if (response.status === 1) {
-                        console.log(response);
-                        console.log(response.Data);
-                        response.Data && navigate("/MobileReceipt", { state: { data: response.Data, path: location.pathname } });
+                    try {
+                        const response = await getApi(`/Booking/DocketReceipt?FromDocket=${formData.DocketNo}&ToDocket=${formData.DocketNo}`);
+                        if (response.status === 1) {
+                            console.log(response);
+                            console.log(response.Data);
+                            response.Data && navigate("/MobileReceipt", { state: { data: response.Data, path: location.pathname } });
+                        }
                     }
-                }
-                catch (error) {
-                    console.error("API Error:", error);
-                }
-                finally {
-                }
+                    catch (error) {
+                        console.error("API Error:", error);
+                    }
+                    finally {
+                    }
                 }
                 // Clear all data
                 resetAllForms(); // Optional: extract form resetting to its own function
@@ -1200,7 +1200,6 @@ function Booking() {
 
     const resetAllForms = () => {
         setFormData({
-
             shipper: "",
             receiver: "",
             Location_Code: "",
@@ -1333,30 +1332,118 @@ function Booking() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-        if (formData.ShipperPhone.length !== 10 || formData.Consignee_Mob.length !== 10) {
-            Swal.fire('Error', 'Mobile numbers must be exactly 10 digits.', 'error');
-            return;
-        }
-        const payload = {
-            BookDate: bookingDate,
+         const requestBody = {
+            Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
+            DocketNo: formData.DocketNo,
+            BookDate: formData.BookDate,
             Customer_Code: formData.Customer_Code,
-            Shipper_Name: formData.ShipperName,
+            Receiver_Code: formData.Receiver_Code,
+            Consignee_Name: formData.ConsigneeName,
+            Consignee_Add1: formData.ConsigneeAdd1,
+            Consignee_Add2: formData.ConsigneeAdd2,
+            Consignee_State: formData.ConsigneeState,
+            Consignee_Pin: formData.ConsigneePin,
+            Consignee_City: formData.Consignee_City,
+            Consignee_Mob: formData.ConsigneeMob,
+            Consignee_Email: formData.ConsigneeEmail,
+            Consignee_GST: formData.ConsigneeGST,
+            Consignee_Country: formData.ConsigneeCountry,
+            Mode_Code: formData.Mode_Code,
+            Origin_code: formData.OriginCode,
+            // Origin_zone: formData.Origin_zone,
+            Destination_Code: formData.DestinationCode,
+            DispatchDate: formData.DispatchDate,
+            DoxSpx: formData.DoxSpx,
+            RateType: formData.RateType,
+            Qty: formData.QtyOrderEntry,
+            ActualWt: formData.ActualWt,
+            VendorWt: formData.VendorWt,
+            VendorAmt: formData.VendorAmt,
+            VolumetricWt: formData.VolumetricWt,
+            ChargedWt: formData.ChargedWt,
+            RatePerKg: formData.RatePerkg,
+            Rate: formData.Rate,
+            FuelPer: formData.FuelPer,
+            FuelCharges: formData.FuelCharges,
+            FovChrgs: formData.FovChrgs,
+            DocketChrgs: formData.DocketChrgs,
+            ODA_Chrgs: formData.ODAChrgs,
+            DeliveryChrgs: formData.DeliveryChrgs,
+            PackingChrgs: formData.PackingChrgs,
+            GreenChrgs: formData.GreenChrgs,
+            HamaliChrgs: formData.HamaliChrgs,
+            OtherCharges: formData.OtherCharges,
+            InsuranceChrgs: formData.InsuranceChrgs,
+            IGSTPer: gstData.IGSTPer,
+            IGSTAMT: gstData.IGSTAMT,
+            CGSTPer: gstData.CGSTPer,
+            CGSTAMT: gstData.CGSTAMT,
+            SGSTPer: gstData.SGSTPer,
+            SGSTAMT: gstData.SGSTAMT,
+            TotalAmt: formData.TotalAmt,
+            Status: formData.Status,
+            Vendor_Code: formData.Vendor_Code,
+            Vendor_Code1: vendorData.Vendor_Code1,
+            Vendor_Code2: vendorData.Vendor_Code2,
+            VendorAwbNo: formData.VendorAwbNo,
+            VendorAwbNo1: vendorData.VendorAwbNo1,
+            VendorAwbNo2: vendorData.VendorAwbNo2,
+            Shipper_Code: formData.shipper,
+            Shipper_Name: formData.Shipper_Name,
+            ActualShipper: shipperData.ActualShipper,
+            ShipperAdd: formData.ShipperAdd,
+            ShipperAdd2: shipperData.ShipperAdd2,
+            ShipperAdd3: shipperData.ShipperAdd3,
+            ShipperCity: shipperData.ShipperCity,
+            Shipper_StateCode: shipperData.Shipper_StateCode,
+            Shipper_GstNo: shipperData.Shipper_GstNo,
+            ShipperPin: formData.ShipperPin,
             ShipperPhone: formData.ShipperPhone,
-            Consignee_Name: formData.Consignee_Name,
-            Consignee_Pin: formData.Consignee_Pin,
-            Consignee_Mob: formData.Consignee_Mob,
-            Mode_code: formData.Mode_code,
-            Origin_code: formData.Origin_code,
-            Destination_Code: formData.Destination_Code,
-            Qty: String(formData.Pcs),
-            ActualWt: String(formData.ActualWt),
-            VolumetricWt: String(formData.volumetricWt || '0'),
-            ChargedWt: String(formData.Chargablewt),
-            Rate: String(formData.Amount)
+            ShipperEmail: shipperData.ShipperEmail,
+            UserName: formData.UserName,
+            InvoiceNo: formData.InvoiceNo,
+            InvValue: formData.InvValue,
+            EwayBill: formData.EwayBill,
+            InvDate: formData.InvDate,
+            BillParty: formData.BillParty,
+            Remark: remarkData.Remark,
+            MHWNo: remarkData.MHWNo,
+            DestName: formData.DestName,
+            MultiInvoice: InvoicesubmittedData.map((invoice) => ({
+                PoNo: invoice.PoNo,
+                PoDate: invoice.PoDate,
+                InvoiceNo: invoice.InvoiceNo,
+                InvoiceValue: invoice.InvoiceValue,
+                Description: invoice.Description,
+                Qty: invoice.Qty,
+                EWayBillNo: invoice.EWayBillNo,
+                Remark: invoice.Remark,
+                InvoiceImg: invoice.InvoiceImg
+            })),
+            Volumetric: submittedData.map((volumetric) => ({
+                Length: volumetric.Length,
+                Width: volumetric.Width,
+                Height: volumetric.Height,
+                Qty: volumetric.Qty,
+                DivideBy: volumetric.DivideBy,
+                VolmetricWt: volumetric.VolmetricWt,
+                ActualWt: volumetric.ActualWt,
+                ChargeWt: volumetric.ChargeWt
+            })),
+            Vendorvolumetric: vendorsubmittedData.map((vendor) => ({
+                Length: vendor.Length,
+                Width: vendor.Width,
+                Height: vendor.Height,
+                Qty: vendor.Qty,
+                DivideBy: vendor.DivideBy,
+                VolmetricWt: vendor.VolmetricWt,
+                ActualWt: vendor.ActualWt,
+                ChargeWt: vendor.ChargeWt
+            }))
         };
         try {
-            const res = await putApi(`/Booking/UpdateShortBooking?docketNo=${formData.DocketNo}`, payload);
-            if (res.status === 1) {
+            const res = await putApi(`/Booking/OrderEntryUpdate`, requestBody);
+            if (res.Success) {
                 Swal.fire('Updated!', res.message || 'Booking updated.', 'success');
                 resetAllForms();
             } else Swal.fire('Error', res.message || 'Update failed.', 'error');
@@ -1369,39 +1456,85 @@ function Booking() {
     const handleSearch = async () => {
         if (!formData.DocketNo) return Swal.fire("Warning", "Enter Docket No", "warning");
         try {
-            const res = await getApi(`/Booking/getShortBookingByDocketNo?DocketNo=${formData.DocketNo}`);
-            if (res.status === 1 && res.data) {
-                const data = res.data;
+            const res = await getApi(`/Booking/getOrderByDocket?docketNo=${formData.DocketNo}`);
+            if (res.Success===1 && res.OrderEntry) {
+                 const result = await Swal.fire({
+                    title: 'Success!',
+                    text: "Data Fecthed Successfuly",
+                    icon: 'success',
+                });
+                const data = res.OrderEntry;
+                console.log(data);
                 const customer = getCustomerdata.find(c => c.Customer_Code.toString() === data.Customer_Code);
                 const mode = getMode.find(m => m.Mode_Code === data.Mode_code);
                 const origin = getCity.find(c => c.City_Code === data.Origin_code);
                 const destination = getCity.find(c => c.City_Code === data.Destination_Code);
 
                 setFormData({
-                    Docket_No: data.DocketNo,
+                    Location_Code: data.Location_Code,
+                    DocketNo: data.DocketNo,
+                    BookDate: data.BookDate,
                     Customer_Code: data.Customer_Code,
-                    Customer_Name: customer?.Customer_Name || '',
-                    ShipperName: data.Shipper_Name,
-                    ShipperPhone: data.ShipperPhone,
-                    Consignee_Name: data.Consignee_Name,
-                    Consignee_Pin: data.Consignee_Pin,
-                    Consignee_Mob: data.Consignee_Mob,
-                    Mode_code: data.Mode_code,
-                    Mode_Name: mode?.Mode_Name || '',
-                    Origin_code: data.Origin_code,
-                    Destination_Code: data.Destination_Code,
-                    Pcs: data.Qty,
+                    Origin_code: "",
+                    Origin_zone: '',
+                    ConsigneeName: data.Consignee_Name,
+                    ConsigneeAdd1: data.Consignee_Add1,
+                    ConsigneeAdd2: data.Consignee_Add2,
+                    ConsigneeState: data.Consignee_State,
+                    ConsigneePin: data.Consignee_Pin,
+                    Consignee_City: data.Consignee_City,
+                    ConsigneeMob: data.Consignee_Mob,
+                    ConsigneeEmail: data.Consignee_Email,
+                    ConsigneeGST: data.Consignee_GST,
+                    ConsigneeCountry: data.Consignee_Country,
+                    Mode_Code: data.Mode_Code,
+                    OriginCode:data.Origin_code,
+                    DestinationCode:data.Destination_Code,
+                    DispatchDate: data.DispatchDate,
+                    DoxSpx: data.DoxSpx,
+                    RateType:data.RateType,
+                    QtyOrderEntry:data.Qty,
                     ActualWt: data.ActualWt,
-                    volumetricWt: data.VolumetricWt,
-                    Chargablewt: data.ChargedWt,
-                    Amount: data.Rate,
-                    Cityname: ''
-                });
+                    VendorWt: data.VendorWt,
+                    VendorAmt: data.VendorAmt,
+                    VolumetricWt: data.VolumetricWt,
+                    ChargedWt: data.ChargedWt,
+                    RatePerkg: data.RatePerKg,
+                    Rate: data.Rate,
+                    FuelPer: data.FuelPer,
+                    FuelCharges: data.FuelCharges,
+                    FovChrgs: data.Fov_Chrgs,
+                    DocketChrgs: data.DocketChrgs,
+                    ODAChrgs: data.ODA_Chrgs,
+                    DeliveryChrgs: data.DeliveryChrgs,
+                    PackingChrgs: data.PackingChrgs,
+                    GreenChrgs: data.GreenChrgs,
+                    HamaliChrgs: data.HamaliChrgs,
+                    OtherCharges: data.OtherCharges,
+                    InsuranceChrgs: data.InsuranceChrgs,
+                    TotalAmt: data.TotalAmt,
+                    Status:data.Remark,
+                    Vendor_Code:data.Vendor_Code,
+                    VendorAwbNo: data.VendorAwbNo,
+                    WebAgent: "",
+                    ExptDateOfDelvDt:data.ExptDateOfDelvDt,
+                    Shipper_Name: data.Shipper_Name,
+                    ShipperAdd: data.ShipperAdd,
+                    ShipperPin: data.ShipperPin,
+                    ShipperPhone: data.ShipperPhone,
+                    UserName: data.UserName,
+                    InvoiceNo: data.InvoiceNo,
+                    InvValue: data.InvValue,
+                    EwayBill: data.EwayBill,
+                    InvDate: data.InvDate,
+                    BillParty: "",
+                    DestName: "",
+                    City_Name: '',
+                    Zone_Name: ''
 
-                setBookingDate(data.BookDate);
-                setGetMode(mode ? { label: mode.Mode_Name, value: mode.Mode_Code } : null);
-                setGetCity(origin ? { label: origin.City_Name, value: origin.City_Code } : null);
-                setSelectedDestCityName(destination ? { label: destination.City_Name, value: destination.City_Code } : null);
+                });
+            
+                
             } else {
                 Swal.fire("Not Found", res.message || "Booking not found.", "info");
             }
@@ -1425,8 +1558,8 @@ function Booking() {
 
         if (confirm.isConfirmed) {
             try {
-                const res = await deleteApi(`/Booking/deleteShortBooking?docketNo=${docketNo}`);
-                if (res.status === 1) {
+                const res = await deleteApi(`/Booking/deleteOrderByDocket?docketNo=${docketNo}`);
+                if (res.Success) {
                     Swal.fire('Deleted!', res.message, 'success');
                     resetAllForms();
                 } else {
@@ -1453,22 +1586,22 @@ function Booking() {
 
 
 
-    const allModeOptions = getMode.length>0 ? getMode.map(mode => ({ label: mode.Mode_Name, value: mode.Mode_Code })):null;
-    const allCityOptions = getCity.length>0 ? getCity.map(dest => ({
+    const allModeOptions = getMode?.length > 0 ? getMode.map(mode => ({ label: mode.Mode_Name, value: mode.Mode_Code })) : null;
+    const allCityOptions = getCity?.length > 0 ? getCity.map(dest => ({
         label: dest.City_Name,         // Display name in dropdown
         value: dest.City_Code,         // City code for backend
         originName: dest.origin_Name,  // Additional origin name
         originCode: dest.Origin_code,  // Origin code
         pincode: dest.Pincode,         // Pincode
         zone: dest.Zone_Name           // Zone
-    })):null;
-    const allVendorOption = getMode.length>0 ?getVendor.map(Vendr => ({ label: Vendr.Vendor_Name, value: Vendr.Vendor_Code })):null;
+    })) : null;
+    const allVendorOption = getMode?.length > 0 ? getVendor.map(Vendr => ({ label: Vendr.Vendor_Name, value: Vendr.Vendor_Code })) : null;
     // const allReceiverOption = getReceiver.map(receiver => ({
     //     label: receiver.Receiver_Name,
     //     value: receiver.Receiver_Code
     // }));
 
-    const allCustomerOptions = getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString() }));
+    const allCustomerOptions = getCustomerdata?.length > 0 ? getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString() })):null;
 
 
 
@@ -2412,13 +2545,14 @@ function Booking() {
 
                     </div>
 
-                    <div className="bottom-card" style={{ width: "100%", display: 'flex', marginTop: "0.5rem", gap: '0.5rem', alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0.5rem" }}>
+                    <div className="bottom-card row" style={{ width: "100%",display: 'flex', marginTop: "0.5rem", gap: '0.5rem' ,alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0.5rem" }}>
 
-                        <button className="btn btn-success w-100" style={{}} onClick={handleSubmit} type="button">Save</button>
-                        <button className="btn btn-primary w-100" style={{}} onClick={handleUpdate} type="button">Update</button>
-                        <button className="btn btn-warning w-100" style={{}} onClick={handleSearch} type="button">Search</button>
+                        <button className="btn btn-success col-4 col-md-2" style={{}} onClick={handleSubmit} type="button">Save</button>
+                        <button className="btn btn-primary col-4 col-md-2" style={{}} onClick={handleUpdate} type="button">Update</button>
+                        <button className="btn btn-warning col-4 col-md-2" style={{}} onClick={handleSearch} type="button">Search</button>
                         <PiDotsThreeOutlineVerticalFill
-                            style={{ fontSize: "40px", width: "130px", cursor: "pointer" }}
+                        className="btn btn-light col-4 col-md-2"
+                            style={{ fontSize: "35px", cursor: "pointer" }}
                             onClick={() => setOpen(!open)} />
 
                         <div style={{ position: "relative", display: "inline-block" }}>
@@ -2449,7 +2583,7 @@ function Booking() {
 
                                     <button
                                         className="btn btn-danger w-100"
-                                        onClick={() => { setOpen(false); handleDelete() }}
+                                        onClick={() => { setOpen(false); handleDelete(formData.DocketNo) }}
                                         type="button"
                                     >
                                         Delete
@@ -2513,7 +2647,7 @@ function Booking() {
                                             <select value={shipperData.ShipperCity}
                                                 onChange={(e) => setShipperData({ ...shipperData, ShipperCity: e.target.value })}>
                                                 <option disabled value="">Select City Name</option>
-                                                {getCity.length>0 && getCity.map((city, index) => (
+                                                {getCity.length > 0 && getCity.map((city, index) => (
                                                     <option value={city.City_Code} key={index}>{city.City_Name}</option>
                                                 ))}
                                             </select>
@@ -2600,7 +2734,7 @@ function Booking() {
                                             <select value={addReceiver.cityCode}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, cityCode: e.target.value })} required>
                                                 <option value="" disabled >Select City</option>
-                                                {getCity.length>0 && getCity.map((city, index) => (
+                                                {getCity.length > 0 && getCity.map((city, index) => (
                                                     <option value={city.City_Code} key={index}>{city.City_Name}</option>
                                                 ))}
                                             </select>
