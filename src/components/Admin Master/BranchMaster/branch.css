@@ -1,0 +1,16 @@
+/* Slider styling */
+.slider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 25%; /* 100% / 4 tabs */
+  height: 3px;
+  background-color: #007bff;
+  transition: all 0.3s ease;
+}
+
+/* Move slider based on checked input */
+#zone:checked ~ nav .slider { left: 0%; }
+#multiple:checked ~ nav .slider { left: 25%; }
+#state:checked ~ nav .slider { left: 50%; }
+#country:checked ~ nav .slider { left: 75%; }

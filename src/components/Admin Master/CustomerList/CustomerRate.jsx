@@ -937,9 +937,9 @@ function CustomerRate() {
                                     </div>
                                 </form>
                             </div>
-                            <div className='container2' style={{}}>
-                                <div className="table-container1">
-                                    <table className="table table-bordered table-sm" style={{ whiteSpace: "nowrap" }}>
+                            <div className='container2' style={{width:"100%"}}>
+                                <div className="table-container1" style={{width:"100%"}}>
+                                    <table className="table table-bordered table-sm" style={{width:"97%", whiteSpace: "nowrap" }}>
                                         <thead>
                                             <tr>
                                                 <th>Sr No</th>
@@ -1001,10 +1001,10 @@ function CustomerRate() {
                                                         }}
                                                     />
                                                 </td>
-                                                <td>
+                                                <td >
                                                     <button className="ok-btn" style={{ padding: "2px", fontSize: "30px", width: "40px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center" }}
                                                         onClick={handleAddRow}>
-                                                        <i className="bi bi-plus"></i>
+                                                        <i className="bi bi-plus" ></i>
                                                     </button>
                                                 </td>
                                             </tr>

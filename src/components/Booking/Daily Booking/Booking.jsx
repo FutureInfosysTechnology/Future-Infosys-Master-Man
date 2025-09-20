@@ -6,6 +6,7 @@ import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
 import Swal from "sweetalert2";
 import Select from 'react-select';
+import CreatableSelect from "react-select/creatable";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import sms from '../../../Assets/Images/sms-svgrepo-com.png';
@@ -28,6 +29,7 @@ function Booking() {
     const [modalIsOpen8, setModalIsOpen8] = useState(false);
     const [modalIsOpen9, setModalIsOpen9] = useState(false);
     const [getReceiver, setGetReceiver] = useState([]);
+    const [getShipper, setGetShipper] = useState([]);
     const [getCustomerdata, setgetCustomerdata] = useState([]);
     const [getCountry, setGetCountry] = useState([]);
     const [getVendor, setGetVendor] = useState([]);
@@ -36,10 +38,6 @@ function Booking() {
     const [getMode, setGetMode] = useState([]);
     const [selectedMode_Code, setSelectedMode_Code] = useState('');
     const [selectedModeName, setSelectedModeName] = useState('');
-    const [suggestions, setSuggestions] = useState([]);
-    const [customerName, setCustomerName] = useState('');
-    const [shipperSuggestions, setShipperSuggestions] = useState([]);
-    const [receiverSuggestions, setReceiverSuggestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [toggleActive, setToggleActive] = useState(false);
@@ -68,16 +66,10 @@ function Booking() {
     const [totalActWt1, setTotalActWt1] = useState(0);
     const [totalChargeWt1, setTotalChargeWt1] = useState(0);
     const [selectedOriginPinCode, setSelectedOriginPinCode] = useState("");
-    const [selectedOriginCityName, setSelectedOriginCityName] = useState("");
-    const [selectedOriginZoneName, setSelectedOriginZoneName] = useState("");
     const [selectedDestPinCode, setSelectedDestPinCode] = useState("");
-    const [selectedDestCityName, setSelectedDestCityName] = useState("");
-    const [selectedDestZoneName, setSelectedDestZoneName] = useState("");
-    const [bookingDate, setBookingDate] = useState('');
     const [open, setOpen] = useState(false);
     const [allReceiverOption, setAllReceiverOption] = useState([])
-
-
+    const [allShipperOption, setAllShipperOption] = useState([])
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
@@ -123,9 +115,9 @@ function Booking() {
         DoxSpx: "",
         RateType: "",
         QtyOrderEntry: "",
-        ActualWt: 0,
         VendorWt: 0,
         VendorAmt: 0,
+        ActualWt: 0,
         VolumetricWt: 0,
         ChargedWt: 0,
         RatePerkg: 0,
@@ -147,10 +139,17 @@ function Booking() {
         VendorAwbNo: "",
         WebAgent: "",
         ExptDateOfDelvDt: "",
+        ActualShipper: "",
         Shipper_Name: "",
         ShipperAdd: "",
+        ShipperAdd2: "",
+        ShipperAdd3: "",
+        ShipperCity: "",
+        Shipper_StateCode: "",
+        Shipper_GstNo: "",
         ShipperPin: "",
         ShipperPhone: "",
+        ShipperEmail: "",
         UserName: "",
         InvoiceNo: "",
         InvValue: 0,
@@ -160,16 +159,19 @@ function Booking() {
         DestName: "",
         Mode_Code: "",
     });
-    const [shipperData, setShipperData] = useState({
-        ActualShipper: "",
-        ShipperAdd2: "",
-        ShipperAdd3: "",
-        ShipperCity: "",
-        Shipper_StateCode: "",
-        Shipper_GstNo: "",
-        ShipperPin: "",
-        ShipperPhone: "",
-        ShipperEmail: ""
+    const [addShipper, setAddShipper] = useState({
+        shipperCode: '',
+        custCode: '',
+        shipperName: '',
+        shipperAdd1: '',
+        shipperAdd2: '',
+        shipperPin: '',
+        cityCode: '',
+        stateCode: '',
+        shipperMob: '',
+        shipperEmail: '',
+        gstNo: '',
+        hsnNo: '',
     });
     const [addReceiver, setAddReceiver] = useState({
         receiverCode: '',
@@ -251,79 +253,6 @@ function Booking() {
     <button onClick={handleClick}>Click me</button>
 
 
-    const handleCustomerSelect = (customer) => {
-        setCustomerName(customer.Customer_Name);
-        setSuggestions([]);
-
-        setFormData((prev) => ({
-            ...prev,
-            Customer_Code: customer.Customer_Code,
-            Customer_Name: customer.Customer_Name
-        }));
-    };
-
-
-
-    const handleCustomerNameChange = (e) => {
-        const name = e.target.value;
-        setCustomerName(name);
-
-        // Optional: If you want to clear Customer_Code when typing
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-
-        }));
-
-
-    };
-
-
-
-    const buttonStyle = {
-        padding: "0.5rem 1.5rem",
-        borderRadius: "5px",
-        border: "none",
-        fontWeight: "bold",
-        width: "100%",
-        textAlign: "left",
-        cursor: "pointer",
-    };
-
-
-
-    const filteredShipper = (name) => {
-        if (name) {
-            const filtered = getReceiver.filter((shipper) =>
-                shipper.Receiver_Name.toLowerCase().includes(name.toLowerCase()));
-            setShipperSuggestions(filtered);
-        } else {
-            setShipperSuggestions([]);
-        }
-    }
-
-    const handleShipperNameChange = (e) => {
-        const name = e.target.value;
-        setFormData({ ...formData, Shipper_Name: name });
-        filteredShipper(name);
-        const matchedShipper = shipperSuggestions.find(shipper => shipper.Receiver_Name.toLowerCase() === name.toLowerCase());
-
-        if (matchedShipper) {
-            setFormData({ ...formData, Shipper_Name: matchedShipper.Receiver_Name });
-        } else {
-            setFormData({ ...formData, Shipper_Name: name });
-        }
-    }
-
-    const handleShipperSelect = (shipper) => {
-        setFormData({ ...formData, Shipper_Name: shipper.Receiver_Name });
-        setShipperSuggestions([]);
-    }
-
-
-
-
-
-
     const handleOriginPinCodeChange = async (e) => {
         const pincode = e.target.value;
         setSelectedOriginPinCode(pincode);
@@ -365,14 +294,14 @@ function Booking() {
                     const { City_Name, City_Code, Zone_Name } = response.data[0];
                     setFormData(prev => ({
                         ...prev,
-                        City_Code: City_Code || "",
+                        DestinationCode: City_Code || "",
                         City_Name: City_Name || "",
                         Zone_Name: Zone_Name || ""
                     }));
                 } else {
                     setFormData(prev => ({
                         ...prev,
-                        City_Code: "",
+                        DestinationCode: "",
                         City_Name: "Not Found",
                         Zone_Name: "Not Found"
                     }));
@@ -384,11 +313,15 @@ function Booking() {
     };
 
 
-
     const handleGenerateCode = () => {
-        if (addReceiver.receiverCode !== '') return;
+        if (addShipper.shipperCode !== '') return;
         const newCode = `${Math.floor(Math.random() * 1000)}`;
-        setAddReceiver({ ...addReceiver, receiverCode: newCode });
+        setAddShipper({ ...addShipper, shipperCode: newCode });
+    };
+    const handleGenerateCode1 = () => {
+        if (addReceiver.receiverCode !== '') return;
+        const newCode1 = `${Math.floor(Math.random() * 1000)}`;
+        setAddReceiver({ ...addReceiver, receiverCode: newCode1 });
     };
     // Fetch receiver list from API and clean data
     const handleSaveReceiverFromBooking = async (e) => {
@@ -468,60 +401,34 @@ function Booking() {
             console.error("Error fetching receiver data:", error);
         }
     };
+    const fetchShipper = async () => {
+        try {
+            const response = await getApi("/Master/GetSmartShipperMaster");
 
-
-    // Filter receiver suggestions based on input
-    const filteredReceiver = (name) => {
-        if (name) {
-            const filtered = getReceiver.filter((receiver) =>
-                receiver.Receiver_Name.toLowerCase().includes(name.toLowerCase()) ||
-                receiver.Receiver_Email.toLowerCase().includes(name.toLowerCase()) ||
-                receiver.Receiver_Mob.toLowerCase().includes(name.toLowerCase()) ||
-                receiver.GSTNo.toLowerCase().includes(name.toLowerCase())
-            );
-            setReceiverSuggestions(filtered);
-        } else {
-            setReceiverSuggestions([]);
+            if (response.status === 1 && Array.isArray(response.data)) {
+                const cleanedData = response.data.map((shipper) => ({
+                    value: shipper.Shipper_Code,
+                    label: shipper.Shipper_Name?.trim() || "",
+                    shipper_Email: shipper.Email?.trim() || "",
+                    shipper_Mob: shipper.Mobile?.trim() || "",
+                    shipper_Add1: shipper.Add1?.trim() || "",
+                    shipper_Add2: shipper.Add2?.trim() || "",
+                    shipper_Pin: shipper.Pin?.trim() || "",
+                    GSTNo: shipper.GSTNo?.trim() || "",
+                    State_Code: shipper.State_Code?.trim() || "",
+                    City_Code: shipper.City_Code?.trim() || "",
+                    City_Name: shipper.City_Name?.trim() || "",
+                    State_Name: shipper.State_Name?.trim() || "",
+                }));
+                console.log(cleanedData);
+                setAllShipperOption(cleanedData);
+            } else {
+                console.warn("Receiver API returned no data.");
+                setAllShipperOption([]);
+            }
+        } catch (error) {
+            console.error("Error fetching receiver data:", error);
         }
-    };
-
-    // Handle input change when typing receiver name
-    const handleReceiverNameChange = (e) => {
-        const name = e.target.value;
-        setFormData((prev) => ({
-            ...prev,
-            ConsigneeName: name
-
-        }));
-
-        filteredReceiver(name);
-
-        const matchedReceiver = getReceiver.find(
-            (receiver) => receiver.Receiver_Name?.trim().toLowerCase() === name.trim().toLowerCase()
-        );
-
-        if (matchedReceiver) {
-            handleReceiverSelect(matchedReceiver);
-        }
-    };
-
-    const handleReceiverSelect = (receiver) => {
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            Receiver_Code: receiver.Receiver_Code?.trim() || "",
-            ConsigneeName: receiver.Receiver_Name?.trim() || "",
-            ConsigneeAdd1: receiver.Receiver_Add1?.trim() || "",
-            ConsigneeAdd2: receiver.Receiver_Add2?.trim() || "",
-            ConsigneePin: receiver.Receiver_Pin?.trim() || "",
-            Consignee_City: receiver.City_Name?.trim() || "",  // ✅ FIXED HERE
-            ConsigneeState: receiver.State_Code?.trim() || "",
-            ConsigneeMob: receiver.Receiver_Mob?.trim() || "",
-            ConsigneeEmail: receiver.Receiver_Email?.trim() || "",
-            ConsigneeGST: receiver.GSTNo?.trim() || "",
-            ConsigneeCountry: "India"
-        }));
-
-        setReceiverSuggestions([]);
     };
 
 
@@ -551,6 +458,7 @@ function Booking() {
             SetdispatchDate(savedState.dispatchDate || false);
         }
         fetchReceivers();
+        fetchShipper();
     }, []);
 
     const handleCheckboxChange = (field, value) => {
@@ -738,6 +646,7 @@ function Booking() {
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen1(false);
                 await fetchReceivers();
+                setFormData(prev => ({ ...prev, Receiver_Code: requestBody.receiverCode }))
             } else {
                 Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
             }
@@ -746,6 +655,53 @@ function Booking() {
             Swal.fire('Error', 'Failed to add branch data', 'error');
         }
     };
+   
+    const handleSaveShipper = async (e) => {
+            e.preventDefault();
+    
+            const requestBody = {
+                shipperCode: addShipper.shipperCode,
+                customerCode: formData.Customer_Code,
+                shipperName: addShipper.shipperName,
+                add1: addShipper.shipperAdd1,
+                add2: addShipper.shipperAdd2,
+                pin: addShipper.shipperPin,
+                mobile: addShipper.shipperMob,
+                stateCode: addShipper.stateCode,
+                gstNo: addShipper.gstNo,
+                email: addShipper.shipperEmail,
+                cityCode: addShipper.cityCode,
+            };
+    
+            try {
+                const response = await postApi('/Master/AddShippmerMaster', requestBody, 'POST')
+                if (response.status === 1) {
+                    setAddShipper({
+                        shipperCode: '',
+                        custCode: '',
+                        shipperName: '',
+                        shipperAdd1: '',
+                        shipperAdd2: '',
+                        shipperPin: '',
+                        cityCode: '',
+                        stateCode: '',
+                        shipperMob: '',
+                        shipperEmail: '',
+                        gstNo: '',
+                        company: '',
+                    });
+                    Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
+                    setModalIsOpen(false);
+                    await fetchReceivers();
+    
+                } else {
+                    Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
+                }
+            } catch (err) {
+                console.error('Save Error:', err);
+                Swal.fire('Error', 'Failed to add branch data', 'error');
+            }
+        };
 
     // Fetch data for each category using useEffect
     useEffect(() => {
@@ -845,7 +801,20 @@ function Booking() {
             });
             return;
         }
+        setFormData((prev) => ({
+            ...prev,
+            ActualWt: prev.ActualWt
+                ? Number(prev.ActualWt) + Number(vendorVolumetric.ActualWt)
+                : Number(vendorVolumetric.ActualWt),
 
+            VolumetricWt: prev.VolumetricWt
+                ? Number(prev.VolumetricWt) + Number(vendorVolumetric.VolmetricWt)
+                : Number(vendorVolumetric.VolmetricWt),
+
+            ChargedWt: prev.ChargedWt
+                ? Number(prev.ChargedWt) + Number(vendorVolumetric.ChargeWt)
+                : Number(vendorVolumetric.ChargeWt),
+        }));
         setVendorSubmittedData((prev) => [...prev, vendorVolumetric]);
         setVendorvolumetric({
             Length: 0,
@@ -871,7 +840,18 @@ function Booking() {
             });
             return;
         }
-
+        setFormData((prev) => ({
+            ...prev,
+            InvoiceNo: prev.InvoiceNo
+                ? prev.InvoiceNo + "," + invoiceData.InvoiceNo
+                : invoiceData.InvoiceNo,
+            InvValue: prev.InvValue
+                ? prev.InvValue + "," + invoiceData.InvoiceValue
+                : invoiceData.InvoiceValue,
+            EwayBill: prev.EwayBill
+                ? prev.EwayBill + "," + invoiceData.EWayBillNo
+                : invoiceData.EWayBillNo,
+        }));
         setInvoiceSubmittedData((prev) => [...prev, invoiceData]);
         setInvoiceData({
             PoNo: "",
@@ -985,9 +965,7 @@ function Booking() {
         };
 
 
-        if (formData.Customer_Code && formData.Mode_Code && formData.Rate) {
-            calculateGstDetails(formData.Customer_Code, formData.Mode_Code, formData.Rate);
-        }
+        calculateGstDetails(formData.Customer_Code, formData.Mode_Code);
     }, [formData.Customer_Code, formData.Mode_Code, formData.Rate]);
 
     // 📦 Auto calculate freight rate
@@ -1021,7 +999,7 @@ function Booking() {
 
 
 
-
+    console.log(InvoicesubmittedData);
     const handleSubmit = async (e) => {
         e.preventDefault();
         // Step 1: Basic Validation Logic 
@@ -1048,10 +1026,9 @@ function Booking() {
             });
             return;
         }
-
         // Step 3: Continue if no errors
         const requestBody = {
-            Location_Code:JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
+            Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             DocketNo: formData.DocketNo,
             BookDate: formData.BookDate,
             Customer_Code: formData.Customer_Code,
@@ -1106,18 +1083,16 @@ function Booking() {
             VendorAwbNo: formData.VendorAwbNo,
             VendorAwbNo1: vendorData.VendorAwbNo1,
             VendorAwbNo2: vendorData.VendorAwbNo2,
-            Shipper_Code: formData.shipper,
-            Shipper_Name: formData.Shipper_Name,
-            ActualShipper: shipperData.ActualShipper,
+            ActualShipper: formData.ActualShipper,
             ShipperAdd: formData.ShipperAdd,
-            ShipperAdd2: shipperData.ShipperAdd2,
-            ShipperAdd3: shipperData.ShipperAdd3,
-            ShipperCity: shipperData.ShipperCity,
-            Shipper_StateCode: shipperData.Shipper_StateCode,
-            Shipper_GstNo: shipperData.Shipper_GstNo,
-            
+            ShipperAdd2: formData.ShipperAdd2,
+            ShipperAdd3: formData.ShipperAdd3,
+            ShipperCity: formData.ShipperCity,
+            Shipper_StateCode: formData.Shipper_StateCode,
+            Shipper_GstNo: formData.Shipper_GstNo,
             ShipperPin: formData.ShipperPin,
             ShipperPhone: formData.ShipperPhone,
+            ShipperEmail: formData.ShipperEmail,
             UserName: formData.UserName,
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
@@ -1200,14 +1175,14 @@ function Booking() {
 
     const resetAllForms = () => {
         setFormData({
+            custName: "",
             shipper: "",
             receiver: "",
             Location_Code: "",
-            DocketNo: "",
-            BookDate: "",
             Customer_Code: "",
-            Origin_code: '',
-            Origin_zone: '',
+            DocketNo: "",
+            BookDate: getTodayDate(),
+            Receiver_Code: "",
             ConsigneeName: "",
             ConsigneeAdd1: "",
             ConsigneeAdd2: "",
@@ -1221,7 +1196,7 @@ function Booking() {
             Mode_Code: "",
             OriginCode: "",
             DestinationCode: "",
-            DispatchDate: "",
+            DispatchDate: getTodayDate(),
             DoxSpx: "",
             RateType: "",
             QtyOrderEntry: "",
@@ -1249,10 +1224,17 @@ function Booking() {
             VendorAwbNo: "",
             WebAgent: "",
             ExptDateOfDelvDt: "",
+            ActualShipper: "",
             Shipper_Name: "",
             ShipperAdd: "",
+            ShipperAdd2: "",
+            ShipperAdd3: "",
+            ShipperCity: "",
+            Shipper_StateCode: "",
+            Shipper_GstNo: "",
             ShipperPin: "",
             ShipperPhone: "",
+            ShipperEmail: "",
             UserName: "",
             InvoiceNo: "",
             InvValue: 0,
@@ -1260,11 +1242,7 @@ function Booking() {
             InvDate: "",
             BillParty: "",
             DestName: "",
-            City_Name: '',
-            Zone_Name: ''
-
-
-
+            Mode_Code: "",
         });
         setSelectedOriginPinCode('');
         setSelectedDestPinCode('');
@@ -1332,7 +1310,7 @@ function Booking() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-         const requestBody = {
+        const requestBody = {
             Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             DocketNo: formData.DocketNo,
             BookDate: formData.BookDate,
@@ -1390,16 +1368,16 @@ function Booking() {
             VendorAwbNo2: vendorData.VendorAwbNo2,
             Shipper_Code: formData.shipper,
             Shipper_Name: formData.Shipper_Name,
-            ActualShipper: shipperData.ActualShipper,
+            ActualShipper: formData.ActualShipper,
             ShipperAdd: formData.ShipperAdd,
-            ShipperAdd2: shipperData.ShipperAdd2,
-            ShipperAdd3: shipperData.ShipperAdd3,
-            ShipperCity: shipperData.ShipperCity,
-            Shipper_StateCode: shipperData.Shipper_StateCode,
-            Shipper_GstNo: shipperData.Shipper_GstNo,
+            ShipperAdd2: formData.ShipperAdd2,
+            ShipperAdd3: formData.ShipperAdd3,
+            ShipperCity: formData.ShipperCity,
+            Shipper_StateCode: formData.Shipper_StateCode,
+            Shipper_GstNo: formData.Shipper_GstNo,
             ShipperPin: formData.ShipperPin,
             ShipperPhone: formData.ShipperPhone,
-            ShipperEmail: shipperData.ShipperEmail,
+            ShipperEmail: formData.ShipperEmail,
             UserName: formData.UserName,
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
@@ -1457,8 +1435,8 @@ function Booking() {
         if (!formData.DocketNo) return Swal.fire("Warning", "Enter Docket No", "warning");
         try {
             const res = await getApi(`/Booking/getOrderByDocket?docketNo=${formData.DocketNo}`);
-            if (res.Success===1 && res.OrderEntry) {
-                 const result = await Swal.fire({
+            if (res.Success === 1 && res.OrderEntry) {
+                const result = await Swal.fire({
                     title: 'Success!',
                     text: "Data Fecthed Successfuly",
                     icon: 'success',
@@ -1488,12 +1466,12 @@ function Booking() {
                     ConsigneeGST: data.Consignee_GST,
                     ConsigneeCountry: data.Consignee_Country,
                     Mode_Code: data.Mode_Code,
-                    OriginCode:data.Origin_code,
-                    DestinationCode:data.Destination_Code,
+                    OriginCode: data.Origin_code,
+                    DestinationCode: data.Destination_Code,
                     DispatchDate: data.DispatchDate,
                     DoxSpx: data.DoxSpx,
-                    RateType:data.RateType,
-                    QtyOrderEntry:data.Qty,
+                    RateType: data.RateType,
+                    QtyOrderEntry: data.Qty,
                     ActualWt: data.ActualWt,
                     VendorWt: data.VendorWt,
                     VendorAmt: data.VendorAmt,
@@ -1513,13 +1491,14 @@ function Booking() {
                     OtherCharges: data.OtherCharges,
                     InsuranceChrgs: data.InsuranceChrgs,
                     TotalAmt: data.TotalAmt,
-                    Status:data.Remark,
-                    Vendor_Code:data.Vendor_Code,
+                    Status: data.Remark,
+                    Vendor_Code: data.Vendor_Code,
                     VendorAwbNo: data.VendorAwbNo,
                     WebAgent: "",
-                    ExptDateOfDelvDt:data.ExptDateOfDelvDt,
+                    ExptDateOfDelvDt: data.ExptDateOfDelvDt,
                     Shipper_Name: data.Shipper_Name,
                     ShipperAdd: data.ShipperAdd,
+                    ShipperAdd2: data.ShipperAdd2,
                     ShipperPin: data.ShipperPin,
                     ShipperPhone: data.ShipperPhone,
                     UserName: data.UserName,
@@ -1533,8 +1512,8 @@ function Booking() {
                     Zone_Name: ''
 
                 });
-            
-                
+
+
             } else {
                 Swal.fire("Not Found", res.message || "Booking not found.", "info");
             }
@@ -1589,9 +1568,7 @@ function Booking() {
     const allModeOptions = getMode?.length > 0 ? getMode.map(mode => ({ label: mode.Mode_Name, value: mode.Mode_Code })) : null;
     const allCityOptions = getCity?.length > 0 ? getCity.map(dest => ({
         label: dest.City_Name,         // Display name in dropdown
-        value: dest.City_Code,         // City code for backend
-        originName: dest.origin_Name,  // Additional origin name
-        originCode: dest.Origin_code,  // Origin code
+        value: dest.City_Code,         // City code for backen// Origin code
         pincode: dest.Pincode,         // Pincode
         zone: dest.Zone_Name           // Zone
     })) : null;
@@ -1601,7 +1578,7 @@ function Booking() {
     //     value: receiver.Receiver_Code
     // }));
 
-    const allCustomerOptions = getCustomerdata?.length > 0 ? getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString() })):null;
+    const allCustomerOptions = getCustomerdata?.length > 0 ? getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString() })) : null;
 
 
 
@@ -1702,13 +1679,17 @@ function Booking() {
                                         <div className="col-md-10 col-sm-9 col-12">
                                             <div className="input-field">
                                                 <label htmlFor="shipper">Shipper Name</label>
-                                                <Select className="blue-selectbooking"
+                                                <CreatableSelect
+                                                    className="blue-selectbooking"
                                                     classNamePrefix="blue-selectbooking"
-                                                    options={allReceiverOption}
+                                                    options={allShipperOption}
                                                     value={
                                                         formData.Shipper_Name ?
                                                             {
-                                                                value: formData.Shipper_Name, label: allReceiverOption.find(opt => opt.value === formData.Shipper_Name)?.label
+                                                                value: formData.Shipper_Name,
+                                                                label:
+                                                                    allShipperOption.find(opt => opt.value === formData.Shipper_Name)
+                                                                        ?.label || formData.Shipper_Name,
                                                             }
                                                             : null
                                                     }
@@ -1716,9 +1697,14 @@ function Booking() {
                                                         setFormData(prev => ({
                                                             ...prev,
                                                             Shipper_Name: selectedOption.value,
-                                                            ShipperPin: selectedOption.Receiver_Pin,
-                                                            ShipperPhone: selectedOption.Receiver_Mob,
-                                                            ShipperAdd: selectedOption.Receiver_Add1,
+                                                            ShipperAdd: selectedOption.shipper_Add1,
+                                                            ShipperAdd2: selectedOption.shipper_Add2,
+                                                            ShipperCity: selectedOption.City_Code,
+                                                            Shipper_StateCode: selectedOption.State_Code,
+                                                            Shipper_GstNo: selectedOption.GSTNo,
+                                                            ShipperPin: selectedOption.shipper_Pin,
+                                                            ShipperPhone: selectedOption.shipper_Mob,
+                                                            ShipperEmail: selectedOption.shipper_Email,
                                                         }));
                                                     }}
                                                     placeholder="Select Shipper Name"
@@ -1727,6 +1713,7 @@ function Booking() {
                                                     styles={{
                                                         menuPortal: base => ({ ...base, zIndex: 9999 })
                                                     }}
+                                                    formatCreateLabel={(inputValue) => inputValue}
                                                 />
                                             </div>
                                         </div>
@@ -1817,15 +1804,16 @@ function Booking() {
                                                 className="blue-selectbooking"
                                                 classNamePrefix="blue-selectbooking"
                                                 options={allCityOptions}
-                                                value={formData.OriginCode ? allCityOptions.find(opt => opt.value === formData.OriginCode) : null}
+                                                value={formData.OriginCode ? { value:formData.OriginCode,label:allCityOptions.find(opt => opt.value === formData.OriginCode)?.label || ""}:  null}
                                                 onChange={(selected) => {
                                                     setFormData(prev => ({
                                                         ...prev,
                                                         OriginCode: selected.value,
                                                         Origin_code: selected.label,
                                                         Origin_zone: selected.zone
+
                                                     }));
-                                                    setSelectedOriginPinCode(selected.pincode);
+                                                    setSelectedOriginPinCode(selected?.pincode);
                                                 }}
                                                 placeholder="Select Origin Name"
                                                 isSearchable
@@ -1864,7 +1852,8 @@ function Booking() {
                                                 options={allCityOptions}
                                                 value={
                                                     formData.DestinationCode
-                                                        ? allCityOptions.find(opt => opt.value === formData.DestinationCode)
+                                                    
+                                                        ? {value :formData.DestinationCode,label:allCityOptions.find(opt => opt.value === formData.DestinationCode)?.label || ""}
                                                         : null
                                                 }
                                                 onChange={(selected) => {
@@ -1874,7 +1863,7 @@ function Booking() {
                                                         City_Name: selected.label,
                                                         Zone_Name: selected.zone
                                                     }));
-                                                    setSelectedDestPinCode(selected.pincode);
+                                                    setSelectedDestPinCode(selected?.pincode);
                                                 }}
                                                 placeholder="Select Destination"
                                                 isSearchable
@@ -2034,14 +2023,18 @@ function Booking() {
                                         <div className="col-md-10 col-sm-9 col-12">
                                             <div className="input-field" style={{ width: "100%", position: "relative" }}>
                                                 <label>Receiver Name</label>
-                                                <Select
+                                                <CreatableSelect
                                                     className="blue-selectbooking"
                                                     classNamePrefix="blue-selectbooking"
                                                     options={allReceiverOption}
                                                     value={
-                                                        formData.ConsigneeName ?
-                                                            {
-                                                                value: formData.ConsigneeName, label: allReceiverOption.find(opt => opt.value === formData.ConsigneeName)?.label
+                                                        formData.ConsigneeName
+                                                            ? {
+                                                                value: formData.ConsigneeName,
+                                                                label:
+                                                                    allReceiverOption.find(
+                                                                        (opt) => opt.value === formData.ConsigneeName
+                                                                    )?.label || formData.ConsigneeName, // fallback to typed text
                                                             }
                                                             : null
                                                     }
@@ -2065,6 +2058,7 @@ function Booking() {
                                                     styles={{
                                                         menuPortal: base => ({ ...base, zIndex: 9999 })
                                                     }}
+                                                    formatCreateLabel={(inputValue) => inputValue}
                                                 />
                                             </div>
 
@@ -2192,7 +2186,7 @@ function Booking() {
 
                                     {isRemarkChecked && (
                                         <div className="input-field1">
-                                            <label>Alarm No</label>
+                                            <label>Contact</label>
                                             <button
                                                 type="button"
                                                 className="ok-btn"
@@ -2545,44 +2539,48 @@ function Booking() {
 
                     </div>
 
-                    <div className="bottom-card row" style={{ width: "100%",display: 'flex', marginTop: "0.5rem", gap: '0.5rem' ,alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0.5rem" }}>
+                    <div className="bottom-card row"
+                        style={{ width: "100%", display: 'flex', marginTop: "0.5rem", gap: '0.5rem', alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0.5rem" }}>
 
-                        <button className="btn btn-success col-4 col-md-2" style={{}} onClick={handleSubmit} type="button">Save</button>
-                        <button className="btn btn-primary col-4 col-md-2" style={{}} onClick={handleUpdate} type="button">Update</button>
-                        <button className="btn btn-warning col-4 col-md-2" style={{}} onClick={handleSearch} type="button">Search</button>
-                        <PiDotsThreeOutlineVerticalFill
-                        className="btn btn-light col-4 col-md-2"
-                            style={{ fontSize: "35px", cursor: "pointer" }}
-                            onClick={() => setOpen(!open)} />
+                        <button className="btn btn-success col-4" style={{ width: "90px" }} onClick={handleSubmit} type="button">Save</button>
+                        <button className="btn btn-primary col-4" style={{ width: "90px" }} onClick={handleUpdate} type="button">Update</button>
+                        <button className="btn btn-warning col-4" style={{ width: "90px" }} onClick={handleSearch} type="button">Search</button>
 
-                        <div style={{ position: "relative", display: "inline-block" }}>
+                        {/* three dots wrapper */}
+                        <div className="btn btn-light col-4"
+                            style={{ position: "relative", height: "38px", width: "90px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                            onClick={() => setOpen(!open)}>
+                            <PiDotsThreeOutlineVerticalFill
+                                style={{ fontSize: "30px", cursor: "pointer" }}
+                            />
+
+                            {/* dropdown must be inside this div ✅ */}
                             {open && (
                                 <div
                                     style={{
                                         position: "absolute",
-                                        width: "100px",
-                                        bottom: "30px",
-                                        right: "2px",
-                                        marginTop: "10px",
+                                        bottom: "41px",   // just below button
+                                        width: "98px",
                                         backgroundColor: "transparent",
                                         borderRadius: "5px",
                                         zIndex: 9999,
-                                        minWidth: "50px",
-                                        overflow: "hidden",
                                         display: "flex",
                                         flexDirection: "column",
-                                        gap: "2px"
+                                        gap: "2px",
+                                        padding: "4px"
                                     }}
                                 >
                                     <button
-                                        className="btn btn-info w-100"
+                                        className="btn btn-info"
+                                        style={{ width: "100%" }}
                                         onClick={() => { setModalIsOpen7(true); setOpen(false) }}
                                     >
                                         Setup
                                     </button>
 
                                     <button
-                                        className="btn btn-danger w-100"
+                                        className="btn btn-danger"
+                                        style={{ width: "100%" }}
                                         onClick={() => { setOpen(false); handleDelete(formData.DocketNo) }}
                                         type="button"
                                     >
@@ -2591,77 +2589,128 @@ function Booking() {
                                 </div>
                             )}
                         </div>
-
-
                     </div>
 
 
 
+
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-volumetric" contentLabel="Modal">
+                        className="custom-modal-receiver" contentLabel="Modal"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
-                                <header>Shipper</header>
+                                <header>Shipper Name Master</header>
                             </div>
+
                             <div className='container2'>
-                                <form>
+                                <form onSubmit={handleSaveShipper}>
                                     <div className="fields2">
-                                        <div className="input-field1">
+                                        <div className="input-field3">
+                                            <label htmlFor="">Code </label>
+                                            <input
+                                                type="text" value={addShipper.shipperCode}
+                                                onChange={(e) => setAddShipper({ ...addShipper, ShipperCode: e.target.value })}
+                                                placeholder="Enter Code/ Generate Code"
+                                                maxLength="3" />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                                onClick={handleGenerateCode}>Generate Code</button>
+                                        </div>
+
+                                        <div className="input-field3">
                                             <label htmlFor="">Shipper Name</label>
-                                            <input type="text" placeholder="Shipper Name" value={formData.Shipper_Name}
-                                                onChange={(e) => setFormData({ ...formData, Shipper_Name: e.target.value })} />
+                                            <input type="text" value={addShipper.shipperName}
+                                                onChange={(e) => setAddShipper({ ...addShipper, shipperName: e.target.value })}
+                                                placeholder="Shipper Name" required />
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">Contact No</label>
-                                            <input type="tel" placeholder=" Contact No" maxLength={10} value={shipperData.ShipperPhone}
-                                                onChange={(e) => setShipperData({ ...shipperData, ShipperPhone: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field1">
-                                            <label htmlFor="">Email</label>
-                                            <input type="email" placeholder=" Email" value={shipperData.ShipperEmail}
-                                                onChange={(e) => setShipperData({ ...shipperData, ShipperEmail: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field1">
-                                            <label htmlFor="">GST No</label>
-                                            <input type="tel" placeholder=" Gst No" value={shipperData.Shipper_GstNo}
-                                                onChange={(e) => setShipperData({ ...shipperData, Shipper_GstNo: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field1">
+                                        <div className="input-field3">
                                             <label htmlFor="">Address</label>
-                                            <input type="text" placeholder=" Address 1" value={shipperData.ShipperAdd2}
-                                                onChange={(e) => setShipperData({ ...shipperData, ShipperAdd2: e.target.value })} />
+                                            <input type="text" value={addShipper.shipperAdd1}
+                                                onChange={(e) => setAddShipper({ ...addShipper, shipperAdd1: e.target.value })}
+                                                placeholder="Address" required />
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">Pin Code</label>
-                                            <input type="tel" placeholder=" Pin Code" maxLength={6} value={shipperData.ShipperPin}
-                                                onChange={(e) => setShipperData({ ...shipperData, ShipperPin: e.target.value })} />
+                                        <div className="input-field3">
+                                            <label htmlFor="">Address</label>
+                                            <input type="text" value={addShipper.shipperAdd2}
+                                                onChange={(e) => setAddShipper({ ...addShipper, shipperAdd2: e.target.value })}
+                                                placeholder="Address" required />
                                         </div>
 
-                                        <div className="input-field1">
+                                        <div className="input-field3">
+                                            <label htmlFor="">Pin code</label>
+                                            <input type="tel" id="pincode" name="pincode" maxLength="6"
+                                                value={addShipper.shipperPin}
+                                                onChange={(e) => setAddShipper({ ...addShipper, shipperPin: e.target.value })}
+                                                placeholder="Pin Code" required />
+                                        </div>
+
+                                        <div className="input-field3">
                                             <label htmlFor="">City Name</label>
-                                            <select value={shipperData.ShipperCity}
-                                                onChange={(e) => setShipperData({ ...shipperData, ShipperCity: e.target.value })}>
-                                                <option disabled value="">Select City Name</option>
+                                            <select value={addShipper.cityCode}
+                                                onChange={(e) => setAddShipper({ ...addShipper, cityCode: e.target.value })} required>
+                                                <option value="" disabled >Select City</option>
                                                 {getCity.length > 0 && getCity.map((city, index) => (
                                                     <option value={city.City_Code} key={index}>{city.City_Name}</option>
                                                 ))}
                                             </select>
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">Upload Image</label>
-                                            <input type="file" style={{ paddingTop: "7px" }} />
+                                        <div className="input-field3">
+                                            <label htmlFor="">State Name</label>
+                                            <select value={addShipper.stateCode} required
+                                                onChange={(e) => { setAddShipper({ ...addShipper, stateCode: e.target.value }) }}>
+                                                <option value="" disabled >Select State</option>
+                                                {getState.map((state, index) => (
+                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Mobile No</label>
+                                            <input type="tel" maxLength="10" id="mobile"
+                                                value={addShipper.shipperMob}
+                                                onChange={(e) => setAddShipper({ ...addShipper, shipperMob: e.target.value })}
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" required />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Email ID</label>
+                                            <input type="email" value={addShipper.shipperEmail}
+                                                onChange={(e) => setAddShipper({ ...addShipper, shipperEmail: e.target.value })}
+                                                placeholder="Email Id" required />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">GST No</label>
+                                            <input type="text" value={addShipper.gstNo}
+                                                onChange={(e) => setAddShipper({ ...addShipper, gstNo: e.target.value })}
+                                                placeholder="Gst No" required />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">HSN No</label>
+                                            <input type="text" value={addShipper.hsnNo}
+                                                onChange={(e) => setAddShipper({ ...addShipper, hsnNo: e.target.value })}
+                                                placeholder="HSN No" required />
                                         </div>
 
                                     </div>
-                                    <div className="bottom-buttons">
-                                        <button className="ok-btn" onClick={() => setModalIsOpen(false)}>Submit</button>
-                                        <button className="ok-btn" onClick={() => setModalIsOpen(false)}>Cancel</button>
+
+                                    <div className='bottom-buttons'>
+                                        <button type='submit' className='ok-btn'>Submit</button>
+                                        <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                     </div>
                                 </form>
                             </div>
@@ -2697,14 +2746,14 @@ function Booking() {
 
                                         <div className="input-field3">
                                             <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
-                                                onClick={handleGenerateCode}>Generate Code</button>
+                                                onClick={handleGenerateCode1}>Generate Code</button>
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Customer Name</label>
+                                            <label htmlFor="">Receiver Name</label>
                                             <input type="text" value={addReceiver.receiverName}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverName: e.target.value })}
-                                                placeholder="Customer Name" required />
+                                                placeholder="Receiver Name" required />
                                         </div>
 
                                         <div className="input-field3">
@@ -3047,8 +3096,8 @@ function Booking() {
                                                     <td>{data.Length}</td>
                                                     <td>{data.Width}</td>
                                                     <td>{data.Height}</td>
-                                                    <td>{data.Qty}</td>
                                                     <td>{data.DivideBy}</td>
+                                                    <td>{data.Qty}</td>
                                                     <td>{data.VolmetricWt}</td>
                                                     <td>{data.ActualWt}</td>
                                                     <td>{data.ChargeWt}</td>

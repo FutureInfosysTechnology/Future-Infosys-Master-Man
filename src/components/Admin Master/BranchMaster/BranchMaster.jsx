@@ -3,6 +3,7 @@ import Footer from "../../../Components-2/Footer";
 import '../../Booking/POD Update/PodEntry';
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
+import "./branch.css"
 
 
 const BranchName = React.lazy(() => import("./BranchName"));
@@ -38,7 +39,7 @@ function BranchMaster() {
                     <input type="radio" name="slider" id="country" checked={activeTab === 'country'}
                         onChange={() => handleChange('country')} />
 
-                    <nav>
+                    <nav >
                         <label htmlFor="zone" className="zone">Branch Name</label>
                         <label htmlFor="multiple" className="multiple">Mode Master</label>
                         <label htmlFor="state" className="state">Bank Name</label>
