@@ -18,6 +18,24 @@ import { useLocation, useNavigate } from "react-router-dom";
 function Booking() {
     const navigate = useNavigate();
     const location = useLocation();
+    // Utility function to format date safely
+    const formatDate = (inputDate) => {
+        if (!inputDate) return null; // if undefined or null
+
+        const date = new Date(inputDate);
+
+        // Check if date is valid
+        if (isNaN(date)) {
+            console.error("Invalid date:", inputDate);
+            return null;
+        }
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    };
+
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
     const [modalIsOpen2, setModalIsOpen2] = useState(false);
@@ -150,7 +168,7 @@ function Booking() {
         ShipperPin: "",
         ShipperPhone: "",
         ShipperEmail: "",
-        UserName: "",
+        BookMode: "",
         InvoiceNo: "",
         InvValue: 0,
         EwayBill: "",
@@ -158,6 +176,8 @@ function Booking() {
         BillParty: "",
         DestName: "",
         Mode_Code: "",
+        Origin_zone: "",
+        Dest_Zone: "",
     });
     const [addShipper, setAddShipper] = useState({
         shipperCode: '',
@@ -223,12 +243,13 @@ function Booking() {
         ActualWt: 0,
         ChargeWt: 0
     });
+    const [editIndex, setEditIndex] = useState(null);
     const [InvoicesubmittedData, setInvoiceSubmittedData] = useState([]);
     const [invoiceData, setInvoiceData] = useState({
         PoNo: "",
         PoDate: "",
         InvoiceNo: "",
-        InvoiceValue: "",
+        InvoiceValue: 0,
         Description: "",
         Qty: 0,
         EWayBillNo: "",
@@ -655,53 +676,53 @@ function Booking() {
             Swal.fire('Error', 'Failed to add branch data', 'error');
         }
     };
-   
+
     const handleSaveShipper = async (e) => {
-            e.preventDefault();
-    
-            const requestBody = {
-                shipperCode: addShipper.shipperCode,
-                customerCode: formData.Customer_Code,
-                shipperName: addShipper.shipperName,
-                add1: addShipper.shipperAdd1,
-                add2: addShipper.shipperAdd2,
-                pin: addShipper.shipperPin,
-                mobile: addShipper.shipperMob,
-                stateCode: addShipper.stateCode,
-                gstNo: addShipper.gstNo,
-                email: addShipper.shipperEmail,
-                cityCode: addShipper.cityCode,
-            };
-    
-            try {
-                const response = await postApi('/Master/AddShippmerMaster', requestBody, 'POST')
-                if (response.status === 1) {
-                    setAddShipper({
-                        shipperCode: '',
-                        custCode: '',
-                        shipperName: '',
-                        shipperAdd1: '',
-                        shipperAdd2: '',
-                        shipperPin: '',
-                        cityCode: '',
-                        stateCode: '',
-                        shipperMob: '',
-                        shipperEmail: '',
-                        gstNo: '',
-                        company: '',
-                    });
-                    Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
-                    setModalIsOpen(false);
-                    await fetchReceivers();
-    
-                } else {
-                    Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
-                }
-            } catch (err) {
-                console.error('Save Error:', err);
-                Swal.fire('Error', 'Failed to add branch data', 'error');
-            }
+        e.preventDefault();
+
+        const requestBody = {
+            shipperCode: addShipper.shipperCode,
+            customerCode: formData.Customer_Code,
+            shipperName: addShipper.shipperName,
+            add1: addShipper.shipperAdd1,
+            add2: addShipper.shipperAdd2,
+            pin: addShipper.shipperPin,
+            mobile: addShipper.shipperMob,
+            stateCode: addShipper.stateCode,
+            gstNo: addShipper.gstNo,
+            email: addShipper.shipperEmail,
+            cityCode: addShipper.cityCode,
         };
+
+        try {
+            const response = await postApi('/Master/AddShippmerMaster', requestBody, 'POST')
+            if (response.status === 1) {
+                setAddShipper({
+                    shipperCode: '',
+                    custCode: '',
+                    shipperName: '',
+                    shipperAdd1: '',
+                    shipperAdd2: '',
+                    shipperPin: '',
+                    cityCode: '',
+                    stateCode: '',
+                    shipperMob: '',
+                    shipperEmail: '',
+                    gstNo: '',
+                    company: '',
+                });
+                Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
+                setModalIsOpen(false);
+                await fetchReceivers();
+
+            } else {
+                Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
+            }
+        } catch (err) {
+            console.error('Save Error:', err);
+            Swal.fire('Error', 'Failed to add branch data', 'error');
+        }
+    };
 
     // Fetch data for each category using useEffect
     useEffect(() => {
@@ -741,6 +762,29 @@ function Booking() {
             [name]: value,
         }));
     };
+    useEffect(() => {
+        const totalVol1 = submittedData.reduce(
+            (acc, d) => acc + parseFloat(d.VolmetricWt || 0), 0
+        );
+        const totalAct1 = submittedData.reduce(
+            (acc, d) => acc + parseFloat(d.ActualWt || 0), 0
+        );
+        const totalCharge1 = submittedData.reduce(
+            (acc, d) => acc + parseFloat(d.ChargeWt || 0), 0
+        );
+
+        setTotalVolWt1(totalVol1);
+        setTotalActWt1(totalAct1);
+        setTotalChargeWt1(totalCharge1);
+
+        setFormData((prev) => ({
+            ...prev,
+            ActualWt: totalAct1,
+            VolumetricWt: totalVol1,
+            ChargedWt: totalCharge1,
+        }));
+    }, [submittedData]);
+
 
     useEffect(() => {
         const totalVol = vendorsubmittedData.reduce((acc, data) => acc + parseFloat(data.VolmetricWt || 0), 0);
@@ -753,15 +797,6 @@ function Booking() {
     }, [vendorsubmittedData]);
 
 
-    useEffect(() => {
-        const totalVol1 = submittedData.reduce((acc, data) => acc + parseFloat(data.VolmetricWt || 0), 0);
-        const totalAct1 = submittedData.reduce((acc, data) => acc + parseFloat(data.ActualWt || 0), 0);
-        const totalCharge1 = submittedData.reduce((acc, data) => acc + parseFloat(data.ChargeWt || 0), 0);
-
-        setTotalVolWt1(totalVol1);
-        setTotalActWt1(totalAct1);
-        setTotalChargeWt1(totalCharge1);
-    }, [submittedData]);
 
     const handleAddRow = (e) => {
         e.preventDefault();
@@ -775,8 +810,16 @@ function Booking() {
             });
             return;
         }
-
-        setSubmittedData((prev) => [...prev, volumetricData]);
+        if (editIndex !== null) {
+            // update existing row
+            const updated = [...submittedData];
+            updated[editIndex] = volumetricData;
+            setSubmittedData(updated);
+            setEditIndex(null);
+        } else {
+            // add new row
+            setSubmittedData((prev) => [...prev, volumetricData]);
+        }
         setVolumetricData({
             Length: "",
             Width: "",
@@ -801,21 +844,16 @@ function Booking() {
             });
             return;
         }
-        setFormData((prev) => ({
-            ...prev,
-            ActualWt: prev.ActualWt
-                ? Number(prev.ActualWt) + Number(vendorVolumetric.ActualWt)
-                : Number(vendorVolumetric.ActualWt),
-
-            VolumetricWt: prev.VolumetricWt
-                ? Number(prev.VolumetricWt) + Number(vendorVolumetric.VolmetricWt)
-                : Number(vendorVolumetric.VolmetricWt),
-
-            ChargedWt: prev.ChargedWt
-                ? Number(prev.ChargedWt) + Number(vendorVolumetric.ChargeWt)
-                : Number(vendorVolumetric.ChargeWt),
-        }));
-        setVendorSubmittedData((prev) => [...prev, vendorVolumetric]);
+        if (editIndex !== null) {
+            // update existing row
+            const updated = [...vendorsubmittedData];
+            updated[editIndex] = vendorVolumetric;
+            setVendorSubmittedData(updated);
+            setEditIndex(null);
+        } else {
+            // add new row
+            setVendorSubmittedData((prev) => [...prev, vendorVolumetric]);
+        }
         setVendorvolumetric({
             Length: 0,
             Width: 0,
@@ -831,7 +869,7 @@ function Booking() {
     const handleInvoiceAddRow = (e) => {
         e.preventDefault();
 
-        if (!invoiceData.EWayBillNo) {
+        if (!invoiceData.EWayBillNo || !invoiceData.InvoiceNo || !invoiceData.InvoiceValue || !invoiceData.PoDate || !invoiceData.PoNo || !invoiceData.Qty) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Missing Information',
@@ -840,19 +878,47 @@ function Booking() {
             });
             return;
         }
-        setFormData((prev) => ({
-            ...prev,
-            InvoiceNo: prev.InvoiceNo
-                ? prev.InvoiceNo + "," + invoiceData.InvoiceNo
-                : invoiceData.InvoiceNo,
-            InvValue: prev.InvValue
-                ? prev.InvValue + "," + invoiceData.InvoiceValue
-                : invoiceData.InvoiceValue,
-            EwayBill: prev.EwayBill
-                ? prev.EwayBill + "," + invoiceData.EWayBillNo
-                : invoiceData.EWayBillNo,
-        }));
-        setInvoiceSubmittedData((prev) => [...prev, invoiceData]);
+        if (editIndex !== null) {
+            // Update existing row
+            const originalInvoice = InvoicesubmittedData[editIndex];
+            const oldInvoice = [...InvoicesubmittedData];
+            oldInvoice[editIndex] = invoiceData;
+            setInvoiceSubmittedData(oldInvoice);
+            setEditIndex(null); // reset edit mode
+            // 2️⃣ Update formData
+
+            setFormData((prev) => {
+                const replaceInCSV = (csv, oldValue, newValue) => {
+                    if (!csv) return "";
+                    return csv
+                        .split(",")
+                        .map(item => item.trim().toLowerCase() === oldValue.toLowerCase() ? newValue : item.trim())
+                        .join(",");
+                };
+
+                return {
+                    ...prev,
+                    InvoiceNo: replaceInCSV(prev.InvoiceNo || "", originalInvoice.InvoiceNo || "", invoiceData.InvoiceNo || ""),
+                    InvValue: (Number(prev.InvValue || 0) - Number(originalInvoice.InvoiceValue || 0)) + Number(invoiceData.InvoiceValue || 0),
+                    EwayBill: replaceInCSV(prev.EwayBill || "", originalInvoice.EWayBillNo || "", invoiceData.EWayBillNo || ""),
+                };
+            });
+
+
+        } else {
+            setInvoiceSubmittedData([...InvoicesubmittedData, invoiceData]);
+            setFormData((prev) => ({
+                ...prev,
+                InvoiceNo: prev.InvoiceNo
+                    ? prev.InvoiceNo + "," + invoiceData.InvoiceNo
+                    : invoiceData.InvoiceNo,
+                InvValue: Number(prev.InvValue || 0) + Number(invoiceData.InvoiceValue || 0),
+                EwayBill: prev.EwayBill
+                    ? prev.EwayBill + "," + invoiceData.EWayBillNo
+                    : invoiceData.EWayBillNo,
+            }));
+        }
+
         setInvoiceData({
             PoNo: "",
             PoDate: "",
@@ -919,10 +985,10 @@ function Booking() {
 
 
     useEffect(() => {
-        const calculateGstDetails = async (Customer_Code, Mode_Code) => {
+        const calculateGstDetails = async (Customer_Code, Mode_Code, Rate) => {
             try {
                 const response = await getApi(
-                    `/Booking/calculateGST?Customer_Code=${Customer_Code}&Mode_Code=${Mode_Code}`
+                    `/Booking/calculateGST?Customer_Code=${Customer_Code}&Mode_Code=${Mode_Code}&Rate=${Rate}`
                 );
                 if (response?.status === 1) {
                     const gst = response.Data;
@@ -930,17 +996,16 @@ function Booking() {
 
                     setFormData((prev) => ({
                         ...prev,
-                        Fuel_Charges: gst.Fuel_Charges,
                         FovChrgs: gst.Fov_Charges,
                         DocketChrgs: gst.Docket_Charges,
-                        DeliveryChrgs: gst.Dilivery_Charges,
+                        DeliveryChrgs: gst.Delivery_Charges,
                         PackingChrgs: gst.Packing_Charges,
                         GreenChrgs: gst.Green_Charges,
                         HamaliChrgs: gst.Hamali_Charges,
                         OtherCharges: gst.Other_Charges,
                         InsuranceChrgs: gst.Insurance_Charges,
-                        FuelCharges: gst.FuelCharges,
-                        FuelPer: gst.FuelChargesPercent,
+                        FuelCharges: gst.Fuel_Charges,
+                        FuelPer: gst.CustomerFuel,
                         CGST: gst.CGSTAMT,
                         SGST: gst.SGSTAMT,
                         IGST: gst.IGSTAMT,
@@ -963,9 +1028,9 @@ function Booking() {
                 console.error("❌ Error in GST API:", error);
             }
         };
-
-
-        calculateGstDetails(formData.Customer_Code, formData.Mode_Code);
+        if (formData.Customer_Code && formData.Mode_Code && formData.Rate) {
+            calculateGstDetails(formData.Customer_Code, formData.Mode_Code, formData.Rate);
+        }
     }, [formData.Customer_Code, formData.Mode_Code, formData.Rate]);
 
     // 📦 Auto calculate freight rate
@@ -996,10 +1061,6 @@ function Booking() {
 
     // ================================Rate+All Charges calculate=======================
 
-
-
-
-    console.log(InvoicesubmittedData);
     const handleSubmit = async (e) => {
         e.preventDefault();
         // Step 1: Basic Validation Logic 
@@ -1030,10 +1091,12 @@ function Booking() {
         const requestBody = {
             Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             DocketNo: formData.DocketNo,
-            BookDate: formData.BookDate,
+            BookDate: formatDate(formData.BookDate),
             Customer_Code: formData.Customer_Code,
-            Receiver_Code: formData.Receiver_Code,
-            Consignee_Name: formData.ConsigneeName,
+            Receiver_Code: formData.ConsigneeName,
+            Consignee_Name: formData.ConsigneeName ? allReceiverOption.find(
+                (opt) => opt.value === formData.ConsigneeName
+            )?.label : formData.ConsigneeName,
             Consignee_Add1: formData.ConsigneeAdd1,
             Consignee_Add2: formData.ConsigneeAdd2,
             Consignee_State: formData.ConsigneeState,
@@ -1045,9 +1108,12 @@ function Booking() {
             Consignee_Country: formData.ConsigneeCountry,
             Mode_Code: formData.Mode_Code,
             Origin_code: formData.OriginCode,
-            Origin_zone: formData.Origin_zone,
+            Origin_Zone: formData.Origin_zone,
             Destination_Code: formData.DestinationCode,
-            DispatchDate: formData.DispatchDate,
+            Dest_Zone: formData.Zone_Name,
+            Dest_PinCode: selectedDestPinCode,
+            BillParty: formData.BillParty,
+            DispatchDate: formatDate(formData.DispatchDate),
             DoxSpx: formData.DoxSpx,
             RateType: formData.RateType,
             Qty: formData.QtyOrderEntry,
@@ -1084,6 +1150,8 @@ function Booking() {
             VendorAwbNo1: vendorData.VendorAwbNo1,
             VendorAwbNo2: vendorData.VendorAwbNo2,
             ActualShipper: formData.ActualShipper,
+            Shipper_Code: formData.Shipper_Name,
+            Shipper_Name: formData.Shipper_Name ? allShipperOption.find(opt => opt.value === formData.Shipper_Name)?.label : formData.Shipper_Name,
             ShipperAdd: formData.ShipperAdd,
             ShipperAdd2: formData.ShipperAdd2,
             ShipperAdd3: formData.ShipperAdd3,
@@ -1093,18 +1161,17 @@ function Booking() {
             ShipperPin: formData.ShipperPin,
             ShipperPhone: formData.ShipperPhone,
             ShipperEmail: formData.ShipperEmail,
-            UserName: formData.UserName,
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
             EwayBill: formData.EwayBill,
-            InvDate: formData.InvDate,
-            BillParty: formData.BillParty,
+            InvDate: formData.InvDate || formatDate(formData.DispatchDate),
             Remark: remarkData.Remark,
             MHWNo: remarkData.MHWNo,
             DestName: formData.DestName,
+            UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
             MultiInvoice: InvoicesubmittedData.map((invoice) => ({
                 PoNo: invoice.PoNo,
-                PoDate: invoice.PoDate,
+                PoDate: formatDate(invoice.PoDate),
                 InvoiceNo: invoice.InvoiceNo,
                 InvoiceValue: invoice.InvoiceValue,
                 Description: invoice.Description,
@@ -1196,13 +1263,15 @@ function Booking() {
             Mode_Code: "",
             OriginCode: "",
             DestinationCode: "",
+            Origin_zone: "",
+            Zone_Name: "",
             DispatchDate: getTodayDate(),
             DoxSpx: "",
             RateType: "",
             QtyOrderEntry: "",
-            ActualWt: 0,
             VendorWt: 0,
             VendorAmt: 0,
+            ActualWt: 0,
             VolumetricWt: 0,
             ChargedWt: 0,
             RatePerkg: 0,
@@ -1235,7 +1304,7 @@ function Booking() {
             ShipperPin: "",
             ShipperPhone: "",
             ShipperEmail: "",
-            UserName: "",
+            BookMode: "",
             InvoiceNo: "",
             InvValue: 0,
             EwayBill: "",
@@ -1247,9 +1316,6 @@ function Booking() {
         setSelectedOriginPinCode('');
         setSelectedDestPinCode('');
         setSelectedModeName('');
-
-
-
 
         setVendorData({
             Vendor_Code1: "",
@@ -1298,13 +1364,16 @@ function Booking() {
             PoNo: "",
             PoDate: "",
             InvoiceNo: "",
-            InvoiceValue: "",
+            InvoiceValue: 0,
             Description: "",
             Qty: 0,
             EWayBillNo: "",
             Remark: "",
             InvoiceImg: ""
         });
+        setSubmittedData([]);
+        setInvoiceSubmittedData([]);
+        setVendorSubmittedData([]);
     };
 
 
@@ -1313,10 +1382,12 @@ function Booking() {
         const requestBody = {
             Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             DocketNo: formData.DocketNo,
-            BookDate: formData.BookDate,
+            BookDate: formatDate(formData.BookDate),
             Customer_Code: formData.Customer_Code,
-            Receiver_Code: formData.Receiver_Code,
-            Consignee_Name: formData.ConsigneeName,
+            Receiver_Code: formData.ConsigneeName,
+            Consignee_Name: formData.ConsigneeName ? allReceiverOption.find(
+                (opt) => opt.value === formData.ConsigneeName
+            )?.label : formData.ConsigneeName,
             Consignee_Add1: formData.ConsigneeAdd1,
             Consignee_Add2: formData.ConsigneeAdd2,
             Consignee_State: formData.ConsigneeState,
@@ -1328,9 +1399,12 @@ function Booking() {
             Consignee_Country: formData.ConsigneeCountry,
             Mode_Code: formData.Mode_Code,
             Origin_code: formData.OriginCode,
-            // Origin_zone: formData.Origin_zone,
+            Origin_Zone: formData.Origin_zone,
             Destination_Code: formData.DestinationCode,
-            DispatchDate: formData.DispatchDate,
+            Dest_Zone: formData.Zone_Name,
+            Dest_PinCode: selectedDestPinCode,
+            BillParty: formData.BillParty,
+            DispatchDate: formatDate(formData.DispatchDate),
             DoxSpx: formData.DoxSpx,
             RateType: formData.RateType,
             Qty: formData.QtyOrderEntry,
@@ -1369,6 +1443,8 @@ function Booking() {
             Shipper_Code: formData.shipper,
             Shipper_Name: formData.Shipper_Name,
             ActualShipper: formData.ActualShipper,
+            Shipper_Code: formData.Shipper_Name,
+            Shipper_Name: formData.Shipper_Name ? allShipperOption.find(opt => opt.value === formData.Shipper_Name)?.label : formData.Shipper_Name,
             ShipperAdd: formData.ShipperAdd,
             ShipperAdd2: formData.ShipperAdd2,
             ShipperAdd3: formData.ShipperAdd3,
@@ -1378,18 +1454,17 @@ function Booking() {
             ShipperPin: formData.ShipperPin,
             ShipperPhone: formData.ShipperPhone,
             ShipperEmail: formData.ShipperEmail,
-            UserName: formData.UserName,
+            UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
             EwayBill: formData.EwayBill,
-            InvDate: formData.InvDate,
-            BillParty: formData.BillParty,
+            InvDate: formatDate(formData.DispatchDate),
             Remark: remarkData.Remark,
             MHWNo: remarkData.MHWNo,
             DestName: formData.DestName,
             MultiInvoice: InvoicesubmittedData.map((invoice) => ({
                 PoNo: invoice.PoNo,
-                PoDate: invoice.PoDate,
+                PoDate: formatDate(invoice.PoDate),
                 InvoiceNo: invoice.InvoiceNo,
                 InvoiceValue: invoice.InvoiceValue,
                 Description: invoice.Description,
@@ -1427,6 +1502,7 @@ function Booking() {
             } else Swal.fire('Error', res.message || 'Update failed.', 'error');
         } catch (err) {
             Swal.fire('Error', 'Something went wrong while updating.', 'error');
+            console.log(err);
         }
     };
 
@@ -1436,26 +1512,20 @@ function Booking() {
         try {
             const res = await getApi(`/Booking/getOrderByDocket?docketNo=${formData.DocketNo}`);
             if (res.Success === 1 && res.OrderEntry) {
-                const result = await Swal.fire({
+                Swal.fire({
                     title: 'Success!',
                     text: "Data Fecthed Successfuly",
                     icon: 'success',
                 });
                 const data = res.OrderEntry;
                 console.log(data);
-                const customer = getCustomerdata.find(c => c.Customer_Code.toString() === data.Customer_Code);
-                const mode = getMode.find(m => m.Mode_Code === data.Mode_code);
-                const origin = getCity.find(c => c.City_Code === data.Origin_code);
-                const destination = getCity.find(c => c.City_Code === data.Destination_Code);
 
                 setFormData({
                     Location_Code: data.Location_Code,
                     DocketNo: data.DocketNo,
                     BookDate: data.BookDate,
                     Customer_Code: data.Customer_Code,
-                    Origin_code: "",
-                    Origin_zone: '',
-                    ConsigneeName: data.Consignee_Name,
+                    ConsigneeName: data.Receiver_Code,
                     ConsigneeAdd1: data.Consignee_Add1,
                     ConsigneeAdd2: data.Consignee_Add2,
                     ConsigneeState: data.Consignee_State,
@@ -1468,6 +1538,8 @@ function Booking() {
                     Mode_Code: data.Mode_Code,
                     OriginCode: data.Origin_code,
                     DestinationCode: data.Destination_Code,
+                    Origin_zone: data.Origin_Zone,
+                    Zone_Name: data.Dest_Zone,
                     DispatchDate: data.DispatchDate,
                     DoxSpx: data.DoxSpx,
                     RateType: data.RateType,
@@ -1496,7 +1568,7 @@ function Booking() {
                     VendorAwbNo: data.VendorAwbNo,
                     WebAgent: "",
                     ExptDateOfDelvDt: data.ExptDateOfDelvDt,
-                    Shipper_Name: data.Shipper_Name,
+                    Shipper_Name: data.Shipper_Code,
                     ShipperAdd: data.ShipperAdd,
                     ShipperAdd2: data.ShipperAdd2,
                     ShipperPin: data.ShipperPin,
@@ -1506,12 +1578,44 @@ function Booking() {
                     InvValue: data.InvValue,
                     EwayBill: data.EwayBill,
                     InvDate: data.InvDate,
-                    BillParty: "",
+                    BillParty: data.BillParty,
                     DestName: "",
-                    City_Name: '',
-                    Zone_Name: ''
 
                 });
+                const multiInvoice = res.MultiInvoice || [];
+                console.log("search", multiInvoice); 
+                const formattedInvoices = multiInvoice.map(item => ({
+                    PoNo: item.PoNo || "",
+                    PoDate: new Date(item.PoDate) || "",
+                    InvoiceNo: item.InvNo || "",
+                    InvoiceValue: item.InvValue || "",
+                    Description: item.Description || "",
+                    Qty: item.Qty || 0,
+                    EWayBillNo: item.EWayBill || "",
+                    Remark: item.Remark || "",
+                    InvoiceImg: item.InvoiceImg || ""
+                }));
+                setInvoiceSubmittedData(formattedInvoices);
+                setSubmittedData(res.Volumetric);    
+                setVendorSubmittedData(res.VendorVolumetric)
+                    
+        
+       
+        // Qty: 0,
+        // DivideBy: "",
+        // VolmetricWt: 0,
+        // ActualWt: 0,
+        // ChargeWt: 0
+                    //  Length:item.Length || 0,
+                    //  Width:item.Width || 0,
+                    //  Height:item.Height || 0,
+                    //  Qty.item.Qty || 0,
+                    //  item.DivideBy || "",
+                    //  item.VolmetricWt || 0,
+                    //  item.ActualWt || 0,
+                    //  item.ChargeWt || 0,
+                // }))
+
 
 
             } else {
@@ -1605,6 +1709,11 @@ function Booking() {
                                             placeholder={toggleActive ? "Enter Docket No" : "Auto Booking On"}
                                             disabled={!toggleActive}
                                             value={formData.DocketNo}
+                                            onKeyDown={(e) => {
+                                                if (toggleActive && e.key === "Enter") {
+                                                    handleSearch();
+                                                }
+                                            }}
                                             onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })}
                                         />
                                     </div>
@@ -1762,7 +1871,7 @@ function Booking() {
 
 
 
-                                    <div className="input-field">
+                                    <div className="input-field1">
                                         <label htmlFor="">Shipper Mobile No</label>
                                         <input
                                             type="tel"
@@ -1773,7 +1882,7 @@ function Booking() {
                                         />
                                     </div>
 
-                                    <div className="input-field">
+                                    <div className="input-field1">
                                         <label htmlFor="">Pin_Code</label>
                                         <input
                                             type="text"
@@ -1782,6 +1891,14 @@ function Booking() {
                                             value={formData.ShipperPin}
                                             onChange={(e) => setFormData({ ...formData, ShipperPin: e.target.value })}
                                         />
+                                    </div>
+                                    <div className="input-field1">
+                                        <label htmlFor="">Booking Mode</label>
+                                        <select value={formData.BookMode} onChange={(e) => setFormData({ ...formData, BookMode: e.target.value })}>
+                                            <option value="" disabled>Select Booking Mode</option>
+                                            <option value="Cash">Cash</option>
+                                            <option value="Credit">Credit</option>
+                                        </select>
                                     </div>
 
                                     {/* Origin Row */}
@@ -1804,7 +1921,7 @@ function Booking() {
                                                 className="blue-selectbooking"
                                                 classNamePrefix="blue-selectbooking"
                                                 options={allCityOptions}
-                                                value={formData.OriginCode ? { value:formData.OriginCode,label:allCityOptions.find(opt => opt.value === formData.OriginCode)?.label || ""}:  null}
+                                                value={formData.OriginCode ? { value: formData.OriginCode, label: allCityOptions.find(opt => opt.value === formData.OriginCode)?.label || "" } : null}
                                                 onChange={(selected) => {
                                                     setFormData(prev => ({
                                                         ...prev,
@@ -1852,8 +1969,8 @@ function Booking() {
                                                 options={allCityOptions}
                                                 value={
                                                     formData.DestinationCode
-                                                    
-                                                        ? {value :formData.DestinationCode,label:allCityOptions.find(opt => opt.value === formData.DestinationCode)?.label || ""}
+
+                                                        ? { value: formData.DestinationCode, label: allCityOptions.find(opt => opt.value === formData.DestinationCode)?.label || "" }
                                                         : null
                                                 }
                                                 onChange={(selected) => {
@@ -1968,8 +2085,8 @@ function Booking() {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="row g-2" style={{ marginLeft: "7px" }}>
-                                                <div className="col-md-6 col-12">
+                                            <div className="fields2" style={{ width: "100%" }}>
+                                                <div className="input-field1">
                                                     <label className="form-label">Vendor Docket No</label>
                                                     <input
                                                         type="text"
@@ -1982,7 +2099,7 @@ function Booking() {
                                                     />
                                                 </div>
 
-                                                <div className="col-md-6 col-12">
+                                                <div className="input-field1">
                                                     <label className="form-label">Vendor Amount</label>
                                                     <input
                                                         type="tel"
@@ -1993,6 +2110,18 @@ function Booking() {
                                                             setFormData({ ...formData, VendorAmt: e.target.value })
                                                         }
                                                     />
+                                                </div>
+
+                                                <div className="input-field1 mt-2">
+                                                    <label>&nbsp;</label>
+                                                    <button
+                                                        type="button"
+                                                        className="ok-btn"
+                                                        onClick={() => setModalIsOpen5(true)}
+                                                        style={{ height: "35px", width: "100%", color: "black" }}
+                                                    >
+                                                        <i className="bi bi-calculator" style={{ fontSize: "20px" }}></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -2021,7 +2150,7 @@ function Booking() {
                                 <div className="container-fluid mb-2">
                                     <div className="row g-2 align-items-end">
                                         <div className="col-md-10 col-sm-9 col-12">
-                                            <div className="input-field" style={{ width: "100%", position: "relative" }}>
+                                            <div className="input-field mt-2" style={{ width: "100%", position: "relative" }}>
                                                 <label>Receiver Name</label>
                                                 <CreatableSelect
                                                     className="blue-selectbooking"
@@ -2172,6 +2301,17 @@ function Booking() {
                                                     <i className="bi bi-receipt-cutoff"></i>
                                                 </button>
                                             </div>
+                                            {isInvoiceNo && (
+                                                <div className="input-field1">
+                                                    <label>Invoice No</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Invoice No"
+                                                        value={formData.InvoiceNo}
+                                                        onChange={(e) => setFormData({ ...formData, InvoiceNo: e.target.value })}
+                                                    />
+                                                </div>
+                                            )}
                                             <div className="input-field1">
                                                 <label>Invoice Value</label>
                                                 <input
@@ -2183,21 +2323,6 @@ function Booking() {
                                             </div>
                                         </>
                                     )}
-
-                                    {isRemarkChecked && (
-                                        <div className="input-field1">
-                                            <label>Contact</label>
-                                            <button
-                                                type="button"
-                                                className="ok-btn"
-                                                style={{ height: "35px" }}
-                                                onClick={() => setModalIsOpen4(true)}
-                                            >
-                                                <i className="bi bi-plus"></i>
-                                            </button>
-                                        </div>
-                                    )}
-
                                     {isEWayChecked && (
                                         <div className="input-field1">
                                             <label>E-Way Bill No</label>
@@ -2210,25 +2335,37 @@ function Booking() {
                                         </div>
                                     )}
 
-                                    {isInvoiceNo && (
+                                    {isRemarkChecked && (
                                         <div className="input-field1">
-                                            <label>Invoice No</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Invoice No"
-                                                value={formData.InvoiceNo}
-                                                onChange={(e) => setFormData({ ...formData, InvoiceNo: e.target.value })}
-                                            />
+                                            <label>Content</label>
+                                            <button
+                                                type="button"
+                                                className="ok-btn"
+                                                style={{ height: "35px" }}
+                                                onClick={() => setModalIsOpen4(true)}
+                                            >
+                                                <i className="bi bi-plus"></i>
+                                            </button>
                                         </div>
                                     )}
+                                    <div className="input-field1">
+                                        <label>Billing Type</label>
+                                        <select value={formData.BillParty} onChange={(e) => setFormData({ ...formData, BillParty: e.target.value })}>
+                                            <option value="" disabled>Select Billing Type</option>
+                                            <option value="Shipper">Shipper</option>
+                                        </select>
+                                    </div>
 
                                     {dispatchDate && (
                                         <div className="input-field1">
                                             <label>Dispatch Date</label>
-                                            <input
-                                                type="date"
-                                                value={formData.DispatchDate}
-                                                onChange={(e) => setFormData({ ...formData, DispatchDate: e.target.value })}
+                                            <DatePicker
+                                                selected={formData.DispatchDate ? new Date(formData.DispatchDate) : null}
+                                                onChange={(date) =>
+                                                    setInvoiceData({ ...formData, DispatchDate: date })
+                                                }
+                                                dateFormat="dd/MM/yyyy"
+                                                placeholderText="dd/mm/yyyy"
                                             />
                                         </div>
                                     )}
@@ -2238,7 +2375,7 @@ function Booking() {
 
 
 
-                            <div className="card" style={{ border: "transparent", padding: "0px" }}>
+                            <div className="card mt-2" style={{ border: "transparent", padding: "0px" }}>
                                 <div className="section-title">Charges Information</div>
 
                                 <form
@@ -2309,7 +2446,7 @@ function Booking() {
                                             <button
                                                 type="button"
                                                 className="ok-btn"
-                                                onClick={() => setModalIsOpen5(true)}
+                                                onClick={() => setModalIsOpen9(true)}
                                                 style={{ height: "35px", width: "100%", color: "black" }}
                                             >
                                                 <i className="bi bi-calculator" style={{ fontSize: "20px" }}></i>
@@ -2334,18 +2471,6 @@ function Booking() {
                                                 value={formData.VendorWt}
                                                 onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
                                             />
-                                        </div>
-
-                                        <div className="input-field1">
-                                            <label>&nbsp;</label>
-                                            <button
-                                                type="button"
-                                                className="ok-btn"
-                                                onClick={() => setModalIsOpen9(true)}
-                                                style={{ height: "35px", width: "100%", color: "black" }}
-                                            >
-                                                <i className="bi bi-calculator" style={{ fontSize: "20px" }}></i>
-                                            </button>
                                         </div>
 
                                         <div className="input-field1">
@@ -2829,7 +2954,7 @@ function Booking() {
                                                 placeholder="HSN No" required />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field2">
                                             <div className="select-radio">
                                                 <input type="checkbox" name="mode" id="SMS"
                                                     checked={addReceiver.sms}
@@ -2993,7 +3118,7 @@ function Booking() {
                                         </div>
 
                                         <div className="input-field">
-                                            <label htmlFor="">Alarm No</label>
+                                            <label htmlFor="">Content</label>
                                             <input type="text" placeholder="Alarm No" value={remarkData.MHWNo}
                                                 onChange={(e) => setRemarkData({ ...remarkData, MHWNo: e.target.value })} />
                                         </div>
@@ -3024,7 +3149,7 @@ function Booking() {
                         }}>
                         <div>
                             <div className="header-tittle">
-                                <header> Volumetric Calculate</header>
+                                <header> Vendor Volumetric</header>
                             </div>
                             <div className='container2'>
                                 <div className="table-container" style={{ padding: "10px" }}>
@@ -3101,6 +3226,30 @@ function Booking() {
                                                     <td>{data.VolmetricWt}</td>
                                                     <td>{data.ActualWt}</td>
                                                     <td>{data.ChargeWt}</td>
+                                                    <td>
+                                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                            <button className='edit-btn'
+                                                                onClick={() => {
+                                                                    setVendorvolumetric({
+                                                                        Length: data.Length,
+                                                                        Width: data.Width,
+                                                                        Height: data.Height,
+                                                                        Qty: data.Qty,
+                                                                        DivideBy: data.DivideBy,
+                                                                        VolmetricWt: data.VolmetricWt,
+                                                                        ActualWt: data.ActualWt,
+                                                                        ChargeWt: data.ChargeWt,
+                                                                    })
+                                                                    setEditIndex(index);
+                                                                }}>
+                                                                <i className='bi bi-pen'></i>
+                                                            </button>
+                                                            <button onClick={() => {
+                                                                setVendorSubmittedData(vendorsubmittedData.filter((_, ind) => ind !== index));
+                                                            }}
+                                                                className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -3151,7 +3300,7 @@ function Booking() {
                         }}>
                         <div>
                             <div className="header-tittle">
-                                <header>Vendor Volumetric</header>
+                                <header>Volumetric Calculate</header>
                             </div>
                             <div className='container2'>
                                 <div className="table-container" style={{ padding: "10px" }}>
@@ -3224,11 +3373,35 @@ function Booking() {
                                                     <td>{data.Length}</td>
                                                     <td>{data.Width}</td>
                                                     <td>{data.Height}</td>
-                                                    <td>{data.Qty}</td>
                                                     <td>{data.DivideBy}</td>
+                                                    <td>{data.Qty}</td>
                                                     <td>{data.VolmetricWt}</td>
                                                     <td>{data.ActualWt}</td>
                                                     <td>{data.ChargeWt}</td>
+                                                    <td>
+                                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                            <button className='edit-btn'
+                                                                onClick={() => {
+                                                                    setVolumetricData({
+                                                                        Length: data.Length,
+                                                                        Width: data.Width,
+                                                                        Height: data.Height,
+                                                                        Qty: data.Qty,
+                                                                        DivideBy: data.DivideBy,
+                                                                        VolmetricWt: data.VolmetricWt,
+                                                                        ActualWt: data.ActualWt,
+                                                                        ChargeWt: data.ChargeWt,
+                                                                    })
+                                                                    setEditIndex(index);
+                                                                }}>
+                                                                <i className='bi bi-pen'></i>
+                                                            </button>
+                                                            <button onClick={() => {
+                                                                setSubmittedData(submittedData.filter((_, ind) => ind !== index));
+                                                            }}
+                                                                className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -3308,9 +3481,14 @@ function Booking() {
                                                         onChange={handleInvoiceDetailChange} />
                                                 </td>
                                                 <td>
-                                                    <input type="date" name="PoDate"
-                                                        style={{ textAlign: "center" }} value={invoiceData.PoDate}
-                                                        onChange={handleInvoiceDetailChange} />
+                                                    <DatePicker
+                                                        selected={invoiceData.PoDate ? new Date(invoiceData.PoDate) : null}
+                                                        onChange={(date) =>
+                                                            setInvoiceData({ ...invoiceData, PoDate: date })
+                                                        }
+                                                        dateFormat="dd/MM/yyyy"
+                                                        placeholderText="dd/mm/yyyy"
+                                                    />
                                                 </td>
                                                 <td>
                                                     <input type="tel" placeholder="Invoice No" name="InvoiceNo"
@@ -3355,10 +3533,10 @@ function Booking() {
                                                 </td>
                                             </tr>
 
-                                            {InvoicesubmittedData.map((data, index) => (
+                                            {InvoicesubmittedData?.map((data, index) => (
                                                 <tr key={index}>
                                                     <td>{data.PoNo}</td>
-                                                    <td>{data.PoDate}</td>
+                                                    <td>{data.PoDate ? (data.PoDate).toLocaleDateString("en-GB") : ""}</td>
                                                     <td>{data.InvoiceNo}</td>
                                                     <td>{data.InvoiceValue}</td>
                                                     <td>{data.Description}</td>
@@ -3366,8 +3544,53 @@ function Booking() {
                                                     <td>{data.EWayBillNo}</td>
                                                     <td>{data.Remark}</td>
                                                     <td>{data.InvoiceImg}</td>
+                                                    <td>
+                                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                            <button className='edit-btn'
+                                                                onClick={() => {
+                                                                    setInvoiceData({
+                                                                        PoNo: data.PoNo,
+                                                                        PoDate: data.PoDate,
+                                                                        InvoiceNo: data.InvoiceNo,
+                                                                        InvoiceValue: data.InvoiceValue,
+                                                                        Description: data.Description,
+                                                                        Qty: data.Qty,
+                                                                        EWayBillNo: data.EWayBillNo,
+                                                                        Remark: data.Remark,
+                                                                        InvoiceImg: data.InvoiceImg,
+                                                                    });
+                                                                    setEditIndex(index);
+                                                                }}>
+                                                                <i className='bi bi-pen'></i>
+                                                            </button>
+                                                            <button onClick={() => {
+                                                                setInvoiceSubmittedData(InvoicesubmittedData.filter(inv => inv.InvoiceNo !== data.InvoiceNo));
+                                                                // Remove from formData
+                                                                setFormData((prev) => {
+                                                                    const removeFromCSV = (csv, valueToRemove) => {
+                                                                        if (!csv) return "";
+                                                                        return csv
+                                                                            .split(",")
+                                                                            .map(item => item.trim())
+                                                                            .filter(item => item.toLowerCase() !== String(valueToRemove).toLowerCase())
+                                                                            .join(",");
+                                                                    };
+
+                                                                    return {
+                                                                        ...prev,
+                                                                        InvoiceNo: removeFromCSV(prev.InvoiceNo, data.InvoiceNo),
+                                                                        InvValue: Number(prev.InvValue || 0) - Number(data.InvoiceValue || 0),
+                                                                        EwayBill: removeFromCSV(prev.EwayBill, data.EWayBillNo),
+                                                                    };
+                                                                });
+
+                                                            }}
+                                                                className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
-                                            ))}
+                                            )
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>

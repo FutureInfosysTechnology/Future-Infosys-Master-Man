@@ -31,7 +31,7 @@ function CustomerName() {
     const [modalIsOpen2, setModalIsOpen2] = useState(false);
     const [discountOption, setDiscountOption] = useState("Yes");
     const [gstOption, setGstOption] = useState("Yes");
-    const [fuelOption, setFuelOption] = useState("Yes");
+    const [fuelOption, setFuelOption] = useState("No");
     const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
     const [isGstEnabled, setIsGstEnabled] = useState(true);
     const [isFuelEnabled, setIsFuelEnabled] = useState(true);
@@ -77,7 +77,8 @@ function CustomerName() {
         whatApp: false,
         userName: '',
         Password: '',
-        DepartmentCode: ''
+        DepartmentCode: '',
+        multiBranch: '',
     })
     console.log(addCustData);
     const togglePasswordVisibility = () => {
@@ -199,8 +200,12 @@ function CustomerName() {
             StateCode: addCustData.stateCode,
             CityCode: addCustData.cityCode,
             GstNo: addCustData.gstNo,
-            HSNNo: addCustData.hsnNo || "",
+            HSN_No: addCustData.hsnNo || "",
             GstType: addCustData.gstType,
+            CustomerGst: addCustData.gst,
+            Gst_Yes_No: gstOption,
+            CustomerFuel: addCustData.fuel,
+            Fuel_Yes_No1: fuelOption,
             Discount: addCustData.discount,
             BillingPeriod: addCustData.billPeriod,
             CustomerStatus: addCustData.custStatus,
@@ -216,9 +221,10 @@ function CustomerName() {
             SMS: addCustData.sms,
             Email: addCustData.email,
             WhatApp: addCustData.whatApp,
-            userName: addCustData.userName,
+            UserName: addCustData.userName,
             Password: addCustData.Password,
-            DepartmentCode: addCustData.DepartmentCode
+            Department: addCustData.DepartmentCode,
+            MultipleSingleBranch: addCustData.multiBranch,
         }
 
         try {
@@ -239,9 +245,9 @@ function CustomerName() {
                     gstNo: '',
                     hsnNo: '',
                     gstType: '',
-                    gst: '',
-                    fuel: '',
-                    discount: '',
+                    gst: '0',
+                    fuel: '0',
+                    discount: '0',
                     billPeriod: '',
                     custStatus: '',
                     contactPerson: '',
@@ -254,16 +260,19 @@ function CustomerName() {
                     whatApp: false,
                     userName: '',
                     Password: '',
-                    DepartmentCode: ''
+                    DepartmentCode: '',
+                    multiBranch: ''
                 });
                 setContractData({
                     creditDate: firstDayOfMonth,
                     dueDate: today,
-                    contractAmount: '',
-                    depositAmount: '',
-                    balance: '',
-                    advAmt: ''
+                    contractAmount: '0',
+                    depositAmount: '0',
+                    balance: '0',
+                    advAmt: '0'
                 });
+                setGstOption("Yes");
+                setFuelOption("No");
                 setPasswordVisible(false);
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -316,9 +325,10 @@ function CustomerName() {
             email: addCustData.email,
             whatApp: addCustData.whatApp,
             cityCode: addCustData.cityCode,
-            userName: addCustData.userName,
+            UserName: addCustData.userName,
             Password: addCustData.Password,
-            DepartmentCode: addCustData.DepartmentCode
+            departmentCode: addCustData.DepartmentCode,
+            MultipleSingleBranch: addCustData.multiBranch,
         }
 
         try {
@@ -339,9 +349,9 @@ function CustomerName() {
                     gstNo: '',
                     hsnNo: '',
                     gstType: '',
-                    gst: '',
-                    fuel: '',
-                    discount: '',
+                    gst: '0',
+                    fuel: '0',
+                    discount: '0',
                     billPeriod: '',
                     custStatus: '',
                     contactPerson: '',
@@ -354,8 +364,20 @@ function CustomerName() {
                     cityCode: '',
                     userName: '',
                     Password: '',
-                    DepartmentCode: ''
+                    DepartmentCode: '',
+                    multiBranch: '',
                 });
+                 setContractData({
+                    creditDate: firstDayOfMonth,
+                    dueDate: today,
+                    contractAmount: '0',
+                    depositAmount: '0',
+                    balance: '0',
+                    advAmt: '0'
+                });
+                setGstOption("Yes");
+                setFuelOption("No");
+                setPasswordVisible(false);
                 Swal.fire('Saved!', saveResponse.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
                 await fetchCustomerData();
@@ -367,9 +389,9 @@ function CustomerName() {
             Swal.fire('Error', 'Failed to add Customer data', 'error');
         }
     };
-    const handleDateChange = (field,date) => {
-    setContractData({ ...contractData, [field]: date });
-  };
+    const handleDateChange = (field, date) => {
+        setContractData({ ...contractData, [field]: date });
+    };
     const handleDeleteCustName = async (Customer_Code) => {
         try {
             const confirmation = await Swal.fire({
@@ -483,9 +505,9 @@ function CustomerName() {
                                     gstNo: '',
                                     hsnNo: '',
                                     gstType: '',
-                                    gst: '',
-                                    fuel: '',
-                                    discount: '',
+                                    gst: '0',
+                                    fuel: '0',
+                                    discount: '0',
                                     billPeriod: '',
                                     custStatus: '',
                                     contactPerson: '',
@@ -500,14 +522,17 @@ function CustomerName() {
                                     Password: '',
                                     DepartmentCode: ''
                                 });
-                                setContractData({
-                                    creditDate: firstDayOfMonth,
-                                    dueDate: today,
-                                    contractAmount: '',
-                                    depositAmount: '',
-                                    balance: '',
-                                    advAmt: ''
-                                });
+                                 setContractData({
+                    creditDate: firstDayOfMonth,
+                    dueDate: today,
+                    contractAmount: '0',
+                    depositAmount: '0',
+                    balance: '0',
+                    advAmt: '0'
+                });
+                setGstOption("Yes");
+                setFuelOption("No");
+                setPasswordVisible(false);
                                 setModalIsOpen(true); setIsEditMode(false);
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -533,10 +558,11 @@ function CustomerName() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Sr.No</th>
+                                    <th scope="col">Branch_Name</th>
                                     <th scope="col">Customer_Code</th>
                                     <th scope="col">Customer_Name</th>
                                     <th scope="col">Booking_Type</th>
@@ -554,6 +580,7 @@ function CustomerName() {
                                 {currentRows.map((cust, index) => (
                                     <tr key={index}>
                                         <td>{index + 1}</td>
+                                        <td>{cust.Branch_Name}</td>
                                         <td>{cust.Customer_Code}</td>
                                         <td>{cust.Customer_Name}</td>
                                         <td>{cust.Booking_Type}</td>
@@ -594,14 +621,18 @@ function CustomerName() {
                                                         email: cust.Email,
                                                         userName: cust.userName,
                                                         Password: cust.Password,
-                                                        DepartmentCode: cust.DepartmentCode
+                                                        billPeriod: cust.Billing_Period,
+                                                        custStatus: cust.Customer_Status,
+                                                        DepartmentCode: cust.DepartmentCode,
+                                                        multiBranch: cust.Manage_Code
+
                                                     });
                                                     setGstOption(cust.Gst_Yes_No);
                                                     setFuelOption(cust.Fuel_Yes_No1);
                                                     setContractData({
                                                         contractAmount: cust.Contact_Amount,
-                                                        creditDate: cust.Credit_Date===null?firstDayOfMonth:cust.Credit_Date,
-                                                        dueDate: cust.Due_Date===null?today:cust.Due_Date,
+                                                        creditDate: cust.Credit_Date === null ? firstDayOfMonth : cust.Credit_Date,
+                                                        dueDate: cust.Due_Date === null ? today : cust.Due_Date,
                                                         advAmt: cust.AdvanceAmt,
                                                         balance: cust.Balance_Amount,
                                                         depositAmount: cust.Deposit_Amount
@@ -674,6 +705,16 @@ function CustomerName() {
                                     <div className="form first">
                                         <div className="details personal">
                                             <div className="fields2" style={{}}>
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Brnach Name</label>
+                                                    <select value={addCustData.bankBranch}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, bankBranch: e.target.value })} required>
+                                                        <option value="">Branch Name</option>
+                                                        {getBranchName.map((branch, index) => (
+                                                            <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Code</label>
@@ -776,17 +817,6 @@ function CustomerName() {
                                                 </div>
 
                                                 <div className="input-field3">
-                                                    <label htmlFor="">Brnach Name</label>
-                                                    <select value={addCustData.bankBranch}
-                                                        onChange={(e) => setAddCustData({ ...addCustData, bankBranch: e.target.value })} required>
-                                                        <option value="">Branch Name</option>
-                                                        {getBranchName.map((branch, index) => (
-                                                            <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-
-                                                <div className="input-field3">
                                                     <label htmlFor="">GST No</label>
                                                     <input type="tel" value={addCustData.gstNo}
                                                         onChange={(e) => setAddCustData({ ...addCustData, gstNo: e.target.value })}
@@ -824,7 +854,7 @@ function CustomerName() {
                                                             borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
                                                             padding: "0px",
                                                             textAlign: "center"
-                                                        }} value={gstOption} onChange={handleGstChange}>
+                                                        }} value={gstOption || "Yes"} onChange={handleGstChange}>
                                                             <option value="Yes">Yes</option>
                                                             <option value="No">No</option>
                                                         </select>
@@ -845,7 +875,7 @@ function CustomerName() {
                                                             borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
                                                             padding: "0px",
                                                             textAlign: "center"
-                                                        }} value={fuelOption} onChange={handleFuelChange}>
+                                                        }} value={fuelOption || "No"} onChange={handleFuelChange}>
                                                             <option value="Yes">Yes</option>
                                                             <option value="No">No</option>
                                                         </select>
@@ -875,13 +905,13 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Billing Period</label>
-                                                    <select value={addCustData.billPeriod} required
+                                                    <select value={addCustData.billPeriod || "Monthly"} required
                                                         onChange={(e) => setAddCustData({ ...addCustData, billPeriod: e.target.value })}>
                                                         <option value="" disabled >Billing Period</option>
-                                                        <option>Monthly</option>
-                                                        <option>Quaterly</option>
-                                                        <option>Half Yearly</option>
-                                                        <option>Yearly</option>
+                                                        <option value="Monthly">Monthly</option>
+                                                        <option value="Quarterly">Quarterly</option>
+                                                        <option value="Half Yearly">Half Yearly</option>
+                                                        <option value="Yearly">Yearly</option>
                                                     </select>
                                                 </div>
 
@@ -897,11 +927,11 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Customer Status</label>
-                                                    <select value={addCustData.custStatus} required
+                                                    <select value={addCustData.custStatus || "Active"} required
                                                         onChange={(e) => setAddCustData({ ...addCustData, custStatus: e.target.value })}>
                                                         <option value="" disabled >Customer Status</option>
-                                                        <option>Active</option>
-                                                        <option>Inactive</option>
+                                                        <option value="Active">Active</option>
+                                                        <option value="Inactive">Inactive</option>
                                                     </select>
                                                 </div>
 
@@ -913,7 +943,7 @@ function CustomerName() {
                                                 </div>
 
                                                 <div className="input-field3">
-                                                    <label htmlFor="">Contact Person Mobile No</label>
+                                                    <label htmlFor="">Mobile No</label>
                                                     <input type="tel" maxLength="10"
                                                         value={addCustData.contactPersonMob}
                                                         onChange={(e) => setAddCustData({ ...addCustData, contactPersonMob: e.target.value })}
@@ -953,7 +983,7 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Department</label>
-                                                    <select value={addCustData.DepartmentCode}
+                                                    <select value={addCustData.DepartmentCode || "1"}
                                                         onChange={(e) => setAddCustData({ ...addCustData, DepartmentCode: e.target.value })}>
                                                         <option value="" disabled>Select Department</option>
                                                         <option value="1">1</option>
@@ -961,7 +991,17 @@ function CustomerName() {
                                                     </select>
                                                 </div>
 
-                                                <div className="input-field1">
+                                                <div className="input-field3">
+                                                    <label htmlFor="">Manage Branch</label>
+                                                    <select value={addCustData.multiBranch}
+                                                        onChange={(e) => setAddCustData({ ...addCustData, multiBranch: e.target.value })} required>
+                                                        <option value="">Select Manage Branch</option>
+                                                        {getBranchName.map((branch, index) => (
+                                                            <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="input-field2">
                                                     <div className="select-radio">
                                                         <input type="checkbox" name="sms" id="sms"
                                                             checked={addCustData.sms}
@@ -982,13 +1022,13 @@ function CustomerName() {
                                                         <img src={whatsapp} />
                                                     </div>
                                                 </div>
+                                                <div className='bottom-buttons' style={{ marginTop: "15px", marginLeft: "10px" }}>
+                                                    {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
+                                                    {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
+                                                    <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
+                                                </div>
 
                                             </div>
-                                        </div>
-                                        <div className='bottom-buttons' style={{}}>
-                                            {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
-                                            {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
-                                            <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                         </div>
                                     </div>
                                 </form>
@@ -1021,7 +1061,7 @@ function CustomerName() {
                                             <DatePicker
                                                 portalId="root-portal"
                                                 selected={contractData.creditDate}
-                                                onChange={(date) => handleDateChange("creditDate",date)}
+                                                onChange={(date) => handleDateChange("creditDate", date)}
                                                 dateFormat="dd/MM/yyyy"
                                                 className="form-control form-control-sm"
                                             />
@@ -1032,7 +1072,7 @@ function CustomerName() {
                                             <DatePicker
                                                 portalId="root-portal"
                                                 selected={contractData.dueDate}
-                                                onChange={(date) => handleDateChange("dueDate",date)}
+                                                onChange={(date) => handleDateChange("dueDate", date)}
                                                 dateFormat="dd/MM/yyyy"
                                                 className="form-control form-control-sm"
                                             />

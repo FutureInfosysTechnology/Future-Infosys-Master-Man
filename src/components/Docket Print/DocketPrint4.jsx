@@ -24,7 +24,7 @@ const DocketPrint4 = () => {
                         console.log(response);
                         console.log(response.Data);
                         setData(response.Data);
-                        response.Data && navigate("/MobileReceipt", { state: { data:response.Data,path:location.pathname } });
+                        response.Data.lenght && navigate("/MobileReceipt", { state: { data:response.Data,path:location.pathname } });
                     }
                 }
                 catch (error) {
@@ -40,11 +40,11 @@ const DocketPrint4 = () => {
                     <div className="fields2">
                         <div className="input-field3">
                             <label htmlFor="">From</label>
-                            <input type="text" placeholder='From Docket' value={formData.from} onChange={(e) => handleFormChange(e.target.value, "from")} />
+                            <input type="text" placeholder='From Docket' value={formData.from} onChange={(e) => handleFormChange(e.target.value, "from")} required/>
                         </div>
                         <div className="input-field3">
                             <label htmlFor="">To</label>
-                            <input type="text" placeholder='To Docket' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} />
+                            <input type="text" placeholder='To Docket' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} required/>
                         </div>
 
 

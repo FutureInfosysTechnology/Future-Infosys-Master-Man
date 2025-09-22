@@ -541,7 +541,7 @@ function ReceiverName() {
                                                 placeholder="HSN No" required />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field2">
                                             <div className="select-radio">
                                                 <input type="checkbox" name="mode" id="SMS"
                                                     checked={addReceiver.sms}
