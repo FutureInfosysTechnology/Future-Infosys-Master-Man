@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import Modal from 'react-modal';
+import Select from 'react-select';
 import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
@@ -41,10 +42,12 @@ function BranchName() {
         mobileNo: '',
         accountNo: '',
         bankBranch: '',
+        img: "",
     });                                                            // to add Branch Data
     const [searchQuery, setSearchQuery] = useState('');
-
-
+    useEffect(() => {
+        console.log(branchData);
+    }, [branchData])
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -82,7 +85,16 @@ function BranchName() {
 
         fetchInitialData();
     }, []);
-
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBranchData({ ...branchData, img: reader.result }); // reader.result is base64 string
+            };
+            reader.readAsDataURL(file); // converts file to base64
+        }
+    };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -96,7 +108,7 @@ function BranchName() {
             Branch_PIN: branchData.branchPIN,
             Email: branchData.email,
             Website: branchData.website,
-            GSTNo: branchData.gstNo,
+            GSTNo: branchData.gstNo.toUpperCase(),
             HSNNo: branchData.hsnNo,
             City_Code: branchData.cityCode,
             State_Code: branchData.stateCode,
@@ -105,7 +117,8 @@ function BranchName() {
             Bank_Name: branchData.bankName,
             IFSC_Code: branchData.ifscCode,
             MobileNo: branchData.mobileNo,
-            Bank_Branch: branchData.bankBranch
+            Bank_Branch: branchData.bankBranch,
+            Branch_Logo: branchData.img,
         }
 
         try {
@@ -131,7 +144,8 @@ function BranchName() {
                     bankName: "",
                     ifscCode: '',
                     mobileNo: '',
-                    bankBranch: ''
+                    bankBranch: '',
+                    img: ''
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -147,7 +161,10 @@ function BranchName() {
 
     const handleSaveBranchName = async (e) => {
         e.preventDefault();
-
+        if (!branchData.branchName || !branchData.cityCode || !branchData.stateCode) {
+            Swal.fire('Warning!', `Branch,City,State are required`, 'warning');
+            return;
+        }
         const requestBody = {
             branchCode: branchData.branchCode,
             branchName: branchData.branchName,
@@ -157,8 +174,7 @@ function BranchName() {
             branchAdd1: branchData.branchAdd1,
             branchPIN: branchData.branchPIN,
             email: branchData.email,
-            website: branchData.website,
-            gstNo: branchData.gstNo,
+            gstNo: branchData.gstNo.toUpperCase(),
             hsnNo: branchData.hsnNo,
             cityCode: branchData.cityCode,
             stateCode: branchData.stateCode,
@@ -167,7 +183,8 @@ function BranchName() {
             ifscCode: branchData.ifscCode,
             mobileNo: branchData.mobileNo,
             bankBranch: branchData.bankBranch,
-            accountNo: branchData.accountNo
+            accountNo: branchData.accountNo,
+            Branch_Logo: branchData.img,
         }
 
         try {
@@ -192,7 +209,8 @@ function BranchName() {
                     ifscCode: '',
                     mobileNo: '',
                     bankBranch: '',
-                    accountNo: ''
+                    accountNo: '',
+                    img: '',
                 });
                 Swal.fire('Saved!', saveResponse.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -300,7 +318,7 @@ function BranchName() {
                                     branchCode: '', branchName: '', manifestNo: '', runsheetNo: '', invoiceNo: '',
                                     branchAdd1: '', branchPIN: '', email: '', website: '', gstNo: '', hsnNo: '', cityCode: '',
                                     stateCode: '', bankName: '', bankCode: '', bankBranch: '', accountNo: '', ifscCode: '',
-                                    mobileNo: ''
+                                    mobileNo: '', img: ''
                                 })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -326,7 +344,7 @@ function BranchName() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Sr.No</th>
@@ -374,14 +392,17 @@ function BranchName() {
                                                         branchPIN: branch.Branch_PIN,
                                                         hsnNo: branch.HSNNo,
                                                         gstNo: branch.GSTNo,
-                                                        bankCode: branch.Bank_Name,
                                                         email: branch.Email,
                                                         website: branch.Website,
                                                         mobileNo: branch.MobileNo,
                                                         stateCode: branch.State_Code,
+                                                        cityCode:branch.City_Code,
+                                                        bankCode: branch.Bank_Code,
+                                                        bankName:branch.Bank_Name,
                                                         accountNo: branch.AccountNo,
                                                         ifscCode: branch.IFSC_Code,
-                                                        bankBranch: branch.Bank_Branch
+                                                        bankBranch: branch.Bank_Branch,
+                                                        img:branch.Branch_Logo,
                                                     });
                                                     setModalIsOpen(true);
                                                 }}>
@@ -397,7 +418,7 @@ function BranchName() {
                         </table>
                     </div>
 
-                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -411,7 +432,7 @@ function BranchName() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -431,13 +452,15 @@ function BranchName() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-branchName" contentLabel="Modal" 
-                        style={{content: {
-      width: '90%',     
-      top: '50%',             // Center vertically
-      left: '50%',
-      whiteSpace:"nowrap"
-    },}}>
+                        className="custom-modal-branchName" contentLabel="Modal"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Branch Master</header>
@@ -466,16 +489,35 @@ function BranchName() {
 
                                         <div className="input-field3">
                                             <label htmlFor="">Branch Name</label>
-                                            <select value={branchData.branchName}
-                                                onChange={(e) => setBranchData({ ...branchData,branchName: e.target.value,branchCode:e.target.value })} required>
-                                                <option value="" disabled >Select Branch</option>
-                                                {getCity.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCity.map((city) => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name,
+                                                }))}
+                                                value={
+                                                    branchData.branchCode
+                                                        ? { value: branchData.branchCode, label: branchData.branchName }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setBranchData({
+                                                        ...branchData,
+                                                        branchName: selected ? selected.label : "",
+                                                        branchCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select Branch"
+                                                isSearchable={true}
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
+                                            />
                                         </div>
 
-                                         <div className="input-field3">
+                                        <div className="input-field3">
                                             <label htmlFor="">Start Invoice No.</label>
                                             <input type="tel" placeholder="Enter Start Invoice No"
                                                 value={branchData.invoiceNo}
@@ -540,36 +582,105 @@ function BranchName() {
 
                                         <div className="input-field3">
                                             <label htmlFor="">City Name</label>
-                                            <select value={branchData.cityCode}
-                                                onChange={(e) => setBranchData({ ...branchData, cityCode: e.target.value })} required>
-                                                <option value="" disabled >Select City</option>
-                                                {getCity.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCity.map((city) => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name,
+                                                }))}
+                                                value={
+                                                    branchData.cityCode
+                                                        ? {
+                                                            value: branchData.cityCode,
+                                                            label:
+                                                                getCity.find((c) => c.City_Code === branchData.cityCode)
+                                                                    ?.City_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setBranchData({
+                                                        ...branchData,
+                                                        cityCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select City"
+                                                isSearchable={true}
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">State Name</label>
-                                            <select value={branchData.stateCode} required
-                                                onChange={(e) => setBranchData({ ...branchData, stateCode: e.target.value })}>
-                                                <option value="" disabled >Select state</option>
-                                                {state.map((state, index) => (
-                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={state.map((st) => ({
+                                                    value: st.State_Code,
+                                                    label: st.State_Name,
+                                                }))}
+                                                value={
+                                                    branchData.stateCode
+                                                        ? {
+                                                            value: branchData.stateCode,
+                                                            label:
+                                                                state.find((s) => s.State_Code === branchData.stateCode)
+                                                                    ?.State_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setBranchData({
+                                                        ...branchData,
+                                                        stateCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable={true}
+                                                menuPortalTarget={document.body} // ✅ Keeps dropdown outside scroll
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Bank Name</label>
-                                            <select required
-                                                value={branchData.bankCode}
-                                                onChange={(e) => setBranchData({ ...branchData, bankCode: e.target.value })}>
-                                                <option value="" disabled>Select Bank Name</option>
-                                                {getBankName.map((bank, index) => (
-                                                    <option key={index} value={bank.Bank_Code}>{bank.Bank_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getBankName.map((bank) => ({
+                                                    value: bank.Bank_Code,
+                                                    label: bank.Bank_Name,
+                                                }))}
+                                                value={
+                                                    branchData.bankCode
+                                                        ? {
+                                                            value: branchData.bankCode,
+                                                            label: branchData.bankName,
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setBranchData({
+                                                        ...branchData,
+                                                        bankCode: selected ? selected.value : "",
+                                                        bankName: selected ? selected.label : "",
+                                                    })
+                                                }
+                                                placeholder="Select Bank Name"
+                                                isSearchable={true}
+                                                menuPortalTarget={document.body} // ✅ Keeps dropdown above other UI
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
@@ -600,6 +711,27 @@ function BranchName() {
                                                 value={branchData.bankBranch}
                                                 onChange={(e) => setBranchData({ ...branchData, bankBranch: e.target.value })} required />
                                         </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="branchLogo">Company Logo</label>
+                                            <input
+                                                type="file"
+                                                id="branchLogo"
+                                                accept="image/*"   // ✅ only allow image files
+                                                onChange={handleFileChange}
+                                                required
+                                                style={{ paddingTop: "5px" }}
+                                            />
+                                        </div>
+                                        {branchData.img && 
+                                        (<div className="input-field3">
+                                            <img
+                                                src={branchData.img}
+                                                alt="Branch Logo"
+                                                style={{ width: "50px",height:"50px", marginTop: "10px" }}
+                                            />
+                                        </div>
+                                        )}
 
                                     </div>
 

@@ -10,7 +10,11 @@ import Booking from "./Booking";
 import ShortEntry from "./ShortEntry";
 import "./DailyBooking.css"
 import ExcelImportBulk from "./ExcelImportBulk"; // ✅ Added import
+import BookingPrint from "./BookingPrint";
+import { useLocation } from "react-router-dom";
 function DailyBooking() {
+  const location=useLocation();
+  const path=location?.state?.tab==="print4"? "print":""
   const [activeTab, setActiveTab] = useState("vendor");
 
   const handleChange = (event) => {
@@ -29,6 +33,13 @@ function DailyBooking() {
             type="radio" name="slider"
             id="vendor"
             checked={activeTab === "vendor"}
+            onChange={handleChange}
+          />
+           <input
+            type="radio"
+            name="slider"
+            id="print"
+            checked={activeTab === "print"}
             onChange={handleChange}
           />
           <input
@@ -79,6 +90,9 @@ function DailyBooking() {
             <label htmlFor="vendor" className="vendor">
               Docket Booking
             </label>
+            <label htmlFor="print" className="print">
+              Docket Print
+            </label>
             <label htmlFor="vendorrate" className="vendorrate">
               Docket Expenses
             </label>
@@ -103,6 +117,7 @@ function DailyBooking() {
           {/* Sections */}
           <section>
             {activeTab === "vendor" && <Booking />}
+            {activeTab === "print" && <BookingPrint />}
             {activeTab === "vendorrate" && <DailyExpenses />}
             {activeTab === "vendorfuel" && <EmailBooking />}
             {activeTab === "entry" && <ShortEntry />}

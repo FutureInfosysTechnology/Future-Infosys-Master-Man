@@ -35,7 +35,7 @@ function Booking() {
 
         return `${year}-${month}-${day}`;
     };
-
+    const [fecthed, setFecthed] = useState("");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
     const [modalIsOpen2, setModalIsOpen2] = useState(false);
@@ -104,9 +104,10 @@ function Booking() {
             e.preventDefault();
         }
     };
-
-
-
+    useEffect(() => {
+        console.log(selectedDestPinCode);
+    }
+        , [selectedDestPinCode])
     const [formData, setFormData] = useState({
         custName: "",
         shipper: "",
@@ -130,8 +131,8 @@ function Booking() {
         OriginCode: "",
         DestinationCode: "",
         DispatchDate: getTodayDate(),
-        DoxSpx: "",
-        RateType: "",
+        DoxSpx: "Box",
+        RateType: "Weight",
         QtyOrderEntry: "",
         VendorWt: 0,
         VendorAmt: 0,
@@ -172,7 +173,7 @@ function Booking() {
         InvoiceNo: "",
         InvValue: 0,
         EwayBill: "",
-        InvDate: "",
+        InvDate: getTodayDate(),
         BillParty: "",
         DestName: "",
         Mode_Code: "",
@@ -434,6 +435,7 @@ function Booking() {
                     shipper_Mob: shipper.Mobile?.trim() || "",
                     shipper_Add1: shipper.Add1?.trim() || "",
                     shipper_Add2: shipper.Add2?.trim() || "",
+                    shipper_Add3: shipper.Add3?.trim() || "",
                     shipper_Pin: shipper.Pin?.trim() || "",
                     GSTNo: shipper.GSTNo?.trim() || "",
                     State_Code: shipper.State_Code?.trim() || "",
@@ -1109,6 +1111,7 @@ function Booking() {
             Mode_Code: formData.Mode_Code,
             Origin_code: formData.OriginCode,
             Origin_Zone: formData.Origin_zone,
+            Origin_Pincode: selectedOriginPinCode,
             Destination_Code: formData.DestinationCode,
             Dest_Zone: formData.Zone_Name,
             Dest_PinCode: selectedDestPinCode,
@@ -1164,10 +1167,11 @@ function Booking() {
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
             EwayBill: formData.EwayBill,
-            InvDate: formData.InvDate || formatDate(formData.DispatchDate),
+            InvDate: formatDate(formData.InvDate),
             Remark: remarkData.Remark,
             MHWNo: remarkData.MHWNo,
             DestName: formData.DestName,
+            T_Flag: formData.BookMode,
             UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
             MultiInvoice: InvoicesubmittedData.map((invoice) => ({
                 PoNo: invoice.PoNo,
@@ -1206,6 +1210,7 @@ function Booking() {
         try {
             const response = await postApi('/Booking/OderEntry', requestBody, 'POST');
             if (response.Success === 1) {
+                setFecthed('');
                 const result = await Swal.fire({
                     title: 'Saved Successfully!',
                     text: "Do you want to print the docket now?",
@@ -1400,6 +1405,7 @@ function Booking() {
             Mode_Code: formData.Mode_Code,
             Origin_code: formData.OriginCode,
             Origin_Zone: formData.Origin_zone,
+            Origin_Pincode: selectedOriginPinCode,
             Destination_Code: formData.DestinationCode,
             Dest_Zone: formData.Zone_Name,
             Dest_PinCode: selectedDestPinCode,
@@ -1458,10 +1464,11 @@ function Booking() {
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
             EwayBill: formData.EwayBill,
-            InvDate: formatDate(formData.DispatchDate),
+            InvDate: formatDate(formData.InvDate),
             Remark: remarkData.Remark,
             MHWNo: remarkData.MHWNo,
             DestName: formData.DestName,
+            T_Flag: formData.BookMode,
             MultiInvoice: InvoicesubmittedData.map((invoice) => ({
                 PoNo: invoice.PoNo,
                 PoDate: formatDate(invoice.PoDate),
@@ -1499,6 +1506,7 @@ function Booking() {
             if (res.Success) {
                 Swal.fire('Updated!', res.message || 'Booking updated.', 'success');
                 resetAllForms();
+                setFecthed('');
             } else Swal.fire('Error', res.message || 'Update failed.', 'error');
         } catch (err) {
             Swal.fire('Error', 'Something went wrong while updating.', 'error');
@@ -1507,8 +1515,11 @@ function Booking() {
     };
 
 
-    const handleSearch = async () => {
+    const handleSearch = async (docket) => {
         if (!formData.DocketNo) return Swal.fire("Warning", "Enter Docket No", "warning");
+        if (fecthed === formData.DocketNo) {
+            return Swal.fire("Warning", `Docket ${formData.DocketNo} already Fetched`, "warning");
+        }
         try {
             const res = await getApi(`/Booking/getOrderByDocket?docketNo=${formData.DocketNo}`);
             if (res.Success === 1 && res.OrderEntry) {
@@ -1517,6 +1528,7 @@ function Booking() {
                     text: "Data Fecthed Successfuly",
                     icon: 'success',
                 });
+                setFecthed(docket);
                 const data = res.OrderEntry;
                 console.log(data);
 
@@ -1571,8 +1583,13 @@ function Booking() {
                     Shipper_Name: data.Shipper_Code,
                     ShipperAdd: data.ShipperAdd,
                     ShipperAdd2: data.ShipperAdd2,
+                    ShipperAdd3: data.ShipperAdd3,
                     ShipperPin: data.ShipperPin,
                     ShipperPhone: data.ShipperPhone,
+                    ShipperCity: data.ShipperCity,
+                    Shipper_StateCode: data.Shipper_StateCode,
+                    Shipper_GstNo: data.Shipper_GstNo,
+                    ShipperEmail: data.ShipperEmail,
                     UserName: data.UserName,
                     InvoiceNo: data.InvoiceNo,
                     InvValue: data.InvValue,
@@ -1580,10 +1597,18 @@ function Booking() {
                     InvDate: data.InvDate,
                     BillParty: data.BillParty,
                     DestName: "",
+                    BookMode: data.T_Flag,
 
                 });
+                setRemarkData({
+                    Remark: data.Remark,
+                    MHWNo: data.MHWNo,
+                });
+                setSelectedOriginPinCode(data.Origin_Pincode);
+                setSelectedDestPinCode(data.Dest_PinCode);
+
                 const multiInvoice = res.MultiInvoice || [];
-                console.log("search", multiInvoice); 
+                console.log("search", multiInvoice);
                 const formattedInvoices = multiInvoice.map(item => ({
                     PoNo: item.PoNo || "",
                     PoDate: new Date(item.PoDate) || "",
@@ -1596,24 +1621,24 @@ function Booking() {
                     InvoiceImg: item.InvoiceImg || ""
                 }));
                 setInvoiceSubmittedData(formattedInvoices);
-                setSubmittedData(res.Volumetric);    
+                setSubmittedData(res.Volumetric);
                 setVendorSubmittedData(res.VendorVolumetric)
-                    
-        
-       
-        // Qty: 0,
-        // DivideBy: "",
-        // VolmetricWt: 0,
-        // ActualWt: 0,
-        // ChargeWt: 0
-                    //  Length:item.Length || 0,
-                    //  Width:item.Width || 0,
-                    //  Height:item.Height || 0,
-                    //  Qty.item.Qty || 0,
-                    //  item.DivideBy || "",
-                    //  item.VolmetricWt || 0,
-                    //  item.ActualWt || 0,
-                    //  item.ChargeWt || 0,
+
+
+
+                // Qty: 0,
+                // DivideBy: "",
+                // VolmetricWt: 0,
+                // ActualWt: 0,
+                // ChargeWt: 0
+                //  Length:item.Length || 0,
+                //  Width:item.Width || 0,
+                //  Height:item.Height || 0,
+                //  Qty.item.Qty || 0,
+                //  item.DivideBy || "",
+                //  item.VolmetricWt || 0,
+                //  item.ActualWt || 0,
+                //  item.ChargeWt || 0,
                 // }))
 
 
@@ -1682,7 +1707,7 @@ function Booking() {
     //     value: receiver.Receiver_Code
     // }));
 
-    const allCustomerOptions = getCustomerdata?.length > 0 ? getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString() })) : null;
+    const allCustomerOptions = getCustomerdata?.length > 0 ? getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString(), Booking_Type: cust.Booking_Type })) : null;
 
 
 
@@ -1711,7 +1736,7 @@ function Booking() {
                                             value={formData.DocketNo}
                                             onKeyDown={(e) => {
                                                 if (toggleActive && e.key === "Enter") {
-                                                    handleSearch();
+                                                    handleSearch(formData.DocketNo);
                                                 }
                                             }}
                                             onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })}
@@ -1750,15 +1775,19 @@ function Booking() {
                                                 classNamePrefix="blue-selectbooking"
                                                 options={allCustomerOptions}
                                                 value={
-                                                    formData.Customer_Code
-                                                        ? allCustomerOptions.find(opt => opt.value === formData.Customer_Code)
+                                                    formData.Customer_Code ?
+                                                        {
+                                                            value: formData.Customer_Code,
+                                                            label: allCustomerOptions.find(opt => opt.value === formData.Customer_Code)?.label
+                                                        } || ""
                                                         : null
                                                 }
                                                 onChange={(selectedOption) => {
                                                     setFormData(prev => ({
                                                         ...prev,
                                                         Customer_Code: selectedOption.value,
-                                                        Customer_Name: selectedOption.label
+                                                        Customer_Name: selectedOption.label,
+                                                        BookMode: selectedOption.Booking_Type,
                                                     }));
                                                 }}
                                                 placeholder="Select Customer"
@@ -1808,6 +1837,7 @@ function Booking() {
                                                             Shipper_Name: selectedOption.value,
                                                             ShipperAdd: selectedOption.shipper_Add1,
                                                             ShipperAdd2: selectedOption.shipper_Add2,
+                                                            ShipperAdd3: selectedOption.shipper_Add3,
                                                             ShipperCity: selectedOption.City_Code,
                                                             Shipper_StateCode: selectedOption.State_Code,
                                                             Shipper_GstNo: selectedOption.GSTNo,
@@ -1898,6 +1928,10 @@ function Booking() {
                                             <option value="" disabled>Select Booking Mode</option>
                                             <option value="Cash">Cash</option>
                                             <option value="Credit">Credit</option>
+                                            <option value="To-pay">To-pay</option>
+                                            <option value="Google Pay">Google Pay</option>
+                                            <option value="RTGS">RTGS</option>
+                                            <option value="NEFT">NEFT</option>
                                         </select>
                                     </div>
 
@@ -2178,8 +2212,9 @@ function Booking() {
                                                             ConsigneeEmail: selectedOption.Receiver_Email,
                                                             ConsigneeAdd1: selectedOption.Receiver_Add1,
                                                             ConsigneeAdd2: selectedOption.Receiver_Add2,
-                                                            ConsigneeGST: selectedOption.GSTNo
+                                                            ConsigneeGST: selectedOption.GSTNo,
                                                         }));
+                                                        setSelectedOriginPinCode(selectedOption.Receiver_Pin)
                                                     }}
                                                     placeholder="Select Receiver Name"
                                                     isSearchable
@@ -2337,7 +2372,7 @@ function Booking() {
 
                                     {isRemarkChecked && (
                                         <div className="input-field1">
-                                            <label>Content</label>
+                                            <label>Content/Remark</label>
                                             <button
                                                 type="button"
                                                 className="ok-btn"
@@ -2352,7 +2387,10 @@ function Booking() {
                                         <label>Billing Type</label>
                                         <select value={formData.BillParty} onChange={(e) => setFormData({ ...formData, BillParty: e.target.value })}>
                                             <option value="" disabled>Select Billing Type</option>
-                                            <option value="Shipper">Shipper</option>
+                                            <option value="Client-wise Bill">Client-wise Bill</option>
+                                            <option value="Shipper-wise Bill">Shipper-wise Bill</option>
+                                            <option value="Vendor-wise Bill">Vendor-wise Bill</option>
+                                            <option value="Product-wise Bill">Product-wise Bill</option>
                                         </select>
                                     </div>
 
@@ -3106,7 +3144,7 @@ function Booking() {
                         className="custom-modal-stock" contentLabel="Modal">
                         <div className="custom-modal-content">
                             <div className="header-tittle">
-                                <header>Remark / Sr No</header>
+                                <header>Content/Remark</header>
                             </div>
                             <div className='container2'>
                                 <form>
@@ -3119,7 +3157,7 @@ function Booking() {
 
                                         <div className="input-field">
                                             <label htmlFor="">Content</label>
-                                            <input type="text" placeholder="Alarm No" value={remarkData.MHWNo}
+                                            <input type="text" placeholder="Content" value={remarkData.MHWNo}
                                                 onChange={(e) => setRemarkData({ ...remarkData, MHWNo: e.target.value })} />
                                         </div>
                                     </div>

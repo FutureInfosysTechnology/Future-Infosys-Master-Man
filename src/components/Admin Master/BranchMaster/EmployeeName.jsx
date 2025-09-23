@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import Modal from 'react-modal';
+import Select from 'react-select';
 import { getApi, postApi, deleteApi } from '../Area Control/Zonemaster/ServicesApi';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -309,7 +310,7 @@ function EmployeeName() {
                         </table>
                     </div>
 
-                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -323,7 +324,7 @@ function EmployeeName() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -394,13 +395,37 @@ function EmployeeName() {
 
                                                 <div className="input-field1">
                                                     <label htmlFor="">Branch Name</label>
-                                                    <select value={addEmp.cityCode}
-                                                        onChange={(e) => setAddEmp({ ...addEmp, cityCode: e.target.value })}>
-                                                        <option value="" disabled >Select City</option>
-                                                        {getBranch.map((branch, index) => (
-                                                            <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <Select
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={getBranch.map((branch) => ({
+                                                            value: branch.Branch_Code,
+                                                            label: branch.Branch_Name,
+                                                        }))}
+                                                        value={
+                                                            addEmp.cityCode
+                                                                ? {
+                                                                    value: addEmp.cityCode,
+                                                                    label:
+                                                                        getBranch.find((b) => b.Branch_Code === addEmp.cityCode)
+                                                                            ?.Branch_Name || "",
+                                                                }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddEmp({
+                                                                ...addEmp,
+                                                                cityCode: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="Select Branch"
+                                                        isSearchable={true}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{
+                                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                        }}
+                                                    />
+
                                                 </div>
 
                                                 <div className="input-field1">

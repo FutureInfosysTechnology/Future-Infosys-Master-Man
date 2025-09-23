@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import Select from 'react-select';
 import Modal from 'react-modal';
 import sms from '../../../Assets/Images/sms-svgrepo-com.png';
 import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
@@ -115,7 +116,7 @@ function ReceiverName() {
     }, []);
 
     const handleGenerateCode = () => {
-        if(addReceiver.receiverCode!=='') return;
+        if (addReceiver.receiverCode !== '') return;
         const newCode = `${Math.floor(Math.random() * 1000)}`;
         setAddReceiver({ ...addReceiver, receiverCode: newCode });
     };
@@ -133,7 +134,7 @@ function ReceiverName() {
             StateCode: addReceiver.stateCode,
             ReceiverMob: addReceiver.receiverMob,
             ReceiverEmail: addReceiver.receiverEmail,
-            GSTNo: addReceiver.gstNo,
+            GSTNo: addReceiver.gstNo.toUpperCase(),
             HSNNo: addReceiver.hsnNo,
             SMS: addReceiver.sms,
             EmailId: addReceiver.emailId,
@@ -185,7 +186,7 @@ function ReceiverName() {
             stateCode: addReceiver.stateCode,
             receiverMob: addReceiver.receiverMob,
             receiverEmail: addReceiver.receiverEmail,
-            gstNo: addReceiver.gstNo,
+            gstNo: addReceiver.gstNo.toUpperCase(),
             hsnNo: addReceiver.hsnNo,
             sms: addReceiver.sms,
             emailId: addReceiver.emailId,
@@ -329,7 +330,7 @@ function ReceiverName() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Sr.No</th>
@@ -374,9 +375,9 @@ function ReceiverName() {
                                                         receiverPin: receiver.Receiver_Pin,
                                                         receiverMob: receiver.Receiver_Mob,
                                                         stateCode: receiver.State_Code,
+                                                        cityCode:receiver.City_Code,
                                                         receiverEmail: receiver.Receiver_Email,
                                                         hsnNo: receiver.HSNNo,
-                                                        cityCode: receiver.City_Name,
                                                         sms: false,
                                                         emailId: false,
                                                         whatApp: false
@@ -492,24 +493,74 @@ function ReceiverName() {
 
                                         <div className="input-field3">
                                             <label htmlFor="">City Name</label>
-                                            <select value={addReceiver.cityCode}
-                                                onChange={(e) => setAddReceiver({ ...addReceiver, cityCode: e.target.value })} required>
-                                                <option value="" disabled >Select City</option>
-                                                {getCity.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCity.map((city) => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name,
+                                                }))}
+                                                value={
+                                                    addReceiver.cityCode
+                                                        ? {
+                                                            value: addReceiver.cityCode,
+                                                            label:
+                                                                getCity.find((c) => c.City_Code === addReceiver.cityCode)
+                                                                    ?.City_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setAddReceiver({
+                                                        ...addReceiver,
+                                                        cityCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select City"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">State Name</label>
-                                            <select value={addReceiver.stateCode} required
-                                                onChange={(e) => { setAddReceiver({ ...addReceiver, stateCode: e.target.value }) }}>
-                                                <option value="" disabled >Select State</option>
-                                                {getState.map((state, index) => (
-                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getState.map((st) => ({
+                                                    value: st.State_Code,
+                                                    label: st.State_Name,
+                                                }))}
+                                                value={
+                                                    addReceiver.stateCode
+                                                        ? {
+                                                            value: addReceiver.stateCode,
+                                                            label:
+                                                                getState.find((s) => s.State_Code === addReceiver.stateCode)
+                                                                    ?.State_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setAddReceiver({
+                                                        ...addReceiver,
+                                                        stateCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">

@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import Select from 'react-select';
 
 
 function CustomerName() {
@@ -43,10 +44,10 @@ function CustomerName() {
     const [contractData, setContractData] = useState({
         creditDate: firstDayOfMonth,
         dueDate: today,
-        contractAmount: '',
-        depositAmount: '',
-        balance: '',
-        advAmt: ''
+        contractAmount: 0,
+        depositAmount: 0,
+        balance: 0,
+        advAmt: 0
     });
     const [addCustData, setAddCustData] = useState({
         custCode: '',
@@ -62,11 +63,11 @@ function CustomerName() {
         gstNo: '',
         hsnNo: '',
         gstType: '',
-        gst: '',
-        fuel: '',
-        discount: '',
-        billPeriod: '',
-        custStatus: '',
+        gst: '0',
+        fuel: '0',
+        discount: '0',
+        billPeriod: 'Monthly',
+        custStatus: 'Active',
         contactPerson: '',
         contactPersonMob: '',
         cityCode: '',
@@ -77,7 +78,7 @@ function CustomerName() {
         whatApp: false,
         userName: '',
         Password: '',
-        DepartmentCode: '',
+        DepartmentCode: '1',
         multiBranch: '',
     })
     console.log(addCustData);
@@ -199,7 +200,7 @@ function CustomerName() {
             PinCode: addCustData.pinCode,
             StateCode: addCustData.stateCode,
             CityCode: addCustData.cityCode,
-            GstNo: addCustData.gstNo,
+            GstNo: addCustData.gstNo.toUpperCase(),
             HSN_No: addCustData.hsnNo || "",
             GstType: addCustData.gstType,
             CustomerGst: addCustData.gst,
@@ -301,7 +302,7 @@ function CustomerName() {
             customerAdd3: addCustData.custAdd3,
             pinCode: addCustData.pinCode,
             stateCode: addCustData.stateCode,
-            gstNo: addCustData.gstNo,
+            gstNo: addCustData.gstNo.toUpperCase(),
             hsnNo: addCustData.hsnNo,
             gstType: addCustData.gstType,
             customerGst: addCustData.gst,
@@ -367,7 +368,7 @@ function CustomerName() {
                     DepartmentCode: '',
                     multiBranch: '',
                 });
-                 setContractData({
+                setContractData({
                     creditDate: firstDayOfMonth,
                     dueDate: today,
                     contractAmount: '0',
@@ -508,8 +509,8 @@ function CustomerName() {
                                     gst: '0',
                                     fuel: '0',
                                     discount: '0',
-                                    billPeriod: '',
-                                    custStatus: '',
+                                    billPeriod: 'Monthly',
+                                    custStatus: 'Active',
                                     contactPerson: '',
                                     contactPersonMob: '',
                                     cityCode: '',
@@ -520,19 +521,20 @@ function CustomerName() {
                                     whatApp: false,
                                     userName: '',
                                     Password: '',
-                                    DepartmentCode: ''
+                                    DepartmentCode: '1',
+                                    multiBranch: '',
                                 });
-                                 setContractData({
-                    creditDate: firstDayOfMonth,
-                    dueDate: today,
-                    contractAmount: '0',
-                    depositAmount: '0',
-                    balance: '0',
-                    advAmt: '0'
-                });
-                setGstOption("Yes");
-                setFuelOption("No");
-                setPasswordVisible(false);
+                                setContractData({
+                                    creditDate: firstDayOfMonth,
+                                    dueDate: today,
+                                    contractAmount: 0,
+                                    depositAmount: 0,
+                                    balance: 0,
+                                    advAmt: 0
+                                });
+                                setGstOption("Yes");
+                                setFuelOption("No");
+                                setPasswordVisible(false);
                                 setModalIsOpen(true); setIsEditMode(false);
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -707,13 +709,38 @@ function CustomerName() {
                                             <div className="fields2" style={{}}>
                                                 <div className="input-field3">
                                                     <label htmlFor="">Brnach Name</label>
-                                                    <select value={addCustData.bankBranch}
-                                                        onChange={(e) => setAddCustData({ ...addCustData, bankBranch: e.target.value })} required>
-                                                        <option value="">Branch Name</option>
-                                                        {getBranchName.map((branch, index) => (
-                                                            <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <Select
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={getBranchName.map((branch) => ({
+                                                            value: branch.Branch_Code,
+                                                            label: branch.Branch_Name,
+                                                        }))}
+                                                        value={
+                                                            addCustData.bankBranch
+                                                                ? {
+                                                                    value: addCustData.bankBranch,
+                                                                    label:
+                                                                        getBranchName.find((b) => b.Branch_Code === addCustData.bankBranch)
+                                                                            ?.Branch_Name || "",
+                                                                }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                bankBranch: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="Branch Name"
+                                                        isSearchable={true}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{
+                                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                        }}
+                                                    />
+
                                                 </div>
 
                                                 <div className="input-field3">
@@ -795,25 +822,74 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">State Name</label>
-                                                    <select required value={addCustData.stateCode}
-                                                        onChange={(e) => setAddCustData({ ...addCustData, stateCode: e.target.value })}>
-                                                        <option value="" disabled >State Name</option>
-                                                        {getState.map((state, index) => (
-                                                            <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <Select
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={getState.map((st) => ({
+                                                            value: st.State_Code,
+                                                            label: st.State_Name,
+                                                        }))}
+                                                        value={
+                                                            addCustData.stateCode
+                                                                ? {
+                                                                    value: addCustData.stateCode,
+                                                                    label:
+                                                                        getState.find((s) => s.State_Code === addCustData.stateCode)
+                                                                            ?.State_Name || "",
+                                                                }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                stateCode: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="State Name"
+                                                        isSearchable={true}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{
+                                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                        }}
+                                                    />
+
                                                 </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">City Name</label>
-                                                    <select required
-                                                        value={addCustData.cityCode}
-                                                        onChange={(e) => setAddCustData({ ...addCustData, cityCode: e.target.value })}>
-                                                        <option value="" disabled>City Name</option>
-                                                        {getCity.map((city, index) => (
-                                                            <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <Select
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={getCity.map((city) => ({
+                                                            value: city.City_Code,
+                                                            label: city.City_Name,
+                                                        }))}
+                                                        value={
+                                                            addCustData.cityCode
+                                                                ? {
+                                                                    value: addCustData.cityCode,
+                                                                    label:
+                                                                        getCity.find((c) => c.City_Code === addCustData.cityCode)
+                                                                            ?.City_Name || "",
+                                                                }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                cityCode: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="City Name"
+                                                        isSearchable={true}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{
+                                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                        }}
+                                                    />
+
                                                 </div>
 
                                                 <div className="input-field3">
@@ -905,7 +981,7 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Billing Period</label>
-                                                    <select value={addCustData.billPeriod || "Monthly"} required
+                                                    <select value={addCustData.billPeriod} required
                                                         onChange={(e) => setAddCustData({ ...addCustData, billPeriod: e.target.value })}>
                                                         <option value="" disabled >Billing Period</option>
                                                         <option value="Monthly">Monthly</option>
@@ -927,7 +1003,7 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Customer Status</label>
-                                                    <select value={addCustData.custStatus || "Active"} required
+                                                    <select value={addCustData.custStatus} required
                                                         onChange={(e) => setAddCustData({ ...addCustData, custStatus: e.target.value })}>
                                                         <option value="" disabled >Customer Status</option>
                                                         <option value="Active">Active</option>
@@ -993,13 +1069,38 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Manage Branch</label>
-                                                    <select value={addCustData.multiBranch}
-                                                        onChange={(e) => setAddCustData({ ...addCustData, multiBranch: e.target.value })} required>
-                                                        <option value="">Select Manage Branch</option>
-                                                        {getBranchName.map((branch, index) => (
-                                                            <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <Select
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={getBranchName.map((branch) => ({
+                                                            value: branch.Branch_Code,
+                                                            label: branch.Branch_Name,
+                                                        }))}
+                                                        value={
+                                                            addCustData.multiBranch
+                                                                ? {
+                                                                    value: addCustData.multiBranch,
+                                                                    label:
+                                                                        getBranchName.find((b) => b.Branch_Code === addCustData.multiBranch)
+                                                                            ?.Branch_Name || "",
+                                                                }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                multiBranch: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="Select Manage Branch"
+                                                        isSearchable={true}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{
+                                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                        }}
+                                                    />
+
                                                 </div>
                                                 <div className="input-field2">
                                                     <div className="select-radio">

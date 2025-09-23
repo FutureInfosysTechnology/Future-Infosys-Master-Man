@@ -3,8 +3,8 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
 import { useLocation, useNavigate } from "react-router-dom"
-import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
-const DocketPrint4 = () => {
+import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+const BookingPrint = () => {
     const [data,setData]=useState([]);
     const [formData, setFormData] = useState({
         from: "",
@@ -51,8 +51,6 @@ const DocketPrint4 = () => {
                             <input type="text" placeholder='To Docket' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} required/>
                         </div>
 
-
-
                         <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "12px" }}>
                             <button type='submit' className='ok-btn'>Submit</button>
                             <button className='ok-btn'>Cancel</button>
@@ -64,4 +62,4 @@ const DocketPrint4 = () => {
     )
 }
 
-export default DocketPrint4
+export default BookingPrint

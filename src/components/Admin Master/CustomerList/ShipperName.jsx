@@ -10,6 +10,7 @@ import sms from '../../../Assets/Images/sms-svgrepo-com.png';
 import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
 import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
 import { getApi, postApi, deleteApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
+import Select from 'react-select';
 
 
 function ShipperName() {
@@ -40,17 +41,17 @@ function ShipperName() {
     });
 
     const filteredgetShipper = getShipper.filter((shipper) =>
-    (shipper?.Shipper_Code?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.Shipper_Name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.Add1?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.Pin?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.City_Name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.State_Name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.Mobile?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.Email?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.GSTNo?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (shipper?.CompanyName?.toLowerCase().includes(searchQuery.toLowerCase()))
-);
+        (shipper?.Shipper_Code?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.Shipper_Name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.Add1?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.Pin?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.City_Name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.State_Name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.Mobile?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.Email?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.GSTNo?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (shipper?.CompanyName?.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
 
 
     const indexOfLastRow = currentPage * rowsPerPage;
@@ -121,19 +122,19 @@ function ShipperName() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-  const requestBody = {
-    Shipper_Code: addShipper.shipperCode,
-    Shipper_Name: addShipper.shipperName,
-    Add1: addShipper.shipperAdd1,
-    Add2: addShipper.shipperAdd2,
-    Pin: addShipper.shipperPin,
-    Mobile: addShipper.shipperMob,
-    State_Code: addShipper.stateCode,
-    GSTNo: addShipper.gstNo,
-    Email: addShipper.shipperEmail,
-    City_Code: addShipper.cityCode,
-    CompanyName: addShipper.company
-};
+        const requestBody = {
+            Shipper_Code: addShipper.shipperCode,
+            Shipper_Name: addShipper.shipperName,
+            Add1: addShipper.shipperAdd1,
+            Add2: addShipper.shipperAdd2,
+            Pin: addShipper.shipperPin,
+            Mobile: addShipper.shipperMob,
+            State_Code: addShipper.stateCode,
+            GSTNo: addShipper.gstNo.toUpperCase(),
+            Email: addShipper.shipperEmail,
+            City_Code: addShipper.cityCode,
+            CompanyName: addShipper.company
+        };
 
         try {
             const response = await putApi('/Master/UpdateSmartShipperMaster', requestBody, 'POST');
@@ -177,7 +178,7 @@ function ShipperName() {
             pin: addShipper.shipperPin,
             mobile: addShipper.shipperMob,
             stateCode: addShipper.stateCode,
-            gstNo: addShipper.gstNo,
+            gstNo: addShipper.gstNo.toUpperCase(),
             email: addShipper.shipperEmail,
             cityCode: addShipper.cityCode,
             companyName: addShipper.company
@@ -364,17 +365,17 @@ function ShipperName() {
                                                 <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
                                                     setAddShipper({
-                                                        shipperCode:shipper.Shipper_Code,
+                                                        shipperCode: shipper.Shipper_Code,
                                                         shipperName: shipper.Shipper_Name,
-                                                        shipperAdd1:shipper.Add1,
+                                                        shipperAdd1: shipper.Add1,
                                                         shipperAdd2: shipper.Add2,
-                                                        shipperPin:shipper.Pin,
-                                                        cityCode:shipper.City_Code,
-                                                        stateCode:shipper.State_Code,
-                                                        shipperMob:shipper.Mobile,
-                                                        shipperEmail:shipper.Email,
-                                                        gstNo:shipper.GSTNo,
-                                                        company:shipper.CompanyName,
+                                                        shipperPin: shipper.Pin,
+                                                        cityCode: shipper.City_Code,
+                                                        stateCode: shipper.State_Code,
+                                                        shipperMob: shipper.Mobile,
+                                                        shipperEmail: shipper.Email,
+                                                        gstNo: shipper.GSTNo,
+                                                        company: shipper.CompanyName,
                                                     });
                                                     setModalIsOpen(true);
                                                 }}>
@@ -484,24 +485,74 @@ function ShipperName() {
 
                                         <div className="input-field3">
                                             <label htmlFor="">City Name</label>
-                                            <select value={addShipper.cityCode}
-                                                onChange={(e) => setAddShipper({ ...addShipper, cityCode: e.target.value })} required>
-                                                <option value="" disabled >Select City</option>
-                                                {getCity.length > 0 && getCity.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCity.map((city) => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name,
+                                                }))}
+                                                value={
+                                                    addShipper.cityCode
+                                                        ? {
+                                                            value: addShipper.cityCode,
+                                                            label:
+                                                                getCity.find((c) => c.City_Code === addShipper.cityCode)
+                                                                    ?.City_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setAddShipper({
+                                                        ...addShipper,
+                                                        cityCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select City"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">State Name</label>
-                                            <select value={addShipper.stateCode} required
-                                                onChange={(e) => { setAddShipper({ ...addShipper, stateCode: e.target.value }) }}>
-                                                <option value="" disabled >Select State</option>
-                                                {getState.map((state, index) => (
-                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getState.map((st) => ({
+                                                    value: st.State_Code,
+                                                    label: st.State_Name,
+                                                }))}
+                                                value={
+                                                    addShipper.stateCode
+                                                        ? {
+                                                            value: addShipper.stateCode,
+                                                            label:
+                                                                getState.find((s) => s.State_Code === addShipper.stateCode)
+                                                                    ?.State_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setAddShipper({
+                                                        ...addShipper,
+                                                        stateCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
@@ -535,7 +586,7 @@ function ShipperName() {
 
                                     </div>
 
-                                     <div className='bottom-buttons'>
+                                    <div className='bottom-buttons'>
                                         {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
                                         {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
                                         <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>

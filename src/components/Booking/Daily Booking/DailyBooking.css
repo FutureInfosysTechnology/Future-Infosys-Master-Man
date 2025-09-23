@@ -2,7 +2,7 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 16.66%; /* 100% / 6 tabs */
+  width: 10%; /* 100% / 7 tabs */
   height: 3px;
   background-color: #007bff;
   transition: all 0.3s ease;
@@ -10,8 +10,9 @@
 
 /* Move slider based on checked input */
 #vendor:checked ~ nav .slider { left: 0%; }
-#vendorrate:checked ~ nav .slider { left: 16.66%; }
-#vendorfuel:checked ~ nav .slider { left: 33.33%; }
-#entry:checked ~ nav .slider { left: 50%; }
-#excelimport:checked  ~ nav .slider { left: 66.66%; }
-#vendorcharge:checked ~ nav .slider { left: 83.33%; }
+#print:checked ~ nav .slider { left: 13%; }
+#vendorrate:checked ~ nav .slider { left: 27.40%; }
+#vendorfuel:checked ~ nav .slider { left: 42%; }
+#entry:checked ~ nav .slider { left: 56.20%; }
+#excelimport:checked ~ nav .slider { left: 71%; }
+#vendorcharge:checked ~ nav .slider { left: 84%; }
