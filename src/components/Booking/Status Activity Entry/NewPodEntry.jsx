@@ -19,6 +19,7 @@ import "./table.css"
 function NewPodEntry() {
 
     const [status, setStatus] = useState([]);
+    const [fetched,setFetched]=useState('');
     const [editIndex, setEditIndex] = useState(null);
     const today = new Date();
     const time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");
@@ -35,6 +36,10 @@ function NewPodEntry() {
         time: time,
         status: "",
     });
+    useEffect(()=>
+    {
+        console.log(formData);
+    },[formData])
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
@@ -102,6 +107,14 @@ function NewPodEntry() {
 
         }))
     }
+ const formatTimeAMPM = (timeStr) => {
+    if (!timeStr) return "";
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hours12 = hours % 12 || 12;
+    return `${hours12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
+};
+   
  const formatExcelDateForBackend = (value) => {
   if (!value) return "";
   if (value instanceof Date && !isNaN(value)) {
@@ -111,11 +124,22 @@ function NewPodEntry() {
 };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-       try {
+    e.preventDefault();
+    if(docket===fetched)
+    {
+        return Swal.fire(
+            {
+                icon:"warning",
+                title:"Status already here",
+                text:`Docket ${docket}' status already fetched`,
+            }
+        )
+    }
+    try {
     const res = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
     if (res.status === 1 && Array.isArray(res.data) && res.data.length > 0) {
         setStatus(res.data);
+        setFetched(docket);
         console.log(res.data);
         Swal.fire({
             icon: 'success',
@@ -141,13 +165,22 @@ function NewPodEntry() {
 }
 
     }
-    const AddStatus = async (e) => {
+  const AddStatus = async (e) => {
+  if(!docket)
+    {
+        return Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing Docket No',
+                        text: 'Please fill docket No.',
+                        confirmButtonText: 'OK',
+                    });
+    }  
   e.preventDefault();
   try {
     const queryParams = new URLSearchParams({
       docketNo: docket,
       delvDt: formatExcelDateForBackend(formData.toDate),
-      delvTime: formData.time,
+      delvTime: formatTimeAMPM(formData.time),
       destinationCode: formData.fromDest,
       destinationName: formData.toDest?getCity.find((city)=>city.City_Code===formData.toDest)?.City_Name:"",
       status: formData.status

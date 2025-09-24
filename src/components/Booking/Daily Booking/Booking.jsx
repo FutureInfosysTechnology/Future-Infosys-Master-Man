@@ -192,7 +192,7 @@ function Booking() {
         shipperMob: '',
         shipperEmail: '',
         gstNo: '',
-        hsnNo: '',
+        company: '',
     });
     const [addReceiver, setAddReceiver] = useState({
         receiverCode: '',
@@ -248,7 +248,7 @@ function Booking() {
     const [InvoicesubmittedData, setInvoiceSubmittedData] = useState([]);
     const [invoiceData, setInvoiceData] = useState({
         PoNo: "",
-        PoDate: "",
+        PoDate: getTodayDate(),
         InvoiceNo: "",
         InvoiceValue: 0,
         Description: "",
@@ -374,7 +374,7 @@ function Booking() {
                 Swal.fire("Success", "Receiver saved successfully.", "success");
 
                 // ✅ Refresh list
-                await fetchReceivers();
+                await fetchReceiverData();
 
                 // ✅ Auto-select newly added receiver
                 setFormData((prev) => ({
@@ -393,7 +393,7 @@ function Booking() {
         }
     };
     console.log(formData);
-    const fetchReceivers = async () => {
+    const fetchReceiverData = async () => {
         try {
             const response = await getApi("/Master/GetReceiver");
 
@@ -453,8 +453,6 @@ function Booking() {
             console.error("Error fetching receiver data:", error);
         }
     };
-
-
     // =======================================================================
 
 
@@ -480,7 +478,7 @@ function Booking() {
             setIsInvoiceNo(savedState.isInvoiceNo || false);
             SetdispatchDate(savedState.dispatchDate || false);
         }
-        fetchReceivers();
+        fetchReceiverData();
         fetchShipper();
     }, []);
 
@@ -639,7 +637,7 @@ function Booking() {
             stateCode: addReceiver.stateCode,
             receiverMob: addReceiver.receiverMob,
             receiverEmail: addReceiver.receiverEmail,
-            gstNo: addReceiver.gstNo,
+            gstNo: addReceiver.gstNo.toUpperCase(),
             hsnNo: addReceiver.hsnNo,
             sms: addReceiver.sms,
             emailId: addReceiver.emailId,
@@ -668,8 +666,7 @@ function Booking() {
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen1(false);
-                await fetchReceivers();
-                setFormData(prev => ({ ...prev, Receiver_Code: requestBody.receiverCode }))
+                await fetchReceiverData();
             } else {
                 Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
             }
@@ -684,16 +681,17 @@ function Booking() {
 
         const requestBody = {
             shipperCode: addShipper.shipperCode,
-            customerCode: formData.Customer_Code,
+            // customerCode: addReceiver.custCode,
             shipperName: addShipper.shipperName,
             add1: addShipper.shipperAdd1,
             add2: addShipper.shipperAdd2,
             pin: addShipper.shipperPin,
             mobile: addShipper.shipperMob,
             stateCode: addShipper.stateCode,
-            gstNo: addShipper.gstNo,
+            gstNo: addShipper.gstNo.toUpperCase(),
             email: addShipper.shipperEmail,
             cityCode: addShipper.cityCode,
+            companyName: addShipper.company
         };
 
         try {
@@ -715,7 +713,7 @@ function Booking() {
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
-                await fetchReceivers();
+                await fetchShipper();
 
             } else {
                 Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
@@ -725,7 +723,6 @@ function Booking() {
             Swal.fire('Error', 'Failed to add branch data', 'error');
         }
     };
-
     // Fetch data for each category using useEffect
     useEffect(() => {
         fetchData('/Master/getCustomerdata', setgetCustomerdata);
@@ -923,7 +920,7 @@ function Booking() {
 
         setInvoiceData({
             PoNo: "",
-            PoDate: "",
+            PoDate: getTodayDate(),
             InvoiceNo: "",
             InvoiceValue: "",
             Description: "",
@@ -1211,6 +1208,8 @@ function Booking() {
             const response = await postApi('/Booking/OderEntry', requestBody, 'POST');
             if (response.Success === 1) {
                 setFecthed('');
+                console.log(response);
+                const generatedDocketNo = formData.DocketNo;
                 const result = await Swal.fire({
                     title: 'Saved Successfully!',
                     text: "Do you want to print the docket now?",
@@ -1221,7 +1220,7 @@ function Booking() {
                 });
                 if (result.isConfirmed) {
                     try {
-                        const response = await getApi(`/Booking/DocketReceipt?FromDocket=${formData.DocketNo}&ToDocket=${formData.DocketNo}`);
+                        const response = await getApi(`/Booking/DocketReceipt?FromDocket=${generatedDocketNo}&ToDocket=${generatedDocketNo}`);
                         if (response.status === 1) {
                             console.log(response);
                             console.log(response.Data);
@@ -1271,8 +1270,8 @@ function Booking() {
             Origin_zone: "",
             Zone_Name: "",
             DispatchDate: getTodayDate(),
-            DoxSpx: "",
-            RateType: "",
+            DoxSpx: "Box",
+            RateType: "Weight",
             QtyOrderEntry: "",
             VendorWt: 0,
             VendorAmt: 0,
@@ -1367,7 +1366,7 @@ function Booking() {
 
         setInvoiceData({
             PoNo: "",
-            PoDate: "",
+            PoDate: getTodayDate(),
             InvoiceNo: "",
             InvoiceValue: 0,
             Description: "",
@@ -1863,7 +1862,23 @@ function Booking() {
                                             <button
                                                 type="button"
                                                 className="ok-btn btn btn-outline-primary w-100"
-                                                onClick={() => setModalIsOpen(true)}
+                                                onClick={() => {
+                                                    setAddShipper({
+                                                        shipperCode: '',
+                                                        custCode: '',
+                                                        shipperName: '',
+                                                        shipperAdd1: '',
+                                                        shipperAdd2: '',
+                                                        shipperPin: '',
+                                                        cityCode: '',
+                                                        stateCode: '',
+                                                        shipperMob: '',
+                                                        shipperEmail: '',
+                                                        gstNo: '',
+                                                        company: '',
+                                                    });
+                                                    setModalIsOpen(true);
+                                                }}
                                             >
                                                 <i className="bi bi-plus" style={{ fontSize: "20px" }}></i>
                                             </button>
@@ -2214,7 +2229,7 @@ function Booking() {
                                                             ConsigneeAdd2: selectedOption.Receiver_Add2,
                                                             ConsigneeGST: selectedOption.GSTNo,
                                                         }));
-                                                        setSelectedOriginPinCode(selectedOption.Receiver_Pin)
+                                                        // setSelectedOriginPinCode(selectedOption.Receiver_Pin)
                                                     }}
                                                     placeholder="Select Receiver Name"
                                                     isSearchable
@@ -2233,7 +2248,25 @@ function Booking() {
                                             <button
                                                 type="button"
                                                 className="ok-btn btn btn-outline-primary w-100"
-                                                onClick={() => setModalIsOpen1(true)}
+                                                onClick={() => {
+                                                    setModalIsOpen1(true);
+                                                    setAddReceiver({
+                                                        receiverCode: '',
+                                                        receiverName: '',
+                                                        receiverAdd1: '',
+                                                        receiverAdd2: '',
+                                                        receiverPin: '',
+                                                        cityCode: '',
+                                                        stateCode: '',
+                                                        receiverMob: '',
+                                                        receiverEmail: '',
+                                                        gstNo: '',
+                                                        hsnNo: '',
+                                                        sms: false,
+                                                        emailId: false,
+                                                        whatsApp: false
+                                                    });
+                                                }}
                                             >
                                                 <i className="bi bi-plus" style={{ fontSize: "20px" }}></i>
                                             </button>
@@ -2391,6 +2424,8 @@ function Booking() {
                                             <option value="Shipper-wise Bill">Shipper-wise Bill</option>
                                             <option value="Vendor-wise Bill">Vendor-wise Bill</option>
                                             <option value="Product-wise Bill">Product-wise Bill</option>
+                                            <option value="Consignee-wise Bill">Consignee-wise Bill</option>
+
                                         </select>
                                     </div>
 
@@ -2756,7 +2791,6 @@ function Booking() {
 
 
 
-
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
                         className="custom-modal-receiver" contentLabel="Modal"
                         style={{
@@ -2820,24 +2854,74 @@ function Booking() {
 
                                         <div className="input-field3">
                                             <label htmlFor="">City Name</label>
-                                            <select value={addShipper.cityCode}
-                                                onChange={(e) => setAddShipper({ ...addShipper, cityCode: e.target.value })} required>
-                                                <option value="" disabled >Select City</option>
-                                                {getCity.length > 0 && getCity.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCity.map((city) => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name,
+                                                }))}
+                                                value={
+                                                    addShipper.cityCode
+                                                        ? {
+                                                            value: addShipper.cityCode,
+                                                            label:
+                                                                getCity.find((c) => c.City_Code === addShipper.cityCode)
+                                                                    ?.City_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setAddShipper({
+                                                        ...addShipper,
+                                                        cityCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select City"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">State Name</label>
-                                            <select value={addShipper.stateCode} required
-                                                onChange={(e) => { setAddShipper({ ...addShipper, stateCode: e.target.value }) }}>
-                                                <option value="" disabled >Select State</option>
-                                                {getState.map((state, index) => (
-                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getState.map((st) => ({
+                                                    value: st.State_Code,
+                                                    label: st.State_Name,
+                                                }))}
+                                                value={
+                                                    addShipper.stateCode
+                                                        ? {
+                                                            value: addShipper.stateCode,
+                                                            label:
+                                                                getState.find((s) => s.State_Code === addShipper.stateCode)
+                                                                    ?.State_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setAddShipper({
+                                                        ...addShipper,
+                                                        stateCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
@@ -2863,10 +2947,10 @@ function Booking() {
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">HSN No</label>
-                                            <input type="text" value={addShipper.hsnNo}
-                                                onChange={(e) => setAddShipper({ ...addShipper, hsnNo: e.target.value })}
-                                                placeholder="HSN No" required />
+                                            <label htmlFor="">Company Name</label>
+                                            <input type="text" value={addShipper.company}
+                                                onChange={(e) => setAddShipper({ ...addShipper, company: e.target.value })}
+                                                placeholder="Company Name" required />
                                         </div>
 
                                     </div>
@@ -2907,16 +2991,18 @@ function Booking() {
                                                 maxLength="3" />
                                         </div>
 
+
                                         <div className="input-field3">
                                             <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
                                                 onClick={handleGenerateCode1}>Generate Code</button>
                                         </div>
 
+
                                         <div className="input-field3">
-                                            <label htmlFor="">Receiver Name</label>
+                                            <label htmlFor="">Customer Name</label>
                                             <input type="text" value={addReceiver.receiverName}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverName: e.target.value })}
-                                                placeholder="Receiver Name" required />
+                                                placeholder="Customer Name" required />
                                         </div>
 
                                         <div className="input-field3">
@@ -2943,24 +3029,74 @@ function Booking() {
 
                                         <div className="input-field3">
                                             <label htmlFor="">City Name</label>
-                                            <select value={addReceiver.cityCode}
-                                                onChange={(e) => setAddReceiver({ ...addReceiver, cityCode: e.target.value })} required>
-                                                <option value="" disabled >Select City</option>
-                                                {getCity.length > 0 && getCity.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCity.map((city) => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name,
+                                                }))}
+                                                value={
+                                                    addReceiver.cityCode
+                                                        ? {
+                                                            value: addReceiver.cityCode,
+                                                            label:
+                                                                getCity.find((c) => c.City_Code === addReceiver.cityCode)
+                                                                    ?.City_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setAddReceiver({
+                                                        ...addReceiver,
+                                                        cityCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select City"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">State Name</label>
-                                            <select value={addReceiver.stateCode} required
-                                                onChange={(e) => { setAddReceiver({ ...addReceiver, stateCode: e.target.value }) }}>
-                                                <option value="" disabled >Select State</option>
-                                                {getState.map((state, index) => (
-                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getState.map((st) => ({
+                                                    value: st.State_Code,
+                                                    label: st.State_Name,
+                                                }))}
+                                                value={
+                                                    addReceiver.stateCode
+                                                        ? {
+                                                            value: addReceiver.stateCode,
+                                                            label:
+                                                                getState.find((s) => s.State_Code === addReceiver.stateCode)
+                                                                    ?.State_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setAddReceiver({
+                                                        ...addReceiver,
+                                                        stateCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">

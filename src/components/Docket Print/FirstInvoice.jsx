@@ -143,9 +143,9 @@ function FirstInvoice() {
             <Sidebar1 />
             <div className="main-body" id="main-body">
 
-                <div className="container-2" style={{ borderRadius: "0px", width: "1100px", height: "40px", border: "none" }}>
+                <div className="container-2" style={{ borderRadius: "0px", width: "1065px", height: "40px", border: "none" }}>
 
-                    <div className="container-2" style={{ borderRadius: "0px", width: "1100px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px", alignItems: "center" }}>
+                    <div className="container-2" style={{ borderRadius: "0px", width: "1065px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px", alignItems: "center" }}>
                         <button
                             onClick={handleDownloadPDF}
                             style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
@@ -168,11 +168,11 @@ function FirstInvoice() {
                 </div>
 
                 <div className="container-2" id="pdf" style={{
-                    borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "1100px", direction: "flex",
+                    borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "1065px", direction: "flex",
                     flexDirection: "column", gap: "5px"
                 }}>
 
-                    <div className="container-2" style={{ borderRadius: "0px", width: "1082px", display: "flex", flexDirection: "column" }}>
+                    <div className="container-2" style={{ borderRadius: "0px", width: "1022px", display: "flex", flexDirection: "column" }}>
 
                         < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
                             <div className="container-3" style={{ border: "5px double black" }}>
@@ -270,7 +270,6 @@ function FirstInvoice() {
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Origin</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Destination</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Mode</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Flight No</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Pieces</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Weight</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Rate</th>
@@ -296,7 +295,6 @@ function FirstInvoice() {
                                                         <td className='td'>{runsheet.DestName}</td>
                                                         <td className='td'>{runsheet.Qty}</td>
                                                         <td className='td'>{runsheet.ActualWt}</td>
-                                                        <td className='td'>{index + 1}</td>
                                                         <td className='td'>{runsheet.BookDate}</td>
                                                         <td className='td'>{runsheet.DocketNo}</td>
                                                         <td className='td'>{runsheet.CustomerName}</td>
@@ -308,7 +306,7 @@ function FirstInvoice() {
                                                     </tr>
                                                 )) : (
                                                     <tr>
-                                                        <td colSpan="17">No data available</td>
+                                                        <td colSpan="16">No data available</td>
                                                     </tr>
                                                 )}
                                         </tbody>

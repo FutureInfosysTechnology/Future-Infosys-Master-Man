@@ -3,12 +3,18 @@ import './login.css';
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
-
+import { ImEye } from "react-icons/im";
+import { ImEyeBlocked } from "react-icons/im";
 
 function NewLogin() {
 
     const [login, setLogin] = useState({ userName: '', password: '' });
     const navigate = useNavigate();
+    const [eye, setEye] = useState(true);
+    const [eyeDis, setEyeDis] = useState(false);
+    const togglePass = () => {
+        setEye((eye) => !eye);
+    }
 
 
     useEffect(() => {
@@ -37,7 +43,14 @@ function NewLogin() {
     const handleNavigation = () => {
         navigate('/signup');
     };
-
+    useEffect(() => {
+        if (!login.password) {
+            setEyeDis(true);
+        }
+        else {
+            setEyeDis(false);
+        }
+    }, [login.password])
     const handleSaveLogin = async (e) => {
         e.preventDefault();
         const { userName, password } = login;
@@ -49,7 +62,7 @@ function NewLogin() {
             const response = await getApi(`/Master/UserContllor?UserName=${encodeURIComponent(userName)}&Password=${encodeURIComponent(password)}`);
             if (response.status === 1) {
                 Swal.fire('Success', 'Login successful!', 'success');
-                localStorage.setItem("Login",JSON.stringify(response.userData));
+                localStorage.setItem("Login", JSON.stringify(response.userData));
                 navigate('/dashboard');
             }
         } catch (err) {
@@ -76,13 +89,13 @@ function NewLogin() {
                         <div className="infield">
                             <label htmlFor="">Email</label>
                             <input className="login-input" type="email" placeholder="Email" />
-                            <label className="login-label" htmlFor=""></label>
+
                         </div>
 
                         <div className="infield">
                             <label htmlFor="">Password</label>
                             <input className="login-input" type="password" placeholder="Password" />
-                            <label className="login-label" htmlFor=""></label>
+
                         </div>
                         <button className="login-button">Sign Up</button>
 
@@ -119,11 +132,25 @@ function NewLogin() {
 
                         <div className="infield">
                             <label htmlFor="">Password</label>
-                            <input className="login-input" type="password"
-                                name="password"
-                                value={login.password}
-                                onChange={handleInputChange}
-                                placeholder="Password" />
+                            <div style={{ position: "relative" }}>
+                                <input className="login-input" type={eye ? "password" : "text"}
+                                    name="password"
+                                    value={login.password}
+                                    onChange={handleInputChange}
+                                    placeholder="Password" />
+                                <div style={{
+                                    opacity: eyeDis ? 0 : 1, // fade instead of display: none
+                                    visibility: eyeDis ? "hidden" : "visible", //
+                                    position: "absolute",
+                                    top: "10%",
+                                    right: "5%",
+                                    fontSize: "25px",
+                                    cursor: "pointer",
+                                    transition: "opacity 0.3s ease, visibility 0.3s ease"
+                                }} onClick={togglePass}>
+
+                                    {eye ? <ImEye /> : <ImEyeBlocked />}
+                                </div></div>
                             <label className="login-label" htmlFor=""></label>
                         </div>
 

@@ -40,7 +40,7 @@ function Manifest() {
         fetchData();
     }, [])
     const BranchData = getBranch.length > 0 ? getBranch[1] : {};
-
+    const pageRef=useRef();
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -66,37 +66,20 @@ function Manifest() {
     //     }
     // }, [loading, manifestData, getBranch]);
 
-    // const generatePDF = async () => {
-    //     if (!pageRef.current) return;
-    //     const canvas = await html2canvas(pageRef.current, { scale: 2 });
-    //     const imgData = canvas.toDataURL('image/png');
-
-    //     const pdf = new jsPDF('p', 'mm', 'a4');
-    //     const pdfWidth = pdf.internal.pageSize.getWidth();
-    //     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    //     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    //     pdf.save(`Manifest_${manifestNo}.pdf`);
-    // };
-
-    // if (loading) return <p>Loading...</p>;
-    const handleDownloadPDF = async () => {
-        const element = document.querySelector("#pdf");
-        if (!element) return;
-
-        if (!element) return;
-
-        const canvas = await html2canvas(element, { scale: 4 });
-        const imgData = canvas.toDataURL("image/png");
-
-        const imgWidth = 210; // A4 width in mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        // Create PDF with dynamic height = content height
-        const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+    const generatePDF = async () => {
+        if (!pageRef.current) return;
+        const canvas = await html2canvas(pageRef.current, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+// 
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+// 
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`Manifest_${manifestNo}.pdf`);
     };
+
+    // if (loading) return <p>Loading...</p>;
 
     return (
         <>
@@ -170,7 +153,7 @@ function Manifest() {
 
                         <div className="container-2" style={{ borderRadius: "0px", width: "840px", display: "flex",flexDirection:"row",border:"none" ,justifyContent:"end",gap:"10px",fontSize:"12px",alignItems:"center"}}>
                         <button
-                            onClick={handleDownloadPDF}
+                            onClick={generatePDF}
                             style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Download
@@ -190,7 +173,7 @@ function Manifest() {
                     </div>
                     </div>
 
-                    <div className="container-2" id="pdf" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex",
+                    <div className="container-2" ref={pageRef} id="pdf" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex",
                          flexDirection: "column", gap: "5px" }}>
 
                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>

@@ -6,6 +6,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
+import Select from "react-select";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
@@ -402,37 +403,37 @@ function PinCode() {
                     </table>
                 </div>
 
-                <div className="row" style={{whiteSpace:"nowrap" }}>
-                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
-                        </div>
-
-                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "50px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
+                <div className="row" style={{ whiteSpace: "nowrap" }}>
+                    <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            {'<'}
+                        </button>
+                        <span style={{ color: "#333", padding: "5px" }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                            {'>'}
+                        </button>
                     </div>
+
+                    <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                        <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                        <select
+                            id="rowsPerPage"
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                                setRowsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            style={{ height: "40px", width: "50px" }}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
+                </div>
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
                     className="custom-modal-volumetric" contentLabel="Modal">
@@ -459,50 +460,139 @@ function PinCode() {
                                         <input type="text" placeholder="Area Name" value={addData.areaName}
                                             onChange={(e) => setAddData({ ...addData, areaName: e.target.value })} required />
                                     </div>
-
                                     <div className="input-field1">
-                                        <label htmlFor="">City Name</label>
-                                        <select value={addData.cityCode}
-                                            onChange={(e) => setAddData({ ...addData, cityCode: e.target.value })} required>
-                                            <option value="" disabled >Select City</option>
-                                            {getCity.map((city, index) => (
-                                                <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>City Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getCity.map((city) => ({
+                                                value: city.City_Code,
+                                                label: city.City_Name,
+                                            }))}
+                                            value={
+                                                addData.cityCode
+                                                    ? {
+                                                        value: addData.cityCode,
+                                                        label:
+                                                            getCity.find((c) => c.City_Code === addData.cityCode)
+                                                                ?.City_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    cityCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select City"
+                                            isSearchable
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
-                                        <label htmlFor="">Zone Name</label>
-                                        <select value={addData.zoneCode}
-                                            onChange={(e) => setAddData({ ...addData, zoneCode: e.target.value })} required>
-                                            <option value="" disabled >Select Zone Code</option>
-                                            {zones.map((zone, index) => (
-                                                <option value={zone.Zone_Code} key={index}>{zone.Zone_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>Zone Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={zones.map((zone) => ({
+                                                value: zone.Zone_Code,
+                                                label: zone.Zone_Name,
+                                            }))}
+                                            value={
+                                                addData.zoneCode
+                                                    ? {
+                                                        value: addData.zoneCode,
+                                                        label:
+                                                            zones.find((z) => z.Zone_Code === addData.zoneCode)
+                                                                ?.Zone_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    zoneCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Zone Code"
+                                            isSearchable
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
-                                        <label htmlFor="">State Name</label>
-                                        <select value={addData.stateCode}
-                                            onChange={(e) => setAddData({ ...addData, stateCode: e.target.value })} required>
-                                            <option value="" disabled >Select State</option>
-                                            {getState.map((state, index) => (
-                                                <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>State Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getState.map((state) => ({
+                                                value: state.State_Code,
+                                                label: state.State_Name,
+                                            }))}
+                                            value={
+                                                addData.stateCode
+                                                    ? {
+                                                        value: addData.stateCode,
+                                                        label:
+                                                            getState.find((s) => s.State_Code === addData.stateCode)
+                                                                ?.State_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    stateCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select State"
+                                            isSearchable
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
-                                        <label htmlFor="">Vendor Name</label>
-                                        <select value={addData.vendorCode}
-                                            onChange={(e) => setAddData({ ...addData, vendorCode: e.target.value })} required>
-                                            <option value="" disabled >Select Vendor Name</option>
-                                            {getVendor.map((vendor, index) => (
-                                                <option value={vendor.Vendor_Code} key={index}>{vendor.Vendor_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>Vendor Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getVendor.map((vendor) => ({
+                                                value: vendor.Vendor_Code,
+                                                label: vendor.Vendor_Name,
+                                            }))}
+                                            value={
+                                                addData.vendorCode
+                                                    ? {
+                                                        value: addData.vendorCode,
+                                                        label:
+                                                            getVendor.find(
+                                                                (v) => v.Vendor_Code === addData.vendorCode
+                                                            )?.Vendor_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    vendorCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Vendor Name"
+                                            isSearchable
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
+
 
                                     <div className="input-field1">
                                         <label htmlFor="">Kilometers</label>
@@ -511,44 +601,117 @@ function PinCode() {
                                     </div>
 
                                     <div className="input-field1">
-                                        <label htmlFor="">Service/ODA</label>
-                                        <select value={addData.service}
-                                            onChange={(e) => setAddData({ ...addData, service: e.target.value })} required>
-                                            <option value="" disabled >Select Services</option>
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                        </select>
+                                        <label>Service/ODA</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={[
+                                                { value: "Yes", label: "Yes" },
+                                                { value: "No", label: "No" },
+                                            ]}
+                                            value={
+                                                addData.service
+                                                    ? { value: addData.service, label: addData.service }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    service: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Services"
+                                            isSearchable={false}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
-                                        <label htmlFor="">ODA/OPA</label>
-                                        <select value={addData.odaOpa}
-                                            onChange={(e) => setAddData({ ...addData, odaOpa: e.target.value })} required>
-                                            <option value="" disabled>Select ODA/OPA</option>
-                                            <option value="ODA">ODA</option>
-                                            <option value="OPA">OPA</option>
-                                        </select>
+                                        <label>ODA/OPA</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={[
+                                                { value: "ODA", label: "ODA" },
+                                                { value: "OPA", label: "OPA" },
+                                            ]}
+                                            value={
+                                                addData.odaOpa
+                                                    ? { value: addData.odaOpa, label: addData.odaOpa }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    odaOpa: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select ODA/OPA"
+                                            isSearchable={false}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
-                                        <label htmlFor="">COD</label>
-                                        <select value={addData.cod}
-                                            onChange={(e) => setAddData({ ...addData, cod: e.target.value })} required>
-                                            <option value="" disabled >Select COD</option>
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                        </select>
+                                        <label>COD</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={[
+                                                { value: "Yes", label: "Yes" },
+                                                { value: "No", label: "No" },
+                                            ]}
+                                            value={
+                                                addData.cod
+                                                    ? { value: addData.cod, label: addData.cod }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    cod: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select COD"
+                                            isSearchable={false}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
-                                        <label htmlFor="">Pickup/Delivery</label>
-                                        <select value={addData.pickUp}
-                                            onChange={(e) => setAddData({ ...addData, pickUp: e.target.value })} required>
-                                            <option value="" disabled >Select Pickup/Delivery</option>
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                        </select>
+                                        <label>Pickup/Delivery</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={[
+                                                { value: "Yes", label: "Yes" },
+                                                { value: "No", label: "No" },
+                                            ]}
+                                            value={
+                                                addData.pickUp
+                                                    ? { value: addData.pickUp, label: addData.pickUp }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    pickUp: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Pickup/Delivery"
+                                            isSearchable={false}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
+
                                 </div>
                                 <div className='bottom-buttons'>
                                     {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}

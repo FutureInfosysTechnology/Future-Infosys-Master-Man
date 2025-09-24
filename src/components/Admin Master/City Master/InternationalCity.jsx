@@ -4,6 +4,7 @@ import '../../Tabs/tabs.css';
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import Select from 'react-select';
 import jsPDF from 'jspdf';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 
@@ -15,6 +16,7 @@ function InternationalCity() {
     const [country, setCountry] = useState([]);               //to get country data
     const [getZone, setGetZone] = useState([]);               // To Get Zone Data
     const [getCity, setGetCity] = useState([]);
+    const [readOnly, setReadOnly] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -242,7 +244,21 @@ function InternationalCity() {
             <div className="container1">
                 <div className="addNew">
                     <div>
-                        <button className='add-btn' onClick={() => { setModalIsOpen(true) }}>
+                        <button className='add-btn' onClick={() => {
+                            setReadOnly(false);
+                            setModalIsOpen(true);
+                            setAddData({
+                                cityCode: '',
+                                cityName: '',
+                                countryCode: '',
+                                stateCode: '',
+                                destination: '',
+                                delivery: '',
+                                pod: '',
+                                product: '',
+                                zoneCode: ''
+                            });
+                        }}>
                             <i className="bi bi-plus-lg"></i>
                             <span>ADD NEW</span>
                         </button>
@@ -288,7 +304,22 @@ function InternationalCity() {
                                     <td>{city.Country_Name}</td>
                                     <td>
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                            <button className='edit-btn'><i className='bi bi-pen'></i></button>
+                                            <button className='edit-btn'
+                                                onClick={() => {
+                                                    setReadOnly(true);
+                                                    setAddData({
+                                                        cityCode: city.City_Code,
+                                                        cityName: city.City_Name,
+                                                        zoneCode: city.Zone_Code,
+                                                        stateCode: city.State_Code,
+                                                        countryCode: city.Country_Name,
+                                                        destination: city.Manifest_Destination,
+                                                        delivery: city.Destination_DHours,
+                                                        pod: city.Destination_PHours,
+                                                        product: '',
+                                                    });
+                                                    setModalIsOpen(true);
+                                                }}><i className='bi bi-pen'></i></button>
                                             <button className='edit-btn' onClick={() => handleDeleteCity(city.City_Code)}><i className='bi bi-trash'></i></button>
                                         </div>
                                     </td>
@@ -298,37 +329,37 @@ function InternationalCity() {
                     </table>
                 </div>
 
-                 <div className="row" style={{whiteSpace:"nowrap" }}>
-                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
-                        </div>
-
-                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "50px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
+                <div className="row" style={{ whiteSpace: "nowrap" }}>
+                    <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            {'<'}
+                        </button>
+                        <span style={{ color: "#333", padding: "5px" }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                            {'>'}
+                        </button>
                     </div>
+
+                    <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                        <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                        <select
+                            id="rowsPerPage"
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                                setRowsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            style={{ height: "40px", width: "50px" }}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
+                </div>
 
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
@@ -357,46 +388,146 @@ function InternationalCity() {
 
                                     <div className="input-field3">
                                         <label htmlFor="">Zone Name</label>
-                                        <select value={addData.zoneCode} required
-                                            onChange={(e) => setAddData({ ...addData, zoneCode: e.target.value })}>
-                                            <option value="" disabled >Select Zone Name</option>
-                                            {getZone.map((zone, index) => (
-                                                <option value={zone.Zone_Code} key={index}>{zone.Zone_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getZone.map((zone) => ({
+                                                value: zone.Zone_Code,
+                                                label: zone.Zone_Name,
+                                            }))}
+                                            value={
+                                                addData.zoneCode
+                                                    ? {
+                                                        value: addData.zoneCode,
+                                                        label:
+                                                            getZone.find((z) => z.Zone_Code === addData.zoneCode)
+                                                                ?.Zone_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    zoneCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Zone Name"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
+
                                     </div>
 
                                     <div className="input-field3">
                                         <label htmlFor="">State Name</label>
-                                        <select value={addData.stateCode}
-                                            onChange={(e) => setAddData({ ...addData, stateCode: e.target.value })} required>
-                                            <option value="" disabled >Select State</option>
-                                            {state.map((state, index) => (
-                                                <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={state.map((s) => ({
+                                                value: s.State_Code,
+                                                label: s.State_Name,
+                                            }))}
+                                            value={
+                                                addData.stateCode
+                                                    ? {
+                                                        value: addData.stateCode,
+                                                        label:
+                                                            state.find((s) => s.State_Code === addData.stateCode)
+                                                                ?.State_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    stateCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select State"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
+
                                     </div>
 
                                     <div className="input-field3">
                                         <label htmlFor="">Country Name</label>
-                                        <select value={addData.countryCode} required
-                                            onChange={(e) => setAddData({ ...addData, countryCode: e.target.value })}>
-                                            <option value="" disabled >Select Country</option>
-                                            {country.map((country, index) => (
-                                                <option value={country.Country_Code} key={index}>{country.Country_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={country.map((c) => ({
+                                                value: c.Country_Code,
+                                                label: c.Country_Name,
+                                            }))}
+                                            value={
+                                                addData.countryCode
+                                                    ? {
+                                                        value: addData.countryCode,
+                                                        label:
+                                                            country.find((c) => c.Country_Code === addData.countryCode)
+                                                                ?.Country_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    countryCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Country"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
+
                                     </div>
 
                                     <div className="input-field3">
                                         <label htmlFor="">Manifest To</label>
-                                        <select value={addData.destination}
-                                            onChange={(e) => setAddData({ ...addData, destination: e.target.value })}>
-                                            <option value="" disabled>Select Destination</option>
-                                            {getCity.map((city, index) => (
-                                                <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getCity.map((city) => ({
+                                                value: city.City_Code,
+                                                label: city.City_Name,
+                                            }))}
+                                            value={
+                                                addData.destination
+                                                    ? {
+                                                        value: addData.destination,
+                                                        label:
+                                                            getCity.find((c) => c.City_Code === addData.destination)
+                                                                ?.City_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    destination: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Destination"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
+
                                     </div>
 
                                     <div className="input-field3">
@@ -413,16 +544,36 @@ function InternationalCity() {
 
                                     <div className="input-field3">
                                         <label htmlFor="">Product Type</label>
-                                        <select value={addData.product}
-                                            onChange={(e) => setAddData({ ...addData, product: e.target.value })} required>
-                                            <option value="" disabled>Product Type</option>
-                                            <option value="International">International</option>
-                                            <option value="Domestic">Domestic</option>
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={[
+                                                { value: "International", label: "International" },
+                                                { value: "Domestic", label: "Domestic" },
+                                            ]}
+                                            value={
+                                                addData.product
+                                                    ? { value: addData.product, label: addData.product }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddData({
+                                                    ...addData,
+                                                    product: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Product Type"
+                                            isSearchable={false}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                        />
+
                                     </div>
                                 </div>
                                 <div className='bottom-buttons'>
-                                    <button type='submit' className='ok-btn'>Submit</button>
+                                    {!readOnly && (<button type='submit' className='ok-btn'>Submit</button>)}
+                                    {readOnly && (<button type='button' className='ok-btn'>Update</button>)}
                                     <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                 </div>
                             </form>

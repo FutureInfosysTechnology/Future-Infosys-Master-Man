@@ -224,7 +224,15 @@ function CustomerRate() {
 
     const handlesave = async (e) => {
         e.preventDefault();
-
+        if(!formdata.Client_Code || !formdata.Mode_Code || !formdata.Vendor_Code)
+        {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please fill in the empty fields.',
+                confirmButtonText: 'OK',
+            });
+        }
         const requestBody = {
             Client_Code: formdata.Client_Code.toString(),
             Vendor_Code: formdata.Vendor_Code,
@@ -289,7 +297,12 @@ function CustomerRate() {
 
     const handleupdate = async (e) => {
         e.preventDefault();
-
+        return Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please fill in the empty fields.',
+                confirmButtonText: 'OK',
+            });
         const requestBody = {
             Client_Code: formdata.Client_Code.toString(),
             Vendor_Code: formdata.Vendor_Code,

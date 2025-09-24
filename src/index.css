@@ -25,17 +25,30 @@
 html, body {
   height: 100vh;
 }
-.blue_input input{
-  box-shadow: none !important;
-}
-/* React-Select search input focus fix */
-blue-selectbooking__input input:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
 #pdf {
-  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .react-datepicker-popper {
     z-index: 2000 !important;
 }
+/* Remove Edge/Chrome default glow on inputs */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+/* Hide Edge/IE reveal button */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+/* Hide WebKit (Chrome, Edge Chromium, Safari) eye */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-clear-button,
+input[type="password"]::-webkit-reveal-button {
+    display: none;
+}
+

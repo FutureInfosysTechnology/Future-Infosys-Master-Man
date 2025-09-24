@@ -769,12 +769,31 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Cash / Credit</label>
-                                                    <select value={addCustData.bookingType}
-                                                        onChange={(e) => setAddCustData({ ...addCustData, bookingType: e.target.value })} required>
-                                                        <option value="" disabled >Cash/ Credit</option>
-                                                        <option value="Cash">Cash</option>
-                                                        <option value="Credit">Credit</option>
-                                                    </select>
+                                                    <Select
+    className="blue-selectbooking"
+    classNamePrefix="blue-selectbooking"
+    options={[
+        { value: "Cash", label: "Cash" },
+        { value: "Credit", label: "Credit" },
+    ]}
+    value={
+        addCustData.bookingType
+            ? { value: addCustData.bookingType, label: addCustData.bookingType }
+            : null
+    }
+    onChange={(selected) =>
+        setAddCustData({
+            ...addCustData,
+            bookingType: selected ? selected.value : "",
+        })
+    }
+    placeholder="Cash / Credit"
+    isSearchable={false}
+    isClearable={false}
+    menuPortalTarget={document.body}
+    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+/>
+
                                                 </div>
 
                                                 <div className="input-field3">
@@ -907,13 +926,32 @@ function CustomerName() {
                                                 </div>
 
                                                 <div className="input-field3">
-                                                    <label htmlFor="">GST Type</label>
-                                                    <select value={addCustData.gstType} required
-                                                        onChange={(e) => setAddCustData({ ...addCustData, gstType: e.target.value })}>
-                                                        <option value="" disabled >GST Type</option>
-                                                        <option value="Transport">Transport</option>
-                                                        <option value="Client">Client</option>
-                                                    </select>
+                                                    <label>GST Type</label>
+<Select
+    className="blue-selectbooking"
+    classNamePrefix="blue-selectbooking"
+    options={[
+        { value: "Transport", label: "Transport" },
+        { value: "Client", label: "Client" },
+    ]}
+    value={
+        addCustData.gstType
+            ? { value: addCustData.gstType, label: addCustData.gstType }
+            : null
+    }
+    onChange={(selected) =>
+        setAddCustData({
+            ...addCustData,
+            gstType: selected ? selected.value : "",
+        })
+    }
+    placeholder="Select GST Type"
+    isSearchable={false}
+    isClearable={false}
+    menuPortalTarget={document.body}
+    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+/>
+
                                                 </div>
 
                                                 <div className="input-field3">
@@ -981,14 +1019,33 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Billing Period</label>
-                                                    <select value={addCustData.billPeriod} required
-                                                        onChange={(e) => setAddCustData({ ...addCustData, billPeriod: e.target.value })}>
-                                                        <option value="" disabled >Billing Period</option>
-                                                        <option value="Monthly">Monthly</option>
-                                                        <option value="Quarterly">Quarterly</option>
-                                                        <option value="Half Yearly">Half Yearly</option>
-                                                        <option value="Yearly">Yearly</option>
-                                                    </select>
+                                                    <Select
+    className="blue-selectbooking"
+    classNamePrefix="blue-selectbooking"
+    options={[
+        { value: "Monthly", label: "Monthly" },
+        { value: "Quarterly", label: "Quarterly" },
+        { value: "Half Yearly", label: "Half Yearly" },
+        { value: "Yearly", label: "Yearly" },
+    ]}
+    value={
+        addCustData.billPeriod
+            ? { value: addCustData.billPeriod, label: addCustData.billPeriod }
+            : null
+    }
+    onChange={(selected) =>
+        setAddCustData({
+            ...addCustData,
+            billPeriod: selected ? selected.value : "",
+        })
+    }
+    placeholder="Billing Period"
+    isSearchable={false}
+    isClearable={false}
+    menuPortalTarget={document.body}
+    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+/>
+
                                                 </div>
 
                                                 <div className="input-field3">
@@ -1003,12 +1060,31 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Customer Status</label>
-                                                    <select value={addCustData.custStatus} required
-                                                        onChange={(e) => setAddCustData({ ...addCustData, custStatus: e.target.value })}>
-                                                        <option value="" disabled >Customer Status</option>
-                                                        <option value="Active">Active</option>
-                                                        <option value="Inactive">Inactive</option>
-                                                    </select>
+                                                    <Select
+    className="blue-selectbooking"
+    classNamePrefix="blue-selectbooking"
+    options={[
+        { value: "Active", label: "Active" },
+        { value: "Inactive", label: "Inactive" },
+    ]}
+    value={
+        addCustData.custStatus
+            ? { value: addCustData.custStatus, label: addCustData.custStatus }
+            : null
+    }
+    onChange={(selected) =>
+        setAddCustData({
+            ...addCustData,
+            custStatus: selected ? selected.value : "",
+        })
+    }
+    placeholder="Customer Status"
+    isSearchable={false}
+    isClearable={false}
+    menuPortalTarget={document.body}
+    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+/>
+
                                                 </div>
 
                                                 <div className="input-field3">
@@ -1059,12 +1135,31 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Department</label>
-                                                    <select value={addCustData.DepartmentCode || "1"}
-                                                        onChange={(e) => setAddCustData({ ...addCustData, DepartmentCode: e.target.value })}>
-                                                        <option value="" disabled>Select Department</option>
-                                                        <option value="1">1</option>
-                                                        <option value="2">2</option>
-                                                    </select>
+                                                    <Select
+    className="blue-selectbooking"
+    classNamePrefix="blue-selectbooking"
+    options={[
+        { value: "1", label: "1" },
+        { value: "2", label: "2" },
+    ]}
+    value={
+        addCustData.DepartmentCode
+            ? { value: addCustData.DepartmentCode, label: addCustData.DepartmentCode }
+            : { value: "1", label: "1" }
+    }
+    onChange={(selected) =>
+        setAddCustData({
+            ...addCustData,
+            DepartmentCode: selected ? selected.value : "",
+        })
+    }
+    placeholder="Select Department"
+    isSearchable={false}
+    isClearable={false}
+    menuPortalTarget={document.body}
+    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+/>
+
                                                 </div>
 
                                                 <div className="input-field3">
