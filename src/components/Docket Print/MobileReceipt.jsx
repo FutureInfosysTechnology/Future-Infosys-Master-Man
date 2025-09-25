@@ -21,10 +21,10 @@ function MobileReceipt() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi("/Master/getBranch");
+                const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
                 if (response.status === 1) {
                     console.log(response.Data);
-                    setGetBranch(response.Data);
+                    setGetBranch(response.Data[0]);
                 }
             }
             catch (error) {
@@ -88,8 +88,6 @@ function MobileReceipt() {
             console.error("html2canvas error:", err);
         });
     };
-
-    const BranchData = getBranch.length > 0 ? getBranch[1] : {};
     return (
         <>
             <style>
@@ -147,14 +145,14 @@ function MobileReceipt() {
                                 (
                                     <div className='docket'>
                                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column", marginBottom: "10px" }}>
-                                            <div className='div1' style={{ width: "100%", height: "90px", border: "2px solid black", display: "flex" }}>
-                                                <div className='logo' style={{ width: "24%", height: "100%" }}></div>
+                                            <div className='div1' style={{ width: "100%", height: "90px", border: "2px solid black", display: "flex",color:"black" }}>
+                                                <div className='logo' style={{ width: "24%", height: "100%" }}>{getBranch.Branch_Logo}</div>
                                                 <div className='heading' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column", gap: "5px", alignItems: "start", marginTop: "5px" }}>
-                                                    <div style={{ fontSize: "14px", fontWeight: "bolder" }}>{BranchData?.Company_Name}</div>
-                                                    <div style={{ lineHeight: "1.2", fontSize: "10px", paddingRight: "10px" }}>{BranchData?.Branch_Add1}</div>
+                                                    <div style={{ fontSize: "14px", fontWeight: "bolder" }}>{getBranch?.Company_Name}Company Name</div>
+                                                    <div style={{ lineHeight: "1.2", fontSize: "10px", paddingRight: "10px" }}>{getBranch?.Branch_Add1},{getBranch.Branch_PIN}</div>
                                                 </div>
                                                 <div className='booking' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ paddingLeft: "5px", fontWeight: "bold", fontSize: "12px" }}>GST No: {BranchData?.GSTNo}</div>
+                                                    <div style={{ paddingLeft: "5px", fontWeight: "bold", fontSize: "12px" }}>GST No: {getBranch?.GSTNo}</div>
                                                     <table style={tableStyle}>
                                                         <tbody >
                                                             <tr>
@@ -210,7 +208,7 @@ function MobileReceipt() {
                                                     <div style={{ fontWeight: "bold", height: "10%" }}>  DOCKET No : </div>
                                                     <div style={{ display: "flex", flexDirection: "column", height: "90%" }}>
                                                         <div style={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", gap: "0px" }}>
-                                                            <img src={barcode} alt="barcode" crossOrigin="anonymous" style={{ height: "70%", width: "150px" }} />
+                                                            <img src={barcode} alt="barcode" crossOrigin="anonymous" style={{ height: "55%", width: "150px" }} />
                                                             <b style={{ fontSize: "20px" }}>{docket?.DocketNo}</b> </div>
                                                     </div>
                                                 </div>
@@ -447,11 +445,11 @@ function MobileReceipt() {
                                             <div className='div1' style={{ width: "100%", height: "90px", border: "2px solid black", display: "flex" }}>
                                                 <div className='logo' style={{ width: "24%", height: "100%" }}></div>
                                                 <div className='heading' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column", gap: "5px", alignItems: "start", marginTop: "5px" }}>
-                                                    <div style={{ fontSize: "14px", fontWeight: "bolder" }}>{BranchData?.Company_Name}</div>
-                                                    <div style={{ lineHeight: "1.2", fontSize: "10px", paddingRight: "10px" }}>{BranchData?.Branch_Add1}</div>
+                                                    <div style={{ fontSize: "14px", fontWeight: "bolder" }}>{getBranch?.Company_Name}</div>
+                                                    <div style={{ lineHeight: "1.2", fontSize: "10px", paddingRight: "10px" }}>{getBranch?.Branch_Add1}</div>
                                                 </div>
                                                 <div className='booking' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ paddingLeft: "5px", fontWeight: "bold", fontSize: "12px" }}>GST No: {BranchData?.GSTNo}</div>
+                                                    <div style={{ paddingLeft: "5px", fontWeight: "bold", fontSize: "12px" }}>GST No: {getBranch?.GSTNo}</div>
                                                     <table style={tableStyle}>
                                                         <tbody >
                                                             <tr>

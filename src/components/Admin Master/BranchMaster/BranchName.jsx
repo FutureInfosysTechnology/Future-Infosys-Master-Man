@@ -161,10 +161,21 @@ function BranchName() {
 
     const handleSaveBranchName = async (e) => {
         e.preventDefault();
-        if (!branchData.branchName || !branchData.cityCode || !branchData.stateCode) {
-            Swal.fire('Warning!', `Branch,City,State are required`, 'warning');
-            return;
-        }
+         const errors = [];
+        // if (!formData.DocketNo) errors.push("DocketNo is required");
+        if (!branchData.branchCode) errors.push("Branch Name is required");
+        if (!branchData.invoiceNo) errors.push("InvoiceNo is required");
+        if (!branchData.runsheetNo) errors.push("RunsheetNo is required");
+        if (!branchData.manifestNo) errors.push("ManifestNo is required");
+        if (!branchData.branchPIN) errors.push("BranchPIN is required");
+        if (errors.length > 0) {
+                   Swal.fire({
+                       icon: 'error',
+                       title: 'Validation Error',
+                       html: errors.map(err => `<div>${err}</div>`).join(''),
+                   });
+                   return;
+               }
         const requestBody = {
             branchCode: branchData.branchCode,
             branchName: branchData.branchName,
@@ -521,63 +532,63 @@ function BranchName() {
                                             <label htmlFor="">Start Invoice No.</label>
                                             <input type="tel" placeholder="Enter Start Invoice No"
                                                 value={branchData.invoiceNo}
-                                                onChange={(e) => setBranchData({ ...branchData, invoiceNo: e.target.value })} required />
+                                                onChange={(e) => setBranchData({ ...branchData, invoiceNo: e.target.value })}  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Start Manifest No.</label>
                                             <input type="tel" placeholder="Enter Start Manifest No"
                                                 value={branchData.manifestNo}
-                                                onChange={(e) => setBranchData({ ...branchData, manifestNo: e.target.value })} required />
+                                                onChange={(e) => setBranchData({ ...branchData, manifestNo: e.target.value })}  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Start Runsheet No.</label>
                                             <input type="tel" value={branchData.runsheetNo}
                                                 onChange={(e) => setBranchData({ ...branchData, runsheetNo: e.target.value })}
-                                                placeholder="Enter Start Bill No" required />
+                                                placeholder="Enter Start Bill No"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" placeholder="Enter Address"
                                                 value={branchData.branchAdd1}
-                                                onChange={(e) => setBranchData({ ...branchData, branchAdd1: e.target.value })} required />
+                                                onChange={(e) => setBranchData({ ...branchData, branchAdd1: e.target.value })}  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Pin code</label>
                                             <input type="tel" id="pincode" name="pincode" maxLength="6"
                                                 placeholder="Enter Pin Code" value={branchData.branchPIN}
-                                                onChange={(e) => setBranchData({ ...branchData, branchPIN: e.target.value })} required />
+                                                onChange={(e) => setBranchData({ ...branchData, branchPIN: e.target.value })}  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">E-mail</label>
                                             <input type="email" placeholder="Enter Email"
                                                 value={branchData.email}
-                                                onChange={(e) => setBranchData({ ...branchData, email: e.target.value })} required />
+                                                onChange={(e) => setBranchData({ ...branchData, email: e.target.value })}  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Website</label>
                                             <input type="text" value={branchData.website}
                                                 onChange={(e) => setBranchData({ ...branchData, website: e.target.value })}
-                                                placeholder="Enter Website" required />
+                                                placeholder="Enter Website"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">GST No</label>
                                             <input type="text" value={branchData.gstNo}
                                                 onChange={(e) => setBranchData({ ...branchData, gstNo: e.target.value })}
-                                                placeholder="Enter GST No" required />
+                                                placeholder="Enter GST No"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">HSN No</label>
                                             <input type="text" value={branchData.hsnNo}
                                                 onChange={(e) => setBranchData({ ...branchData, hsnNo: e.target.value })}
-                                                placeholder="Enter HSN No" required />
+                                                placeholder="Enter HSN No"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -687,14 +698,14 @@ function BranchName() {
                                             <label htmlFor="">AC/No</label>
                                             <input type="tel" value={branchData.accountNo}
                                                 onChange={(e) => setBranchData({ ...branchData, accountNo: e.target.value })}
-                                                placeholder="Enter Account No" required />
+                                                placeholder="Enter Account No"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">IFSC</label>
                                             <input type="text" value={branchData.ifscCode}
                                                 onChange={(e) => setBranchData({ ...branchData, ifscCode: e.target.value })}
-                                                placeholder="Enter IFSC" required />
+                                                placeholder="Enter IFSC"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -702,14 +713,14 @@ function BranchName() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={branchData.mobileNo}
                                                 onChange={(e) => setBranchData({ ...branchData, mobileNo: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No" required />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Branch Location</label>
                                             <input type="text" placeholder="Enter Branch Location"
                                                 value={branchData.bankBranch}
-                                                onChange={(e) => setBranchData({ ...branchData, bankBranch: e.target.value })} required />
+                                                onChange={(e) => setBranchData({ ...branchData, bankBranch: e.target.value })}  />
                                         </div>
 
                                         <div className="input-field3">
@@ -719,7 +730,7 @@ function BranchName() {
                                                 id="branchLogo"
                                                 accept="image/*"   // ✅ only allow image files
                                                 onChange={handleFileChange}
-                                                required
+                                                
                                                 style={{ paddingTop: "5px" }}
                                             />
                                         </div>

@@ -116,41 +116,6 @@ function ViewInvoice() {
     };
 
     /**************** function to export table data in excel and pdf ************/
-    const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(zones);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Zones');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'zones.xlsx');
-    };
-
-    const handleExportPDF = () => {
-        const input = document.getElementById('table-to-pdf');
-
-        html2canvas(input, { scale: 2 }).then((canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF();
-            const imgWidth = 190; // Set width of the image
-            const pageHeight = pdf.internal.pageSize.height; // Get the height of the PDF page
-            const imgHeight = (canvas.height * imgWidth) / canvas.width; // Calculate the height of the image
-            let heightLeft = imgHeight;
-
-            let position = 10;  /****Set the margin top of pdf */
-
-            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-            pdf.save('zones.pdf');
-        });
-    };
-
     // Handle changing page
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -246,16 +211,9 @@ function ViewInvoice() {
                             </div>
                         </div>
                     </form>
-                    <div style={{ width: "100%", display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
-                        <div className="dropdown">
-                            <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
-                            <div className="dropdown-content">
-                                <button onClick={handleExportExcel}>Export to Excel</button>
-                                <button onClick={handleExportPDF}>Export to PDF</button>
-                            </div>
-                        </div>
+                    <div style={{ width: "100%", display: "flex", justifyContent: "end", marginTop: "10px" }}>
                         <div className="search-input">
-                            <input style={{ marginLeft: "150px" }} className="add-input" type="text" placeholder="search" />
+                            <input style={{}} className="add-input" type="text" placeholder="search" />
                             <button type="submit" title="search">
                                 <i className="bi bi-search"></i>
                             </button>

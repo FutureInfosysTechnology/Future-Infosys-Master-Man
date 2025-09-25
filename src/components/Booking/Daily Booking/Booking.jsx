@@ -174,7 +174,7 @@ function Booking() {
         InvValue: 0,
         EwayBill: "",
         InvDate: getTodayDate(),
-        BillParty: "",
+        BillParty: "Client-wise Bill",
         DestName: "",
         Mode_Code: "",
         Origin_zone: "",
@@ -1070,10 +1070,10 @@ function Booking() {
         if (!formData.ActualWt) errors.push("ActualWt is required");
         if (!formData.DestinationCode) errors.push("Destination_Name is required");
         if (!formData.Mode_Code) errors.push("Mode_Name is required");
-        if (!formData.OriginCode) errors.push("Origin_Code is required");
+        if (!formData.OriginCode) errors.push("Origin_Name is required");
         if (!formData.QtyOrderEntry || parseFloat(formData.QtyOrderEntry) <= 0) errors.push("Quantity must be greater than 0");
-        if (!formData.DoxSpx) errors.push("DoxSpx is required");
-        if (!formData.RateType) errors.push("RateType is required");
+        // if (!formData.DoxSpx) errors.push("DoxSpx is required");
+        // if (!formData.RateType) errors.push("RateType is required");
 
         // You can add more required validations here as needed...
 
@@ -1313,7 +1313,7 @@ function Booking() {
             InvValue: 0,
             EwayBill: "",
             InvDate: "",
-            BillParty: "",
+            BillParty: "Client-wise Bill",
             DestName: "",
             Mode_Code: "",
         });

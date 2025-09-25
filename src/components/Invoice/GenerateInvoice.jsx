@@ -18,7 +18,7 @@ function GenerateInvoice() {
     }
     const [toggleActive, setToggleActive] = useState(false);
     const [getCustomer, setGetCustomer] = useState([]);
-    const [getCity, setGetCity] = useState([]);
+    const [getBranch, setGetBranch] = useState([]);
     const [getMode, setGetMode] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -26,12 +26,12 @@ function GenerateInvoice() {
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
         branch: "",
-        type: "",
+        BookMode: "",
         customerType: "",
         fromDate: firstDayOfMonth,
         toDate: today,
         invoiceDate: today,
-        billingType: "",
+        BillParty:"Client-wise Bill",
         customer: "",
         mode: "",
         invoiceNo: ""
@@ -52,10 +52,23 @@ function GenerateInvoice() {
 
 
     useEffect(() => {
+                const fetchBranch = async () => {
+                    try {
+                        const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
+                        if (response.status === 1) {
+                            console.log(response.Data);
+                            setGetBranch(response.Data);
+                        }
+                    }
+                    catch (error) {
+                        console.log(error);
+                    }
+        }
         fetchData('/Master/getCustomerdata', setGetCustomer);
-        fetchData('/Master/getdomestic', setGetCity);
         fetchData('/Master/getMode', setGetMode);
+        fetchBranch();
     }, []);
+
 
 
     return (
@@ -68,15 +81,15 @@ function GenerateInvoice() {
                             <div className="input-field3">
                                 <label htmlFor="">Branch Name</label>
                                 <Select
-                                    options={getCity.map(city => ({
-                                        value: city.City_Code,   // adjust keys from your API
-                                        label: city.City_Name
+                                    options={getBranch.map(branch => ({
+                                        value: branch.Branch_Code,   // adjust keys from your API
+                                        label: branch.Branch_Name
                                     }))}
                                     value={
                                         formData.branch
                                             ? {
                                                 value: formData.branch,
-                                                label: getCity.find(c => c.City_Code === formData.branch)?.City_Name
+                                                label: getBranch.find(c => c.Branch_Code === formData.branch)?.Branch_Name
                                             }
                                             : null
                                     }
@@ -104,14 +117,16 @@ function GenerateInvoice() {
                             </div>
 
                             <div className="input-field3">
-                                <label htmlFor="">Type</label>
-                                <select value={formData.type} onChange={(e) => handleFormChange(e.target.value, "type")}>
-                                    <option value="" disabled>Select Type</option>
-                                    <option value="Client Wise">Client Wise</option>
-                                    <option value="Shipper Wise">Shipper Wise</option>
-                                    <option value="Receiver Wise">Receiver Wise</option>
-                                    <option value="Alarm No Wise">Alarm No Wise</option>
-                                </select>
+                                <label>Billing Type</label>
+                                        <select value={formData.BillParty} onChange={(e) => setFormData({ ...formData, BillParty: e.target.value })}>
+                                            <option value="" disabled>Select Billing Type</option>
+                                            <option value="Client-wise Bill">Client-wise Bill</option>
+                                            <option value="Shipper-wise Bill">Shipper-wise Bill</option>
+                                            <option value="Vendor-wise Bill">Vendor-wise Bill</option>
+                                            <option value="Product-wise Bill">Product-wise Bill</option>
+                                            <option value="Consignee-wise Bill">Consignee-wise Bill</option>
+
+                                        </select>
                             </div>
 
                             <div className="input-field3">
@@ -200,10 +215,12 @@ function GenerateInvoice() {
                             </div>
 
                             <div className="input-field3">
-                                <label htmlFor="">Billing Type</label>
-                                <select value={formData.billingType} onChange={(e) => handleFormChange(e.target.value, "billingType")}>
-                                    <option value="" disabled>Billing Type</option>
-                                    <option value="Client">Client</option>
+                                <label htmlFor="">Booking Mode</label>
+                                <select value={formData.BookMode} onChange={(e) => setFormData({ ...formData, BookMode: e.target.value })}>
+                                    <option value="" disabled>Select Booking Mode</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Credit">Credit</option>
+                                    <option value="To-pay">To-pay</option>
                                 </select>
                             </div>
 
@@ -267,8 +284,8 @@ function GenerateInvoice() {
                                 <button className="ok-btn" style={{ height: "35px", width: "50px" }}><i className="bi bi-layout-text-sidebar"></i></button>
                             </div>
 
-                            <div className="bottom-buttons input-field3" style={{}}>
-                                <button className="ok-btn">Submit</button>
+                            <div className="bottom-buttons input-field3" style={{marginTop: "18px",padding:"0px"}}>
+                                <button className="ok-btn mx-0 my-0">Submit</button>
                             </div>
                         </div>
                     </form>

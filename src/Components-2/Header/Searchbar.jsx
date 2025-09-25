@@ -182,11 +182,19 @@ function Searchbar() {
             </Modal >
 
         <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen1}
-            className="custom-modal" contentLabel="Modal">
+            className="custom-modal" contentLabel="Modal"  style={{
+                    content: {
+                        top: '55%',             // Center vertically
+                        left: '50%',
+                        whiteSpace: "nowrap",
+                        height:"90%",
+                        width:"100%"
+                    },
+                }}>
             <div className="custom-modal-content">
                 <div className="header-tittle" style={{ display: "flex", flexDirection: "row" }}>
-                    <header style={{ width: "95%", textAlign: "center" }}>Tracking Details</header>
-                    <button className="ok-btn" style={{ width: "5%", height: "100%", backgroundColor: "red" }}
+                    <header className="" style={{width:"95%",textAlign: "center" }}>Tracking Details</header>
+                    <button className="ok-btn " style={{width:"60px",height: "100%", backgroundColor: "red" }}
                         onClick={() => setModalIsOpen1(false)}>
                         <i className="bi bi-x-lg"></i>
                     </button>

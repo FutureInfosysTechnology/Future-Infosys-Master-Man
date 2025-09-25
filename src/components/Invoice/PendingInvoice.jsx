@@ -178,7 +178,7 @@ function PendingInvoice() {
                 <div className="container1">
                     <form style={{ margin: "0px", padding: "0px" }}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
-                            <div className="input-field3">
+                            <div className="input-field1">
                                 <label htmlFor="">Customer</label>
                                 <Select
                                     options={getCustomer.map(cust => ({

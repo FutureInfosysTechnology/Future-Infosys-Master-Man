@@ -229,6 +229,7 @@ function EmailBooking() {
               placeholder="Search Customer..."
               isClearable
               noOptionsMessage={() => "Customer not found"}
+              menuPortalTarget={document.body}
               styles={{
                 control: (base) => ({ ...base, minHeight: "32px", fontSize: "0.85rem" }),
                 menu: (base) => ({ ...base, zIndex: 9999 })

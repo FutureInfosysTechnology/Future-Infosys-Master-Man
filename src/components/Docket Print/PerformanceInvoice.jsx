@@ -1,162 +1,419 @@
-import React from 'react'
-import Sidebar1 from '../../Components-2/Sidebar1';
+import React, { useRef, useState, useEffect } from 'react';
+import logoimg from '../../Assets/Images/AceLogo.jpeg';
+import { useLocation, useNavigate } from 'react-router-dom';
+import 'jspdf-autotable';
+import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import Header from '../../Components-2/Header/Header';
-import Footer from '../../Components-2/Footer';
+import Sidebar1 from '../../Components-2/Sidebar1';
 
 function PerformanceInvoice() {
+
+    const location = useLocation();
+    const navigate = useNavigate();
+    const manifest = location?.state?.data || {};
+    const fromPath = location?.state?.from || "/";
+    const [getBranch, setGetBranch] = useState([]);
+    const [manifestData, setGetManifestData] = useState([]);
+    console.log(location.state);
+    const manifestNo = manifest?.manifestNo || "";
+    const sumQty = manifest?.sumQty || 0;
+    const sumActualWt = manifest?.sumActualWt || 0;
+    const [loading, setLoading] = useState(true);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+    console.log(manifestNo, sumQty, sumActualWt);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
+                if (response.status === 1) {
+                    console.log(response.Data);
+                    setGetBranch(response.Data[0]);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        fetchData();
+    }, [])
+    const pageRef = useRef();
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getApi(`/Manifest/viewManifestPrint?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&manifestNo=${manifestNo}`);
+                setGetManifestData(Array.isArray(response.data) ? response.data : []);
+                console.log(response);
+            } catch (err) {
+                console.error('Fetch Error:', err);
+            } finally {
+                setLoading(false);
+                setIsDataLoaded(true);
+                // generatePDF();
+            }
+        };
+        if (manifestNo) {
+            fetchData();
+        }
+    }, [manifestNo]);
+
+    // useEffect(() => {
+    //     if (!loading && manifestData.length > 0 && getBranch.length > 0) {
+    //         setTimeout(generatePDF, 1000);
+    //     }
+    // }, [loading, manifestData, getBranch]);
+
+    const generatePDF = async () => {
+        if (!pageRef.current) return;
+        const canvas = await html2canvas(pageRef.current, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        // 
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        // 
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Manifest_${manifestNo}.pdf`);
+    };
+
+    // if (loading) return <p>Loading...</p>;
+
     return (
         <>
+            <style>
+                {`@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #pdf, #pdf * {
+        visibility: visible;
+    }
+
+    #pdf {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box;
+    }
+
+    table {
+        width: auto !important;  /* Let table auto-expand */
+        table-layout: auto;      /* Use auto layout */
+        border-collapse: collapse;
+        font-size: 10px !important;
+    }
+
+    th, td {
+        white-space: nowrap !important;
+        border: 1px solid black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .th {
+        background-color: rgba(36, 98, 113, 1) !important;
+        color: white !important;
+    }
+
+    button {
+        display: none !important;
+    }
+
+    .container-2, .container-3 {
+        width: auto !important;
+    }
+}
+   th, td {
+       
+    }
+
+    .th {
+       
+    }
+ 
+`}
+            </style>
+
             <Header />
             <Sidebar1 />
             <div className="main-body" id="main-body">
-                <div className="container">
-                    <div className="container" style={{ border: "1px solid black", padding: "0px" }}>
-                        <div style={{ display: "flex", flexDirection: "row", height: "40px" }}>
-                            <div style={{ width: "80%", border: "1px solid black", textAlign: "center", paddingTop: "5px", fontSize: "18px" }}>
-                                <b>PERFORMANCE INVOICE</b>
-                            </div>
 
-                            <div style={{ border: "1px solid black", width: "20%", textAlign: "end", paddingTop: "5px", paddingRight: "10px" }}>
-                                <label htmlFor="">INVOICE NO :</label>
-                                <label htmlFor="" style={{ fontSize: "12px", marginLeft: "5px" }}><b>9834</b></label>
-                            </div>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "row", height: "150px", fontSize: "14px" }}>
-                            <div style={{ width: "50%", border: "1px solid black", display: "flex", flexDirection: "column", paddingLeft: "5px" }}>
-                                <b><u>SHIPPER :</u></b>
-                                <b>RAMESH KUMAR</b>
-                                <p style={{ margin: "0px" }}>171 RRAMJI FADIYU</p>
-                                <p style={{ margin: "0px" }}>VASANAPURA</p>
-                                <p style={{ margin: "0px" }}>VADODARA (391770) GUJARAT, INDIA</p>
-                                <b>AADHAR NO : 1234 5678 1234</b>
-                            </div>
+                <div className="container-2" style={{ borderRadius: "0px", width: "793px", height: "40px", border: "none" }}>
 
-                            <div style={{ width: "50%", border: "1px solid black", display: "flex", flexDirection: "column", paddingLeft: "5px" }}>
-                                <b><u>RECEIVER :</u></b>
-                                <b>SURESH KUMAR</b>
-                                <p style={{ margin: "0px" }}>480 A - KATHERING ROAD</p>
-                                <p style={{ margin: "0px" }}>LONDON</p>
-                                <p style={{ margin: "0px" }}>LONDON, UK - E78DP</p>
-                                <b>MOBILE NO : +447 (44) 84-97-197</b>
-                            </div>
-                        </div>
-
-                        <div style={{ display: "flex", flexDirection: "row", height: "90px", fontSize: "14px" }}>
-                            <div style={{ width: "50%", border: "1px solid black", display: "flex", flexDirection: "column", paddingLeft: "5px" }}>
-                                <label htmlFor="">DATE OF INVOICE : <b>11-01-2025</b></label>
-                                <label htmlFor="">DOCKET NO : <b>123456</b></label>
-                                <label htmlFor="">COUNTRY OF ORIGIN : <b>INDIA</b></label>
-                                <label htmlFor="">FINAL DESTINATION : <b>UNITED KINGDOM</b></label>
-                            </div>
-
-                            <div style={{ width: "50%", display: "flex", flexDirection: "column" }}>
-                                <div style={{ height: "50%", border: "1px solid black", textAlign: "center" }}>
-                                    <b>UNSOLICITATED GIFT FOR PEROSNAL USE ONLY NOT FOR
-                                        SALE</b>
-                                </div>
-
-                                <div style={{ height: "50%", border: "1px solid black", display: "flex", flexDirection: "column", paddingLeft: "5px" }}>
-                                    <label htmlFor="">NO OF BOX : <b>1 BOX</b></label>
-                                    <label htmlFor="">TOTAL WEIGHT : <b>12.9 KG</b></label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ display: "flex", flexDirection: "row", height: "600px", fontSize: "14px" }}>
-                            <div style={{ width: "50%", border: "1px solid black", display: "flex", flexDirection: "column" }}>
-                                <div style={{ height: "40px", textAlign: "center", border: "1px solid black", paddingTop: "5px" }}>
-                                    <b>DESCRIPTION OF GOODS</b>
-                                </div>
-                                <label style={{ paddingLeft: "5px" }} htmlFor=""><b>BOX NO : 1[ A.Wt. 12.900 KG ] [ 35x35x53 CM ]</b></label>
-                                <label style={{ paddingLeft: "5px" }} htmlFor="">SNACKS</label>
-                                <label style={{ paddingLeft: "5px" }} htmlFor="">SPICES</label>
-                                <label style={{ paddingLeft: "5px" }} htmlFor="">BISCUIT</label>
-                                <label style={{ paddingLeft: "5px" }} htmlFor="">KHAKHARA WITH CONTAINER </label>
-                                <label style={{ paddingLeft: "5px" }} htmlFor="">SNACKS WITH CONTAINER </label>
-                            </div>
-
-                            <div style={{ width: "10%", border: "1px solid black", display: "flex", flexDirection: "column", textAlign: "center" }}>
-                                <div style={{ height: "40px", border: "1px solid black", paddingTop: "5px" }}>
-                                    <b>HSN CODE</b>
-                                </div>
-                                <label style={{ marginTop: "20px" }} htmlFor="">21069099</label>
-                                <label htmlFor="">09103090</label>
-                                <label htmlFor="">19053100</label>
-                                <label htmlFor="">21069099</label>
-                                <label htmlFor="">21039040</label>
-                            </div>
-
-                            <div style={{ width: "10%", border: "1px solid black", display: "flex", flexDirection: "column", textAlign: "center" }}>
-                                <div style={{ height: "40px", border: "1px solid black", display: "flex", flexDirection: "column", fontSize: "13px" }}>
-                                    <b>QTY</b>
-                                    <b>(PCS/PKT)</b>
-                                </div>
-                                <label style={{ marginTop: "20px" }} htmlFor="">24</label>
-                                <label htmlFor="">8</label>
-                                <label htmlFor="">4</label>
-                                <label htmlFor="">1</label>
-                                <label htmlFor="">1</label>
-                            </div>
-
-                            <div style={{ width: "15%", border: "1px solid black", display: "flex", flexDirection: "column", textAlign: "end" }}>
-                                <div style={{ height: "40px", border: "1px solid black", display: "flex", flexDirection: "column", fontSize: "13px", paddingRight: "5px" }}>
-                                    <b>UNIT VALUE</b>
-                                    <b>INR</b>
-                                </div>
-                                <label style={{ marginTop: "20px", paddingRight: "10px" }} htmlFor="">100.00</label>
-                                <label style={{ paddingRight: "10px" }} htmlFor="">100.00</label>
-                                <label style={{ paddingRight: "10px" }} htmlFor="">250.00</label>
-                                <label style={{ paddingRight: "10px" }} htmlFor="">150.00</label>
-                                <label style={{ paddingRight: "10px" }} htmlFor="">100.00</label>
-                            </div>
-
-                            <div style={{ width: "15%", border: "1px solid black", display: "flex", flexDirection: "column", textAlign: "end" }}>
-                                <div style={{ height: "40px", border: "1px solid black", display: "flex", flexDirection: "column", fontSize: "13px", paddingRight: "5px" }}>
-                                    <b>TOTAL</b>
-                                    <b>INR</b>
-                                </div>
-                                <label style={{ marginTop: "20px", paddingRight: "10px" }} htmlFor="">2400.00</label>
-                                <label style={{ paddingRight: "10px" }} htmlFor="">800.00</label>
-                                <label style={{ paddingRight: "10px" }} htmlFor="">100.00</label>
-                                <label style={{ paddingRight: "10px" }} htmlFor="">150.00</label>
-                                <label style={{ paddingRight: "10px" }} htmlFor="">100.00</label>
-                            </div>
-                        </div>
-
-                        <div style={{ display: "flex", flexDirection: "row", height: "30px" }}>
-                            <div style={{ width: "70%", border: "1px solid black", fontSize: "12px", paddingTop: "5px", paddingLeft: "5px" }}>
-                                <p style={{ margin: "0px" }}>INR THREE THOUSAND SIX HUNDRED ONLY</p>
-                            </div>
-
-                            <div style={{ width: "15%", border: "1px solid black", textAlign: "end", paddingRight: "10px" }}>
-                                <b>TOTAL(INR)</b>
-                            </div>
-
-                            <div style={{ width: "15%", border: "1px solid black", textAlign: "end", paddingRight: "10px" }}>
-                                <b>4500.00</b>
-                            </div>
-                        </div>
-
-                        <div style={{ display: "flex", flexDirection: "row", height: "60px", fontSize: "14px" }}>
-                            <div style={{ width: "70%", border: "1px solid black", paddingLeft: "5px" }}>
-                                <p style={{ margin: "0px" }}>WE HERE BY CONFIRM THAT THE PARCEL DOES NOT INVOLVE ANY COMMERCIAL TRANSACTION. THE VALUE IS DECLARED FOR CUSTOMS PURPOSE ONLY.</p>
-                            </div>
-
-                            <div style={{ width: "30%", border: "1px solid black", textAlign: "end", paddingRight: "10px" }}>
-                                <p style={{ marginBottom: "15px" }}>For, <b>RAMESH KUMAR</b></p>
-                                <b>PREPAID BY</b>
-                            </div>
-                        </div>
-
-                        <div style={{ textAlign: "center", padding: "5px", fontSize: "12px", height: "30px" }}>
-                            <label htmlFor="">THIS IS A COMPUTER GENERATED INVOICE</label>
-                        </div>
+                    <div className="container-2" style={{ borderRadius: "0px", width: "793px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px", alignItems: "center" }}>
+                        <button
+                            onClick={generatePDF}
+                            style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Download
+                        </button>
+                        <button
+                            onClick={() => window.print()}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Print
+                        </button>
+                        <button
+                            onClick={() => navigate(fromPath, { state: { tab: "viewmanifest" } })}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            Exit
+                        </button>
                     </div>
                 </div>
-                <Footer />
-            </div>
+
+                <div className="container-2" ref={pageRef} id="pdf" style={{
+                    borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px"
+                    , paddingBottom: "20px", width: "793px", direction: "flex", fontFamily: "Roboto",
+                    flexDirection: "column", gap: "5px", fontSize: "10px", fontWeight: "bold"
+                }}>
+
+                    <div className="container-2" style={{ borderRadius: "0px", width: "750px", display: "flex", flexDirection: "column" }}>
+                        < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
+                            <div className="container-3 px-0 py-0" style={{ border: "2px solid black", height: "815px" }}>
+
+                                <div className="div1" style={{ height: "120px", display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
+                                    <div style={{ width: "50%", height: "100%", borderRight: "2px solid black", display: "flex", gap: "7px" }}>
+                                        <div style={{ width: "30%", height: "100%", padding: "10px", paddingTop: "10px", paddingBottom: "10px" }}>
+                                            <img src={getBranch?.Branch_Logo || logoimg} alt="" style={{ height: "100%", width: "100%", borderRadius: "50%" }} />
+                                        </div>
+                                        <div style={{ width: "70%", height: "100%", display: "flex", flexDirection: "column" }}>
+                                            <div style={{ fontWeight: "bolder", fontSize: "18px", marginTop: "12px" }}>Sales Points{getBranch.Company_Name}</div>
+                                            <div >{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div>
+                                            <div style={{ width: "100%", display: "flex" }}>
+                                                <div style={{ width: "50%", display: "flex", flexDirection: "column" }}>
+                                                    <div style={{ fontSize: "12px" }}>GST No:</div>
+                                                    <div>{getBranch.GSTNo}</div>
+                                                </div>
+                                                <div style={{ width: "50%", display: "flex", flexDirection: "column" }}>
+                                                    <div style={{ fontSize: "12px" }}>Mobile No:</div>
+                                                    <div>{getBranch.MobileNo}</div>
+                                                </div>
+                                                {/* <div style={{width:"30%",display:"flex",flexDirection:"column"}}> */}
+                                                {/* <div style={{fontWeight:"bolder"}}>Email:</div> */}
+                                                {/* <div>{getBranch.Email}</div> */}
+                                                {/* </div> */}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style={{ width: "50%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <div style={{ display: "flex", width: "80%", height: "40%", justifyContent: "space-between", alignItems: "center", marginTop: "5px" }}>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                                                <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Invoice No:</div>
+                                                <div>1001</div>
+                                            </div>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                                                <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Invoice Date:</div>
+                                                <div>01/09/2025</div>
+                                            </div>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                                                <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Due Date:</div>
+                                                <div>10/09/2025</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="div2" style={{ height: "140px", display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
+                                    <div style={{ width: "50%", height: "100%", borderRight: "2px solid black", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
+                                        <div style={{ fontSize: "12px" }}>BILL TO</div>
+                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}> RAJ AIR EXPRESS CARGO PRIVATE LIMITED</div>
+                                        <div style={{ display: "flex", gap: "2px" }}>
+                                            <div style={{ width: "12%" }}> Address:</div>
+                                            <div style={{ width: "80%" }}> 001, GROUND FLOOR, 9/1, SAIDHAM, TELLY GALLI, SAHAR ROAD, ANDHERI EAST, Mumbai Suburban, Maharashtra,
+                                                Mumbai, Maharashtra, 400069</div>
+                                        </div>
+                                        <div style={{ display: "flex", gap: "15px" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}>GSTIN:</div>
+                                                <div>27AAFCR7719F1Z6 </div>
+                                            </div>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}> Place of Supply:</div>
+                                                <div>Maharashtra </div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: "flex", gap: "15px" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}> Mobile:</div>
+                                                <div> 9324038719  </div>
+                                            </div>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}>  PAN Number:</div>
+                                                <div>AAFCR7719F</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
+                                        <div style={{ fontSize: "12px" }}>SHIP TO</div>
+                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}> RAJ AIR EXPRESS CARGO PRIVATE LIMITED</div>
+                                        <div style={{ display: "flex", gap: "2px" }}>
+                                            <div style={{ width: "12%" }}> Address:</div>
+                                            <div style={{ width: "80%" }}> 001, GROUND FLOOR, 9/1, SAIDHAM, TELLY GALLI, SAHAR ROAD, ANDHERI EAST, Mumbai Suburban, Maharashtra,
+                                                Mumbai, Maharashtra, 400069</div>
+                                        </div>
+                                        <div style={{ display: "flex", gap: "15px" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}>GSTIN:</div>
+                                                <div>27AAFCR7719F1Z6 </div>
+                                            </div>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}> Place of Supply:</div>
+                                                <div>Maharashtra </div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: "flex", gap: "15px" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}> Mobile:</div>
+                                                <div> 9324038719  </div>
+                                            </div>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}>  PAN Number:</div>
+                                                <div>AAFCR7719F</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="div3" style={{ height: "30px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black", backgroundColor: "rgba(255, 165, 0, 0.1)" }}>
+
+                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>S.NO</div>
+                                    <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>ITEMS</div>
+                                    <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>HSN</div>
+                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>QTY</div>
+                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>RATE</div>
+                                    <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>AMOUNT</div>
+                                </div>
+                                <div className="div4" style={{ height: "500px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
+                                    <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
+                                        <div>1</div> <div>2</div>
+                                    </div>
+                                    <div style={{ width: "40%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px", textAlign: "start", paddingLeft: "10px" }}>
+                                        <div> 1519 Pod bags</div> <div>4050 ench HDPE laminated bags</div>
+                                    </div>
+                                    <div style={{ width: "15%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
+                                        <div> 39232100</div> <div> 39232100</div>
+                                    </div>
+                                    <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
+                                        <div> 100 PCS</div> <div> 100 PCS</div>
+                                    </div>
+                                    <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
+                                        <div>3.9</div> <div>2.48</div>
+                                    </div>
+                                    <div style={{ width: "15%", flexDirection: "column", display: "flex", flexDirection: "column", gap: "5px", paddingTop: "5px" }}>
+                                        <div>390</div> <div>390</div>
+                                    </div>
+                                </div>
+                                <div className="div5" style={{ height: "30px", textAlign: "center", display: "flex", flexDirection: "row", backgroundColor: "rgba(255, 165, 0, 0.1)" }}>
+
+                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
+                                    <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>TOTAL</div>
+                                    <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
+                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>200</div>
+                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
+                                    <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>Rs. 3113</div>
+                                </div>
+                            </div>
+                            <div className="second px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
+                                <div className="div1" style={{ height: "33px", textAlign: "center", display: "flex", flexDirection: "row", fontWeight: "bolder", fontSize: "11px", backgroundColor: "rgba(255, 165, 0, 0.1)", borderBottom: "2px solid black" }}>
+
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> HSN/SAC</div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Taxable Value</div>
+                                    <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
+                                        <div style={{ borderBottom: "2px solid black" }}>CGST</div>
+                                        <div style={{ display: "flex" }}>
+                                            <div style={{ width: "40%", borderRight: "2px solid black" }}>Rate</div>
+                                            <div style={{ width: "60%" }}>Amount</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
+                                        <div style={{ borderBottom: "2px solid black" }}>SGST</div>
+                                        <div style={{ display: "flex" }}>
+                                            <div style={{ width: "40%", borderRight: "2px solid black" }}>Rate</div>
+                                            <div style={{ width: "60%" }}>Amount</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}> Total Tax Amount</div>
+                                </div>
+                                <div className="div2" style={{ height: "20px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black" }}>
+
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 39232100</div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 390</div>
+                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
+
+                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> 9%</div>
+                                        <div style={{ width: "60%" }}> 35.1</div>
+
+                                    </div>
+                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
+                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> 9%</div>
+                                        <div style={{ width: "60%" }}> 35.1</div>
+                                    </div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>  ₹70.2</div>
+                                </div>
+                                <div className="div3" style={{ height: "20px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black" }}>
+
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 39232100</div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 390</div>
+                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
+
+                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> 9%</div>
+                                        <div style={{ width: "60%" }}> 35.1</div>
+
+                                    </div>
+                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
+                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> 9%</div>
+                                        <div style={{ width: "60%" }}> 35.1</div>
+                                    </div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>  ₹70.2</div>
+                                </div>
+                                <div className="div4" style={{ height: "20px", textAlign: "center", display: "flex", flexDirection: "row" }}>
+
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black", fontSize: "13px", fontWeight: "bolder" }}> Total</div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 900</div>
+                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
+
+                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> </div>
+                                        <div style={{ width: "60%" }}> 80</div>
+
+                                    </div>
+                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
+                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> </div>
+                                        <div style={{ width: "60%" }}> 80</div>
+                                    </div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>   ₹150</div>
+                                </div>
+                            </div>
+                            <div className="third px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
+                                <div style={{ display: "flex", flexDirection: "column", padding: "5px", borderBottom: "2px solid black" }}>
+                                    <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Total Amount (in words)
+                                    </div>
+                                    <div>Three Thousand One Hundred Thirteen Rupees</div>
+                                </div>
+                                <div style={{ display: "flex" }}>
+                                    <div style={{ display: "flex", flexDirection: "column", fontSize: "11px", width: "50%", padding: "5px", borderRight: "2px solid black" }}>
+                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Bank Details</div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Name:</div><div> sales point</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>IFSC Code:</div><div>  GBCB0000007</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div> 30208426463</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>  Greater Bombay Co-operative Bank,Andheri Branch</div></div>
+                                    </div>
+                                    <div style={{ display: "flex", width: "50%",flexDirection:"column", justifyContent: "end" ,alignItems:"center",paddingBottom:"5px"}}>
+                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Authorised Signatory For
+                                        </div>
+                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Sales Poin</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div >
+                </div>
+            </div >
         </>
-    )
+    );
 }
 
 export default PerformanceInvoice;
