@@ -5,7 +5,7 @@ import Sidebar1 from "../Sidebar1";
 import Footer from "../Footer";
 import {
     LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList, PieChart, Pie, Sector, Cell,
-    BarChart, Bar, Rectangle, CartesianGrid, Legend
+    BarChart, Bar, Rectangle, CartesianGrid, Legend,
 } from 'recharts';
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import bookingSvg from "../../Assets/Images/cash-svgrepo-com.png";
@@ -26,7 +26,8 @@ import person3 from "../../Assets/Images/person3.jpg";
 import person4 from "../../Assets/Images/person4.jpg";
 import person5 from "../../Assets/Images/person5.jpg";
 
-
+// Colors for Pie slices
+const COLORS1 = ["#FF8042", "#00C49F"];
 const data = [
     {
         name: 'Jan',
@@ -231,49 +232,178 @@ function Dashboard() {
             <Sidebar1 />
             <div className="main-body" id="main-body">
                 <div className="dashboard-container">
+<Swiper
+  modules={[Navigation, Autoplay]}
+  slidesPerView={4}
+  spaceBetween={20}
+  autoplay={{ delay: 4000 }}
+  speed={1300}
+  loop={true}
+  className="w-100"
+  style={{ marginTop: "30px" }}
+  breakpoints={{
+    320: { slidesPerView: 1 },
+    640: { slidesPerView: 2 },
+    1024: { slidesPerView: 3 },
+    1280: { slidesPerView: 4 },
+  }}
+>
+  {cards.map((card) => {
+    const pending = parseInt(card.pending);
+    const done = parseInt(card.done);
+    const total = pending + done;
 
-                    <Swiper
-                        modules={[Navigation, Autoplay]}
-                        slidesPerView={4}
-                        spaceBetween={20}
-                        autoplay={{ delay: 4000 }}
-                        speed={1300}
-                        effect="slide"
-                        loop={true}
-                        className="w-100"
-                        breakpoints={{
-                            320: { slidesPerView: 1 },
-                            640: { slidesPerView: 2 },
-                            1024: { slidesPerView: 3 },
-                            1280: { slidesPerView: 4 },
-                        }}
-                    >
-                        {cards.map((card) => (
-                            <SwiperSlide key={card.id}>
-                                <div className="card booking-card1">
-                                    <div className="row1">
-                                        <div style={{ width: "30%", alignItems: "center", justifyContent: "center", display: "flex" }}>
-                                            <img className="card-image" src={card.image} alt="" />
-                                        </div>
-                                        <div className="column1" style={{ alignItems: "center", justifyContent: "center", width: "70%" }}>
-                                            <b>{card.title}</b>
-                                            <div className="row1" style={{ marginTop: "10px" }}>
-                                                <div className="column1" style={{ alignItems: "center", justifyContent: "center", marginRight: "5px" }}>
-                                                    <span>{card.pending}</span>
-                                                    <p>Pending</p>
-                                                </div>
+    const data = [
+      { name: "Pending", value: pending },
+      { name: "Done", value: done },
+    ];
 
-                                                <div className="column1" style={{ alignItems: "center", justifyContent: "center", marginLeft: "5px" }}>
-                                                    <span>{card.done}</span>
-                                                    <p>Done</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
+    return (
+      <SwiperSlide key={card.id}>
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: "15px",
+            boxShadow: "0 3px 8px rgba(0,0,0,0.1)",
+            padding: "10px",
+            minHeight: "170px",
+            minWidth: "220px",
+            margin: "auto",
+            display: "flex",
+            flexDirection: "column", // title top, rest bottom
+            alignItems: "center",
+          }}
+        >
+          {/* Title top */}
+          <div
+            style={{
+              width: "100%",
+              marginBottom: "10px",
+              fontSize: "18px",
+              fontWeight: "600",
+              textAlign: "center",
+            }}
+          >
+            {card.title}
+          </div>
+
+          {/* Bottom row (Pie left + Right content) */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              paddingLeft:"5px",
+            }}
+          >
+            {/* Left (Pie) */}
+            <div
+              style={{
+                position: "relative",
+                width: "120px",
+                height: "120px",
+                flexShrink: 0,
+              }}
+            >
+              <PieChart width={120} height={120}>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={30}
+                  outerRadius={55}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {data.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS1[index % COLORS1.length]}
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+
+              {/* Center total */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  textAlign: "center",
+                }}
+              >
+                <h4 style={{ margin: 0, fontSize: "14px" }}>{total}</h4>
+                <small style={{ fontSize: "11px" }}>Total</small>
+              </div>
+            </div>
+
+            {/* Right (Image + Pending/Done) */}
+            <div
+              style={{
+                flex: 1,
+                marginLeft: "15px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              {/* Image */}
+              <img
+                src={card.image}
+                alt={card.title}
+                style={{ width: "45px", height: "45px", marginBottom: "8px" }}
+              />
+
+              {/* Pending + Done side-by-side */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                {/* Pending */}
+                <div style={{ textAlign: "center", flex: 1 }}>
+                  <span
+                    style={{
+                      color: "#FF8042",
+                      fontWeight: "bold",
+                      fontSize: "14px",
+                    }}
+                  >
+                    {pending}
+                  </span>
+                  <p style={{ margin: 0, fontSize: "12px" }}>Pending</p>
+                </div>
+
+                {/* Done */}
+                <div style={{ textAlign: "center", flex: 1 }}>
+                  <span
+                    style={{
+                      color: "#00C49F",
+                      fontWeight: "bold",
+                      fontSize: "14px",
+                    }}
+                  >
+                    {done}
+                  </span>
+                  <p style={{ margin: 0, fontSize: "12px" }}>Done</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </SwiperSlide>
+    );
+  })}
+</Swiper>
+
+
+
+
 
                     <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: "20px" }}>
                         <div className="card" style={{ width: "70%", marginRight: "10px", height: "350px", padding: "20px", border: "none" }}>
@@ -504,13 +634,13 @@ function Dashboard() {
                                 <div className="card booking-card1" style={{ height: "160px", padding: "20px" }}>
                                     <div className="column1" style={{ height: "100%", width: "100%" }}>
                                         <div className="row1">
-                                            <img src={card.image} alt="" className="card-image" style={{padding:"0px", border:"none", marginRight:"20px"}} />
+                                            <img src={card.image} alt="" className="card-image" style={{ padding: "0px", border: "none", marginRight: "20px" }} />
                                             <div className="column1">
                                                 <b>{card.title}</b>
-                                                <p style={{margin:"0px", padding:"0px"}}>UI Designer / <i className="bi bi-star-fill" style={{color:"yellow"}}></i> 5.0</p>
+                                                <p style={{ margin: "0px", padding: "0px" }}>UI Designer / <i className="bi bi-star-fill" style={{ color: "yellow" }}></i> 5.0</p>
                                             </div>
                                         </div>
-                                        <p style={{margin:"0px", padding:"0px", fontSize:"12px"}}>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sit velit quod corporis esse illo quaerat excepturi doloribus nobis soluta consequuntur.</p>
+                                        <p style={{ margin: "0px", padding: "0px", fontSize: "12px" }}>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sit velit quod corporis esse illo quaerat excepturi doloribus nobis soluta consequuntur.</p>
                                     </div>
                                 </div>
                             </SwiperSlide>

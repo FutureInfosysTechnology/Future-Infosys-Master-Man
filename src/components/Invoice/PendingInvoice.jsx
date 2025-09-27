@@ -19,14 +19,17 @@ import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 function PendingInvoice() {
 
 
-    const [zones, setZones] = useState([{ code: "INV001", date: "2025-08-25", shipper: "ABC Pvt Ltd", receiver: "XYZ Ltd", from: "Mumbai", to: "Delhi", pc: "5", weight: "50", invoiceno: "1001", invoicevalue: "5000" },
-    { code: "INV002", date: "2025-08-26", shipper: "LMN Pvt Ltd", receiver: "OPQ Ltd", from: "Pune", to: "Bangalore", pc: "3", weight: "20", invoiceno: "1002", invoicevalue: "3000" }]);
+    const [invoice, setInvoice] = useState([]);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
     const [editIndex, setEditIndex] = useState(null);
     const [modalData, setModalData] = useState({
         code: '', date: '', shipper: '', receiver: '', from: '', to: '',
         pc: '', weight: '', invoiceno: '', invoicevalue: ''
     });
     const [getCustomer, setGetCustomer] = useState([]);
+    const [getBranch, setGetBranch] = useState([]);
+    const [getMode, setGetMode] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const extrectArray = (response) => {
@@ -40,19 +43,44 @@ function PendingInvoice() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;
-
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
-    const totalPages = Math.ceil(zones.length / rowsPerPage);
+    const currentRows = invoice.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.ceil(invoice.length / rowsPerPage);
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
         fromDate: firstDayOfMonth,
         toDate: today,
-        customer: "",
+        customer: "ALL CUSTOMER DATA",
+        branch: "ALL BRANCH DATA",
+        mode: "ALL MODE DATA",
     });
+    // Merge static + API
+    const customerOptions = [
+        { value: "ALL CUSTOMER DATA", label: "ALL CUSTOMER DATA" },
+        ...getCustomer.map(cust => ({
+            value: cust.Customer_Code,
+            label: cust.Customer_Name
+        }))
+    ];
+
+    const branchOptions = [
+        { value: "ALL BRANCH DATA", label: "ALL BRANCH DATA" },
+        ...getBranch.map(branch => ({
+            value: branch.Branch_Code,
+            label: branch.Branch_Name
+        }))
+    ];
+
+    const modeOptions = [
+        { value: "ALL MODE DATA", label: "ALL MODE DATA" },
+        ...getMode.map(mode => ({
+            value: mode.Mode_Code,
+            label: mode.Mode_Name
+        }))
+    ];
+
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -65,17 +93,45 @@ function PendingInvoice() {
             setLoading(false);
         }
     };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setLoading(true);
 
+            const queryParams = new URLSearchParams({
+                branchCode: formData.branch || "ALL BRANCH DATA",
+                customerCode: formData.customer || "ALL CUSTOMER DATA",
+                modeCode: formData.mode || "ALL MODE DATA",
+                fromDate: formData.fromDate?.toISOString().split("T")[0] || "",
+                toDate: formData.toDate?.toISOString().split("T")[0] || ""
+            });
 
+            const response = await getApi(`/Smart/GetPendingInvoice?${queryParams.toString()}`);
+
+            if (response?.status === 1 && Array.isArray(response.Data)) {
+                setInvoice(response.Data);
+            } else {
+                setInvoice([]);
+                Swal.fire("Info", response?.message || "No pending invoices found", "info");
+            }
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            Swal.fire("Error", "Failed to fetch pending invoices", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
         fetchData('/Master/getCustomerdata', setGetCustomer);
+        fetchData('/Master/GetAllBranchData', setGetBranch);
+        fetchData('/Master/getMode', setGetMode);
     }, []);
     const handleEdit = (index) => {
         setEditIndex(index);
         setModalData({
-            code: zones[index].code, date: zones[index].date, shipper: zones[index].shipper,
-            receiver: zones[index].receiver, from: zones[index].from, to: zones[index].to, pc: zones[index].pc,
-            weight: zones[index].weight, invoiceno: zones[index].invoiceno, invoicevalue: zones[index].invoicevalue
+            code: invoice[index].code, date: invoice[index].date, shipper: invoice[index].shipper,
+            receiver: invoice[index].receiver, from: invoice[index].from, to: invoice[index].to, pc: invoice[index].pc,
+            weight: invoice[index].weight, invoiceno: invoice[index].invoiceno, invoicevalue: invoice[index].invoicevalue
         });
         setModalIsOpen(true);
     };
@@ -91,8 +147,8 @@ function PendingInvoice() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                const updatedZones = zones.filter((_, i) => i !== index);
-                setZones(updatedZones);
+                const updatedZones = invoice.filter((_, i) => i !== index);
+                setInvoice(updatedZones);
                 Swal.fire(
                     'Deleted!',
                     'Your zone has been deleted.',
@@ -104,9 +160,9 @@ function PendingInvoice() {
 
 
     const handleSave = () => {
-        const updatedZones = [...zones];
+        const updatedZones = [...invoice];
         updatedZones[editIndex] = { id: editIndex + 1, ...modalData };
-        setZones(updatedZones);
+        setInvoice(updatedZones);
         setModalIsOpen(false);
         setEditIndex(null);
         Swal.fire('Saved!', 'Your changes have been saved.', 'success');
@@ -114,12 +170,12 @@ function PendingInvoice() {
 
     /**************** function to export table data in excel and pdf ************/
     const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(zones);
+        const worksheet = XLSX.utils.json_to_sheet(invoice);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Zones');
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'zones.xlsx');
+        saveAs(file, 'invoice.xlsx');
     };
 
     const handleExportPDF = () => {
@@ -144,11 +200,15 @@ function PendingInvoice() {
                 pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
             }
-            pdf.save('zones.pdf');
+            pdf.save('invoice.pdf');
         });
     };
 
     // Handle changing page
+    const handleRowsPerPageChange = (event) => {
+        setRowsPerPage(Number(event.target.value));
+        setCurrentPage(1);
+    };
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
@@ -176,20 +236,13 @@ function PendingInvoice() {
 
             <div className="body">
                 <div className="container1">
-                    <form style={{ margin: "0px", padding: "0px" }}>
+                    <form onSubmit={handleSubmit} style={{ margin: "0px", padding: "0px" }}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
                             <div className="input-field1">
                                 <label htmlFor="">Customer</label>
                                 <Select
-                                    options={getCustomer.map(cust => ({
-                                        value: cust.Customer_Code,   // adjust keys from your API
-                                        label: cust.Customer_Name
-                                    }))}
-                                    value={
-                                        formData.customer
-                                            ? getCustomer.find(c => c.Customer_Code === formData.customer)
-                                            : null
-                                    }
+                                    options={customerOptions}
+                                    value={customerOptions.find(opt => opt.value === formData.customer) || null}
                                     onChange={(selectedOption) =>
                                         setFormData({
                                             ...formData,
@@ -212,6 +265,60 @@ function PendingInvoice() {
                                     className="blue-selectbooking"
                                 />
 
+                            </div>
+                            <div className="input-field1">
+                                <label htmlFor="">Branch Name</label>
+                                <Select
+                                    options={branchOptions}
+                                    value={branchOptions.find(opt => opt.value === formData.branch) || null}
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            branch: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Branch"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
+                            </div>
+                            <div className="input-field1">
+                                <label htmlFor="">Branch Name</label>
+                                <Select
+                                    options={modeOptions}
+                                    value={modeOptions.find(opt => opt.value === formData.mode) || null}
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            mode: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Branch"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
                             </div>
                             <div className="input-field3">
                                 <label htmlFor="">From</label>
@@ -255,62 +362,141 @@ function PendingInvoice() {
                         </div>
 
                     </div>
-                    <div className='table-container' style={{ margin: "0px" }}>
-                        <table className='table table-bordered table-sm'>
-                            <thead className='table-sm'>
+                    {loading ? (<div className="loader"></div>) : (
+                    <div className="table-container" style={{ whiteSpace: "nowrap" }}>
+                        <table className="table table-bordered table-sm">
+                            <thead className="table-sm">
                                 <tr>
-                                    <th scope="col">Sr.No</th>
-                                    <th scope="col">Customer Name</th>
-                                    <th scope="col">City Name</th>
-                                    <th scope="col">Bill No</th>
-                                    <th scope="col">Amount</th>
-                                    <th scope="col">Total GST</th>
-                                    <th scope="col">Sub Total(Amt + Gst)</th>
-                                    <th scope="col">Invoice Date</th>
-                                    <th scope="col">From Date</th>
-                                    <th scope="col">To Date</th>
-                                    <th scope="col">Actions</th>
+                                    <th>Sr.No</th>
+                                    <th>Docket No</th>
+                                    <th>Booking Date</th>
+                                    <th>Customer Name</th>
+                                    <th>Consignee Name</th>
+                                    <th>Mode</th>
+                                    <th>From</th>
+                                    <th>Branch Name</th>
+                                    <th>To</th>
+                                    <th>Pcs</th>
+                                    <th>Actual Wt</th>
+                                    <th>Volumetric Wt</th>
+                                    <th>Charged Wt</th>
+                                    <th>Invoice No</th>
+                                    <th>Invoice Value</th>
+                                    <th>E-Way Bill No</th>
+                                    <th>Bill No</th>
+                                    <th>Payment Type</th>
+                                    <th>Type</th>
+                                    <th>Rate/Kg</th>
+                                    <th>Rate</th>
+                                    <th>Fuel %</th>
+                                    <th>Fuel Charges</th>
+                                    <th>FOV Charges</th>
+                                    <th>Docket Charges</th>
+                                    <th>ODA Charges</th>
+                                    <th>Delivery Charges</th>
+                                    <th>Packing Charges</th>
+                                    <th>Hamali Charges</th>
+                                    <th>Other Charges</th>
+                                    <th>Insurance Charges</th>
+                                    <th>IGST %</th>
+                                    <th>IGST Amt</th>
+                                    <th>CGST %</th>
+                                    <th>CGST Amt</th>
+                                    <th>SGST %</th>
+                                    <th>SGST Amt</th>
+                                    <th>Total Amount</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className='table-body'>
 
-                                {currentRows.map((zone, index) => (
-                                    <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{zone.receiver}</td>
-                                        <td>{zone.from}</td>
-                                        <td>{zone.code}</td>
-                                        <td>{zone.pc}</td>
-                                        <td>{zone.pc}</td>
-                                        <td>{zone.weight}</td>
-                                        <td>{zone.date}</td>
-                                        <td>{zone.date}</td>
-                                        <td>{zone.date}</td>
-                                        <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => handleOpenInvoicePrint(zone)}>
-                                                    <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "24px" }}></i>
-                                                </button>
-                                                <button onClick={() => handleDelete(index)} className='edit-btn'>
-                                                    <i className='bi bi-trash' style={{ fontSize: "24px" }}></i>
-                                                </button>
-                                            </div>
-
+                            <tbody className="table-body">
+                                {currentRows.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="100%" className="text-center text-danger">
+                                            No Pending Invoices Found
                                         </td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    currentRows.map((zone, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{zone.DocketNo}</td>
+                                            <td>{zone.BookDate}</td>
+                                            <td>{zone.customerName}</td>
+                                            <td>{zone.consigneeName}</td>
+                                            <td>{zone.ModeName}</td>
+                                            <td>{zone.fromDest}</td>
+                                            <td>{zone.Branch_Name}</td>
+                                            <td>{zone.toDest}</td>
+                                            <td>{zone.pcs}</td>
+                                            <td>{zone.actualWt}</td>
+                                            <td>{zone.VolumetricWt}</td>
+                                            <td>{zone.ChargedWt}</td>
+                                            <td>{zone.invoiceNo}</td>
+                                            <td>{zone.invoiceValue}</td>
+                                            <td>{zone.eWayBillNo}</td>
+                                            <td>{zone.BillNo}</td>
+                                            <td>{zone.T_Flag}</td>
+                                            <td>{zone.DoxSpx}</td>
+                                            <td>{zone.RatePerkg}</td>
+                                            <td>{zone.Rate}</td>
+                                            <td>{zone.FuelPer}</td>
+                                            <td>{zone.FuelCharges}</td>
+                                            <td>{zone.Fov_Chrgs}</td>
+                                            <td>{zone.DocketChrgs}</td>
+                                            <td>{zone.ODA_Chrgs}</td>
+                                            <td>{zone.DeliveryChrgs}</td>
+                                            <td>{zone.PackingChrgs}</td>
+                                            <td>{zone.HamaliChrgs}</td>
+                                            <td>{zone.OtherCharges}</td>
+                                            <td>{zone.InsuranceChrgs}</td>
+                                            <td>{zone.IGSTPer}</td>
+                                            <td>{zone.IGSTAMT}</td>
+                                            <td>{zone.CGSTPer}</td>
+                                            <td>{zone.CGSTAMT}</td>
+                                            <td>{zone.SGSTPer}</td>
+                                            <td>{zone.SGSTAMT}</td>
+                                            <td>{zone.TotalAmt}</td>
+                                            <td>
+                                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                    <button className="edit-btn" onClick={() => handleOpenInvoicePrint(zone)}>
+                                                        <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "20px" }}></i>
+                                                    </button>
+                                                    <button onClick={() => handleDelete(index)} className="edit-btn">
+                                                        <i className="bi bi-trash" style={{ fontSize: "20px" }}></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
-                    </div>
+                    </div>)}
 
-                    <div className="pagination">
-                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            {'<'}
-                        </button>
-                        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                            {'>'}
-                        </button>
+
+
+                    <div style={{ display: "flex", flexDirection: "row" }}>
+                        <div className="pagination">
+                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>{"<"}</button>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>{">"}</button>
+                        </div>
+
+                        <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
+                            <label style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
+                            <select style={{ height: "40px", width: "60px", marginTop: "10px" }} value={rowsPerPage} onChange={handleRowsPerPageChange}>
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                                <option value={200}>200</option>
+                                <option value={500}>500</option>
+                            </select>
+                        </div>
                     </div>
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
                         style={{

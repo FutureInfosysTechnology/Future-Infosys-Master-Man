@@ -26,11 +26,11 @@ function SecondInvoice() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi("/Master/getBranch");
-                if (response.status === 1) {
-                    console.log(response.Data);
-                    setGetBranch(response.Data);
-                }
+                const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
+                                if (response.status === 1) {
+                                    console.log(response.Data);
+                                    setGetBranch(response.Data[0]);
+                                }
             }
             catch (error) {
                 console.log(error);
@@ -191,32 +191,22 @@ function SecondInvoice() {
                             < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
                                 <div className="container-3" style={{ border: "7px double black" }}>
 
-                                    <div style={{ height: "130px", display: "flex", flexDirection: "row", borderBottom: "1px solid black", paddingBottom: "5px", marginBottom: "5px" }}>
-                                        <div style={{ width: "40%" }}>
-                                            <img src={logoimg} alt="" style={{ height: "120px" }} />
+                                   <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px" }}>
+                                    <div style={{ width: "40%" }}>
+                                        <img src={getBranch.Branch_Logo} alt="" style={{ height: "120px" }} />
+                                    </div>
+                                    <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
+                                        <div style={{ textAlign: "center", height: "40%" }}>
+                                            <p><b style={{ fontSize: "24px" }}>{getBranch.Company_Name}manifest</b></p>
                                         </div>
-                                        <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
-                                            <div style={{ textAlign: "center", height: "40%" }}>
-                                                <p><b style={{ fontSize: "24px" }}>{BranchData.Company_Name}</b></p>
-                                            </div>
-                                            <div style={{ textAlign: "center", display: "flex", paddingLeft: "5px", marginLeft: "50px" }}>
-                                                <div style={{ display: "flex", flexDirection: "column", fontWeight: "bold", width: "20%", fontSize: "10px", textAlign: "start" }}>
-                                                    <span style={{}}>Address :</span>
-                                                    <span style={{}}>Pin Code :</span>
-                                                    <span style={{}}>Mob :</span>
-                                                    <span style={{}}>Email :</span>
-                                                    <span style={{}}>GST No :</span>
-                                                </div>
-                                                <div style={{ display: "flex", flexDirection: "column", width: "70%", fontSize: "10px", textAlign: "start" }}>
-                                                    <span>{BranchData.Branch_Add1}</span>
-                                                    <span>{BranchData.Branch_PIN}</span>
-                                                    <span>{BranchData.MobileNo}</span>
-                                                    <span>{BranchData.Email}</span>
-                                                    <span>{BranchData.GSTNo}</span>
-                                                </div>
-                                            </div>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "10px", textAlign: "start" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Address :</div><div style={{ width: "100%", textAlign: "start" }}>{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>{getBranch.MobileNo}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{getBranch.Email}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{getBranch.GSTNo}</div></div>
                                         </div>
                                     </div>
+                                </div>
 
                                     <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px", marginTop: "20px" }}>
                                         <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>

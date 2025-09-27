@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, postApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -36,7 +36,33 @@ function GenerateInvoice() {
         mode: "",
         invoiceNo: ""
     });
+    const handleSubmit = async (e) => {
+    e.preventDefault();
 
+    try {
+        const data = await postApi("/Smart/BillGenerate", formData);
+
+        if (data.status === 1) {
+            Swal.fire({
+                icon: "success",
+                title: "Invoice Generated",
+                text: data.message || "Invoice created successfully!",
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: data.message || "Something went wrong!",
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: "error",
+            title: "Network Error",
+            text: "Could not connect to server.",
+        });
+    }
+};
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);

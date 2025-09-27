@@ -74,7 +74,7 @@ function Booking() {
     const [isEWayChecked, setIsEWayChecked] = useState(false);
     const [isInvoiceValue, setIsInvoiceValue] = useState(false);
     const [isInvoiceNo, setIsInvoiceNo] = useState(false);
-    const [dispatchDate, SetdispatchDate] = useState(false);
+    const [dispatchDate, setDispatchDate] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalVolWt, setTotalVolWt] = useState(0);
@@ -462,6 +462,7 @@ function Booking() {
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("bookingState"));
         if (savedState) {
+            setIsAllChecked(savedState.isAllChecked || false);
             setIsFovChecked(savedState.isFovChecked || false);
             setIsDocketChecked(savedState.isDocketChecked || false);
             setIsDeliveryChecked(savedState.isDeliveryChecked || false);
@@ -476,7 +477,7 @@ function Booking() {
             setIsEWayChecked(savedState.isEWayChecked || false);
             setIsInvoiceValue(savedState.isInvoiceValue || false);
             setIsInvoiceNo(savedState.isInvoiceNo || false);
-            SetdispatchDate(savedState.dispatchDate || false);
+            setDispatchDate(savedState.dispatchDate || false);
         }
         fetchReceiverData();
         fetchShipper();
@@ -489,43 +490,51 @@ function Booking() {
         const currentState = JSON.parse(localStorage.getItem("bookingState")) || {};
         localStorage.setItem("bookingState", JSON.stringify({ ...currentState, ...newState }));
     };
-    const handleAllChange = (e) => {
-        if (!isAllChecked) {
-            setIsFovChecked(true);
-            setIsDocketChecked(true);
-            setIsDeliveryChecked(true);
-            setIsPackingChecked(true);
-            setIsGreenChecked(true);
-            setIsHamaliChecked(true);
-            setIsOtherChecked(true);
-            setIsInsuranceChecked(true);
-            setIsODAChecked(true);
-            setIsFuelChecked(true);
-            setIsRemarkChecked(true);
-            setIsEWayChecked(true);
-            setIsInvoiceValue(true);
-            setIsInvoiceNo(true);
-            SetdispatchDate(true);
-        }
-        else {
-            setIsFovChecked(false);
-            setIsDocketChecked(false);
-            setIsDeliveryChecked(false);
-            setIsPackingChecked(false);
-            setIsGreenChecked(false);
-            setIsHamaliChecked(false);
-            setIsOtherChecked(false);
-            setIsInsuranceChecked(false);
-            setIsODAChecked(false);
-            setIsFuelChecked(false);
-            setIsRemarkChecked(false);
-            setIsEWayChecked(false);
-            setIsInvoiceValue(false);
-            setIsInvoiceNo(false);
-            SetdispatchDate(false);
-        }
-        setIsAllChecked(!isAllChecked);
-    }
+    const handleAllChange = () => {
+        const newValue = !isAllChecked;
+
+        setIsAllChecked(newValue);
+
+        const allFields = {
+            isFovChecked: newValue,
+            isDocketChecked: newValue,
+            isDeliveryChecked: newValue,
+            isPackingChecked: newValue,
+            isGreenChecked: newValue,
+            isHamaliChecked: newValue,
+            isOtherChecked: newValue,
+            isInsuranceChecked: newValue,
+            isODAChecked: newValue,
+            isFuelChecked: newValue,
+            isRemarkChecked: newValue,
+            isEWayChecked: newValue,
+            isInvoiceValue: newValue,
+            isInvoiceNo: newValue,
+            dispatchDate: newValue,
+            isAllChecked: newValue,
+        };
+
+        // Update React states
+        setIsFovChecked(newValue);
+        setIsDocketChecked(newValue);
+        setIsDeliveryChecked(newValue);
+        setIsPackingChecked(newValue);
+        setIsGreenChecked(newValue);
+        setIsHamaliChecked(newValue);
+        setIsOtherChecked(newValue);
+        setIsInsuranceChecked(newValue);
+        setIsODAChecked(newValue);
+        setIsFuelChecked(newValue);
+        setIsRemarkChecked(newValue);
+        setIsEWayChecked(newValue);
+        setIsInvoiceValue(newValue);
+        setIsInvoiceNo(newValue);
+        setDispatchDate(newValue);
+
+        // Save to localStorage
+        localStorage.setItem("bookingState", JSON.stringify(allFields));
+    };
+
     const handleFovChange = (e) => {
         setIsFovChecked(e.target.checked);
         handleCheckboxChange('isFovChecked', e.target.checked);
@@ -597,13 +606,9 @@ function Booking() {
     }
 
     const handledispatch = (e) => {
-        SetdispatchDate(e.target.checked);
+        setDispatchDate(e.target.checked);
         handleCheckboxChange('dispatchDate', e.target.checked);
     }
-
-
-
-
     const fetchData = async (endpoint, setData) => {
         setLoading(true); // Set loading state to true
 
@@ -622,8 +627,6 @@ function Booking() {
             setLoading(false); // Set loading state to false after fetching
         }
     };
-
-
     const handleSaveReceiver = async (e) => {
         e.preventDefault();
 
@@ -877,7 +880,7 @@ function Booking() {
             });
             return;
         }
-        if (editIndex !== null) {
+        if (editIndex !== null && InvoicesubmittedData[editIndex]) {
             // Update existing row
             const originalInvoice = InvoicesubmittedData[editIndex];
             const oldInvoice = [...InvoicesubmittedData];
@@ -1234,7 +1237,16 @@ function Booking() {
                     }
                 }
                 // Clear all data
+                const Customer_Code=formData.Customer_Code;
+                const Origin_code= formData.OriginCode;
+                const Pincode= selectedOriginPinCode;
                 resetAllForms(); // Optional: extract form resetting to its own function
+                setFormData({
+                    ...formData,
+                    Customer_Code:Customer_Code,
+                    OriginCode:Origin_code,
+                })
+                setSelectedOriginPinCode(Pincode);
                 Swal.fire('Saved!', response.Message || 'Your changes have been saved.', 'success');
                 setModalIsOpen8(false);
             }
@@ -3738,7 +3750,7 @@ function Booking() {
                                                                 <i className='bi bi-pen'></i>
                                                             </button>
                                                             <button onClick={() => {
-                                                                setInvoiceSubmittedData(InvoicesubmittedData.filter(inv => inv.InvoiceNo !== data.InvoiceNo));
+                                                                setInvoiceSubmittedData(InvoicesubmittedData.filter((_,ind) => ind !== index));
                                                                 // Remove from formData
                                                                 setFormData((prev) => {
                                                                     const removeFromCSV = (csv, valueToRemove) => {

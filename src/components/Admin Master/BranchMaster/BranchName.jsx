@@ -63,7 +63,7 @@ function BranchName() {
 
     const fetchBranchData = async () => {
         try {
-            const response = await getApi('/Master/getBranch');
+            const response = await getApi('/Master/GetAllBranchData');
             setGetBranchData(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             console.error('Fetch Error:', err);
@@ -85,16 +85,33 @@ function BranchName() {
 
         fetchInitialData();
     }, []);
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setBranchData({ ...branchData, img: reader.result }); // reader.result is base64 string
-            };
-            reader.readAsDataURL(file); // converts file to base64
-        }
+   const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.src = reader.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // reduce size (max 300px wide for example)
+        const scale = 300 / img.width;
+        canvas.width = 300;
+        canvas.height = img.height * scale;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // convert back to base64 (smaller)
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7); 
+        setBranchData({ ...branchData, img: compressedBase64 });
+      };
     };
+    reader.readAsDataURL(file);
+  }
+};
+
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -122,7 +139,7 @@ function BranchName() {
         }
 
         try {
-            const response = await postApi('/Master/updateBranch', requestBody, 'POST');
+            const response = await postApi('/Master/updateBranch', requestBody);
             if (response.status === 1) {
                 setGetBranchData(getBranchData.map((branch) => branch.Branch_Code === branchData.branchCode ? response.Data : branch));
                 setBranchData({
