@@ -1062,6 +1062,143 @@ function Booking() {
 
 
     // ================================Rate+All Charges calculate=======================
+    const resetAllForms = () => {
+        console.log("reset");
+        setFormData({
+            custName: "",
+            shipper: "",
+            receiver: "",
+            Location_Code: "",
+            Customer_Code: "",
+            DocketNo: "",
+            BookDate: getTodayDate(),
+            Receiver_Code: "",
+            ConsigneeName: "",
+            ConsigneeAdd1: "",
+            ConsigneeAdd2: "",
+            ConsigneeState: "",
+            ConsigneePin: "",
+            Consignee_City: "",
+            ConsigneeMob: "",
+            ConsigneeEmail: "",
+            ConsigneeGST: "",
+            ConsigneeCountry: "",
+            Mode_Code: "",
+            OriginCode: "",
+            DestinationCode: "",
+            Origin_zone: "",
+            Zone_Name: "",
+            DispatchDate: getTodayDate(),
+            DoxSpx: "Box",
+            RateType: "Weight",
+            QtyOrderEntry: "",
+            VendorWt: 0,
+            VendorAmt: 0,
+            ActualWt: 0,
+            VolumetricWt: 0,
+            ChargedWt: 0,
+            RatePerkg: 0,
+            Rate: 0,
+            FuelPer: 0,
+            FuelCharges: 0,
+            FovChrgs: 0,
+            DocketChrgs: 0,
+            ODAChrgs: 0,
+            DeliveryChrgs: 0,
+            PackingChrgs: 0,
+            GreenChrgs: 0,
+            HamaliChrgs: 0,
+            OtherCharges: 0,
+            InsuranceChrgs: 0,
+            TotalAmt: 0,
+            Status: "",
+            Vendor_Code: "",
+            VendorAwbNo: "",
+            WebAgent: "",
+            ExptDateOfDelvDt: "",
+            ActualShipper: "",
+            Shipper_Name: "",
+            ShipperAdd: "",
+            ShipperAdd2: "",
+            ShipperAdd3: "",
+            ShipperCity: "",
+            Shipper_StateCode: "",
+            Shipper_GstNo: "",
+            ShipperPin: "",
+            ShipperPhone: "",
+            ShipperEmail: "",
+            BookMode: "",
+            InvoiceNo: "",
+            InvValue: 0,
+            EwayBill: "",
+            InvDate: "",
+            BillParty: "Client-wise Bill",
+            DestName: "",
+        });
+
+        setSelectedOriginPinCode('');
+        setSelectedDestPinCode('');
+        setSelectedModeName('');
+
+        setVendorData({
+            Vendor_Code1: "",
+            Vendor_Code2: "",
+            VendorAwbNo1: "",
+            VendorAwbNo2: ""
+        });
+
+        setGstData({
+            IGSTPer: 0,
+            IGSTAMT: 0,
+            CGSTPer: 0,
+            CGSTAMT: 0,
+            SGSTPer: 0,
+            SGSTAMT: 0
+        });
+
+        setRemarkData({
+            Remark: "",
+            MHWNo: ""
+        });
+
+        setVendorvolumetric({
+            Length: 0,
+            Width: 0,
+            Height: 0,
+            Qty: 0,
+            DivideBy: 0,
+            VolmetricWt: 0,
+            ActualWt: 0,
+            ChargeWt: 0
+        });
+
+        setVolumetricData({
+            Length: 0,
+            Width: 0,
+            Height: 0,
+            Qty: 0,
+            DivideBy: 0,
+            VolmetricWt: 0,
+            ActualWt: 0,
+            ChargeWt: 0,
+        });
+
+        setInvoiceData({
+            PoNo: "",
+            PoDate: getTodayDate(),
+            InvoiceNo: "",
+            InvoiceValue: 0,
+            Description: "",
+            Qty: 0,
+            EWayBillNo: "",
+            Remark: "",
+            InvoiceImg: ""
+        });
+
+        setSubmittedData([]);
+        setInvoiceSubmittedData([]);
+        setVendorSubmittedData([]);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -1213,6 +1350,8 @@ function Booking() {
                 setFecthed('');
                 console.log(response);
                 const generatedDocketNo = formData.DocketNo;
+
+                // Show confirmation popup
                 const result = await Swal.fire({
                     title: 'Saved Successfully!',
                     text: "Do you want to print the docket now?",
@@ -1221,176 +1360,47 @@ function Booking() {
                     confirmButtonText: 'Yes, print it!',
                     cancelButtonText: 'No, later'
                 });
+
                 if (result.isConfirmed) {
                     try {
-                        const response = await getApi(`/Booking/DocketReceipt?FromDocket=${generatedDocketNo}&ToDocket=${generatedDocketNo}`);
-                        if (response.status === 1) {
-                            console.log(response);
-                            console.log(response.Data);
-                            response.Data && navigate("/MobileReceipt", { state: { data: response.Data, path: location.pathname } });
+                        const res = await getApi(`/Booking/DocketReceipt?FromDocket=${generatedDocketNo}&ToDocket=${generatedDocketNo}`);
+                        if (res.status === 1) {
+                            navigate("/MobileReceipt", { state: { data: res.Data, path: location.pathname } });
                         }
-                    }
-                    catch (error) {
+                    } catch (error) {
                         console.error("API Error:", error);
                     }
-                    finally {
-                    }
                 }
-                // Clear all data
-                const Customer_Code=formData.Customer_Code;
-                const Origin_code= formData.OriginCode;
-                const Pincode= selectedOriginPinCode;
-                resetAllForms(); // Optional: extract form resetting to its own function
-                setFormData({
-                    ...formData,
-                    Customer_Code:Customer_Code,
-                    OriginCode:Origin_code,
-                })
+
+                // ✅ Always reset after save (whether user confirms or not)
+                const Customer_Code = formData.Customer_Code;
+                const Origin_code = formData.OriginCode;
+                const Pincode = selectedOriginPinCode;
+                const zone = formData.Origin_zone;
+                const bill = formData.BillParty;
+                const book = formData.BookMode;
+                const mode = formData.Mode_Code;
+
+                resetAllForms();
+                setFormData(prev => ({
+                    ...prev,
+                    Customer_Code: Customer_Code,
+                    OriginCode: Origin_code,
+                    Origin_zone: zone,
+                    BillParty: bill,
+                    BookMode: book,
+                    Mode_Code: mode,
+                }));
                 setSelectedOriginPinCode(Pincode);
                 Swal.fire('Saved!', response.Message || 'Your changes have been saved.', 'success');
                 setModalIsOpen8(false);
             }
+
         } catch (error) {
             console.error('Unable to save Booking Data:', error);
         }
     };
 
-
-    const resetAllForms = () => {
-        setFormData({
-            custName: "",
-            shipper: "",
-            receiver: "",
-            Location_Code: "",
-            Customer_Code: "",
-            DocketNo: "",
-            BookDate: getTodayDate(),
-            Receiver_Code: "",
-            ConsigneeName: "",
-            ConsigneeAdd1: "",
-            ConsigneeAdd2: "",
-            ConsigneeState: "",
-            ConsigneePin: "",
-            Consignee_City: "",
-            ConsigneeMob: "",
-            ConsigneeEmail: "",
-            ConsigneeGST: "",
-            ConsigneeCountry: "",
-            Mode_Code: "",
-            OriginCode: "",
-            DestinationCode: "",
-            Origin_zone: "",
-            Zone_Name: "",
-            DispatchDate: getTodayDate(),
-            DoxSpx: "Box",
-            RateType: "Weight",
-            QtyOrderEntry: "",
-            VendorWt: 0,
-            VendorAmt: 0,
-            ActualWt: 0,
-            VolumetricWt: 0,
-            ChargedWt: 0,
-            RatePerkg: 0,
-            Rate: 0,
-            FuelPer: 0,
-            FuelCharges: 0,
-            FovChrgs: 0,
-            DocketChrgs: 0,
-            ODAChrgs: 0,
-            DeliveryChrgs: 0,
-            PackingChrgs: 0,
-            GreenChrgs: 0,
-            HamaliChrgs: 0,
-            OtherCharges: 0,
-            InsuranceChrgs: 0,
-            TotalAmt: 0,
-            Status: "",
-            Vendor_Code: "",
-            VendorAwbNo: "",
-            WebAgent: "",
-            ExptDateOfDelvDt: "",
-            ActualShipper: "",
-            Shipper_Name: "",
-            ShipperAdd: "",
-            ShipperAdd2: "",
-            ShipperAdd3: "",
-            ShipperCity: "",
-            Shipper_StateCode: "",
-            Shipper_GstNo: "",
-            ShipperPin: "",
-            ShipperPhone: "",
-            ShipperEmail: "",
-            BookMode: "",
-            InvoiceNo: "",
-            InvValue: 0,
-            EwayBill: "",
-            InvDate: "",
-            BillParty: "Client-wise Bill",
-            DestName: "",
-            Mode_Code: "",
-        });
-        setSelectedOriginPinCode('');
-        setSelectedDestPinCode('');
-        setSelectedModeName('');
-
-        setVendorData({
-            Vendor_Code1: "",
-            Vendor_Code2: "",
-            VendorAwbNo1: "",
-            VendorAwbNo2: ""
-        });
-
-        setGstData({
-            IGSTPer: 0,
-            IGSTAMT: 0,
-            CGSTPer: 0,
-            CGSTAMT: 0,
-            SGSTPer: 0,
-            SGSTAMT: 0
-        });
-
-        setRemarkData({
-            Remark: "",
-            MHWNo: ""
-        });
-
-        setVendorvolumetric({
-            Length: 0,
-            Width: 0,
-            Height: 0,
-            Qty: 0,
-            DivideBy: 0,
-            VolmetricWt: 0,
-            ActualWt: 0,
-            ChargeWt: 0
-        });
-
-        setVolumetricData({
-            Length: 0,
-            Width: 0,
-            Height: 0,
-            Qty: 0,
-            DivideBy: 0,
-            VolmetricWt: 0,
-            ActualWt: 0,
-            ChargeWt: 0,
-        });
-
-        setInvoiceData({
-            PoNo: "",
-            PoDate: getTodayDate(),
-            InvoiceNo: "",
-            InvoiceValue: 0,
-            Description: "",
-            Qty: 0,
-            EWayBillNo: "",
-            Remark: "",
-            InvoiceImg: ""
-        });
-        setSubmittedData([]);
-        setInvoiceSubmittedData([]);
-        setVendorSubmittedData([]);
-    };
 
 
     const handleUpdate = async (e) => {
@@ -1516,7 +1526,26 @@ function Booking() {
             const res = await putApi(`/Booking/OrderEntryUpdate`, requestBody);
             if (res.Success) {
                 Swal.fire('Updated!', res.message || 'Booking updated.', 'success');
+                // ✅ Always reset after save (whether user confirms or not)
+                const Customer_Code = formData.Customer_Code;
+                const Origin_code = formData.OriginCode;
+                const Pincode = selectedOriginPinCode;
+                const zone = formData.Origin_zone;
+                const bill = formData.BillParty;
+                const book = formData.BookMode;
+                const mode = formData.Mode_Code;
+
                 resetAllForms();
+                setFormData(prev => ({
+                    ...prev,
+                    Customer_Code: Customer_Code,
+                    OriginCode: Origin_code,
+                    Origin_zone: zone,
+                    BillParty: bill,
+                    BookMode: book,
+                    Mode_Code: mode,
+                }));
+                setSelectedOriginPinCode(Pincode);
                 setFecthed('');
             } else Swal.fire('Error', res.message || 'Update failed.', 'error');
         } catch (err) {
@@ -3432,6 +3461,17 @@ function Booking() {
                                                             </button>
                                                             <button onClick={() => {
                                                                 setVendorSubmittedData(vendorsubmittedData.filter((_, ind) => ind !== index));
+                                                                setEditIndex(null);
+                                                                setVendorvolumetric({
+                                                                    Length: 0,
+                                                                    Width: 0,
+                                                                    Height: 0,
+                                                                    Qty: 0,
+                                                                    DivideBy: "",
+                                                                    VolmetricWt: 0,
+                                                                    ActualWt: 0,
+                                                                    ChargeWt: 0
+                                                                });
                                                             }}
                                                                 className='edit-btn'><i className='bi bi-trash'></i></button>
                                                         </div>
@@ -3584,6 +3624,17 @@ function Booking() {
                                                             </button>
                                                             <button onClick={() => {
                                                                 setSubmittedData(submittedData.filter((_, ind) => ind !== index));
+                                                                setEditIndex(null);
+                                                                setVolumetricData({
+                                                                    Length: 0,
+                                                                    Width: 0,
+                                                                    Height: 0,
+                                                                    Qty: 0,
+                                                                    DivideBy: "",
+                                                                    VolmetricWt: 0,
+                                                                    ActualWt: 0,
+                                                                    ChargeWt: 0
+                                                                });
                                                             }}
                                                                 className='edit-btn'><i className='bi bi-trash'></i></button>
                                                         </div>
@@ -3750,7 +3801,19 @@ function Booking() {
                                                                 <i className='bi bi-pen'></i>
                                                             </button>
                                                             <button onClick={() => {
-                                                                setInvoiceSubmittedData(InvoicesubmittedData.filter((_,ind) => ind !== index));
+                                                                setInvoiceSubmittedData(InvoicesubmittedData.filter((_, ind) => ind !== index));
+                                                                setEditIndex(null);
+                                                                setInvoiceData({
+                                                                    PoNo: "",
+                                                                    PoDate: getTodayDate(),
+                                                                    InvoiceNo: "",
+                                                                    InvoiceValue: 0,
+                                                                    Description: "",
+                                                                    Qty: 0,
+                                                                    EWayBillNo: "",
+                                                                    Remark: "",
+                                                                    InvoiceImg: ""
+                                                                });
                                                                 // Remove from formData
                                                                 setFormData((prev) => {
                                                                     const removeFromCSV = (csv, valueToRemove) => {

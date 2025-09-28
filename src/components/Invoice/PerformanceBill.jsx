@@ -4,7 +4,7 @@ import "./permonce.css"
 import Swal from "sweetalert2";
 import Select from 'react-select';
 import CreatableSelect from "react-select/creatable";
-import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, postApi, putApi, deleteApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 function PerformanceBill() {
@@ -12,9 +12,17 @@ function PerformanceBill() {
         const today = new Date();
         return today;
     };
+    const parseDDMMYYYY = (str) => {
+  const [day, month, year] = str.split("/");
+  return new Date(`${year}-${month}-${day}`);
+};
+    const [editIndex, setEditIndex] = useState(null);
+    const [getInvoice, setGetInvoice] = useState([]);
     const [formData, setFormData] = useState({
         invoiceNo: "",
+        invoiceID:null,
         invDate: getTodayDate(),
+        invDueDate: getTodayDate(),
         DocketNo: "",
         ogCountry: "",
         destination: "",
@@ -49,6 +57,354 @@ function PerformanceBill() {
     const [getCountry, setGetCountry] = useState([]);
     const [allReceiverOption, setAllReceiverOption] = useState([])
     const [allShipperOption, setAllShipperOption] = useState([])
+    const [invoiceSubmittedData, setInvoiceSubmittedData] = useState([]);
+    const [invoice, setInvoice] = useState({
+        Items: "", HSN: "", QTY: 0, Rate: 0, Amount: 0
+    });
+    useEffect(() => {
+        console.log(invoiceSubmittedData);
+    }, [invoiceSubmittedData])
+    const handleInvoiceChange = (e) => {
+        const { name, value } = e.target;
+        setInvoice((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+    const handleAddRow = (e) => {
+        e.preventDefault();
+
+        if (!invoice.Items || !invoice.HSN) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please fill in the empty fields.',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+        if (editIndex !== null) {
+            // update existing row
+            const updated = [...invoiceSubmittedData];
+            updated[editIndex] = invoice;
+            setInvoiceSubmittedData(updated);
+            setEditIndex(null);
+        } else {
+            // add new row
+            setInvoiceSubmittedData((prev) => [...prev, invoice]);
+        }
+        setInvoice({
+            Items: "", HSN: "", QTY: 0, Rate: 0, Amount: 0
+        });
+    };
+    const resetAllForm = () => {
+        setFormData({
+            invoiceNo: "",
+            invoiceID:null,
+            invDate: getTodayDate(),
+            invDueDate: getTodayDate(),
+            DocketNo: "",
+            ogCountry: "",
+            destination: "",
+            boxes: "",
+            totalWt: "",
+            ConsigneeName: "",
+            ConsigneeAdd1: "",
+            ConsigneeAdd2: "",
+            ConsigneeState: "",
+            ConsigneePin: "",
+            Consignee_City: "",
+            ConsigneeMob: "",
+            ConsigneeEmail: "",
+            ConsigneeGST: "",
+            ConsigneeCountry: "",
+            Shipper_Name: "",
+            ShipperAdd: "",
+            ShipperAdd2: "",
+            ShipperCity: "",
+            Shipper_StateCode: "",
+            Shipper_GstNo: "",
+            ShipperPin: "",
+            ShipperPhone: "",
+            ShipperEmail: "",
+        });
+        setInvoice({
+            Items: "", HSN: "", QTY: 0, Rate: 0, Amount: 0
+        });
+        setInvoiceSubmittedData([]);
+    }
+    const formatDate = (date) => {
+        if (!date) return null;
+        return new Date(date).toLocaleDateString("en-CA");
+    };
+    const handleSave = async (e) => {
+        e.preventDefault();
+
+        if (!formData.Shipper_Name || !formData.ConsigneeName || !formData.invoiceNo) {
+            return Swal.fire({
+                icon: "warning",
+                title: "Missing Field",
+                text: "Fill all missing fields",
+            });
+        }
+
+        try {
+            const payload = {
+                // Shipper
+                ShipperName: formData.Shipper_Name,
+                ShipperAddress: formData.ShipperAdd,
+                Shipper_Address2: formData.ShipperAdd2,
+                ShipperCity: formData.ShipperCity,
+                ShipperStateCode: formData.Shipper_StateCode,
+                ShipperPinCode: formData.ShipperPin,
+                ShipperMobileNo: formData.ShipperPhone,
+                ShipperGSTNo: formData.Shipper_GstNo,
+
+                // Receiver
+                ReceiverName: formData.ConsigneeName,
+                ReceiverAddress: formData.ConsigneeAdd1,
+                Receiver_Address2: formData.ConsigneeAdd2,
+                ReceiverCity: formData.Consignee_City,
+                ReceiverStateCode: formData.ConsigneeState,
+                ReceiverPinCode: formData.ConsigneePin,
+                ReceiverMobileNo: formData.ConsigneeMob,
+                ReceiverGSTNo: formData.ConsigneeGST,
+
+                // Invoice
+                InvoiceNo: formData.invoiceNo,
+                InvoiceDate: formatDate(formData.invDate),
+                InvoiceDue: formatDate(formData.invDueDate),
+                DocketNo: formData.DocketNo,
+                Destination_Code: formData.destination,
+                Qty: formData.boxes,
+                Country_Name: formData.ogCountry,
+                TotalWeight: formData.totalWt,
+
+                // Items
+                Items: invoiceSubmittedData,
+            };
+
+            const response = await postApi("/Smart/AddProformaInvoice", payload);
+
+            if (response.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Saved",
+                    text: "Proforma Invoice saved successfully!",
+                });
+                // reset form + items
+                resetAllForm();
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed",
+                    text: response.message || "Error saving invoice.",
+                });
+            }
+        } catch (err) {
+            console.error("Save error:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: err.message,
+            });
+        }
+    };
+
+
+    const handleSearch = async () => {
+        if (!formData.invoiceNo) {
+            return Swal.fire({
+                icon: "warning",
+                title: "Warning",
+                text: "Invoice Number is Required",
+            });
+        }
+
+        try {
+            const response = await getApi(
+                `/Smart/GetProformaInvoiceByNo?InvoiceNo=${formData.invoiceNo}`
+            );
+
+            if (response.status === 1 && response.data.length > 0) {
+                const invoice = response.data[0]; // assuming only one invoice is returned
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Data Fetched",
+                    text: `Invoice ${formData.invoiceNo} has been fetched successfully`,
+                });
+
+                // ✅ Update formData with response values
+                setFormData({
+                    ...formData,
+                    invoiceNo: invoice.InvoiceNo,
+                    invoiceID:invoice.InvoiceID,
+                    invDate: parseDDMMYYYY(invoice.InvoiceDate),
+                    invDueDate: parseDDMMYYYY(invoice.InvoiceDue),
+                    DocketNo: invoice.DocketNo,
+                    destination: invoice.Destination_Code,
+                    boxes: invoice.Qty,
+                    totalWt: invoice.TotalWeight,
+                    Shipper_Name: invoice.ShipperName,
+                    ShipperAdd: invoice.ShipperAddress,
+                    ShipperAdd2: invoice.Shipper_Address2,
+                    ShipperCity: invoice.ShipperCity,
+                    Shipper_StateCode: invoice.ShipperStateCode,
+                    ShipperPin: invoice.ShipperPinCode,
+                    ShipperPhone: invoice.ShipperMobileNo,
+                    Shipper_GstNo: invoice.ShipperGSTNo,
+                    ConsigneeName: invoice.ReceiverName,
+                    ConsigneeAdd1: invoice.ReceiverAddress,
+                    ConsigneeAdd2: invoice.Receiver_Address2,
+                    ConsigneeCity: invoice.ReceiverCity,
+                    ConsigneeState: invoice.ReceiverStateCode,
+                    ConsigneePin: invoice.ReceiverPinCode,
+                    ConsigneeMob: invoice.ReceiverMobileNo,
+                    ConsigneeGST: invoice.ReceiverGSTNo,
+                    // you can also map country/state if needed
+                });
+
+                // ✅ Set invoice line items
+                setInvoiceSubmittedData(
+                    invoice.Items.map((item) => ({
+                        Items: item.Items,
+                        HSN: item.HSN,
+                        QTY: item.QTY,
+                        Rate: item.Rate,
+                        Amount: item.Amount,
+                    }))
+                );
+
+
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed",
+                    text: response.message || "Error fetching invoice.",
+                });
+            }
+        } catch (err) {
+            console.error("Save error:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: err.message,
+            });
+        }
+    }
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+
+        if (!formData.invoiceNo) {
+            return Swal.fire({
+                icon: "warning",
+                title: "Warning",
+                text: "Invoice Number is Required",
+            });
+        }
+
+        try {
+            const payload = {
+                // Shipper
+                ShipperName: formData.Shipper_Name,
+                ShipperAddress: formData.ShipperAdd,
+                Shipper_Address2: formData.ShipperAdd2,
+                ShipperCity: formData.ShipperCity,
+                ShipperStateCode: formData.Shipper_StateCode,
+                ShipperPinCode: formData.ShipperPin,
+                ShipperMobileNo: formData.ShipperPhone,
+                ShipperGSTNo: formData.Shipper_GstNo,
+
+                // Receiver
+                ReceiverName: formData.ConsigneeName,
+                ReceiverAddress: formData.ConsigneeAdd1,
+                Receiver_Address2: formData.ConsigneeAdd2,
+                ReceiverCity: formData.Consignee_City,
+                ReceiverStateCode: formData.ConsigneeState,
+                ReceiverPinCode: formData.ConsigneePin,
+                ReceiverMobileNo: formData.ConsigneeMob,
+                ReceiverGSTNo: formData.ConsigneeGST,
+
+                // Invoice
+                InvoiceID:formData.invoiceID,
+                InvoiceNo: formData.invoiceNo,
+                InvoiceDate: formatDate(formData.invDate),
+                InvoiceDue: formatDate(formData.invDueDate),
+                DocketNo: formData.DocketNo,
+                Destination_Code: formData.destination,
+                Qty: formData.boxes,
+                Country_Name: formData.ogCountry,
+                TotalWeight: formData.totalWt,
+
+                // Items
+                Items: invoiceSubmittedData,
+            };
+
+            const response = await putApi("/Smart/updateProformaInvoice", payload);
+
+            if (response.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Updated",
+                    text: "Proforma Invoice updated successfully!",
+                });
+                // reset form + items
+                resetAllForm();
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed",
+                    text: response.message || "Error updating invoice.",
+                });
+            }
+        } catch (err) {
+            console.error("Save error:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: err.message,
+            });
+        }
+    };
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        if (!formData.invoiceID) {
+            return Swal.fire({
+                icon: "warning",
+                title: "Warning",
+                text: "Invoice ID is Required",
+            });
+        }
+        try {
+            const response = await deleteApi(`Smart/DeleteProformaInvoice?InvoiceID=${formData.invoiceID}`);
+
+            if (response.status == 1) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Deleted",
+                    text: `${formData.invoiceNo} is deleted`,
+                });
+                // reset form + items
+                resetAllForm();
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed",
+                    text: response.message || "Error deleting invoice.",
+                });
+            }
+        } catch (err) {
+            console.error("Save error:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: err.message,
+            });
+        }
+
+    }
+
     // const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
 
     // const totalPages = Math.ceil(zones.length / rowsPerPage);
@@ -458,36 +814,51 @@ function PerformanceBill() {
 
                     </div>
 
-                    <div className="card mt-1">
+                    <div className="card mt-0">
                         <div className="section-title">Courier Details</div>
-                        <form style={{ margin: "0px", padding: "0px" }}>
-                            <div className="row g-3 mx-0">
-                                <div className="input-field col-md-4 col-sm-6">
+                        <form className="m-0 px-3 py-2">
+                            <div className="row g-3">
+                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
                                     <label className="form-label">Invoice No</label>
                                     <input type="tel" className="form-control" placeholder="Invoice No"
                                         value={formData.invoiceNo}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                e.preventDefault(); // prevent form submission
+                                                handleSearch();
+                                            }
+                                        }}
                                         onChange={(e) => setFormData({ ...formData, invoiceNo: e.target.value })} />
                                 </div>
 
-                                <div className="input-field col-md-4 col-sm-6">
+                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
                                     <label className="form-label">Invoice Date</label>
                                     <DatePicker
                                         portalId='rootPortal'
                                         selected={formData.invDate}
-                                        onChange={(date) => setFormData({...formData,invDate:date})}
+                                        onChange={(date) => setFormData({ ...formData, invDate: date })}
                                         dateFormat="dd/MM/yyyy"
                                         className="form-control form-control-sm"
                                     />
                                 </div>
-
-                                <div className="input-field col-md-4 col-sm-6">
+                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
+                                    <label className="form-label">Due Date</label>
+                                    <DatePicker
+                                        portalId='rootPortal'
+                                        selected={formData.invDueDate}
+                                        onChange={(date) => setFormData({ ...formData, invDueDate: date })}
+                                        dateFormat="dd/MM/yyyy"
+                                        className="form-control form-control-sm"
+                                    />
+                                </div>
+                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
                                     <label className="form-label">Docket No</label>
                                     <input type="text" className="form-control" placeholder="Docket No"
                                         value={formData.DocketNo}
                                         onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })} />
                                 </div>
 
-                                <div className="input-field col-md-4 col-sm-6">
+                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
                                     <label className="form-label">Country of Origin</label>
                                     <Select
                                         className="blue-selectbooking"
@@ -522,7 +893,7 @@ function PerformanceBill() {
                                     />
                                 </div>
 
-                                <div className="input-field col-md-4 col-sm-6">
+                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
                                     <label className="form-label">Final Destination</label>
                                     <Select
                                         className="blue-selectbooking"
@@ -557,14 +928,14 @@ function PerformanceBill() {
                                     />
                                 </div>
 
-                                <div className="input-field col-md-4 col-sm-6">
+                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
                                     <label className="form-label">No of Boxes</label>
                                     <input type="tel" className="form-control" placeholder="No of Boxes"
                                         value={formData.boxes}
                                         onChange={(e) => setFormData({ ...formData, boxes: e.target.value })} />
                                 </div>
 
-                                <div className="input-field col-md-4 col-sm-6">
+                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
                                     <label className="form-label">Total Weight</label>
                                     <input type="tel" className="form-control" placeholder="Total Weight"
                                         value={formData.totalWt}
@@ -578,23 +949,81 @@ function PerformanceBill() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-info table-sm'>
                                 <tr>
-                                    <th scope="col">Sr.No</th>
                                     <th scope="col">Desciption Of Goods</th>
                                     <th scope="col">HSN Code</th>
                                     <th scope="col">QTY</th>
                                     <th scope="col">Rate</th>
                                     <th scope="col">Total Amount</th>
+                                    <th scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
                                 <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>
+                                        <input type="text" placeholder="ITEM" name="Items"
+                                            style={{ textAlign: "center" }} value={invoice.Items}
+                                            onChange={handleInvoiceChange} />
+                                    </td>
+                                    <td>
+                                        <input type="text" placeholder="HSN NO" name="HSN"
+                                            style={{ textAlign: "center" }} value={invoice.HSN}
+                                            onChange={handleInvoiceChange} />
+                                    </td>
+                                    <td>
+                                        <input type="tel" placeholder="QTY" name="QTY"
+                                            style={{ textAlign: "center" }} value={invoice.QTY}
+                                            onChange={handleInvoiceChange} />
+                                    </td>
+                                    <td>
+                                        <input type="tel" placeholder="Rate" name="Rate"
+                                            style={{ textAlign: "center" }} value={invoice.Rate}
+                                            onChange={handleInvoiceChange} />
+                                    </td>
+                                    <td>
+                                        <input type="tel" placeholder="TOTAL" name="Amount"
+                                            style={{ textAlign: "center" }} value={invoice.Amount}
+                                            onChange={handleInvoiceChange} />
+                                    </td>
+                                    <td>
+                                        <button className="ok-btn" style={{ width: "30px", height: "30px" }}
+                                            onClick={handleAddRow}>
+                                            <i className="bi bi-plus" style={{ fontSize: "18px" }}></i>
+                                        </button>
+                                    </td>
                                 </tr>
+                                {invoiceSubmittedData.map((data, index) => (
+                                    <tr key={index}>
+
+                                        <td>{data.Items}</td>
+                                        <td>{data.HSN}</td>
+                                        <td>{data.QTY}</td>
+                                        <td>{data.Rate}</td>
+                                        <td>{data.Amount}</td>
+                                        <td>
+                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                <button className='edit-btn'
+                                                    onClick={() => {
+                                                        setInvoice({
+                                                            Items: data.Items,
+                                                            HSN: data.HSN,
+                                                            QTY: data.QTY,
+                                                            Rate: data.Rate,
+                                                            Amount: data.Amount,
+                                                        });
+                                                        setEditIndex(index);
+                                                    }}>
+                                                    <i className='bi bi-pen'></i>
+                                                </button>
+                                                <button onClick={() => {
+                                                    setInvoiceSubmittedData(invoiceSubmittedData.filter((_, ind) => ind !== index));
+                                                    setEditIndex(null);
+                                                    setInvoice({ Items: "", HSN: "", QTY: 0, Rate: 0, Amount: 0 });
+                                                }}
+                                                    className='edit-btn'><i className='bi bi-trash'></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -610,8 +1039,10 @@ function PerformanceBill() {
                     </div> */}
 
                     <div className="bottom-buttons">
-                        <button className='ok-btn'>Save</button>
-                        <button className='ok-btn'>Cancel</button>
+                        <button className='ok-btn' onClick={handleSave}>Save</button>
+                        <button className='ok-btn' onClick={handleUpdate}>Update</button>
+                        <button className='ok-btn' onClick={handleDelete}>Delete</button>
+                        <button className='ok-btn' onClick={resetAllForm}>Cancel</button>
                     </div>
                 </div>
             </div>

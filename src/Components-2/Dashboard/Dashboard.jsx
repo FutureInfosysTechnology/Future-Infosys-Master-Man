@@ -232,174 +232,174 @@ function Dashboard() {
             <Sidebar1 />
             <div className="main-body" id="main-body">
                 <div className="dashboard-container">
-<Swiper
-  modules={[Navigation, Autoplay]}
-  slidesPerView={4}
-  spaceBetween={20}
-  autoplay={{ delay: 4000 }}
-  speed={1300}
-  loop={true}
-  className="w-100"
-  style={{ marginTop: "30px" }}
-  breakpoints={{
-    320: { slidesPerView: 1 },
-    640: { slidesPerView: 2 },
-    1024: { slidesPerView: 3 },
-    1280: { slidesPerView: 4 },
-  }}
->
-  {cards.map((card) => {
-    const pending = parseInt(card.pending);
-    const done = parseInt(card.done);
-    const total = pending + done;
+                    <Swiper
+                        modules={[Navigation, Autoplay]}
+                        slidesPerView={4}
+                        spaceBetween={20}
+                        autoplay={{ delay: 4000 }}
+                        speed={1300}
+                        loop={true}
+                        className="w-100"
+                        style={{ marginTop: "20px" }}
+                        breakpoints={{
+                            320: { slidesPerView: 1 },
+                            640: { slidesPerView: 2 },
+                            1024: { slidesPerView: 3 },
+                            1280: { slidesPerView: 4 },
+                        }}
+                    >
+                        {cards.map((card) => {
+                            const pending = parseInt(card.pending);
+                            const done = parseInt(card.done);
+                            const total = pending + done;
 
-    const data = [
-      { name: "Pending", value: pending },
-      { name: "Done", value: done },
-    ];
+                            const data = [
+                                { name: "Pending", value: pending },
+                                { name: "Done", value: done },
+                            ];
 
-    return (
-      <SwiperSlide key={card.id}>
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "15px",
-            boxShadow: "0 3px 8px rgba(0,0,0,0.1)",
-            padding: "10px",
-            minHeight: "170px",
-            minWidth: "220px",
-            margin: "auto",
-            display: "flex",
-            flexDirection: "column", // title top, rest bottom
-            alignItems: "center",
-          }}
-        >
-          {/* Title top */}
-          <div
-            style={{
-              width: "100%",
-              marginBottom: "10px",
-              fontSize: "18px",
-              fontWeight: "600",
-              textAlign: "center",
-            }}
-          >
-            {card.title}
-          </div>
+                            return (
+                                <SwiperSlide key={card.id}>
+                                    <div
+                                        style={{
+                                            background: "#fff",
+                                            borderRadius: "15px",
+                                            boxShadow: "0 3px 8px rgba(0,0,0,0.1)",
+                                            padding: "10px",
+                                            minHeight: "170px",
+                                            minWidth: "220px",
+                                            margin: "auto",
+                                            display: "flex",
+                                            flexDirection: "column", // title top, rest bottom
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        {/* Title top */}
+                                        <div
+                                            style={{
+                                                width: "100%",
+                                                marginBottom: "10px",
+                                                fontSize: "18px",
+                                                fontWeight: "600",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            {card.title}
+                                        </div>
 
-          {/* Bottom row (Pie left + Right content) */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              paddingLeft:"5px",
-            }}
-          >
-            {/* Left (Pie) */}
-            <div
-              style={{
-                position: "relative",
-                width: "120px",
-                height: "120px",
-                flexShrink: 0,
-              }}
-            >
-              <PieChart width={120} height={120}>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={30}
-                  outerRadius={55}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {data.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS1[index % COLORS1.length]}
-                    />
-                  ))}
-                </Pie>
-              </PieChart>
+                                        {/* Bottom row (Pie left + Right content) */}
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                width: "100%",
+                                                paddingLeft: "5px",
+                                            }}
+                                        >
+                                            {/* Left (Pie) */}
+                                            <div
+                                                style={{
+                                                    position: "relative",
+                                                    width: "120px",
+                                                    height: "120px",
+                                                    flexShrink: 0,
+                                                }}
+                                            >
+                                                <PieChart width={120} height={120}>
+                                                    <Pie
+                                                        data={data}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        innerRadius={30}
+                                                        outerRadius={55}
+                                                        paddingAngle={3}
+                                                        dataKey="value"
+                                                    >
+                                                        {data.map((entry, index) => (
+                                                            <Cell
+                                                                key={`cell-${index}`}
+                                                                fill={COLORS1[index % COLORS1.length]}
+                                                            />
+                                                        ))}
+                                                    </Pie>
+                                                </PieChart>
 
-              {/* Center total */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  textAlign: "center",
-                }}
-              >
-                <h4 style={{ margin: 0, fontSize: "14px" }}>{total}</h4>
-                <small style={{ fontSize: "11px" }}>Total</small>
-              </div>
-            </div>
+                                                {/* Center total */}
+                                                <div
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: "50%",
+                                                        left: "50%",
+                                                        transform: "translate(-50%, -50%)",
+                                                        textAlign: "center",
+                                                    }}
+                                                >
+                                                    <h4 style={{ margin: 0, fontSize: "14px" }}>{total}</h4>
+                                                    <small style={{ fontSize: "11px" }}>Total</small>
+                                                </div>
+                                            </div>
 
-            {/* Right (Image + Pending/Done) */}
-            <div
-              style={{
-                flex: 1,
-                marginLeft: "15px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              {/* Image */}
-              <img
-                src={card.image}
-                alt={card.title}
-                style={{ width: "45px", height: "45px", marginBottom: "8px" }}
-              />
+                                            {/* Right (Image + Pending/Done) */}
+                                            <div
+                                                style={{
+                                                    flex: 1,
+                                                    marginLeft: "15px",
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                {/* Image */}
+                                                <img
+                                                    src={card.image}
+                                                    alt={card.title}
+                                                    style={{ width: "45px", height: "45px", marginBottom: "8px" }}
+                                                />
 
-              {/* Pending + Done side-by-side */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-              >
-                {/* Pending */}
-                <div style={{ textAlign: "center", flex: 1 }}>
-                  <span
-                    style={{
-                      color: "#FF8042",
-                      fontWeight: "bold",
-                      fontSize: "14px",
-                    }}
-                  >
-                    {pending}
-                  </span>
-                  <p style={{ margin: 0, fontSize: "12px" }}>Pending</p>
-                </div>
+                                                {/* Pending + Done side-by-side */}
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "space-between",
+                                                        width: "100%",
+                                                    }}
+                                                >
+                                                    {/* Pending */}
+                                                    <div style={{ textAlign: "center", flex: 1 }}>
+                                                        <span
+                                                            style={{
+                                                                color: "#FF8042",
+                                                                fontWeight: "bold",
+                                                                fontSize: "14px",
+                                                            }}
+                                                        >
+                                                            {pending}
+                                                        </span>
+                                                        <p style={{ margin: 0, fontSize: "12px" }}>Pending</p>
+                                                    </div>
 
-                {/* Done */}
-                <div style={{ textAlign: "center", flex: 1 }}>
-                  <span
-                    style={{
-                      color: "#00C49F",
-                      fontWeight: "bold",
-                      fontSize: "14px",
-                    }}
-                  >
-                    {done}
-                  </span>
-                  <p style={{ margin: 0, fontSize: "12px" }}>Done</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </SwiperSlide>
-    );
-  })}
-</Swiper>
+                                                    {/* Done */}
+                                                    <div style={{ textAlign: "center", flex: 1 }}>
+                                                        <span
+                                                            style={{
+                                                                color: "#00C49F",
+                                                                fontWeight: "bold",
+                                                                fontSize: "14px",
+                                                            }}
+                                                        >
+                                                            {done}
+                                                        </span>
+                                                        <p style={{ margin: 0, fontSize: "12px" }}>Done</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </SwiperSlide>
+                            );
+                        })}
+                    </Swiper>
 
 
 

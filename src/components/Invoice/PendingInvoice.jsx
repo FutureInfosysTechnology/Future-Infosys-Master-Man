@@ -30,7 +30,7 @@ function PendingInvoice() {
     const [getCustomer, setGetCustomer] = useState([]);
     const [getBranch, setGetBranch] = useState([]);
     const [getMode, setGetMode] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
@@ -126,6 +126,7 @@ function PendingInvoice() {
         fetchData('/Master/GetAllBranchData', setGetBranch);
         fetchData('/Master/getMode', setGetMode);
     }, []);
+
     const handleEdit = (index) => {
         setEditIndex(index);
         setModalData({

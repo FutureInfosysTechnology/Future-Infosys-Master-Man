@@ -49,7 +49,8 @@ function MobileReceipt() {
         textAlign: "start",
         whiteSpace: "nowrap",
         fontSize: "10px",
-        paddingLeft: "2px"
+        paddingLeft: "2px",
+        textAlign:"center"
     }
     const tableStyle = {
         borderCollapse: "collapse"
@@ -116,9 +117,9 @@ function MobileReceipt() {
             {loading && <div style={{ fontSize: "30px", color: "black" }}>Loading...</div>}
             {data?.length > 0 && (
                 <div className="main-body" id="main-body">
-                    <div className="container">
-                        <div className="container-2" style={{ borderRadius: "0px", paddingLeft: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", gap: "5px" }}>
-                            <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "row", border: "none", backgroundColor: "transparent", justifyContent: "end", gap: "10px", fontSize: "12px" }}>
+                    <div className="container py-0">
+                        <div className="container-2 py-1" style={{ borderRadius: "0px", width: "840px", gap: "5px" ,border:"none"}}>
+                            <div className="container-2" style={{ borderRadius: "0px", width: "840px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px" }}>
                                 <button
                                     onClick={handleDownloadPDF}
                                     style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
@@ -146,13 +147,13 @@ function MobileReceipt() {
                                     <div className='docket'>
                                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column", marginBottom: "10px" }}>
                                             <div className='div1' style={{ width: "100%", height: "90px", border: "2px solid black", display: "flex",color:"black" }}>
-                                                <div className='logo' style={{ width: "24%", height: "100%" }}>{getBranch.Branch_Logo}</div>
-                                                <div className='heading' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column", gap: "5px", alignItems: "start", marginTop: "5px" }}>
+                                                <div className='logo' style={{ width: "24%", height: "100%" ,padding:"5px"}}> <img src= {getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
+                                                <div className='heading' style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", gap: "3px", alignItems: "start",paddingLeft:"5px"}}>
                                                     <div style={{ fontSize: "14px", fontWeight: "bolder" }}>{getBranch?.Company_Name}Company Name</div>
                                                     <div style={{ lineHeight: "1.2", fontSize: "10px", paddingRight: "10px" }}>{getBranch?.Branch_Add1},{getBranch.Branch_PIN}</div>
+                                                    <div style={{ fontWeight: "bold", fontSize: "12px" }}>GST No: {getBranch?.GSTNo}</div>
                                                 </div>
-                                                <div className='booking' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ paddingLeft: "5px", fontWeight: "bold", fontSize: "12px" }}>GST No: {getBranch?.GSTNo}</div>
+                                                <div className='booking' style={{ width: "26%", height: "100%", display: "flex", flexDirection: "column",justifyContent:"center" }}>
                                                     <table style={tableStyle}>
                                                         <tbody >
                                                             <tr>
@@ -167,9 +168,9 @@ function MobileReceipt() {
                                                                 <td style={cellsStyle}>Booking Mode:</td>
                                                                 <td style={cellsStyle}>
                                                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
-                                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "RAIL"} /><span>RAIL</span></label>
-                                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "AIR"} /><span>AIR</span></label>
-                                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "SURFACE"} /><span>SURFACE</span></label>
+                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "RAIL"?"flex":"none", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "RAIL"} /><span>RAIL</span></label>
+                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "AIR"?"flex":"none" ,alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "AIR"} /><span>AIR</span></label>
+                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "SURFACE"?"flex":"none",alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "SURFACE"} /><span>SURFACE</span></label>
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -178,17 +179,17 @@ function MobileReceipt() {
                                                 </div>
                                             </div>
                                             <div className='div2' style={{ width: "100%", fontSize: "10px", height: "20px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
-                                                <div style={{ width: "30%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNOR :</div>
-                                                <div style={{ width: "30%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNEE:</div>
-                                                <div style={{ width: "40%", display: "flex", textAlign: "center" }}>
-                                                    <div style={{ width: "25%", fontWeight: "bold", borderRight: "2px solid black", paddingTop: "2px" }}>ORIGIN</div>
-                                                    <div style={{ width: "25%", borderRight: "2px solid black", paddingTop: "2px" }}>{docket?.Origin_Name}</div>
-                                                    <div style={{ width: "25%", fontWeight: "bold", borderRight: "2px solid black", paddingTop: "2px" }}>DESTINATION</div>
-                                                    <div style={{ width: "25%", paddingTop: "2px" }}>{docket?.Destination_Name}</div>
+                                                <div style={{ width: "37%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CLIENT NAME :</div>
+                                                <div style={{ width: "37%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNEE NAME:</div>
+                                                <div style={{ width: "26%", display: "flex", textAlign: "center" }}>
+                                                    <div style={{ width: "23%", fontWeight: "bold", borderRight: "2px solid black", paddingTop: "2px" }}>ORIGIN</div>
+                                                    <div style={{ width: "23%", borderRight: "2px solid black", paddingTop: "2px" }}>{docket?.Origin_Name}</div>
+                                                    <div style={{ width: "36%", fontWeight: "bold", borderRight: "2px solid black", paddingTop: "2px" }}>DESTINATION</div>
+                                                    <div style={{ width: "18%", paddingTop: "2px" }}>{docket?.Destination_Name}</div>
                                                 </div>
                                             </div>
                                             <div className='div3' style={{ width: "100%", fontSize: "10px", minHeight: "130px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
-                                                <div className='consignor px-2' style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
+                                                <div className='consignor px-2' style={{ width: "37%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold" }}>{docket?.Customer_Name}</div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Address : </div><span>{docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>{docket?.Customer_Mob}</span></div>
@@ -196,7 +197,7 @@ function MobileReceipt() {
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Email_Id}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Gst_No}</span></div>
                                                 </div>
-                                                <div className='consignee px-2' style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
+                                                <div className='consignee px-2' style={{ width: "37%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold" }}> {docket?.Consignee_Name}</div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Address : </div><span>{docket?.Consignee_Add1},{docket?.Consignee_Add2}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>{docket?.Consignee_Mob}</span></div>
@@ -204,7 +205,7 @@ function MobileReceipt() {
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Consignee_Email}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span> {docket?.Consignee_GST}</span></div>
                                                 </div>
-                                                <div className='docket px-2' style={{ width: "40%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
+                                                <div className='docket px-2' style={{ width: "26%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold", height: "10%" }}>  DOCKET No : </div>
                                                     <div style={{ display: "flex", flexDirection: "column", height: "90%" }}>
                                                         <div style={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", gap: "0px" }}>
@@ -339,52 +340,45 @@ function MobileReceipt() {
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> FUEL CHARGES</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.FuelCharges}</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>{docket?.FuelCharges}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DKT CHARGES </span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.DocketChrgs}</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>{docket?.DocketChrgs}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DOV CHARGES</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.FuelCharges}</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>{docket?.FuelCharges}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DELIVERY CHARGES</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.HamaliChrgs}</span>
+                                                            <span style={{ width: "40%",textAlign:"center" }}>{docket?.HamaliChrgs}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> OTHER CHARGES</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.OtherCharges}</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>{docket?.OtherCharges}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> TOTAL</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.TotalAmt}</span>
+                                                            <span style={{ width: "40%",textAlign:"center" }}>{docket?.TotalAmt}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> GST</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>0.00</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>0.00</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "11%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}>  GRAND TOTAL</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>0.00</span>
+                                                            <span style={{ width: "40%",textAlign:"center" }}>0.00</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className='payment' style={{ width: "29%" }}>
-                                                    <div style={{ height: "39%" }}>
-                                                        <div style={{ fontWeight: "bold", textAlign: "center" }}>BOOKING TYPE</div>
-                                                        <div style={{ display: "flex", gap: "22px", paddingLeft: "25px" }}>
-                                                            <div style={{ display: "flex", flexDirection: "column", width: "45px", height: "45px" }}>
-                                                                <span>To Pay</span>
-                                                                <span>Paid</span>
-                                                                <span>TBB</span>
-                                                            </div>
-                                                            <div style={{ display: "flex", flexDirection: "column", width: "40px", height: "45px", border: "2px solid black" }}>
-                                                                <span style={{ height: "35%", borderBottom: "2px solid black", textAlign: "center" }}>{docket?.T_Flag}</span>
-                                                                <span style={{ height: "35%", borderBottom: "2px solid black", textAlign: "center" }}>{docket?.T_Flag}</span>
-                                                                <span style={{ textAlign: "center" }}>{docket?.T_Flag}</span>
-                                                            </div>
+                                                    <div style={{ height: "39%" ,display:"flex",alignItems:"center",justifyContent:"start"
+                                                        ,paddingLeft:"20px",gap:"10px",fontSize:"15px"}}>
+                                                        <div style={{ fontWeight: "bold",}}>BOOKING TYPE :</div>
+                                                        <div style={{ }}>
+                                                           
+                                                               {docket?.T_Flag}
                                                         </div>
                                                     </div>
                                                     <div className='px-2' style={{ height: "60%", borderTop: "2px solid black", fontWeight: "bold", fontSize: "9px" }} >
@@ -441,15 +435,15 @@ function MobileReceipt() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
-                                            <div className='div1' style={{ width: "100%", height: "90px", border: "2px solid black", display: "flex" }}>
-                                                <div className='logo' style={{ width: "24%", height: "100%" }}></div>
-                                                <div className='heading' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column", gap: "5px", alignItems: "start", marginTop: "5px" }}>
-                                                    <div style={{ fontSize: "14px", fontWeight: "bolder" }}>{getBranch?.Company_Name}</div>
-                                                    <div style={{ lineHeight: "1.2", fontSize: "10px", paddingRight: "10px" }}>{getBranch?.Branch_Add1}</div>
+<div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column", marginBottom: "10px" }}>
+                                            <div className='div1' style={{ width: "100%", height: "90px", border: "2px solid black", display: "flex",color:"black" }}>
+                                                <div className='logo' style={{ width: "24%", height: "100%" ,padding:"5px"}}> <img src= {getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
+                                                <div className='heading' style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", gap: "3px", alignItems: "start",paddingLeft:"5px"}}>
+                                                    <div style={{ fontSize: "14px", fontWeight: "bolder" }}>{getBranch?.Company_Name}Company Name</div>
+                                                    <div style={{ lineHeight: "1.2", fontSize: "10px", paddingRight: "10px" }}>{getBranch?.Branch_Add1},{getBranch.Branch_PIN}</div>
+                                                    <div style={{ fontWeight: "bold", fontSize: "12px" }}>GST No: {getBranch?.GSTNo}</div>
                                                 </div>
-                                                <div className='booking' style={{ width: "38%", height: "100%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ paddingLeft: "5px", fontWeight: "bold", fontSize: "12px" }}>GST No: {getBranch?.GSTNo}</div>
+                                                <div className='booking' style={{ width: "26%", height: "100%", display: "flex", flexDirection: "column",justifyContent:"center" }}>
                                                     <table style={tableStyle}>
                                                         <tbody >
                                                             <tr>
@@ -464,9 +458,9 @@ function MobileReceipt() {
                                                                 <td style={cellsStyle}>Booking Mode:</td>
                                                                 <td style={cellsStyle}>
                                                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
-                                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "RAIL"} /><span>RAIL</span></label>
-                                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "AIR"} /><span>AIR</span></label>
-                                                                        <label htmlFor="" style={{ display: "flex", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "SURFACE"} /><span>SURFACE</span></label>
+                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "RAIL"?"flex":"none", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "RAIL"} /><span>RAIL</span></label>
+                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "AIR"?"flex":"none" ,alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "AIR"} /><span>AIR</span></label>
+                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "SURFACE"?"flex":"none",alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "SURFACE"} /><span>SURFACE</span></label>
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -475,17 +469,17 @@ function MobileReceipt() {
                                                 </div>
                                             </div>
                                             <div className='div2' style={{ width: "100%", fontSize: "10px", height: "20px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
-                                                <div style={{ width: "30%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNOR :</div>
-                                                <div style={{ width: "30%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNEE:</div>
-                                                <div style={{ width: "40%", display: "flex", textAlign: "center" }}>
-                                                    <div style={{ width: "25%", fontWeight: "bold", borderRight: "2px solid black", paddingTop: "2px" }}>ORIGIN</div>
-                                                    <div style={{ width: "25%", borderRight: "2px solid black", paddingTop: "2px" }}>{docket?.Origin_Name}</div>
-                                                    <div style={{ width: "25%", fontWeight: "bold", borderRight: "2px solid black", paddingTop: "2px" }}>DESTINATION</div>
-                                                    <div style={{ width: "25%", paddingTop: "2px" }}>{docket?.Destination_Name}</div>
+                                                <div style={{ width: "37%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CLIENT NAME :</div>
+                                                <div style={{ width: "37%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNEE NAME:</div>
+                                                <div style={{ width: "26%", display: "flex", textAlign: "center" }}>
+                                                    <div style={{ width: "23%", fontWeight: "bold", borderRight: "2px solid black", paddingTop: "2px" }}>ORIGIN</div>
+                                                    <div style={{ width: "23%", borderRight: "2px solid black", paddingTop: "2px" }}>{docket?.Origin_Name}</div>
+                                                    <div style={{ width: "36%", fontWeight: "bold", borderRight: "2px solid black", paddingTop: "2px" }}>DESTINATION</div>
+                                                    <div style={{ width: "18%", paddingTop: "2px" }}>{docket?.Destination_Name}</div>
                                                 </div>
                                             </div>
                                             <div className='div3' style={{ width: "100%", fontSize: "10px", minHeight: "130px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
-                                                <div className='consignor px-2' style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
+                                                <div className='consignor px-2' style={{ width: "37%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold" }}>{docket?.Customer_Name}</div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Address : </div><span>{docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>{docket?.Customer_Mob}</span></div>
@@ -493,19 +487,19 @@ function MobileReceipt() {
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Email_Id}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Gst_No}</span></div>
                                                 </div>
-                                                <div className='consignee px-2' style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
+                                                <div className='consignee px-2' style={{ width: "37%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "7px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold" }}> {docket?.Consignee_Name}</div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Address : </div><span>{docket?.Consignee_Add1},{docket?.Consignee_Add2}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>{docket?.Consignee_Mob}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Pin Code : </div><span> {docket?.Consignee_Pin}</span></div>
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span> {docket?.Consignee_Email}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Consignee_Email}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span> {docket?.Consignee_GST}</span></div>
                                                 </div>
-                                                <div className='docket px-2' style={{ width: "40%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
+                                                <div className='docket px-2' style={{ width: "26%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold", height: "10%" }}>  DOCKET No : </div>
                                                     <div style={{ display: "flex", flexDirection: "column", height: "90%" }}>
                                                         <div style={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", gap: "0px" }}>
-                                                            <img src={barcode} alt="barcode" style={{ height: "70%", width: "150px" }} />
+                                                            <img src={barcode} alt="barcode" crossOrigin="anonymous" style={{ height: "55%", width: "150px" }} />
                                                             <b style={{ fontSize: "20px" }}>{docket?.DocketNo}</b> </div>
                                                     </div>
                                                 </div>
@@ -636,52 +630,45 @@ function MobileReceipt() {
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> FUEL CHARGES</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.FuelCharges}</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>{docket?.FuelCharges}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DKT CHARGES </span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.DocketChrgs}</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>{docket?.DocketChrgs}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DOV CHARGES</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.FuelCharges}</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>{docket?.FuelCharges}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> DELIVERY CHARGES</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.HamaliChrgs}</span>
+                                                            <span style={{ width: "40%",textAlign:"center" }}>{docket?.HamaliChrgs}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> OTHER CHARGES</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.OtherCharges}</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>{docket?.OtherCharges}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> TOTAL</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>{docket?.TotalAmt}</span>
+                                                            <span style={{ width: "40%",textAlign:"center" }}>{docket?.TotalAmt}</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "10%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}> GST</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>0.00</span>
+                                                            <span style={{ width: "40%", textAlign:"center" }}>0.00</span>
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "11%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "60%", paddingLeft: "5px" }}>  GRAND TOTAL</span>
-                                                            <span style={{ width: "40%", paddingLeft: "5px" }}>0.00</span>
+                                                            <span style={{ width: "40%",textAlign:"center" }}>0.00</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className='payment' style={{ width: "29%" }}>
-                                                    <div style={{ height: "39%" }}>
-                                                        <div style={{ fontWeight: "bold", textAlign: "center" }}>BOOKING TYPE</div>
-                                                        <div style={{ display: "flex", gap: "22px", paddingLeft: "25px" }}>
-                                                            <div style={{ display: "flex", flexDirection: "column", width: "45px", height: "45px" }}>
-                                                                <span>To Pay</span>
-                                                                <span>Paid</span>
-                                                                <span>TBB</span>
-                                                            </div>
-                                                            <div style={{ display: "flex", flexDirection: "column", width: "40px", height: "45px", border: "2px solid black" }}>
-                                                                <span style={{ height: "35%", borderBottom: "2px solid black", textAlign: "center" }}>{docket?.T_Flag}</span>
-                                                                <span style={{ height: "35%", borderBottom: "2px solid black", textAlign: "center" }}>{docket?.T_Flag}</span>
-                                                                <span style={{ textAlign: "center" }}>{docket?.T_Flag}</span>
-                                                            </div>
+                                                    <div style={{ height: "39%" ,display:"flex",alignItems:"center",justifyContent:"start"
+                                                        ,paddingLeft:"20px",gap:"10px",fontSize:"15px"}}>
+                                                        <div style={{ fontWeight: "bold",}}>BOOKING TYPE :</div>
+                                                        <div style={{ }}>
+                                                           
+                                                               {docket?.T_Flag}
                                                         </div>
                                                     </div>
                                                     <div className='px-2' style={{ height: "60%", borderTop: "2px solid black", fontWeight: "bold", fontSize: "9px" }} >
