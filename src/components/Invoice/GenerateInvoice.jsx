@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getApi, postApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, postApi, putApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -18,6 +18,7 @@ function GenerateInvoice() {
     }
     const [toggleActive, setToggleActive] = useState(false);
     const [getCustomer, setGetCustomer] = useState([]);
+    const [previewData, setPreviewData] = useState([]);
     const [getBranch, setGetBranch] = useState([]);
     const [getMode, setGetMode] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,43 +27,16 @@ function GenerateInvoice() {
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
         branch: "",
-        BookMode: "",
+        BookMode: "Monthly",
         customerType: "",
         fromDate: firstDayOfMonth,
         toDate: today,
         invoiceDate: today,
-        BillParty:"Client-wise Bill",
+        BillParty: "Client-wise Bill",
         customer: "",
         mode: "",
         invoiceNo: ""
     });
-    const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-        const data = await postApi("/Smart/BillGenerate", formData);
-
-        if (data.status === 1) {
-            Swal.fire({
-                icon: "success",
-                title: "Invoice Generated",
-                text: data.message || "Invoice created successfully!",
-            });
-        } else {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: data.message || "Something went wrong!",
-            });
-        }
-    } catch (error) {
-        Swal.fire({
-            icon: "error",
-            title: "Network Error",
-            text: "Could not connect to server.",
-        });
-    }
-};
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -78,30 +52,88 @@ function GenerateInvoice() {
 
 
     useEffect(() => {
-                const fetchBranch = async () => {
-                    try {
-                        const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
-                        if (response.status === 1) {
-                            console.log(response.Data);
-                            setGetBranch(response.Data);
-                        }
-                    }
-                    catch (error) {
-                        console.log(error);
-                    }
+        const fetchBranch = async () => {
+            try {
+                const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
+                if (response.status === 1) {
+                    console.log(response.Data);
+                    setGetBranch(response.Data);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
         }
         fetchData('/Master/getCustomerdata', setGetCustomer);
         fetchData('/Master/getMode', setGetMode);
         fetchBranch();
     }, []);
+    const handlePreview = async (e) => {
+        e.preventDefault();
 
+        try {
+            const payload = {
+                ActionType: "Preview",                 // always preview here
+                Branch_Code: formData.branch || null,  // from formData
+                BillingCycle: formData.BookMode || null,
+                FromDate: formData.fromDate || null,
+                ToDate: formData.toDate || null,
+                InvoiceDate: formData.invoiceDate || null,
+                CustomerType: formData.customerType || null,
+                GroupValue: String(formData.customer) || null,
+                Mode_Code: formData.mode || null,
+            };
+            console.log(payload);
+            const response = await putApi("/Smart/InvoiceGenerate",
+                payload
+            );
+            console.log(response);
+            if (response.status === 1) {
+                setPreviewData(response.previewData);
+                Swal.fire("Preview Ready", response.message, "success");
+            } else {
+                Swal.fire("Failed", response.message, "warning");
+            }
+        } catch (error) {
+            Swal.fire("Error", error.message, "error");
+        }
+    };
+    const handleGenerate = async (e) => {
+        e.preventDefault();
+
+        try {
+            const payload = {
+                ActionType: "Generate",                 // always preview here
+                Branch_Code: formData.branch || null,  // from formData
+                BillingCycle: formData.BookMode || null,
+                FromDate: formData.fromDate?.toISOString().split("T")[0] || null,
+                ToDate: formData.toDate?.toISOString().split("T")[0] || null,
+                InvoiceDate: formData.invoiceDate?.toISOString().split("T")[0] || null,
+                CustomerType: formData.customerType || null,
+                GroupValue: String(formData.customer) || null,
+                Mode_Code: formData.mode || null,
+            };
+            console.log(payload);
+            const response = await putApi("/Smart/InvoiceGenerate",
+                payload
+            );
+            console.log(response);
+            if (response.status === 1) {
+                Swal.fire("Generated", response.message, "success");
+            } else {
+                Swal.fire("Failed", response.message, "warning");
+            }
+        } catch (error) {
+            Swal.fire("Error", error.message, "error");
+        }
+    };
 
 
     return (
         <>
             <div className="body">
                 <div className="container1">
-                    <form action="">
+                    <form action="" style={{ margin: "0px", padding: "0px" }}>
                         <div className="fields2">
 
                             <div className="input-field3">
@@ -144,15 +176,15 @@ function GenerateInvoice() {
 
                             <div className="input-field3">
                                 <label>Billing Type</label>
-                                        <select value={formData.BillParty} onChange={(e) => setFormData({ ...formData, BillParty: e.target.value })}>
-                                            <option value="" disabled>Select Billing Type</option>
-                                            <option value="Client-wise Bill">Client-wise Bill</option>
-                                            <option value="Shipper-wise Bill">Shipper-wise Bill</option>
-                                            <option value="Vendor-wise Bill">Vendor-wise Bill</option>
-                                            <option value="Product-wise Bill">Product-wise Bill</option>
-                                            <option value="Consignee-wise Bill">Consignee-wise Bill</option>
+                                <select value={formData.BillParty} onChange={(e) => setFormData({ ...formData, BillParty: e.target.value })}>
+                                    <option value="" disabled>Select Billing Type</option>
+                                    <option value="Client-wise Bill">Client-wise Bill</option>
+                                    <option value="Shipper-wise Bill">Shipper-wise Bill</option>
+                                    <option value="Vendor-wise Bill">Vendor-wise Bill</option>
+                                    <option value="Product-wise Bill">Product-wise Bill</option>
+                                    <option value="Consignee-wise Bill">Consignee-wise Bill</option>
 
-                                        </select>
+                                </select>
                             </div>
 
                             <div className="input-field3">
@@ -163,7 +195,12 @@ function GenerateInvoice() {
                                     <option value="Single">Single</option>
                                 </select>
                             </div>
-                            <div className="input-field3 flex-fill" style={{ flex: "1 1 300px", minWidth: "240px", maxWidth: "100%" }}>
+                            <div className="input-field3" style={{
+                                flex: 1,
+                                minWidth: "240px", // ✅ keep a good size on desktop
+                                width: "100%",
+                                marginRight:"1.5rem"// ✅ default full width
+                            }}>
                                 <label htmlFor="">Customer</label>
                                 <Select
                                     options={getCustomer.map(cust => ({
@@ -244,9 +281,10 @@ function GenerateInvoice() {
                                 <label htmlFor="">Booking Mode</label>
                                 <select value={formData.BookMode} onChange={(e) => setFormData({ ...formData, BookMode: e.target.value })}>
                                     <option value="" disabled>Select Booking Mode</option>
-                                    <option value="Cash">Cash</option>
-                                    <option value="Credit">Credit</option>
-                                    <option value="To-pay">To-pay</option>
+                                    <option value="Monthly">Monthly</option>
+                                    <option value="Quarterly">Quarterly</option>
+                                    <option value="Half Yearly">Half Yearly</option>
+                                    <option value="Yearly">Yearly</option>
                                 </select>
                             </div>
 
@@ -310,11 +348,74 @@ function GenerateInvoice() {
                                 <button className="ok-btn" style={{ height: "35px", width: "50px" }}><i className="bi bi-layout-text-sidebar"></i></button>
                             </div>
 
-                            <div className="bottom-buttons input-field3" style={{marginTop: "18px",padding:"0px"}}>
-                                <button className="ok-btn mx-0 my-0">Submit</button>
+                            <div className="input-field3 px-0" style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: "0px", marginTop: "18px" }}>
+                                <div className="bottom-buttons" style={{}}>
+                                    <button className="ok-btn m-0" onClick={handleGenerate}>Generate</button>
+                                </div>
+                                <div className="bottom-buttons" style={{}}>
+                                    <button className="ok-btn m-0" onClick={handlePreview}>Preview</button>
+                                </div>
                             </div>
+
                         </div>
                     </form>
+                    {previewData.length > 0 && (<div className="table-container" style={{ margin: "0px" }}>
+                        <table className="table table-bordered table-sm" style={{ whiteSpace: "nowrap" }}>
+                            <thead className="table-info table-sm">
+                                <tr>
+                                    <th>Customer Code</th>
+                                    <th>Customer Name</th>
+                                    <th>Book Date</th>
+                                    <th>Branch Name</th>
+                                    <th>Mode Name</th>
+                                    <th>Bill No</th>
+                                    <th>Bill Generate</th>
+                                    <th>Docket No</th>
+                                    <th>Qty</th>
+                                    <th>Actual Wt</th>
+                                    <th>Charged Wt</th>
+                                    <th>Rate Per Kg</th>
+                                    <th>Rate</th>
+                                    <th>Docket Chrgs</th>
+                                    <th>IGST %</th>
+                                    <th>IGST Amt</th>
+                                    <th>CGST %</th>
+                                    <th>CGST Amt</th>
+                                    <th>SGST %</th>
+                                    <th>SGST Amt</th>
+                                    <th>City Name</th>
+                                </tr>
+                            </thead>
+                            <tbody className="table-body">
+                                {previewData.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        <td>{row.Customer_Code}</td>
+                                        <td>{row.Customer_Name}</td>
+                                        <td>{row.BookDate}</td>
+                                        <td>{row.Branch_Name}</td>
+                                        <td>{row.Mode_Name}</td>
+                                        <td>{row.BillNo}</td>
+                                        <td>{row.BillGenerate ? "Yes" : "No"}</td>
+                                        <td>{row.DocketNo}</td>
+                                        <td>{row.Qty}</td>
+                                        <td>{row.ActualWt}</td>
+                                        <td>{row.ChargedWt}</td>
+                                        <td>{row.RatePerkg}</td>
+                                        <td>{row.Rate}</td>
+                                        <td>{row.DocketChrgs}</td>
+                                        <td>{row.IGSTPer}</td>
+                                        <td>{row.IGSTAMT}</td>
+                                        <td>{row.CGSTPer}</td>
+                                        <td>{row.CGSTAMT}</td>
+                                        <td>{row.SGSTPer}</td>
+                                        <td>{row.SGSTAMT}</td>
+                                        <td>{row.City_Name}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>)}
+
                 </div >
             </div >
         </>

@@ -13,14 +13,14 @@ function PerformanceBill() {
         return today;
     };
     const parseDDMMYYYY = (str) => {
-  const [day, month, year] = str.split("/");
-  return new Date(`${year}-${month}-${day}`);
-};
+        if (!str) return null;
+        const [day, month, year] = str.split("/");
+        return new Date(`${year}-${month}-${day}`);
+    };
     const [editIndex, setEditIndex] = useState(null);
-    const [getInvoice, setGetInvoice] = useState([]);
     const [formData, setFormData] = useState({
         invoiceNo: "",
-        invoiceID:null,
+        invoiceID: null,
         invDate: getTodayDate(),
         invDueDate: getTodayDate(),
         DocketNo: "",
@@ -64,6 +64,9 @@ function PerformanceBill() {
     useEffect(() => {
         console.log(invoiceSubmittedData);
     }, [invoiceSubmittedData])
+    useEffect(() => {
+        console.log(formData);
+    }, [formData])
     const handleInvoiceChange = (e) => {
         const { name, value } = e.target;
         setInvoice((prev) => ({
@@ -100,7 +103,7 @@ function PerformanceBill() {
     const resetAllForm = () => {
         setFormData({
             invoiceNo: "",
-            invoiceID:null,
+            invoiceID: null,
             invDate: getTodayDate(),
             invDueDate: getTodayDate(),
             DocketNo: "",
@@ -147,7 +150,14 @@ function PerformanceBill() {
                 text: "Fill all missing fields",
             });
         }
-
+        if(invoiceSubmittedData.length<1)
+        {
+            return Swal.fire({
+                icon: "warning",
+                title: "Empty Items",
+                text: "Select Atleast one item",
+            });
+        }
         try {
             const payload = {
                 // Shipper
@@ -179,7 +189,6 @@ function PerformanceBill() {
                 Qty: formData.boxes,
                 Country_Name: formData.ogCountry,
                 TotalWeight: formData.totalWt,
-
                 // Items
                 Items: invoiceSubmittedData,
             };
@@ -227,7 +236,7 @@ function PerformanceBill() {
             );
 
             if (response.status === 1 && response.data.length > 0) {
-                const invoice = response.data[0]; // assuming only one invoice is returned
+                const responseInvoice = response.data[0]; // assuming only one invoice is returned
 
                 Swal.fire({
                     icon: "success",
@@ -236,45 +245,48 @@ function PerformanceBill() {
                 });
 
                 // ✅ Update formData with response values
-                setFormData({
-                    ...formData,
-                    invoiceNo: invoice.InvoiceNo,
-                    invoiceID:invoice.InvoiceID,
-                    invDate: parseDDMMYYYY(invoice.InvoiceDate),
-                    invDueDate: parseDDMMYYYY(invoice.InvoiceDue),
-                    DocketNo: invoice.DocketNo,
-                    destination: invoice.Destination_Code,
-                    boxes: invoice.Qty,
-                    totalWt: invoice.TotalWeight,
-                    Shipper_Name: invoice.ShipperName,
-                    ShipperAdd: invoice.ShipperAddress,
-                    ShipperAdd2: invoice.Shipper_Address2,
-                    ShipperCity: invoice.ShipperCity,
-                    Shipper_StateCode: invoice.ShipperStateCode,
-                    ShipperPin: invoice.ShipperPinCode,
-                    ShipperPhone: invoice.ShipperMobileNo,
-                    Shipper_GstNo: invoice.ShipperGSTNo,
-                    ConsigneeName: invoice.ReceiverName,
-                    ConsigneeAdd1: invoice.ReceiverAddress,
-                    ConsigneeAdd2: invoice.Receiver_Address2,
-                    ConsigneeCity: invoice.ReceiverCity,
-                    ConsigneeState: invoice.ReceiverStateCode,
-                    ConsigneePin: invoice.ReceiverPinCode,
-                    ConsigneeMob: invoice.ReceiverMobileNo,
-                    ConsigneeGST: invoice.ReceiverGSTNo,
-                    // you can also map country/state if needed
-                });
+                setFormData((prev) => ({
+                    ...prev,
+                    invoiceNo: responseInvoice.InvoiceNo,
+                    invoiceID: responseInvoice.InvoiceID,
+                    invDate: parseDDMMYYYY(responseInvoice.InvoiceDate),
+                    invDueDate: parseDDMMYYYY(responseInvoice.InvoiceDue),
+                    ogCountry:responseInvoice.Country_Name,
+                    DocketNo: responseInvoice.DocketNo,
+                    destination: responseInvoice.Destination_Code,
+                    boxes: responseInvoice.Qty,
+                    totalWt: responseInvoice.TotalWeight,
+                    Shipper_Name: responseInvoice.ShipperName,
+                    ShipperAdd: responseInvoice.ShipperAddress,
+                    ShipperAdd2: responseInvoice.Shipper_Address2,
+                    ShipperCity: responseInvoice.ShipperCity,
+                    Shipper_StateCode: responseInvoice.ShipperStateCode,
+                    ShipperPin: responseInvoice.ShipperPinCode,
+                    ShipperPhone: responseInvoice.ShipperMobileNo,
+                    Shipper_GstNo: responseInvoice.ShipperGSTNo,
+                    ConsigneeName: responseInvoice.ReceiverName,
+                    ConsigneeAdd1: responseInvoice.ReceiverAddress,
+                    ConsigneeAdd2: responseInvoice.Receiver_Address2,
+                    Consignee_City: responseInvoice.ReceiverCity,
+                    ConsigneeState: responseInvoice.ReceiverStateCode,
+                    ConsigneePin: responseInvoice.ReceiverPinCode,
+                    ConsigneeMob: responseInvoice.ReceiverMobileNo,
+                    ConsigneeGST: responseInvoice.ReceiverGSTNo,
+                }));
 
-                // ✅ Set invoice line items
-                setInvoiceSubmittedData(
-                    invoice.Items.map((item) => ({
-                        Items: item.Items,
-                        HSN: item.HSN,
-                        QTY: item.QTY,
-                        Rate: item.Rate,
-                        Amount: item.Amount,
-                    }))
-                );
+
+                // ✅ SetgetInvoice line items
+                if (responseInvoice.Items) {
+                    setInvoiceSubmittedData(
+                        responseInvoice.Items.map((item) => ({
+                            Items: item.Items,
+                            HSN: item.HSN,
+                            QTY: item.QTY,
+                            Rate: item.Rate,
+                            Amount: item.Amount,
+                        }))
+                    );
+                }
 
 
             } else {
@@ -327,7 +339,7 @@ function PerformanceBill() {
                 ReceiverGSTNo: formData.ConsigneeGST,
 
                 // Invoice
-                InvoiceID:formData.invoiceID,
+                InvoiceID: formData.invoiceID,
                 InvoiceNo: formData.invoiceNo,
                 InvoiceDate: formatDate(formData.invDate),
                 InvoiceDue: formatDate(formData.invDueDate),
@@ -340,7 +352,7 @@ function PerformanceBill() {
                 // Items
                 Items: invoiceSubmittedData,
             };
-
+            console.log(payload);
             const response = await putApi("/Smart/updateProformaInvoice", payload);
 
             if (response.success) {
@@ -991,7 +1003,7 @@ function PerformanceBill() {
                                         </button>
                                     </td>
                                 </tr>
-                                {invoiceSubmittedData.map((data, index) => (
+                                {Array.isArray(invoiceSubmittedData) && invoiceSubmittedData.map((data, index) => (
                                     <tr key={index}>
 
                                         <td>{data.Items}</td>

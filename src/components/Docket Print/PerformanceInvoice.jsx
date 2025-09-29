@@ -12,17 +12,14 @@ function PerformanceInvoice() {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const manifest = location?.state?.data || {};
+    const invoiceNo = location?.state?.invoiceNo || "";
     const fromPath = location?.state?.from || "/";
     const [getBranch, setGetBranch] = useState([]);
-    const [manifestData, setGetManifestData] = useState([]);
+    const [invoiceData, setGetInvoiceData] = useState({});
     console.log(location.state);
-    const manifestNo = manifest?.manifestNo || "";
-    const sumQty = manifest?.sumQty || 0;
-    const sumActualWt = manifest?.sumActualWt || 0;
     const [loading, setLoading] = useState(true);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
-    console.log(manifestNo, sumQty, sumActualWt);
+    console.log(invoiceNo);
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -42,8 +39,8 @@ function PerformanceInvoice() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi(`/Manifest/viewManifestPrint?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&manifestNo=${manifestNo}`);
-                setGetManifestData(Array.isArray(response.data) ? response.data : []);
+                const response = await getApi(`/Smart/GetProformaInvoicesPdf?invoiceNos=${invoiceNo}`);
+                setGetInvoiceData(Array.isArray(response.data) ? response.data[0] : {});
                 console.log(response);
             } catch (err) {
                 console.error('Fetch Error:', err);
@@ -53,10 +50,10 @@ function PerformanceInvoice() {
                 // generatePDF();
             }
         };
-        if (manifestNo) {
+        if (invoiceNo) {
             fetchData();
         }
-    }, [manifestNo]);
+    }, [invoiceNo]);
 
     // useEffect(() => {
     //     if (!loading && manifestData.length > 0 && getBranch.length > 0) {
@@ -74,7 +71,7 @@ function PerformanceInvoice() {
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         // 
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`Manifest_${manifestNo}.pdf`);
+        pdf.save(`Manifest_${invoiceNo}.pdf`);
     };
 
     // if (loading) return <p>Loading...</p>;
@@ -177,13 +174,13 @@ function PerformanceInvoice() {
                         < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
                             <div className="container-3 px-0 py-0" style={{ border: "2px solid black", height: "815px" }}>
 
-                                <div className="div1" style={{ height: "120px", display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
-                                    <div style={{ width: "50%", height: "100%", borderRight: "2px solid black", display: "flex", gap: "7px" }}>
+                                <div className="div1" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
+                                    <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", gap: "7px" }}>
                                         <div style={{ width: "30%", height: "100%", padding: "10px", paddingTop: "10px", paddingBottom: "10px" }}>
                                             <img src={getBranch?.Branch_Logo || logoimg} alt="" style={{ height: "100%", width: "100%", borderRadius: "50%" }} />
                                         </div>
-                                        <div style={{ width: "70%", height: "100%", display: "flex", flexDirection: "column" }}>
-                                            <div style={{ fontWeight: "bolder", fontSize: "18px", marginTop: "12px" }}>Sales Points{getBranch.Company_Name}</div>
+                                        <div style={{ width: "70%", display: "flex", flexDirection: "column" }}>
+                                            <div style={{ fontWeight: "bolder", fontSize: "18px", marginTop: "12px" }}>{getBranch.Company_Name}</div>
                                             <div >{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div>
                                             <div style={{ width: "100%", display: "flex" }}>
                                                 <div style={{ width: "50%", display: "flex", flexDirection: "column" }}>
@@ -201,19 +198,19 @@ function PerformanceInvoice() {
                                             </div>
                                         </div>
                                     </div>
-                                    <div style={{ width: "50%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <div style={{ width: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                                         <div style={{ display: "flex", width: "80%", height: "40%", justifyContent: "space-between", alignItems: "center", marginTop: "5px" }}>
-                                            <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column",justifyContent:"center",alignItems:"center" }}>
                                                 <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Invoice No:</div>
-                                                <div>1001</div>
+                                                <div>{invoiceData.InvoiceNo}</div>
                                             </div>
-                                            <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column",justifyContent:"center",alignItems:"center" }}>
                                                 <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Invoice Date:</div>
-                                                <div>01/09/2025</div>
+                                                <div>{invoiceData.InvoiceDate}</div>
                                             </div>
-                                            <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column" ,justifyContent:"center",alignItems:"center"}}>
                                                 <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Due Date:</div>
-                                                <div>10/09/2025</div>
+                                                <div>{invoiceData.InvoiceDue}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -221,16 +218,16 @@ function PerformanceInvoice() {
                                 <div className="div2" style={{ height: "140px", display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
                                     <div style={{ width: "50%", height: "100%", borderRight: "2px solid black", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
                                         <div style={{ fontSize: "12px" }}>BILL TO</div>
-                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}> RAJ AIR EXPRESS CARGO PRIVATE LIMITED</div>
+                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ReceiverName}</div>
                                         <div style={{ display: "flex", gap: "2px" }}>
                                             <div style={{ width: "12%" }}> Address:</div>
                                             <div style={{ width: "80%" }}> 001, GROUND FLOOR, 9/1, SAIDHAM, TELLY GALLI, SAHAR ROAD, ANDHERI EAST, Mumbai Suburban, Maharashtra,
-                                                Mumbai, Maharashtra, 400069</div>
+                                                {invoiceData.ReceiverCity}, Maharashtra, 400069</div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}>GSTIN:</div>
-                                                <div>27AAFCR7719F1Z6 </div>
+                                                <div>{invoiceData.ReceiverGSTNo} </div>
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}> Place of Supply:</div>
@@ -240,7 +237,7 @@ function PerformanceInvoice() {
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}> Mobile:</div>
-                                                <div> 9324038719  </div>
+                                                <div> {invoiceData.ReceiverMobileNo}  </div>
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}>  PAN Number:</div>
@@ -250,16 +247,16 @@ function PerformanceInvoice() {
                                     </div>
                                     <div style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
                                         <div style={{ fontSize: "12px" }}>SHIP TO</div>
-                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}> RAJ AIR EXPRESS CARGO PRIVATE LIMITED</div>
+                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ShipperName}</div>
                                         <div style={{ display: "flex", gap: "2px" }}>
                                             <div style={{ width: "12%" }}> Address:</div>
                                             <div style={{ width: "80%" }}> 001, GROUND FLOOR, 9/1, SAIDHAM, TELLY GALLI, SAHAR ROAD, ANDHERI EAST, Mumbai Suburban, Maharashtra,
-                                                Mumbai, Maharashtra, 400069</div>
+                                                {invoiceData.ShipperCity}, Maharashtra, 400069</div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}>GSTIN:</div>
-                                                <div>27AAFCR7719F1Z6 </div>
+                                                <div>{invoiceData.ShipperGSTNo} </div>
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}> Place of Supply:</div>
@@ -269,7 +266,7 @@ function PerformanceInvoice() {
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}> Mobile:</div>
-                                                <div> 9324038719  </div>
+                                                <div> {invoiceData.ShipperMobileNo}  </div>
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}>  PAN Number:</div>
