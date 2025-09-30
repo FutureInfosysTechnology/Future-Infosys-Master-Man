@@ -14,21 +14,22 @@ import Select from 'react-select';
 import 'react-toggle/style.css';
 import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 
 function ViewInvoice() {
 
 
-    const [zones, setZones] = useState([{ code: "INV001", date: "2025-08-25", shipper: "ABC Pvt Ltd", receiver: "XYZ Ltd", from: "Mumbai", to: "Delhi", pc: "5", weight: "50", invoiceno: "1001", invoicevalue: "5000" },
-    { code: "INV002", date: "2025-08-26", shipper: "LMN Pvt Ltd", receiver: "OPQ Ltd", from: "Pune", to: "Bangalore", pc: "3", weight: "20", invoiceno: "1002", invoicevalue: "3000" }]);
-    const [editIndex, setEditIndex] = useState(null);
-    const [modalData, setModalData] = useState({
-        code: '', date: '', shipper: '', receiver: '', from: '', to: '',
-        pc: '', weight: '', invoiceno: '', invoicevalue: ''
-    });
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const [invoice, setInvoice] = useState([])
+    const [openRow, setOpenRow] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
     const [getCustomer, setGetCustomer] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
@@ -38,21 +39,16 @@ function ViewInvoice() {
     const handleFormChange = (value, key) => {
         setFormData({ ...formData, [key]: value })
     }
-    const [openRow, setOpenRow] = useState(null);
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;
-
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
-    const totalPages = Math.ceil(zones.length / rowsPerPage);
+    const currentRows = invoice.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.ceil(invoice.length / rowsPerPage);
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
         fromDate: firstDayOfMonth,
         toDate: today,
+        invDate: today,
         customer: "",
         invoiceNo: "",
     });
@@ -68,21 +64,9 @@ function ViewInvoice() {
             setLoading(false);
         }
     };
-
-
     useEffect(() => {
         fetchData('/Master/getCustomerdata', setGetCustomer);
     }, []);
-    const handleEdit = (index) => {
-        setEditIndex(index);
-        setModalData({
-            code: zones[index].code, date: zones[index].date, shipper: zones[index].shipper,
-            receiver: zones[index].receiver, from: zones[index].from, to: zones[index].to, pc: zones[index].pc,
-            weight: zones[index].weight, invoiceno: zones[index].invoiceno, invoicevalue: zones[index].invoicevalue
-        });
-        setModalIsOpen(true);
-    };
-
     const handleDelete = (index) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -94,8 +78,6 @@ function ViewInvoice() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                const updatedZones = zones.filter((_, i) => i !== index);
-                setZones(updatedZones);
                 Swal.fire(
                     'Deleted!',
                     'Your zone has been deleted.',
@@ -104,19 +86,44 @@ function ViewInvoice() {
             }
         });
     };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setLoading(true);
 
+            const queryParams = new URLSearchParams({
+                InvoiceNos: formData.invoiceNo || "",
+                InvoiceDate: formData.invDate?.toISOString().split("T")[0] || "",
+                BillFrom: formData.fromDate?.toISOString().split("T")[0] || "",
+                BillTO: formData.toDate?.toISOString().split("T")[0] || "",
+                CustomerName: formData.customer || "",
+                BranchName: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM"
+            });
 
-    const handleSave = () => {
-        const updatedZones = [...zones];
-        updatedZones[editIndex] = { id: editIndex + 1, ...modalData };
-        setZones(updatedZones);
-        setModalIsOpen(false);
-        setEditIndex(null);
-        Swal.fire('Saved!', 'Your changes have been saved.', 'success');
+            const response = await getApi(`/Smart/getInvoiceGenerateData?${queryParams.toString()}`);
+            console.log(response);
+
+            if (response?.status === 1 && Array.isArray(response.Data)) {
+                setInvoice(response.Data);
+            } else {
+                setInvoice([]);
+                Swal.fire("Info", response?.message || "No invoices found", "info");
+            }
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            setInvoice([]);
+            Swal.fire("Error", "Failed to fetch invoices", "error");
+        } finally {
+            setLoading(false);
+        }
     };
 
     /**************** function to export table data in excel and pdf ************/
     // Handle changing page
+    const handleRowsPerPageChange = (event) => {
+        setRowsPerPage(Number(event.target.value));
+        setCurrentPage(1);
+    };
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
@@ -124,19 +131,8 @@ function ViewInvoice() {
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
-    const handleOpenInvoicePrint = (zone) => {
-        const code = zone.code;
-        const date = zone.date;
-        const shipper = zone.shipper;
-        const url = `/firstinvoice?manifestNo=${encodeURIComponent(code)}&sumQty=${encodeURIComponent(date)}&sumActualWt=${encodeURIComponent(shipper)}`;
-        const newWindow = window.open(
-            url,
-            '_blank', 'width=900,height=600,fullscreen=yes'
-        );
-
-        if (newWindow) {
-            newWindow.focus();
-        }
+    const handleOpenInvoicePrint = (invData) => {
+        navigate("/firstinvoice", { state: { invoiceData: invData, from: location.pathname } })
     };
 
     return (
@@ -144,9 +140,9 @@ function ViewInvoice() {
 
             <div className="body">
                 <div className="container1">
-                    <form style={{ margin: "0px", padding: "0px" }}>
+                    <form style={{ margin: "0px", padding: "0px" }} onSubmit={handleSubmit}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
-                            <div className="input-field3">
+                            <div className="input-field1">
                                 <label htmlFor="">Customer</label>
                                 <Select
                                     options={getCustomer.map(cust => ({
@@ -155,7 +151,7 @@ function ViewInvoice() {
                                     }))}
                                     value={
                                         formData.customer
-                                            ? getCustomer.find(c => c.Customer_Code === formData.customer)
+                                            ? { value: formData.customer,label:getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name}
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -203,6 +199,16 @@ function ViewInvoice() {
                                 />
                             </div>
                             <div className="input-field3">
+                                <label htmlFor="">Invoice Date</label>
+                                <DatePicker
+                                    portalId="root-portal"
+                                    selected={formData.invDate}
+                                    onChange={(date) => handleFormChange(date, "invDate")}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
+                            </div>
+                            <div className="input-field3">
                                 <label htmlFor="">Invoice No</label>
                                 <input type="text" placeholder="Invoice No" value={formData.invoiceNo} onChange={(e) => handleFormChange(e.target.value, "invoiceNo")} />
                             </div>
@@ -220,189 +226,104 @@ function ViewInvoice() {
                         </div>
 
                     </div>
-                    <div className='table-container' style={{ margin: "0px" }}>
-                        <table className='table table-bordered table-sm'>
-                            <thead className='table-sm'>
-                                <tr>
-                                    <th scope="col">Actions</th>
-                                    <th scope="col">Sr.No</th>
-                                    <th scope="col">Customer Name</th>
-                                    <th scope="col">City Name</th>
-                                    <th scope="col">Bill No</th>
-                                    <th scope="col">Amount</th>
-                                    <th scope="col">Total GST</th>
-                                    <th scope="col">Sub Total(Amt + Gst)</th>
-                                    <th scope="col">Invoice Date</th>
-                                    <th scope="col">From Date</th>
-                                    <th scope="col">To Date</th>
-                                    
-                                </tr>
-                            </thead>
-                            <tbody className='table-body'>
-
-                                {currentRows.map((zone, index) => (
-                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
-                                        <td><PiDotsThreeOutlineVerticalFill
-                                            style={{ fontSize: "20px", cursor: "pointer" }}
-                                            onClick={() =>
-                                                setOpenRow(openRow === index ? null : index) // toggle only this row
-                                            }
-                                        />
-
-                                            {openRow === index && (
-                                                <div
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent: "center",
-                                                        flexDirection: "row",
-                                                        position: "absolute",
-                                                        alignItems: "center",
-                                                        left: "70px",
-                                                        top: "0px",
-                                                        borderRadius: "10px",
-                                                        backgroundColor: "white",
-                                                        zIndex: "999999",
-                                                        height: "30px",
-                                                        width: "50px",
-                                                        padding: "10px"
-                                                    }}
-                                                >
-                                                     <button className='edit-btn' onClick={() => handleOpenInvoicePrint(zone)}>
-                                                    <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
-                                                </button>
-                                                <button onClick={() => handleDelete(index)} className='edit-btn'>
-                                                    <i className='bi bi-trash' style={{ fontSize: "18px" }}></i>
-                                                </button>
-                                                </div>
-                                            )}</td>
-                                        <td>{index + 1}</td>
-                                        <td>{zone.receiver}</td>
-                                        <td>{zone.from}</td>
-                                        <td>{zone.code}</td>
-                                        <td>{zone.pc}</td>
-                                        <td>{zone.pc}</td>
-                                        <td>{zone.weight}</td>
-                                        <td>{zone.date}</td>
-                                        <td>{zone.date}</td>
-                                        <td>{zone.date}</td>
-                                        <td>
-                                        </td>
+                    {loading ? (<div className="loader"></div>) : (
+                        <div className='table-container' style={{ margin: "0px" }}>
+                            <table className="table table-bordered table-sm" style={{ whiteSpace: "nowrap" }}>
+                                <thead className="table-sm">
+                                    <tr>
+                                        <th>Actions</th>
+                                        <th>Sr.No</th>
+                                        <th>Bill No</th>
+                                        <th>Invoice Date</th>
+                                        <th>Invoice Due Date</th>
+                                        <th>Customer Name</th>
+                                        <th>Branch Name</th>
+                                        <th>Total Qty</th>
+                                        <th>CGST</th>
+                                        <th>SGST</th>
+                                        <th>IGST</th>
+                                        <th>Total Amount</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {currentRows.map((row, index) => (
+                                        <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                            {/* Actions */}
+                                            <td>
+                                                <PiDotsThreeOutlineVerticalFill
+                                                    style={{ fontSize: "20px", cursor: "pointer" }}
+                                                    onClick={() => setOpenRow(openRow === index ? null : index)}
+                                                />
+                                                {openRow === index && (
+                                                    <div
+                                                        style={{
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            flexDirection: "row",
+                                                            position: "absolute",
+                                                            alignItems: "center",
+                                                            left: "70px",
+                                                            top: "0px",
+                                                            borderRadius: "10px",
+                                                            backgroundColor: "white",
+                                                            zIndex: "999999",
+                                                            height: "30px",
+                                                            width: "50px",
+                                                            padding: "10px",
+                                                        }}
+                                                    >
+                                                        <button className="edit-btn" onClick={() => handleOpenInvoicePrint(row)}>
+                                                            <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "18px" }}></i>
+                                                        </button>
+                                                        <button onClick={() => handleDelete(index)} className="edit-btn">
+                                                            <i className="bi bi-trash" style={{ fontSize: "18px" }}></i>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
 
-                    <div className="pagination">
-                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            {'<'}
-                        </button>
-                        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                            {'>'}
-                        </button>
-                    </div>
-                    <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        style={{
-                            content: {
-                                top: '50%',
-                                left: '55%',
-                                right: 'auto',
-                                bottom: 'auto',
-                                marginRight: '-50%',
-                                transform: 'translate(-50%, -50%)',
-                                height: '253px',
-                                width: '650px',
-                                borderRadius: '10px',
-                                padding: "0px"
-                            },
-                        }}>
-                        <div>
-                            <div className="header-tittle">
-                                <header>View Invoice</header>
-                            </div>
+                                            {/* Data columns */}
+                                            <td>{index + 1}</td>
+                                            <td>{row.BillNo}</td>
+                                            <td>{row.InvoiceDate}</td>
+                                            <td>{row.InvoiceDue}</td>
+                                            <td>{row.Customer_Name}</td>
+                                            <td>{row.Branch_Name}</td>
+                                            <td>{row.TotalQty}</td>
+                                            <td>{row.CGSTAMT}</td>
+                                            <td>{row.SGSTAMT}</td>
+                                            <td>{row.IGSTAMT}</td>
+                                            <td>{row.TotalAmount}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
 
-                            <div className='container2'>
-                                <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                        </div >)
+                    }
 
-                                    <div className="fields2">
-                                        <div className="input-field">
-                                            <label htmlFor="mode-select" className="label">Mode Name</label>
-                                            <select name="" id="mode-select" value={modalData.mode}
-                                                onChange={(e) => setModalData({ ...modalData, mode: e.target.value })}>
-                                                <option value="" disabled>Select Mode</option>
-                                                <option value="Air">Air</option>
-                                                <option value="Road">Road</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field">
-                                            <label htmlFor="">State Name</label>
-                                            <select name="" id="" value={modalData.name}
-                                                onChange={(e) => setModalData({ ...modalData, name: e.target.value })}>
-                                                <option value="" disabled>Select State</option>
-                                                <option value="Maharashtra">Maharashtra</option>
-                                                <option value="Delhi">Delhi</option>
-                                                <option value="Karnataka">Karnataka</option>
-                                                <option value="Goa">Goa</option>
-                                                <option value="Punjab">Punjab</option>
-                                                <option value="Rajasthan">Rajasthan</option>
-                                                <option value="Uttar Pradesh">Uttar Pradesh</option>
-                                                <option value="Bihar">Bihar</option>
-                                                <option value="Haryana">Haryana</option>
-                                                <option value="Madhya Pradesh">Madhya Pradesh</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field">
-                                            <label htmlFor="">Vendor Name</label>
-                                            <select name="" id="">
-                                                <option value="" disabled>Select Vendor</option>
-                                                <option value="">1</option>
-                                                <option value="">2</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field">
-                                            <label htmlFor="">Zone Name</label>
-                                            <select name="" id="">
-                                                <option value="" disabled>Select Zone</option>
-                                                <option value="">1</option>
-                                                <option value="">2</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field">
-                                            <label htmlFor="">Country Name</label>
-                                            <select name="" id="">
-                                                <option value="" disabled>Select Country</option>
-                                                <option value="">India</option>
-                                                <option value="">United State Of America</option>
-                                                <option value="">China</option>
-                                                <option value="">Russia</option>
-                                                <option value="">South Korea</option>
-                                                <option value="">Nepal</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="input-field">
-                                            <label htmlFor="">Destination</label>
-                                            <select name="" id="">
-                                                <option value="" disabled>Select Destination</option>
-                                                <option value="">1</option>
-                                                <option value="">2</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className='bottom-buttons' style={{ marginTop: "20px" }}>
-                                        <button type='submit' className='ok-btn'>Submit</button>
-                                        <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
-                                    </div>
-                                </form>
-                            </div>
+                    <div style={{ display: "flex", flexDirection: "row" }}>
+                        <div className="pagination">
+                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>{"<"}</button>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>{">"}</button>
                         </div>
-                    </Modal >
+
+                        <div className="rows-per-page" style={{ display: "flex", flexDirection: "row", color: "black", marginLeft: "10px" }}>
+                            <label style={{ marginTop: "16px", marginRight: "10px" }}>Rows per page:</label>
+                            <select style={{ height: "40px", width: "60px", marginTop: "10px" }} value={rowsPerPage} onChange={handleRowsPerPageChange}>
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                                <option value={200}>200</option>
+                                <option value={500}>500</option>
+                            </select>
+                        </div>
+                    </div>
 
                 </div>
             </div>

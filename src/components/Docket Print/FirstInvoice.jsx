@@ -13,21 +13,20 @@ function FirstInvoice() {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const runsheet = location?.state?.data || {};
+    const invoice = location?.state?.invoiceData || {};
     const fromPath = location?.state?.from || "/";
     const [getBranch, setGetBranch] = useState([]);
-    const [runsheetData, setRunsheetData] = useState([]);
+    const [invoiceData, setInvoiceData] = useState([]);
     console.log(location.state);
-    const drsNo = runsheet?.DrsNo || "";
     const [loading, setLoading] = useState(true);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi("/Master/getBranch");
+                const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
                 if (response.status === 1) {
                     console.log(response.Data);
-                    setGetBranch(response.Data);
+                    setGetBranch(response.Data[0]);
                 }
             }
             catch (error) {
@@ -36,27 +35,31 @@ function FirstInvoice() {
         }
         fetchData();
     }, [])
-    const BranchData = getBranch.length > 0 ? getBranch[1] : {};
-
-    useEffect(() => {
-        const fetchData = async () => {
+        useEffect(() => {
+        const fetchInvoiceData = async () => {
             try {
-                const response = await getApi(`/Runsheet/viewRunsheetPrint?sessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&RunsheetNo=${drsNo}`);
-                setRunsheetData(Array.isArray(response.data) ? response.data : []);
-                console.log(response);
-            } catch (err) {
-                console.error('Fetch Error:', err);
+                const loginData = JSON.parse(localStorage.getItem("Login"));
+
+                const response = await getApi(
+                    `/InvoicePdf?branchCode=${loginData?.Branch_Code}&customerCode=${""}&fromDate=${""}&toDate=${""}&InvoiceNos=${""}`
+                );
+                if (response.status === 200 && response.data?.status === 1) {
+                    setInvoiceData(response.data.Data || []);
+                } else {
+                    setInvoiceData([]);
+                }
+                console.log("Invoice Response:", response.data);
+
+            } catch (error) {
+                console.error("Invoice Fetch Error:", error);
+                setInvoiceData([]);
             } finally {
                 setLoading(false);
-                setIsDataLoaded(true);
-                // generatePDF();
             }
         };
-        if (drsNo) {
-            fetchData();
-        }
-    }, [drsNo]);
 
+        fetchInvoiceData();
+    }, []);
     const handleDownloadPDF = async () => {
         const element = document.querySelector("#pdf");
         if (!element) return;
@@ -72,7 +75,7 @@ function FirstInvoice() {
         // Create PDF with dynamic height = content height
         const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-        pdf.save(`Runsheet_${drsNo}.pdf`);
+        pdf.save(`Runsheet_${"invoice"}.pdf`);
     };
 
     return (
@@ -179,27 +182,17 @@ function FirstInvoice() {
 
                                 <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px" }}>
                                     <div style={{ width: "40%" }}>
-                                        <img src={logoimg} alt="" style={{ height: "120px" }} />
+                                        <img src={getBranch.Branch_Logo} alt="" style={{ height: "120px" }} />
                                     </div>
-                                    <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
+                                    <div style={{ width: "80%", display: "flex", flexDirection: "column" }}>
                                         <div style={{ textAlign: "center", height: "40%" }}>
-                                            <p><b style={{ fontSize: "24px" }}>{BranchData.Company_Name}</b></p>
+                                            <p><b style={{ fontSize: "24px" }}>{getBranch.Company_Name}</b></p>
                                         </div>
-                                        <div style={{ textAlign: "center", display: "flex", paddingLeft: "5px", marginLeft: "50px" }}>
-                                            <div style={{ display: "flex", flexDirection: "column", fontWeight: "bold", width: "20%", fontSize: "10px", textAlign: "start" }}>
-                                                <span style={{}}>Address :</span>
-                                                <span style={{}}>Pin Code :</span>
-                                                <span style={{}}>Mob :</span>
-                                                <span style={{}}>Email :</span>
-                                                <span style={{}}>GST No :</span>
-                                            </div>
-                                            <div style={{ display: "flex", flexDirection: "column", width: "70%", fontSize: "10px", textAlign: "start" }}>
-                                                <span>{BranchData.Branch_Add1}</span>
-                                                <span>{BranchData.Branch_PIN}</span>
-                                                <span>{BranchData.MobileNo}</span>
-                                                <span>{BranchData.Email}</span>
-                                                <span>{BranchData.GSTNo}</span>
-                                            </div>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "10px", textAlign: "start" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Address :</div><div style={{ width: "100%", textAlign: "start" }}>{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>{getBranch.MobileNo}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{getBranch.Email}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{getBranch.GSTNo}</div></div>
                                         </div>
                                     </div>
                                 </div>
@@ -209,59 +202,59 @@ function FirstInvoice() {
                                         <div style={{ fontWeight: "bold" }}>TO,</div>
                                         <div>
                                             <label htmlFor=""><b>CLIENT NAME :</b></label>
-                                            <span style={{ marginLeft: "10px" }}>{runsheetData[0]?.vendorName}</span>
+                                            <span style={{ marginLeft: "10px" }}>{}</span>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>ADDRESS :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.vehicleNo}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
                                         <div>
                                             <label htmlFor=""><b>CLIENT MOBILE NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.driverMobile}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>PIN CODE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.Remark}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
                                         <div>
                                             <label htmlFor=""><b>GST NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.Remark}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
                                     </div>
 
-                                    <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px",paddingTop:"20px" }}>
+                                    <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px", paddingTop: "20px" }}>
                                         <div>
                                             <label htmlFor=""><b>INVOICE NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{drsNo}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE DATE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.DrsDate}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE FROM :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.Area}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE TO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.toDest}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE MODE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{runsheetData[0]?.toDest}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
                                         </div>
 
                                     </div>
                                 </div>
 
-                                <div className="table-container2" style={{ borderBottom: "1px solid black"}}>
-                                    <table className='table table-bordered table-sm' style={{ border: "1px solid black"}}>
+                                <div className="table-container2" style={{ borderBottom: "1px solid black" }}>
+                                    <table className='table table-bordered table-sm' style={{ border: "1px solid black" }}>
                                         <thead className='thead'>
                                             <tr className='tr'>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr.No</th>
@@ -284,24 +277,24 @@ function FirstInvoice() {
                                         </thead>
 
                                         <tbody className='tbody'>
-                                            {runsheetData.length > 0 ?
-                                                runsheetData.map((runsheet, index) => (
+                                            {invoiceData.length > 0 ?
+                                                invoiceData.map((invoice, index) => (
                                                     <tr key={index} className='tr'>
                                                         <td className='td'>{index + 1}</td>
-                                                        <td className='td'>{runsheet.BookDate}</td>
-                                                        <td className='td'>{runsheet.DocketNo}</td>
-                                                        <td className='td'>{runsheet.CustomerName}</td>
-                                                        <td className='td'>{runsheet.OriginName}</td>
-                                                        <td className='td'>{runsheet.DestName}</td>
-                                                        <td className='td'>{runsheet.Qty}</td>
-                                                        <td className='td'>{runsheet.ActualWt}</td>
-                                                        <td className='td'>{runsheet.BookDate}</td>
-                                                        <td className='td'>{runsheet.DocketNo}</td>
-                                                        <td className='td'>{runsheet.CustomerName}</td>
-                                                        <td className='td'>{runsheet.OriginName}</td>
-                                                        <td className='td'>{runsheet.DestName}</td>
-                                                        <td className='td'>{runsheet.Qty}</td>
-                                                        <td className='td'>{runsheet.ActualWt}</td>
+                                                        <td className='td'>{invoice.BookDate}</td>
+                                                        <td className='td'>{invoice.DocketNo}</td>
+                                                        <td className='td'>{invoice.CustomerName}</td>
+                                                        <td className='td'>{invoice.OriginName}</td>
+                                                        <td className='td'>{invoice.DestName}</td>
+                                                        <td className='td'>{invoice.Qty}</td>
+                                                        <td className='td'>{invoice.ActualWt}</td>
+                                                        <td className='td'>{invoice.BookDate}</td>
+                                                        <td className='td'>{invoice.DocketNo}</td>
+                                                        <td className='td'>{invoice.CustomerName}</td>
+                                                        <td className='td'>{invoice.OriginName}</td>
+                                                        <td className='td'>{invoice.DestName}</td>
+                                                        <td className='td'>{invoice.Qty}</td>
+                                                        <td className='td'>{invoice.ActualWt}</td>
                                                         <td></td>
                                                     </tr>
                                                 )) : (
@@ -315,12 +308,12 @@ function FirstInvoice() {
                                     <div className='page'>
                                         <div>
                                             <label htmlFor="">Total QTY :</label>
-                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{runsheetData?.length * runsheetData[0]?.Qty}</label>
+                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{}</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor="">Total Wt :</label>
-                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{runsheetData?.length * runsheetData[0]?.ActualWt}</label>
+                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{}</label>
                                         </div>
                                     </div>
                                 </div>
@@ -332,7 +325,7 @@ function FirstInvoice() {
                                 <div className='page' style={{ justifyContent: "space-between" }}>
                                     <div className='page' style={{ marginTop: "20px" }}>
                                         <p>Prepared by :</p>
-                                        <p style={{ textAlign: "start", paddingLeft: "5px" }}><b style={{ fontSize: "12px", marginRight: "10px" }}>{BranchData.Company_Name}</b></p>
+                                        <p style={{ textAlign: "start", paddingLeft: "5px" }}><b style={{ fontSize: "12px", marginRight: "10px" }}>{getBranch.Company_Name}</b></p>
                                     </div>
                                     <div className='page' style={{ marginTop: "20px" }}>
                                         <p>Checked by :</p>

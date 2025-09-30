@@ -16,6 +16,7 @@ function PerformanceInvoice() {
     const fromPath = location?.state?.from || "/";
     const [getBranch, setGetBranch] = useState([]);
     const [invoiceData, setGetInvoiceData] = useState({});
+    const [getItem, setGetItem] = useState([]);
     console.log(location.state);
     const [loading, setLoading] = useState(true);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -41,7 +42,8 @@ function PerformanceInvoice() {
             try {
                 const response = await getApi(`/Smart/GetProformaInvoicesPdf?invoiceNos=${invoiceNo}`);
                 setGetInvoiceData(Array.isArray(response.data) ? response.data[0] : {});
-                console.log(response);
+                setGetItem(response?.data[0]?.Items);
+                console.log(response.data[0].Items);
             } catch (err) {
                 console.error('Fetch Error:', err);
             } finally {
@@ -170,8 +172,8 @@ function PerformanceInvoice() {
                     flexDirection: "column", gap: "5px", fontSize: "10px", fontWeight: "bold"
                 }}>
 
-                    <div className="container-2" style={{ borderRadius: "0px", width: "750px", display: "flex", flexDirection: "column" }}>
-                        < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
+                    <div className="container-2" style={{ borderRadius: "0px",border:"none", width: "750px", display: "flex", flexDirection: "column" }}>
+                        < div id="printable-section" className="container-3" style={{ padding: "0px" ,border:"none"}}>
                             <div className="container-3 px-0 py-0" style={{ border: "2px solid black", height: "815px" }}>
 
                                 <div className="div1" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
@@ -200,29 +202,29 @@ function PerformanceInvoice() {
                                     </div>
                                     <div style={{ width: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                                         <div style={{ display: "flex", width: "80%", height: "40%", justifyContent: "space-between", alignItems: "center", marginTop: "5px" }}>
-                                            <div style={{ height: "100%", display: "flex", flexDirection: "column",justifyContent:"center",alignItems:"center" }}>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                                                 <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Invoice No:</div>
                                                 <div>{invoiceData.InvoiceNo}</div>
                                             </div>
-                                            <div style={{ height: "100%", display: "flex", flexDirection: "column",justifyContent:"center",alignItems:"center" }}>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                                                 <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Invoice Date:</div>
                                                 <div>{invoiceData.InvoiceDate}</div>
                                             </div>
-                                            <div style={{ height: "100%", display: "flex", flexDirection: "column" ,justifyContent:"center",alignItems:"center"}}>
+                                            <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                                                 <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Due Date:</div>
                                                 <div>{invoiceData.InvoiceDue}</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="div2" style={{ height: "140px", display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
-                                    <div style={{ width: "50%", height: "100%", borderRight: "2px solid black", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
+                                <div className="div2" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
+                                    <div style={{ width: "50%", borderRight: "2px solid black",paddingBottom:"5px",display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
                                         <div style={{ fontSize: "12px" }}>BILL TO</div>
                                         <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ReceiverName}</div>
                                         <div style={{ display: "flex", gap: "2px" }}>
                                             <div style={{ width: "12%" }}> Address:</div>
-                                            <div style={{ width: "80%" }}> 001, GROUND FLOOR, 9/1, SAIDHAM, TELLY GALLI, SAHAR ROAD, ANDHERI EAST, Mumbai Suburban, Maharashtra,
-                                                {invoiceData.ReceiverCity}, Maharashtra, 400069</div>
+                                            <div style={{ width: "80%" }}> {invoiceData.ReceiverAddress},{invoiceData.Receiver_Address2},
+                                                {invoiceData.ReceiverCity_Name}, {invoiceData.ReceiverState_Name}, {invoiceData.ReceiverPinCode}</div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
@@ -231,7 +233,7 @@ function PerformanceInvoice() {
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}> Place of Supply:</div>
-                                                <div>Maharashtra </div>
+                                                <div>{invoiceData.ReceiverState_Name}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
@@ -245,13 +247,13 @@ function PerformanceInvoice() {
                                             </div>
                                         </div>
                                     </div>
-                                    <div style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
+                                    <div style={{ width: "50%",display:"flex" ,paddingBottom:"5px", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
                                         <div style={{ fontSize: "12px" }}>SHIP TO</div>
                                         <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ShipperName}</div>
                                         <div style={{ display: "flex", gap: "2px" }}>
                                             <div style={{ width: "12%" }}> Address:</div>
-                                            <div style={{ width: "80%" }}> 001, GROUND FLOOR, 9/1, SAIDHAM, TELLY GALLI, SAHAR ROAD, ANDHERI EAST, Mumbai Suburban, Maharashtra,
-                                                {invoiceData.ShipperCity}, Maharashtra, 400069</div>
+                                            <div style={{ width: "80%" }}>{invoiceData.ShipperAddress},{invoiceData.Shipper_Address2},
+                                                {invoiceData.ShipperCity_Name}, {invoiceData.ShipperState_Name}, {invoiceData.ShipperPinCode}</div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
@@ -260,7 +262,7 @@ function PerformanceInvoice() {
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}> Place of Supply:</div>
-                                                <div>Maharashtra </div>
+                                                <div>{invoiceData.ShipperState_Name}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
@@ -275,8 +277,14 @@ function PerformanceInvoice() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="div3" style={{ height: "30px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black", backgroundColor: "rgba(255, 165, 0, 0.1)" }}>
-
+                                <div className="div3" style={{
+                                    height: "30px",
+                                    textAlign: "center",
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    borderBottom: "2px solid black",
+                                    backgroundColor: "rgba(255, 165, 0, 0.1)"
+                                }}>
                                     <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>S.NO</div>
                                     <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>ITEMS</div>
                                     <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>HSN</div>
@@ -284,26 +292,57 @@ function PerformanceInvoice() {
                                     <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>RATE</div>
                                     <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>AMOUNT</div>
                                 </div>
-                                <div className="div4" style={{ height: "500px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
+
+                                <div className="div4" style={{
+                                    height: "532px",
+                                    textAlign: "center",
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    borderBottom: "2px solid black"
+                                }}>
+                                    {/* S.NO */}
                                     <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                        <div>1</div> <div>2</div>
+                                        {getItem.map((item, ind) => (
+                                            <div key={item.DetailID}>{ind + 1}</div>
+                                        ))}
                                     </div>
+
+                                    {/* ITEMS */}
                                     <div style={{ width: "40%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px", textAlign: "start", paddingLeft: "10px" }}>
-                                        <div> 1519 Pod bags</div> <div>4050 ench HDPE laminated bags</div>
+                                        {getItem.map((item) => (
+                                            <div key={item.DetailID}>{item.Items}</div>
+                                        ))}
                                     </div>
+
+                                    {/* HSN */}
                                     <div style={{ width: "15%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                        <div> 39232100</div> <div> 39232100</div>
+                                        {getItem.map((item) => (
+                                            <div key={item.DetailID}>{item.HSN}</div>
+                                        ))}
                                     </div>
+
+                                    {/* QTY */}
                                     <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                        <div> 100 PCS</div> <div> 100 PCS</div>
+                                        {getItem.map((item) => (
+                                            <div key={item.DetailID}>{item.QTY}</div>
+                                        ))}
                                     </div>
+
+                                    {/* RATE */}
                                     <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                        <div>3.9</div> <div>2.48</div>
+                                        {getItem.map((item) => (
+                                            <div key={item.DetailID}>{item.Rate}</div>
+                                        ))}
                                     </div>
-                                    <div style={{ width: "15%", flexDirection: "column", display: "flex", flexDirection: "column", gap: "5px", paddingTop: "5px" }}>
-                                        <div>390</div> <div>390</div>
+
+                                    {/* AMOUNT */}
+                                    <div style={{ width: "15%", display: "flex", flexDirection: "column", gap: "5px", paddingTop: "5px" }}>
+                                        {getItem.map((item) => (
+                                            <div key={item.DetailID}>{item.Amount}</div>
+                                        ))}
                                     </div>
                                 </div>
+
                                 <div className="div5" style={{ height: "30px", textAlign: "center", display: "flex", flexDirection: "row", backgroundColor: "rgba(255, 165, 0, 0.1)" }}>
 
                                     <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
@@ -317,8 +356,14 @@ function PerformanceInvoice() {
                             <div className="second px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
                                 <div className="div1" style={{ height: "33px", textAlign: "center", display: "flex", flexDirection: "row", fontWeight: "bolder", fontSize: "11px", backgroundColor: "rgba(255, 165, 0, 0.1)", borderBottom: "2px solid black" }}>
 
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> HSN/SAC</div>
                                     <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Taxable Value</div>
+                                    <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
+                                        <div style={{ borderBottom: "2px solid black" }}>IGST</div>
+                                        <div style={{ display: "flex" }}>
+                                            <div style={{ width: "40%", borderRight: "2px solid black" }}>Rate</div>
+                                            <div style={{ width: "60%" }}>Amount</div>
+                                        </div>
+                                    </div>
                                     <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
                                         <div style={{ borderBottom: "2px solid black" }}>CGST</div>
                                         <div style={{ display: "flex" }}>
@@ -335,53 +380,27 @@ function PerformanceInvoice() {
                                     </div>
                                     <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}> Total Tax Amount</div>
                                 </div>
-                                <div className="div2" style={{ height: "20px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black" }}>
-
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 39232100</div>
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 390</div>
+                                <div className="div2" style={{ height: "20px", textAlign: "center", display: "flex", flexDirection: "row",}}>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{invoiceData.TotalAmount}</div>
                                     <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
 
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> 9%</div>
-                                        <div style={{ width: "60%" }}> 35.1</div>
+                                        <div style={{ width: "40%", borderRight: "2px solid black",paddingTop:"3px" }}> {invoiceData.IGST_Per}</div>
+                                        <div style={{ width: "60%",paddingTop:"3px"  }}> {invoiceData.IGST_Amount}</div>
 
                                     </div>
                                     <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> 9%</div>
-                                        <div style={{ width: "60%" }}> 35.1</div>
-                                    </div>
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>  ₹70.2</div>
-                                </div>
-                                <div className="div3" style={{ height: "20px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black" }}>
 
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 39232100</div>
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 390</div>
-                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
-
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> 9%</div>
-                                        <div style={{ width: "60%" }}> 35.1</div>
+                                        <div style={{ width: "40%", borderRight: "2px solid black",paddingTop:"3px" }}> {invoiceData.CGST_Per}</div>
+                                        <div style={{ width: "60%",paddingTop:"3px"  }}> {invoiceData.CGST_Amount}</div>
 
                                     </div>
-                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> 9%</div>
-                                        <div style={{ width: "60%" }}> 35.1</div>
-                                    </div>
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>  ₹70.2</div>
-                                </div>
-                                <div className="div4" style={{ height: "20px", textAlign: "center", display: "flex", flexDirection: "row" }}>
+                                   <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
 
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black", fontSize: "13px", fontWeight: "bolder" }}> Total</div>
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}> 900</div>
-                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
-
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> </div>
-                                        <div style={{ width: "60%" }}> 80</div>
+                                        <div style={{ width: "40%", borderRight: "2px solid black",paddingTop:"3px" }}> {invoiceData.SGST_Per}</div>
+                                        <div style={{ width: "60%",paddingTop:"3px"  }}> {invoiceData.SGST_Amount}</div>
 
                                     </div>
-                                    <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}> </div>
-                                        <div style={{ width: "60%" }}> 80</div>
-                                    </div>
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>   ₹150</div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>  {invoiceData.GrandTotal}</div>
                                 </div>
                             </div>
                             <div className="third px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
@@ -398,7 +417,7 @@ function PerformanceInvoice() {
                                         <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div> 30208426463</div></div>
                                         <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>  Greater Bombay Co-operative Bank,Andheri Branch</div></div>
                                     </div>
-                                    <div style={{ display: "flex", width: "50%",flexDirection:"column", justifyContent: "end" ,alignItems:"center",paddingBottom:"5px"}}>
+                                    <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent: "end", alignItems: "center", paddingBottom: "5px" }}>
                                         <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Authorised Signatory For
                                         </div>
                                         <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Sales Poin</div>

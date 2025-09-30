@@ -91,7 +91,7 @@ function ShortEntry() {
     }
     const payload = {
       docketNo: formData.Docket_No,
-      bookDate: bookingDate,
+      bookDate: bookingDate?bookingDate.toISOString().split("T")[0] : null,
       customerCode: formData.Customer_Code,
       shipperName: formData.ShipperName,
       shipperPhone: formData.ShipperPhone,

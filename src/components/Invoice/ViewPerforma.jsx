@@ -21,6 +21,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 function ViewPerforma() {
     const navigate=useNavigate();
     const location=useLocation();
+
     const [invoice, setInvoice] = useState([])
     const [openRow, setOpenRow] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -66,6 +67,7 @@ function ViewPerforma() {
             }
         } catch (err) {
             console.error("Fetch Error:", err);
+            setInvoice([]);
             Swal.fire("Error", "Failed to fetch performa invoices", "error");
         } finally {
             setLoading(false);

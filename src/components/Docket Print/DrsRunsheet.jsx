@@ -183,7 +183,7 @@ function DrsRunsheet() {
                                     </div>
                                     <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
                                         <div style={{ textAlign: "center", height: "40%" }}>
-                                            <p><b style={{ fontSize: "24px" }}>{getBranch.Company_Name}manifest</b></p>
+                                            <p><b style={{ fontSize: "24px" }}>{getBranch.Company_Name}</b></p>
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "10px", textAlign: "start" }}>
                                             <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Address :</div><div style={{ width: "100%", textAlign: "start" }}>{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div></div>

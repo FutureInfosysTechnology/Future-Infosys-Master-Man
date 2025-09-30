@@ -26,21 +26,21 @@ function Invoice() {
 
                     <div className="container">
                         <nav>
+                            <label onClick={() => setActiveTab("state")}>Pending Invoice</label>
                             <label onClick={() => setActiveTab("zone")}>Generate Invoice</label>
                             <label onClick={() => setActiveTab("multiple")}>View Invoice</label>
-                            <label onClick={() => setActiveTab("state")}>Pending Invoice</label>
                             <label onClick={() => setActiveTab("country")}>Performance Invoice</label>
                             <label onClick={() => setActiveTab("view")}>View Performance Invoice</label>
 
                             <div
                                 className="slider"
-                                style={{ left: `${["zone", "multiple", "state", "country", "view"].indexOf(activeTab) * 20}%` ,width: "20%",}}
+                                style={{ left: `${[ "state","zone", "multiple", "country", "view"].indexOf(activeTab) * 20}%` ,width: "20%",}}
                             />
                         </nav>
                     <section>
+                        {activeTab === 'state' && <PendingInvoice />}
                         {activeTab === 'zone' && <GenerateInvoice />}
                         {activeTab === 'multiple' && <ViewInvoice />}
-                        {activeTab === 'state' && <PendingInvoice />}
                         {activeTab === 'country' && <PerformanceBill />}
                         {activeTab === 'view' && <ViewPerforma />}
 

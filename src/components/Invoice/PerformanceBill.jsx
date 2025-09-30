@@ -536,16 +536,14 @@ function PerformanceBill() {
                                                 formData.Shipper_Name ?
                                                     {
                                                         value: formData.Shipper_Name,
-                                                        label:
-                                                            allShipperOption.find(opt => opt.value === formData.Shipper_Name)
-                                                                ?.label || formData.Shipper_Name,
+                                                        label: formData.Shipper_Name,
                                                     }
                                                     : null
                                             }
                                             onChange={(selectedOption) => {
                                                 setFormData(prev => ({
                                                     ...prev,
-                                                    Shipper_Name: selectedOption.value,
+                                                    Shipper_Name: selectedOption.label,
                                                     ShipperAdd: selectedOption.shipper_Add1,
                                                     ShipperAdd2: selectedOption.shipper_Add2,
                                                     ShipperCity: selectedOption.City_Code,
@@ -684,17 +682,14 @@ function PerformanceBill() {
                                                 formData.ConsigneeName
                                                     ? {
                                                         value: formData.ConsigneeName,
-                                                        label:
-                                                            allReceiverOption.find(
-                                                                (opt) => opt.value === formData.ConsigneeName
-                                                            )?.label || formData.ConsigneeName, // fallback to typed text
+                                                        label: formData.ConsigneeName,
                                                     }
                                                     : null
                                             }
                                             onChange={(selectedOption) => {
                                                 setFormData(prev => ({
                                                     ...prev,
-                                                    ConsigneeName: selectedOption.value,
+                                                    ConsigneeName: selectedOption.label,
                                                     Consignee_City: selectedOption.City_Code,
                                                     ConsigneeState: selectedOption.State_Code,
                                                     ConsigneePin: selectedOption.Receiver_Pin,
@@ -826,136 +821,165 @@ function PerformanceBill() {
 
                     </div>
 
-                    <div className="card mt-0">
-                        <div className="section-title">Courier Details</div>
-                        <form className="m-0 px-3 py-2">
-                            <div className="row g-3">
-                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
-                                    <label className="form-label">Invoice No</label>
-                                    <input type="tel" className="form-control" placeholder="Invoice No"
-                                        value={formData.invoiceNo}
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Enter") {
-                                                e.preventDefault(); // prevent form submission
-                                                handleSearch();
-                                            }
-                                        }}
-                                        onChange={(e) => setFormData({ ...formData, invoiceNo: e.target.value })} />
-                                </div>
+                 <div className="card mt-0" style={{width:"100%"}}>
+  <div className="section-title">Courier Details</div>
+  <form className="m-0 px-2 py-2" >
+    <div className="row g-3 mx-0">
+      
+      {/* Invoice No */}
+      <div className="input-field col-12 col-sm-12 col-md-6 col-lg-3">
+        <label className="form-label">Invoice No</label>
+        <input
+          type="tel"
+          className="form-control"
+          placeholder="Invoice No"
+          value={formData.invoiceNo}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSearch();
+            }
+          }}
+          onChange={(e) => setFormData({ ...formData, invoiceNo: e.target.value })}
+        />
+      </div>
 
-                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
-                                    <label className="form-label">Invoice Date</label>
-                                    <DatePicker
-                                        portalId='rootPortal'
-                                        selected={formData.invDate}
-                                        onChange={(date) => setFormData({ ...formData, invDate: date })}
-                                        dateFormat="dd/MM/yyyy"
-                                        className="form-control form-control-sm"
-                                    />
-                                </div>
-                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
-                                    <label className="form-label">Due Date</label>
-                                    <DatePicker
-                                        portalId='rootPortal'
-                                        selected={formData.invDueDate}
-                                        onChange={(date) => setFormData({ ...formData, invDueDate: date })}
-                                        dateFormat="dd/MM/yyyy"
-                                        className="form-control form-control-sm"
-                                    />
-                                </div>
-                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
-                                    <label className="form-label">Docket No</label>
-                                    <input type="text" className="form-control" placeholder="Docket No"
-                                        value={formData.DocketNo}
-                                        onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })} />
-                                </div>
+      {/* Invoice Date */}
+      <div className="input-field col-12 col-sm-12 col-md-6 col-lg-3">
+        <label className="form-label">Invoice Date</label>
+        <DatePicker
+          portalId="rootPortal"
+          selected={formData.invDate}
+          onChange={(date) => setFormData({ ...formData, invDate: date })}
+          dateFormat="dd/MM/yyyy"
+          className="form-control form-control-sm"
+        />
+      </div>
 
-                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
-                                    <label className="form-label">Country of Origin</label>
-                                    <Select
-                                        className="blue-selectbooking"
-                                        classNamePrefix="blue-selectbooking"
-                                        options={getCountry.map((st) => ({
-                                            value: st.Country_Code,
-                                            label: st.Country_Name,
-                                        }))}
-                                        value={
-                                            formData.ogCountry
-                                                ? {
-                                                    value: formData.ogCountry,
-                                                    label:
-                                                        getCountry.find((s) => s.Country_Code === formData.ogCountry)
-                                                            ?.Country_Name || "",
-                                                }
-                                                : null
-                                        }
-                                        onChange={(selected) =>
-                                            setFormData({
-                                                ...formData,
-                                                ogCountry: selected ? selected.value : "",
-                                            })
-                                        }
-                                        placeholder="Select Country"
-                                        isSearchable={true}
-                                        isClearable={false}
-                                        menuPortalTarget={document.body}
-                                        styles={{
-                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                        }}
-                                    />
-                                </div>
+      {/* Due Date */}
+      <div className="input-field col-12 col-sm-12 col-md-6 col-lg-3">
+        <label className="form-label">Due Date</label>
+        <DatePicker
+          portalId="rootPortal"
+          selected={formData.invDueDate}
+          onChange={(date) => setFormData({ ...formData, invDueDate: date })}
+          dateFormat="dd/MM/yyyy"
+          className="form-control form-control-sm"
+        />
+      </div>
 
-                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
-                                    <label className="form-label">Final Destination</label>
-                                    <Select
-                                        className="blue-selectbooking"
-                                        classNamePrefix="blue-selectbooking"
-                                        options={getCity.map((city) => ({
-                                            value: city.City_Code,
-                                            label: city.City_Name,
-                                        }))}
-                                        value={
-                                            formData.destination
-                                                ? {
-                                                    value: formData.destination,
-                                                    label:
-                                                        getCity.find((c) => c.City_Code === formData.destination)
-                                                            ?.City_Name || "",
-                                                }
-                                                : null
-                                        }
-                                        onChange={(selected) =>
-                                            setFormData({
-                                                ...formData,
-                                                destination: selected ? selected.value : "",
-                                            })
-                                        }
-                                        placeholder="Select Destination"
-                                        isSearchable={true}
-                                        isClearable={false}
-                                        menuPortalTarget={document.body}
-                                        styles={{
-                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                        }}
-                                    />
-                                </div>
+      {/* Docket No */}
+      <div className="input-field col-12 col-sm-12 col-md-6 col-lg-3">
+        <label className="form-label">Docket No</label>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Docket No"
+          value={formData.DocketNo}
+          onChange={(e) => setFormData({ ...formData, DocketNo: e.target.value })}
+        />
+      </div>
 
-                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
-                                    <label className="form-label">No of Boxes</label>
-                                    <input type="tel" className="form-control" placeholder="No of Boxes"
-                                        value={formData.boxes}
-                                        onChange={(e) => setFormData({ ...formData, boxes: e.target.value })} />
-                                </div>
+      {/* Country of Origin */}
+      <div className="input-field col-12 col-sm-12 col-md-6 col-lg-3">
+        <label className="form-label">Country of Origin</label>
+        <Select
+          className="blue-selectbooking"
+          classNamePrefix="blue-selectbooking"
+          options={getCountry.map((st) => ({
+            value: st.Country_Code,
+            label: st.Country_Name,
+          }))}
+          value={
+            formData.ogCountry
+              ? {
+                  value: formData.ogCountry,
+                  label:
+                    getCountry.find((s) => s.Country_Code === formData.ogCountry)
+                      ?.Country_Name || "",
+                }
+              : null
+          }
+          onChange={(selected) =>
+            setFormData({
+              ...formData,
+              ogCountry: selected ? selected.value : "",
+            })
+          }
+          placeholder="Select Country"
+          isSearchable={true}
+          isClearable={false}
+          menuPortalTarget={document.body}
+          styles={{
+            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          }}
+        />
+      </div>
 
-                                <div className="input-field col-lg-3 col-md-6 col-sm-12">
-                                    <label className="form-label">Total Weight</label>
-                                    <input type="tel" className="form-control" placeholder="Total Weight"
-                                        value={formData.totalWt}
-                                        onChange={(e) => setFormData({ ...formData, totalWt: e.target.value })} />
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+      {/* Final Destination */}
+      <div className="input-field col-12 col-sm-12 col-md-6 col-lg-3">
+        <label className="form-label">Final Destination</label>
+        <Select
+          className="blue-selectbooking"
+          classNamePrefix="blue-selectbooking"
+          options={getCity.map((city) => ({
+            value: city.City_Code,
+            label: city.City_Name,
+          }))}
+          value={
+            formData.destination
+              ? {
+                  value: formData.destination,
+                  label:
+                    getCity.find((c) => c.City_Code === formData.destination)
+                      ?.City_Name || "",
+                }
+              : null
+          }
+          onChange={(selected) =>
+            setFormData({
+              ...formData,
+              destination: selected ? selected.value : "",
+            })
+          }
+          placeholder="Select Destination"
+          isSearchable={true}
+          isClearable={false}
+          menuPortalTarget={document.body}
+          styles={{
+            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          }}
+        />
+      </div>
+
+      {/* No of Boxes */}
+      <div className="input-field col-12 col-sm-12 col-md-6 col-lg-3">
+        <label className="form-label">No of Boxes</label>
+        <input
+          type="tel"
+          className="form-control"
+          placeholder="No of Boxes"
+          value={formData.boxes}
+          onChange={(e) => setFormData({ ...formData, boxes: e.target.value })}
+        />
+      </div>
+
+      {/* Total Weight */}
+      <div className="input-field col-12 col-sm-12 col-md-6 col-lg-3">
+        <label className="form-label">Total Weight</label>
+        <input
+          type="tel"
+          className="form-control"
+          placeholder="Total Weight"
+          value={formData.totalWt}
+          onChange={(e) => setFormData({ ...formData, totalWt: e.target.value })}
+        />
+      </div>
+
+    </div>
+  </form>
+</div>
+
 
                     <div className='table-container' style={{ margin: "0px" }}>
                         <table className='table table-bordered table-sm'>
@@ -1050,7 +1074,7 @@ function PerformanceBill() {
                         </button>
                     </div> */}
 
-                    <div className="bottom-buttons">
+                    <div className="bottom-buttons" style={{display:"flex",flexWrap:"wrap"}}>
                         <button className='ok-btn' onClick={handleSave}>Save</button>
                         <button className='ok-btn' onClick={handleUpdate}>Update</button>
                         <button className='ok-btn' onClick={handleDelete}>Delete</button>
