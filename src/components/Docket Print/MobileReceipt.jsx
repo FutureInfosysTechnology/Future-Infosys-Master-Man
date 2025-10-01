@@ -169,7 +169,7 @@ function MobileReceipt() {
                                                                 <td style={cellsStyle}>
                                                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
                                                                         <label htmlFor="" style={{ display: docket?.Mode_Name === "RAIL"?"flex":"none", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "RAIL"} /><span>RAIL</span></label>
-                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "AIR"?"flex":"none" ,alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "AIR"} /><span>AIR</span></label>
+                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "Air"?"flex":"none" ,alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "Air"} /><span>AIR</span></label>
                                                                         <label htmlFor="" style={{ display: docket?.Mode_Name === "SURFACE"?"flex":"none",alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "SURFACE"} /><span>SURFACE</span></label>
                                                                     </div>
                                                                 </td>
@@ -459,7 +459,7 @@ function MobileReceipt() {
                                                                 <td style={cellsStyle}>
                                                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
                                                                         <label htmlFor="" style={{ display: docket?.Mode_Name === "RAIL"?"flex":"none", alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "RAIL"} /><span>RAIL</span></label>
-                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "AIR"?"flex":"none" ,alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "AIR"} /><span>AIR</span></label>
+                                                                        <label htmlFor="" style={{ display: docket?.Mode_Name === "Air"?"flex":"none" ,alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "Air"} /><span>AIR</span></label>
                                                                         <label htmlFor="" style={{ display: docket?.Mode_Name === "SURFACE"?"flex":"none",alignItems: "center" }}><input type="checkbox" checked={docket?.Mode_Name === "SURFACE"} /><span>SURFACE</span></label>
                                                                     </div>
                                                                 </td>

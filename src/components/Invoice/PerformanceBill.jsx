@@ -161,6 +161,7 @@ function PerformanceBill() {
         try {
             const payload = {
                 // Shipper
+                Branch_code:JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
                 ShipperName: formData.Shipper_Name,
                 ShipperAddress: formData.ShipperAdd,
                 Shipper_Address2: formData.ShipperAdd2,
@@ -319,6 +320,7 @@ function PerformanceBill() {
         try {
             const payload = {
                 // Shipper
+                Branch_code:JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
                 ShipperName: formData.Shipper_Name,
                 ShipperAddress: formData.ShipperAdd,
                 Shipper_Address2: formData.ShipperAdd2,

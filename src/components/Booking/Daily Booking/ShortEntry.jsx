@@ -82,6 +82,8 @@ function ShortEntry() {
       
     }));
     setSelectedDestination(null);
+    setBookingDate(today);
+    setSelectedMode(null);
   };
   const handleSave = async (e) => {
     e.preventDefault();
@@ -128,7 +130,7 @@ function ShortEntry() {
       return;
     }
     const payload = {
-      BookDate: bookingDate ? bookingDate.toISOString().split('T')[0] : null,
+      BookDate: bookingDate ? new Date(bookingDate).toISOString().split('T')[0] : null,
       Customer_Code: formData.Customer_Code,
       Shipper_Name: formData.ShipperName,
       ShipperPhone: formData.ShipperPhone,
@@ -192,7 +194,7 @@ function ShortEntry() {
           Cityname: ''
         });
 
-        setBookingDate(data.BookDate);
+        setBookingDate(new Date(data.BookDate));
         setSelectedMode(mode ? { label: mode.Mode_Name, value: mode.Mode_Code } : null);
         setSelectedOrigin(origin ? { label: origin.City_Name, value: origin.City_Code } : null);
         setSelectedDestination(destination ? { label: destination.City_Name, value: destination.City_Code } : null);

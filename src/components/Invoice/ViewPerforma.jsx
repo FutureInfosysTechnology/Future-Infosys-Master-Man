@@ -54,7 +54,11 @@ function ViewPerforma() {
             const queryParams = new URLSearchParams({
                 invoiceNos: formData.invoiceNo,
                 invoiceDate: formData.invDate?.toISOString().split("T")[0] || "",
-                invoiceDue: formData.dueDate?.toISOString().split("T")[0] || ""
+                invoiceDue: formData.dueDate?.toISOString().split("T")[0] || "",
+                 pageSize:rowsPerPage,
+                pageNumber:currentPage,
+                locationCode:JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
+                // branchName: JSON.parse(localStorage.getItem("Login"))?.Branch_Name || "MUMBAI",
             });
 
             const response = await getApi(`/Smart/GetProformaInvoicesGroupby?${queryParams.toString()}`);

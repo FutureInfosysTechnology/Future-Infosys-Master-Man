@@ -7,6 +7,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Header from '../../Components-2/Header/Header';
 import Sidebar1 from '../../Components-2/Sidebar1';
+import { toWords } from "number-to-words";
 
 function PerformanceInvoice() {
 
@@ -56,7 +57,12 @@ function PerformanceInvoice() {
             fetchData();
         }
     }, [invoiceNo]);
-
+function toTitleCase(str) {
+  return str
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
     // useEffect(() => {
     //     if (!loading && manifestData.length > 0 && getBranch.length > 0) {
     //         setTimeout(generatePDF, 1000);
@@ -400,27 +406,27 @@ function PerformanceInvoice() {
                                         <div style={{ width: "60%",paddingTop:"3px"  }}> {invoiceData.SGST_Amount}</div>
 
                                     </div>
-                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>  {invoiceData.GrandTotal}</div>
+                                    <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.GrandTotal}</div>
                                 </div>
                             </div>
                             <div className="third px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
                                 <div style={{ display: "flex", flexDirection: "column", padding: "5px", borderBottom: "2px solid black" }}>
                                     <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Total Amount (in words)
                                     </div>
-                                    <div>Three Thousand One Hundred Thirteen Rupees</div>
+                                    <div> {invoiceData?.GrandTotal ? toTitleCase(toWords(Number(invoiceData.GrandTotal))) : ""}</div>
                                 </div>
                                 <div style={{ display: "flex" }}>
                                     <div style={{ display: "flex", flexDirection: "column", fontSize: "11px", width: "50%", padding: "5px", borderRight: "2px solid black" }}>
                                         <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Bank Details</div>
-                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Name:</div><div> sales point</div></div>
-                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>IFSC Code:</div><div>  GBCB0000007</div></div>
-                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div> 30208426463</div></div>
-                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>  Greater Bombay Co-operative Bank,Andheri Branch</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Name:</div><div>{getBranch.Company_Name}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>IFSC Code:</div><div>{getBranch.IFSC_Code}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div>{getBranch.AccountNo}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>{getBranch.Bank_Name}</div></div>
                                     </div>
                                     <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent: "end", alignItems: "center", paddingBottom: "5px" }}>
                                         <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Authorised Signatory For
                                         </div>
-                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Sales Poin</div>
+                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}>{getBranch.Company_Name}</div>
                                     </div>
                                 </div>
                             </div>

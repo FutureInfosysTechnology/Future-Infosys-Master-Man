@@ -97,7 +97,10 @@ function ViewInvoice() {
                 BillFrom: formData.fromDate?.toISOString().split("T")[0] || "",
                 BillTO: formData.toDate?.toISOString().split("T")[0] || "",
                 CustomerName: formData.customer || "",
-                BranchName: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM"
+                Location_Code:JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
+                BranchName:JSON.parse(localStorage.getItem("Login"))?.Branch_Name || "MUMBAI",
+                pageSize:rowsPerPage,
+                pageNumber:currentPage,
             });
 
             const response = await getApi(`/Smart/getInvoiceGenerateData?${queryParams.toString()}`);
@@ -107,7 +110,7 @@ function ViewInvoice() {
                 setInvoice(response.Data);
             } else {
                 setInvoice([]);
-                Swal.fire("Info", response?.message || "No invoices found", "info");
+                Swal.fire("Not Found", "No invoices found", "info");
             }
         } catch (err) {
             console.error("Fetch Error:", err);
@@ -131,8 +134,8 @@ function ViewInvoice() {
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
-    const handleOpenInvoicePrint = (invData) => {
-        navigate("/firstinvoice", { state: { invoiceData: invData, from: location.pathname } })
+    const handleOpenInvoicePrint = (invNo) => {
+        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname } })
     };
 
     return (
@@ -272,7 +275,7 @@ function ViewInvoice() {
                                                             padding: "10px",
                                                         }}
                                                     >
-                                                        <button className="edit-btn" onClick={() => handleOpenInvoicePrint(row)}>
+                                                        <button className="edit-btn" onClick={() => handleOpenInvoicePrint(row.BillNo)}>
                                                             <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "18px" }}></i>
                                                         </button>
                                                         <button onClick={() => handleDelete(index)} className="edit-btn">

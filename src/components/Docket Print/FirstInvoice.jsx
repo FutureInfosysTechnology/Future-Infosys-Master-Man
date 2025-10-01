@@ -13,7 +13,7 @@ function FirstInvoice() {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const invoice = location?.state?.invoiceData || {};
+    const invNo = location?.state?.invoiceNo || "";
     const fromPath = location?.state?.from || "/";
     const [getBranch, setGetBranch] = useState([]);
     const [invoiceData, setInvoiceData] = useState([]);
@@ -35,19 +35,22 @@ function FirstInvoice() {
         }
         fetchData();
     }, [])
-        useEffect(() => {
+    useEffect(() => {
         const fetchInvoiceData = async () => {
+            const loginData = JSON.parse(localStorage.getItem("Login"));
             try {
-                const loginData = JSON.parse(localStorage.getItem("Login"));
+                const response = await getApi(`/Smart/InvoicePrintPdf?InvoiceNos=${invNo}`);
 
-                const response = await getApi(
-                    `/InvoicePdf?branchCode=${loginData?.Branch_Code}&customerCode=${""}&fromDate=${""}&toDate=${""}&InvoiceNos=${""}`
-                );
-                if (response.status === 200 && response.data?.status === 1) {
-                    setInvoiceData(response.data.Data || []);
+                console.log("Raw Response:", response);
+
+                if (response.status === 1) {
+                    setInvoiceData(response?.Data || []);
+                    console.log("Data:", response.Data);
+                    // 👈 match backend key
                 } else {
                     setInvoiceData([]);
                 }
+
                 console.log("Invoice Response:", response.data);
 
             } catch (error) {
@@ -59,7 +62,8 @@ function FirstInvoice() {
         };
 
         fetchInvoiceData();
-    }, []);
+    }, [invNo]);
+
     const handleDownloadPDF = async () => {
         const element = document.querySelector("#pdf");
         if (!element) return;
@@ -98,6 +102,7 @@ function FirstInvoice() {
         padding: 0 !important;
         margin: 0 !important;
         box-sizing: border-box;
+        
     }
 
     table {
@@ -127,12 +132,33 @@ function FirstInvoice() {
         width: auto !important;
     }
 }
-   th, td {
-        white-space: nowrap !important;
-        border: 1px solid black !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
+.table-container2 {
+  width: 100% !important;
+}
+
+.tablediv {
+  width: 100% !important; 
+  padding:0         /* parent also full width */
+}
+
+.tablediv table {
+  width: auto !important;          /* force table full width */
+  border-collapse: collapse !important;
+  table-layout: auto !important;
+}
+  .tablediv .table {
+  width: auto% !important;   /* force full width */
+  table-layout: auto !important;
+}
+
+
+.table-container2 th,
+.table-container2 td {
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid black !important;
+  font-size: 10px;                   /* shrink text size */
+}
 
     .th {
         background-color: rgba(36, 98, 113, 1) !important;
@@ -202,118 +228,130 @@ function FirstInvoice() {
                                         <div style={{ fontWeight: "bold" }}>TO,</div>
                                         <div>
                                             <label htmlFor=""><b>CLIENT NAME :</b></label>
-                                            <span style={{ marginLeft: "10px" }}>{}</span>
+                                            <span style={{ marginLeft: "10px" }}>{ }</span>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>ADDRESS :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
                                         <div>
                                             <label htmlFor=""><b>CLIENT MOBILE NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>PIN CODE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
                                         <div>
                                             <label htmlFor=""><b>GST NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
                                     </div>
 
                                     <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px", paddingTop: "20px" }}>
                                         <div>
                                             <label htmlFor=""><b>INVOICE NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE DATE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE FROM :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE TO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE MODE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ }</label>
                                         </div>
 
                                     </div>
                                 </div>
 
-                                <div className="table-container2" style={{ borderBottom: "1px solid black" }}>
-                                    <table className='table table-bordered table-sm' style={{ border: "1px solid black" }}>
-                                        <thead className='thead'>
-                                            <tr className='tr'>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr.No</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>C.Note</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Date</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Origin</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Destination</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Mode</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Pieces</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Weight</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Rate</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Dkt.Chrgs</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Pickup.Chrgs</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Delivery.Chrgs</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>FOV.Chrgs</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Fuel.Chrgs</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Airline F.Chrgs</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Freight Amount</th>
-                                            </tr>
-                                        </thead>
+                                <div className="table-container2 w-100" style={{ borderBottom: "1px solid black",width: "100%",}}>
+                                    <div className="tablediv w-100" style={{  width: "100%",}}>
+                                       <table 
+  className="table table-bordered table-sm" 
+  style={{ width: "100%", border: "1px solid black" }}
+>
+                                            <thead className='thead'>
+                                                <tr>
+                                                    <th>Sr.No</th>
+                                                    <th>C.Note</th>
+                                                    <th>Date</th>
+                                                    <th>Origin</th>
+                                                    <th>Destination</th>
+                                                    <th>Mode</th>
+                                                    <th>Pieces</th>
+                                                    <th>Weight</th>
+                                                    <th>Rate</th>
+                                                    <th>Dkt.Chrgs</th>
+                                                    <th>Pickup/Hamali</th>
+                                                    <th>Delivery</th>
+                                                    <th>FOV</th>
+                                                    <th>Fuel</th>
+                                                    <th>ODA / Airline</th>
+                                                    <th>Insurance</th>
+                                                    <th>Packing</th>
+                                                    <th>Other</th>
+                                                    <th>Freight Amount</th>
+                                                </tr>
+                                            </thead>
 
-                                        <tbody className='tbody'>
-                                            {invoiceData.length > 0 ?
-                                                invoiceData.map((invoice, index) => (
-                                                    <tr key={index} className='tr'>
-                                                        <td className='td'>{index + 1}</td>
-                                                        <td className='td'>{invoice.BookDate}</td>
-                                                        <td className='td'>{invoice.DocketNo}</td>
-                                                        <td className='td'>{invoice.CustomerName}</td>
-                                                        <td className='td'>{invoice.OriginName}</td>
-                                                        <td className='td'>{invoice.DestName}</td>
-                                                        <td className='td'>{invoice.Qty}</td>
-                                                        <td className='td'>{invoice.ActualWt}</td>
-                                                        <td className='td'>{invoice.BookDate}</td>
-                                                        <td className='td'>{invoice.DocketNo}</td>
-                                                        <td className='td'>{invoice.CustomerName}</td>
-                                                        <td className='td'>{invoice.OriginName}</td>
-                                                        <td className='td'>{invoice.DestName}</td>
-                                                        <td className='td'>{invoice.Qty}</td>
-                                                        <td className='td'>{invoice.ActualWt}</td>
-                                                        <td></td>
-                                                    </tr>
-                                                )) : (
+                                            <tbody className='tbody'>
+                                                {invoiceData.length > 0 ? (
+                                                        invoiceData.map((invoice, index) => (
+                                                            <tr key={index}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{invoice.DocketNo}</td>
+                                                                <td>{invoice.BillDate}</td>
+                                                                <td>{invoice.fromDest}</td>
+                                                                <td>{invoice.toDest}</td>
+                                                                <td>{invoice.ModeName}</td>
+                                                                <td>{invoice.pcs}</td>
+                                                                <td>{invoice.actualWt}</td>
+                                                                <td>{invoice.Rate}</td>
+                                                                <td>{invoice.DocketChrgs}</td>
+                                                                <td>{invoice.HamaliChrgs}</td>
+                                                                <td>{invoice.DeliveryChrgs}</td>
+                                                                <td>{invoice.Fov_Chrgs}</td>
+                                                                <td>{invoice.FuelCharges}</td>
+                                                                <td>{invoice.ODA_Chrgs}</td>
+                                                                <td>{invoice.InsuranceChrgs}</td>
+                                                                <td>{invoice.PackingChrgs}</td>
+                                                                <td>{invoice.OtherCharges}</td>
+                                                                <td>{invoice.TotalAmount}</td>
+                                                            </tr>
+                                                        ))): (
                                                     <tr>
-                                                        <td colSpan="16">No data available</td>
+                                                        <td colSpan="16" style={{ textAlign: "center" }}>No data available</td>
                                                     </tr>
                                                 )}
-                                        </tbody>
-                                    </table>
+                                            </tbody>
 
-                                    <div className='page'>
+                                        </table>
+                                    </div>
+
+                                    <div className='page' style={{ backgroundColor: "green" }}>
                                         <div>
                                             <label htmlFor="">Total QTY :</label>
-                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{}</label>
+                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{ }</label>
                                         </div>
 
                                         <div>
                                             <label htmlFor="">Total Wt :</label>
-                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{}</label>
+                                            <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{ }</label>
                                         </div>
                                     </div>
                                 </div>
