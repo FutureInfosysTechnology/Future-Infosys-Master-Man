@@ -1,0 +1,23 @@
+.table-container2 {
+  width: 100% !important;
+  /* overflow-x: auto; */
+}
+
+.tablediv {
+  width: 100% !important;
+  padding:0
+}
+
+.tablediv .table {
+  width: 100% !important;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.tablediv th,
+.tablediv td {
+  text-align: center;
+  border: 1px solid black !important;/* wrap long text */
+  white-space:nowrap !important; 
+  font-size: 10px;
+}

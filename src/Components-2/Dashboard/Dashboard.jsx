@@ -27,7 +27,6 @@ import person4 from "../../Assets/Images/person4.jpg";
 import person5 from "../../Assets/Images/person5.jpg";
 
 // Colors for Pie slices
-const COLORS1 = ["#FF8042", "#00C49F"];
 const data = [
     {
         name: 'Jan',
@@ -182,8 +181,6 @@ const data3 = [
     },
 ];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 
@@ -206,7 +203,9 @@ function Dashboard() {
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
-
+    const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+    const COLORS1 = ["#FFA500", "#000000"];
+    const COLORS2 = ["#007BFF", "#000000"];
     const cards = [
         { id: 1, title: "Booking", pending: "24", done: "15", image: bookingSvg },
         { id: 2, title: "Manifest", pending: "31", done: "20", image: manifestSvg },
@@ -311,15 +310,21 @@ function Dashboard() {
                                                         data={data}
                                                         cx="50%"
                                                         cy="50%"
-                                                        innerRadius={30}
-                                                        outerRadius={55}
-                                                        paddingAngle={3}
+                                                        innerRadius={45}   // 🔹 बड़ा innerRadius = पतला circle
+                                                        outerRadius={55}   // 🔹 outerRadius थोड़ा ज़्यादा = thin ring look
+                                                        paddingAngle={2}
                                                         dataKey="value"
                                                     >
                                                         {data.map((entry, index) => (
                                                             <Cell
                                                                 key={`cell-${index}`}
-                                                                fill={COLORS1[index % COLORS1.length]}
+                                                                fill={
+                                                                    card.id % 2 === 0
+                                                                        ? COLORS2[index % COLORS2.length]   // Even cards → Blue/Black
+                                                                        : COLORS1[index % COLORS1.length]   // Odd cards → Orange/Black
+                                                                }
+                                                                stroke="#fff"
+                                                                strokeWidth={0.5}
                                                             />
                                                         ))}
                                                     </Pie>
@@ -335,8 +340,8 @@ function Dashboard() {
                                                         textAlign: "center",
                                                     }}
                                                 >
-                                                    <h4 style={{ margin: 0, fontSize: "14px" }}>{total}</h4>
-                                                    <small style={{ fontSize: "11px" }}>Total</small>
+                                                    <h4 style={{ margin: 0, fontSize: "14px" ,fontWeight:"bold" }}>{total}</h4>
+                                                    <small style={{ fontSize: "11px" ,fontWeight:"bold"}}>Total</small>
                                                 </div>
                                             </div>
 
@@ -369,7 +374,7 @@ function Dashboard() {
                                                     <div style={{ textAlign: "center", flex: 1 }}>
                                                         <span
                                                             style={{
-                                                                color: "#FF8042",
+                                                                color: card.id % 2 === 0 ? "#007BFF" : "#FFA500", // even → blue, odd → orange
                                                                 fontWeight: "bold",
                                                                 fontSize: "14px",
                                                             }}
@@ -383,7 +388,7 @@ function Dashboard() {
                                                     <div style={{ textAlign: "center", flex: 1 }}>
                                                         <span
                                                             style={{
-                                                                color: "#00C49F",
+                                                                color: "#000000", // black for all
                                                                 fontWeight: "bold",
                                                                 fontSize: "14px",
                                                             }}
@@ -392,6 +397,7 @@ function Dashboard() {
                                                         </span>
                                                         <p style={{ margin: 0, fontSize: "12px" }}>Done</p>
                                                     </div>
+
                                                 </div>
                                             </div>
                                         </div>

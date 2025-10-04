@@ -10,7 +10,7 @@ function ShortEntry() {
   const [getCustomer, setGetCustomer] = useState([]);
   const [getMode, setGetMode] = useState([]);
   const [getDest, setGetDestination] = useState([]);
-  const today=new Date();
+  const today = new Date();
   const [bookingDate, setBookingDate] = useState(today);
   const [selectedMode, setSelectedMode] = useState(null);
   const [selectedOrigin, setSelectedOrigin] = useState(null);
@@ -60,26 +60,26 @@ function ShortEntry() {
   const resetForm = () => {
     setFormData((prev) => ({
       ...prev,
-     Customer_Code: '',
-    Customer_Name: '',
-    Origin_code: '',
-    Destination_Code: '',
-    Docket_No: '',
-    Consignee_Pin: '',
-    Cityname: '',
-    Consignee_Name: '',
-    Pcs: '',
-    DoxSpx: '',
-    ActualWt: '',
-    Chargablewt: '',
-    Amount: '',
-    Mode_code: '',
-    Mode_Name: '',
-    ShipperName: '',
-    ShipperPhone: '',
-    Consignee_Mob: '',
-    volumetricWt: ''
-      
+      Customer_Code: '',
+      Customer_Name: '',
+      Origin_code: '',
+      Destination_Code: '',
+      Docket_No: '',
+      Consignee_Pin: '',
+      Cityname: '',
+      Consignee_Name: '',
+      Pcs: '',
+      DoxSpx: '',
+      ActualWt: '',
+      Chargablewt: '',
+      Amount: '',
+      Mode_code: '',
+      Mode_Name: '',
+      ShipperName: '',
+      ShipperPhone: '',
+      Consignee_Mob: '',
+      volumetricWt: ''
+
     }));
     setSelectedDestination(null);
     setBookingDate(today);
@@ -93,7 +93,7 @@ function ShortEntry() {
     }
     const payload = {
       docketNo: formData.Docket_No,
-      bookDate: bookingDate?bookingDate.toISOString().split("T")[0] : null,
+      bookDate: bookingDate ? bookingDate.toISOString().split("T")[0] : null,
       customerCode: formData.Customer_Code,
       shipperName: formData.ShipperName,
       shipperPhone: formData.ShipperPhone,
@@ -109,8 +109,8 @@ function ShortEntry() {
       volumetricWt: formData.volumetricWt || '0',
       chargedWt: formData.Chargablewt,
       rate: formData.Amount,
-      branchCode:JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
-      
+      branchCode: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
+
     };
     try {
       const res = await postApi("/Booking/ShortBooking", payload);
@@ -146,7 +146,7 @@ function ShortEntry() {
       VolumetricWt: String(formData.volumetricWt || '0'),
       ChargedWt: String(formData.Chargablewt),
       Rate: String(formData.Amount),
-      Branch_Code:JSON.parse(localStorage.getItem("Login")).Branch_Code,
+      Branch_Code: JSON.parse(localStorage.getItem("Login")).Branch_Code,
     };
     try {
       const res = await putApi(`/Booking/UpdateShortBooking?docketNo=${formData.Docket_No}`, payload);
@@ -239,7 +239,7 @@ function ShortEntry() {
   return (
     <div className="container py-1">
       <div className="card shadow-sm p-4">
-        <form onSubmit={handleSave}>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className="row g-2">
             <div className="col-md-6 col-lg-4">
               <label className="form-label">Customer</label>
@@ -308,11 +308,11 @@ function ShortEntry() {
                   setFormData({ ...formData, Docket_No: e.target.value })
                 }
                 onKeyDown={(e) => {
-                  if (e.key === 'Tab') {
-                    // Don't prevent tab, just trigger handleSearch after a short delay
-                    setTimeout(() => {
-                      handleSearch();
-                    }, 100); // Adjust delay if needed
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  } else if (e.key === "Tab") {
+                    setTimeout(handleSearch, 100);
                   }
                 }}
               />
@@ -437,7 +437,7 @@ function ShortEntry() {
             <div className="col-md-2">
               <label className="form-label">Product Type</label>
               <select
-              style={{ height: '35px', fontSize:"15px"}}
+                style={{ height: '35px', fontSize: "15px" }}
                 className="form-control"
                 value={formData.DoxSpx} // separate field for type
                 onChange={(e) => setFormData({ ...formData, DoxSpx: e.target.value })}
@@ -470,7 +470,7 @@ function ShortEntry() {
 
             <div className="col-md-2 custom-save-button">
 
-              <button type="submit" className="btn btn-success w-100" onClick={handleSave}>Save</button>
+              <button className="btn btn-success w-100" onClick={handleSave}>Save</button>
             </div>
             <div className="col-md-2 custom-save-button">
 
