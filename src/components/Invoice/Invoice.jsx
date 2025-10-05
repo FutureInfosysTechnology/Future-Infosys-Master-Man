@@ -8,10 +8,11 @@ import PerformanceBill from './PerformanceBill';
 import PendingInvoice from './PendingInvoice';
 import "./permonce.css"
 import ViewPerforma from './ViewPerforma';
+import { useLocation } from 'react-router-dom';
 
 function Invoice() {
-
-    const [activeTab, setActiveTab] = useState('zone');
+     const location=useLocation();
+    const [activeTab, setActiveTab] = useState(location?.state?.tab ||'state');
 
     const handleChange = (event) => {
         setActiveTab(event.target.id);

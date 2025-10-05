@@ -230,7 +230,7 @@ function FirstInvoice() {
 
                                         <div>
                                             <label htmlFor=""><b>INVOICE DATE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ invoiceData[0]?.BillDate}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{ invoiceData[0]?.BillDate[0]}</label>
                                         </div>
 
                                         <div>
@@ -282,7 +282,7 @@ function FirstInvoice() {
                                                         <tr key={index}>
                                                             <td>{index + 1}</td>
                                                             <td>{invoice.DocketNo}</td>
-                                                            <td>{invoice.BillDate}</td>
+                                                            <td>{invoice.BillDate[0]}</td>
                                                             <td>{invoice.fromDest}</td>
                                                             <td>{invoice.toDest}</td>
                                                             <td>{invoice.ModeName}</td>

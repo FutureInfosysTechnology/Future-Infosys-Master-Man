@@ -16,6 +16,7 @@ function PerformanceInvoice() {
     const navigate = useNavigate();
     const invoiceNo = location?.state?.invoiceNo || "";
     const fromPath = location?.state?.from || "/";
+    const tab = location?.state?.tab || "view";
     const [getBranch, setGetBranch] = useState([]);
     const [invoiceData, setGetInvoiceData] = useState({});
     const [getItem, setGetItem] = useState([]);
@@ -72,73 +73,98 @@ function PerformanceInvoice() {
         }
     }, [getItem]); // 
 
-    const generatePDF = async () => {
-        if (!pageRef.current) return;
-        const canvas = await html2canvas(pageRef.current, { scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
-        // 
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        // 
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`Manifest_${invoiceNo}.pdf`);
-    };
+   const generatePDF = async () => {
+  if (!pageRef.current) return;
+
+  // 1️⃣ Capture screenshot
+  const canvas = await html2canvas(pageRef.current, {
+    scale: 10, // reduce scale slightly (2 → 1.5)
+    useCORS: true,
+    logging: false,
+  });
+
+  // 2️⃣ Convert to compressed JPEG (not PNG)
+  const imgData = canvas.toDataURL("image/jpeg", 0.6); // quality: 0.6–0.8 recommended
+
+  // 3️⃣ Create A4 PDF
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  // 4️⃣ Add compressed image
+  pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+
+  // 5️⃣ Save
+  pdf.save(`Performa_${invoiceNo}.pdf`);
+};
+
 
     // if (loading) return <p>Loading...</p>;
 
     return (
         <>
-            <style>
-                {`@media print {
-    body * {
-        visibility: hidden;
-    }
+<style>
+{`
+ @media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
 
-    #pdf, #pdf * {
-        visibility: visible;
-    }
+  #pdf {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 210mm !important;   /* exact A4 width */
+    min-height: 297mm !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    background: white !important;
+    box-sizing: border-box !important;
+  }
 
-    #pdf {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: auto !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-sizing: border-box;
-    }
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    table-layout: fixed !important;   /* ✅ Fix uneven border spacing */
+  }
 
-    table {
-        width: auto !important;  /* Let table auto-expand */
-        table-layout: auto;      /* Use auto layout */
-        border-collapse: collapse;
-        font-size: 10px !important;
-    }
+  th, td {
+    border: 1px solid black !important;
+    padding: 4px !important;
+    font-size: 10px !important;
+  }
 
-    th, td {
-        white-space: nowrap !important;
-        border: 1px solid black !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
+  /* ✅ Force the outermost table border to match edges perfectly */
+  #pdf table {
+    border-left: 2px solid black !important;
+    border-right: 2px solid black !important;
+    border-top: 2px solid black !important;
+    border-bottom: 2px solid black !important;
+  }
 
-    .th {
-        background-color: rgba(36, 98, 113, 1) !important;
-        color: white !important;
-    }
+  #pdf th:last-child,
+  #pdf td:last-child {
+    border-right: 2px solid black !important; /* fixes thin right border */
+  }
 
-    button {
-        display: none !important;
-    }
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
 
-    .container-2, .container-3 {
-        width: auto !important;
-    }
+  button, .header, .sidebar {
+    display: none !important;
+  }
 }
- 
+
 `}
-            </style>
+</style>
+
 
             <Header />
             <Sidebar1 />
@@ -160,7 +186,7 @@ function PerformanceInvoice() {
                             Print
                         </button>
                         <button
-                            onClick={() => navigate(fromPath, { state: { tab: "viewmanifest" } })}
+                            onClick={() => navigate(fromPath, { state: { tab:tab } })}
                             style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Exit
@@ -171,12 +197,12 @@ function PerformanceInvoice() {
                 <div className="container-2" ref={pageRef} id="pdf" style={{
                     borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px"
                     , paddingBottom: "20px", width: "793px", direction: "flex", fontFamily: "Roboto",
-                    flexDirection: "column", gap: "5px", fontSize: "10px", fontWeight: "bold"
+                    flexDirection: "column", gap: "5px", fontSize: "10px", fontWeight: "bold",border:"none"
                 }}>
 
                     <div className="container-2" style={{ borderRadius: "0px", border: "none", width: "750px", display: "flex", flexDirection: "column" }}>
                         < div id="printable-section" className="container-3" style={{ padding: "0px", border: "none" }}>
-                            <div className="container-3 px-0 py-0" style={{ border: "2px solid black", height: "815px" }}>
+                        <div className="container-3 px-0 py-0" style={{ border: "2px solid black", height: "815px"}}>
 
                                 <div className="div1" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
                                     <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", gap: "7px" }}>
@@ -189,11 +215,11 @@ function PerformanceInvoice() {
                                             <div style={{ width: "100%", display: "flex" }}>
                                                 <div style={{ width: "50%", display: "flex", flexDirection: "column" }}>
                                                     <div style={{ fontSize: "12px" }}>GST No:</div>
-                                                    <div>{invoiceData.GSTNo}</div>
+                                                    <div>{invoiceData.BranchGSTNo}</div>
                                                 </div>
                                                 <div style={{ width: "50%", display: "flex", flexDirection: "column" }}>
                                                     <div style={{ fontSize: "12px" }}>Mobile No:</div>
-                                                    <div>{invoiceData.MobileNo}</div>
+                                                    <div>(+91) {invoiceData.MobileNo}</div>
                                                 </div>
                                                 {/* <div style={{width:"30%",display:"flex",flexDirection:"column"}}> */}
                                                 {/* <div style={{fontWeight:"bolder"}}>Email:</div> */}
@@ -220,36 +246,7 @@ function PerformanceInvoice() {
                                     </div>
                                 </div>
                                 <div className="div2" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
-                                    <div style={{ width: "50%", borderRight: "2px solid black", paddingBottom: "5px", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
-                                        <div style={{ fontSize: "12px" }}>BILL TO</div>
-                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ReceiverName}</div>
-                                        <div style={{ display: "flex", gap: "2px" }}>
-                                            <div style={{ width: "12%" }}> Address:</div>
-                                            <div style={{ width: "80%" }}> {invoiceData.ReceiverAddress},{invoiceData.Receiver_Address2},
-                                                {invoiceData.ReceiverCity_Name}, {invoiceData.ReceiverState_Name}, {invoiceData.ReceiverPinCode}</div>
-                                        </div>
-                                        <div style={{ display: "flex", gap: "15px" }}>
-                                            <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}>GSTIN:</div>
-                                                <div>{invoiceData.ReceiverGSTNo} </div>
-                                            </div>
-                                            <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}> Place of Supply:</div>
-                                                <div>{invoiceData.ReceiverState_Name}</div>
-                                            </div>
-                                        </div>
-                                        <div style={{ display: "flex", gap: "15px" }}>
-                                            <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}> Mobile:</div>
-                                                <div> {invoiceData.ReceiverMobileNo}  </div>
-                                            </div>
-                                            <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}>  PAN Number:</div>
-                                                <div>AAFCR7719F</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div style={{ width: "50%", display: "flex", paddingBottom: "5px", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
+                                    <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", paddingBottom: "5px", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
                                         <div style={{ fontSize: "12px" }}>SHIP TO</div>
                                         <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ShipperName}</div>
                                         <div style={{ display: "flex", gap: "2px" }}>
@@ -259,22 +256,43 @@ function PerformanceInvoice() {
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}>GSTIN:</div>
+                                                <div style={{ fontWeight: "bolder" }}>GST No:</div>
                                                 <div>{invoiceData.ShipperGSTNo} </div>
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}> Place of Supply:</div>
+                                                <div style={{ fontWeight: "bolder" }}> State Name:</div>
                                                 <div>{invoiceData.ShipperState_Name}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}> Mobile:</div>
-                                                <div> {invoiceData.ShipperMobileNo}  </div>
+                                                <div style={{ fontWeight: "bolder" }}> Mobile No:</div>
+                                                <div> (+91) {invoiceData.ShipperMobileNo}  </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style={{ width: "50%", paddingBottom: "5px", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
+                                        <div style={{ fontSize: "12px" }}>BILL TO</div>
+                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ReceiverName}</div>
+                                        <div style={{ display: "flex", gap: "2px" }}>
+                                            <div style={{ width: "12%" }}> Address:</div>
+                                            <div style={{ width: "80%" }}> {invoiceData.ReceiverAddress},{invoiceData.Receiver_Address2},
+                                                {invoiceData.ReceiverCity_Name}, {invoiceData.ReceiverState_Name}, {invoiceData.ReceiverPinCode}</div>
+                                        </div>
+                                        <div style={{ display: "flex", gap: "15px" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}>GST No:</div>
+                                                <div>{invoiceData.ReceiverGSTNo} </div>
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}>  PAN Number:</div>
-                                                <div>AAFCR7719F</div>
+                                                <div style={{ fontWeight: "bolder" }}> State Name:</div>
+                                                <div>{invoiceData.ReceiverState_Name}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: "flex", gap: "15px" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}>
+                                                <div style={{ fontWeight: "bolder" }}> Mobile No:</div>
+                                                <div> (+91) {invoiceData.ReceiverMobileNo}  </div>
                                             </div>
                                         </div>
                                     </div>
@@ -371,26 +389,26 @@ function PerformanceInvoice() {
                                         </div>
                                         <div className="div5" style={{ height: "25px", textAlign: "center", display: "flex", flexDirection: "row", }}>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>IGST%{invoiceData.IGST_Per}</div>
+                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
+                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>IGST%{invoiceData.IGST_Per}</div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.IGST_Amount}</div>
                                         </div>
                                         <div className="div6" style={{ height: "25px", textAlign: "center", display: "flex", flexDirection: "row", }}>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>CGST%{invoiceData.CGST_Per}</div>
+                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
+                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>CGST%{invoiceData.CGST_Per}</div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.CGST_Amount}</div>
                                         </div>
                                         <div className="div7" style={{ height: "25px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black" }}>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>SGST%{invoiceData.SGST_Per}</div>
+                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
+                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>SGST%{invoiceData.SGST_Per}</div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.SGST_Amount}</div>
                                         </div>
                                     </div>
@@ -407,30 +425,30 @@ function PerformanceInvoice() {
                         </div>
                         <div className="second px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
                             <div className="div1" style={{
-                                height: "33px", textAlign: "center", display: "flex", flexDirection: "row",
+                                height: "40px", textAlign: "center", display: "flex", flexDirection: "row",
                                 fontWeight: "bolder", fontSize: "11px", backgroundColor: "rgba(255, 192, 203, 0.1)", borderBottom: "2px solid black"
                             }}>
 
                                 <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Taxable Value</div>
                                 <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
                                     <div style={{ borderBottom: "2px solid black" }}>IGST</div>
-                                    <div style={{ display: "flex" }}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}>Rate</div>
-                                        <div style={{ width: "60%" }}>Amount</div>
+                                    <div style={{ display: "flex" ,height:"100%"}}>
+                                        <div style={{ width: "40%", borderRight: "2px solid black", display:"flex",justifyContent:"center", alignItems:"center"}}>Rate</div>
+                                        <div style={{ width: "60%",display:"flex",justifyContent:"center", alignItems:"center" }}>Amount</div>
                                     </div>
                                 </div>
                                 <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
                                     <div style={{ borderBottom: "2px solid black" }}>CGST</div>
-                                    <div style={{ display: "flex" }}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}>Rate</div>
-                                        <div style={{ width: "60%" }}>Amount</div>
+                                   <div style={{ display: "flex" ,height:"100%"}}>
+                                        <div style={{ width: "40%", borderRight: "2px solid black", display:"flex",justifyContent:"center", alignItems:"center"}}>Rate</div>
+                                        <div style={{ width: "60%",display:"flex",justifyContent:"center", alignItems:"center" }}>Amount</div>
                                     </div>
                                 </div>
                                 <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
                                     <div style={{ borderBottom: "2px solid black" }}>SGST</div>
-                                    <div style={{ display: "flex" }}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black" }}>Rate</div>
-                                        <div style={{ width: "60%" }}>Amount</div>
+                                    <div style={{ display: "flex" ,height:"100%"}}>
+                                        <div style={{ width: "40%", borderRight: "2px solid black", display:"flex",justifyContent:"center", alignItems:"center"}}>Rate</div>
+                                        <div style={{ width: "60%",display:"flex",justifyContent:"center", alignItems:"center" }}>Amount</div>
                                     </div>
                                 </div>
                                 <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}> Total Tax Amount</div>

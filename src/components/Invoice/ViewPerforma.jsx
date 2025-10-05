@@ -112,7 +112,7 @@ function ViewPerforma() {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
     const handleOpenInvoicePrint = (invNo) => {
-      navigate("/performanceinvoice",{state:{invoiceNo:invNo,from:location.pathname}})
+      navigate("/performanceinvoice",{state:{invoiceNo:invNo,from:location.pathname,tab:"view"}})
     };
 
     return (

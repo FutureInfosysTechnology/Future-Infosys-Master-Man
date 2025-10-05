@@ -74,14 +74,22 @@ function PerformanceBill() {
             [name]: value,
         }));
     };
+   useEffect(()=>{
+        setInvoice((prev)=>({
+            ...prev,
+            Amount:invoice.QTY*invoice.Rate,
+
+
+        }))
+    },[invoice.QTY,invoice.Rate])
     const handleAddRow = (e) => {
         e.preventDefault();
 
-        if (!invoice.Items || !invoice.HSN) {
+        if (!invoice.Items) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Missing Information',
-                text: 'Please fill in the empty fields.',
+                text: 'Please fill atleast one item.',
                 confirmButtonText: 'OK',
             });
             return;
@@ -143,7 +151,7 @@ function PerformanceBill() {
     const handleSave = async (e) => {
         e.preventDefault();
 
-        if (!formData.Shipper_Name || !formData.ConsigneeName || !formData.invoiceNo) {
+        if (!formData.Shipper_Name || !formData.invoiceNo) {
             return Swal.fire({
                 icon: "warning",
                 title: "Missing Field",
