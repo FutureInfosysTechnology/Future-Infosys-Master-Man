@@ -8,7 +8,7 @@
   padding:0
 }
 
-.tablediv .table {
+.tablediv table {
   width: 100% !important;
   border-collapse: collapse;
   margin: 0;
@@ -18,6 +18,13 @@
 .tablediv td {
   text-align: center;
   border: 1px solid black !important;/* wrap long text */
-  white-space:nowrap !important; 
   font-size: 10px;
+}
+/* Alternate row colors (striped effect) */
+.tablediv tbody tr:nth-child(odd) {
+   background-color: white;
+}
+
+.tablediv tbody tr:nth-child(even) {
+   background-color: #f5fcf9; 
 }

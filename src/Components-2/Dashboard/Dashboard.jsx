@@ -205,7 +205,7 @@ function Dashboard() {
     };
     const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
     const COLORS1 = ["#FFA500", "#000000"];
-    const COLORS2 = ["#007BFF", "#000000"];
+    const COLORS2 = ["#007BFF", "red"];
     const cards = [
         { id: 1, title: "Booking", pending: "24", done: "15", image: bookingSvg },
         { id: 2, title: "Manifest", pending: "31", done: "20", image: manifestSvg },
@@ -388,7 +388,7 @@ function Dashboard() {
                                                     <div style={{ textAlign: "center", flex: 1 }}>
                                                         <span
                                                             style={{
-                                                                color: "#000000", // black for all
+                                                                color:card.id % 2 === 0 ? "red": "#000000", // black for all
                                                                 fontWeight: "bold",
                                                                 fontSize: "14px",
                                                             }}

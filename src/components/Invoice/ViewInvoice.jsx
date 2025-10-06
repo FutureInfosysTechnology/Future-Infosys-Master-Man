@@ -23,7 +23,7 @@ function ViewInvoice() {
 
     const navigate = useNavigate();
     const location = useLocation();
-
+    const [modalIsOpen, setModalIsOpen] = useState(false);
     const [invoice, setInvoice] = useState([])
     const [openRow, setOpenRow] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -52,6 +52,17 @@ function ViewInvoice() {
         customer: "",
         invoiceNo: "",
     });
+    const [isFovChecked, setIsFovChecked] = useState(false);
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [isDocketChecked, setIsDocketChecked] = useState(false);
+    const [isDeliveryChecked, setIsDeliveryChecked] = useState(false);
+    const [isPackingChecked, setIsPackingChecked] = useState(false);
+    const [isGreenChecked, setIsGreenChecked] = useState(false);
+    const [isHamaliChecked, setIsHamaliChecked] = useState(false);
+    const [isOtherChecked, setIsOtherChecked] = useState(false);
+    const [isInsuranceChecked, setIsInsuranceChecked] = useState(false);
+    const [isODAChecked, setIsODAChecked] = useState(false);
+    const [isFuelChecked, setIsFuelChecked] = useState(false);
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -64,7 +75,151 @@ function ViewInvoice() {
             setLoading(false);
         }
     };
+     const handleCheckboxChange = (field, value) => {
+        const newState = {
+            [field]: value
+        };
+        const currentState = JSON.parse(localStorage.getItem("toggelChargs")) || {};
+        localStorage.setItem("toggelChargs", JSON.stringify({ ...currentState, ...newState }));
+    };
+    const handleAllChange = () => {
+        const newValue = !isAllChecked;
+
+        setIsAllChecked(newValue);
+
+        const allFields = {
+            isAllChecked:newValue,
+            isFovChecked: newValue,
+            isDocketChecked: newValue,
+            isDeliveryChecked: newValue,
+            isPackingChecked: newValue,
+            isGreenChecked: newValue,
+            isHamaliChecked: newValue,
+            isOtherChecked: newValue,
+            isInsuranceChecked: newValue,
+            isODAChecked: newValue,
+            isFuelChecked: newValue,
+        };
+        // Update React states
+        setIsAllChecked(newValue);
+        setIsFovChecked(newValue);
+        setIsDocketChecked(newValue);
+        setIsDeliveryChecked(newValue);
+        setIsPackingChecked(newValue);
+        setIsGreenChecked(newValue);
+        setIsHamaliChecked(newValue);
+        setIsOtherChecked(newValue);
+        setIsInsuranceChecked(newValue);
+        setIsODAChecked(newValue);
+        setIsFuelChecked(newValue);
+        // Save to localStorage
+        localStorage.setItem("toggelChargs", JSON.stringify(allFields));
+    };
     useEffect(() => {
+    const allFields = {
+        isFovChecked,
+        isDocketChecked,
+        isDeliveryChecked,
+        isPackingChecked,
+        isGreenChecked,
+        isHamaliChecked,
+        isOtherChecked,
+        isInsuranceChecked,
+        isODAChecked,
+        isFuelChecked,
+    };
+
+    // Check if all are true
+    const allChecked = Object.values(allFields).every(Boolean);
+    setIsAllChecked(allChecked);
+    handleCheckboxChange('isAllChecked', allChecked)
+}, [
+    isFovChecked,
+    isDocketChecked,
+    isDeliveryChecked,
+    isPackingChecked,
+    isGreenChecked,
+    isHamaliChecked,
+    isOtherChecked,
+    isInsuranceChecked,
+    isODAChecked,
+    isFuelChecked
+]);
+
+    const handleFovChange = (e) => {
+        setIsFovChecked(e.target.checked);
+        
+        handleCheckboxChange('isFovChecked', e.target.checked);
+    }
+
+    const handleDocketChange = (e) => {
+        setIsDocketChecked(e.target.checked);
+        
+        handleCheckboxChange('isDocketChecked', e.target.checked);
+    }
+
+    const handleDeliveryChange = (e) => {
+        setIsDeliveryChecked(e.target.checked);
+        
+        handleCheckboxChange('isDeliveryChecked', e.target.checked);
+    }
+
+    const handlePackingChange = (e) => {
+        setIsPackingChecked(e.target.checked);
+        handleCheckboxChange('isPackingChecked', e.target.checked);
+    }
+
+    const handleGreenChange = (e) => {
+        setIsGreenChecked(e.target.checked);
+        
+        handleCheckboxChange('isGreenChecked', e.target.checked);
+    }
+
+    const handleHamaliChange = (e) => {
+        setIsHamaliChecked(e.target.checked);
+        
+        handleCheckboxChange('isHamaliChecked', e.target.checked);
+    }
+
+    const handleOtherChange = (e) => {
+        setIsOtherChecked(e.target.checked);
+        
+        handleCheckboxChange('isOtherChecked', e.target.checked);
+    }
+
+    const handleInsuranceChange = (e) => {
+        setIsInsuranceChecked(e.target.checked);
+        
+        handleCheckboxChange('isInsuranceChecked', e.target.checked);
+    }
+
+    const handleODAChange = (e) => {
+        setIsODAChecked(e.target.checked);
+        
+        handleCheckboxChange('isODAChecked', e.target.checked);
+    }
+
+    const handleFuelChange = (e) => {
+        setIsFuelChecked(e.target.checked);
+        
+        handleCheckboxChange('isFuelChecked', e.target.checked);
+    }
+
+    useEffect(() => {
+        const savedState = JSON.parse(localStorage.getItem("toggelChargs"));
+        if (savedState) {
+            setIsAllChecked(savedState.isAllChecked || false);
+            setIsFovChecked(savedState.isFovChecked || false);
+            setIsDocketChecked(savedState.isDocketChecked || false);
+            setIsDeliveryChecked(savedState.isDeliveryChecked || false);
+            setIsPackingChecked(savedState.isPackingChecked || false);
+            setIsGreenChecked(savedState.isGreenChecked || false);
+            setIsHamaliChecked(savedState.isHamaliChecked || false);
+            setIsOtherChecked(savedState.isOtherChecked || false);
+            setIsInsuranceChecked(savedState.isInsuranceChecked || false);
+            setIsODAChecked(savedState.isODAChecked || false);
+            setIsFuelChecked(savedState.isFuelChecked || false);
+        }
         fetchData('/Master/getCustomerdata', setGetCustomer);
     }, []);
     const handleDelete = (index) => {
@@ -97,10 +252,10 @@ function ViewInvoice() {
                 BillFrom: formData.fromDate?.toISOString().split("T")[0] || "",
                 BillTO: formData.toDate?.toISOString().split("T")[0] || "",
                 CustomerName: formData.customer || "",
-                Location_Code:JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
-                BranchName:JSON.parse(localStorage.getItem("Login"))?.Branch_Name || "MUMBAI",
-                pageSize:rowsPerPage,
-                pageNumber:currentPage,
+                Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
+                BranchName: JSON.parse(localStorage.getItem("Login"))?.Branch_Name || "MUMBAI",
+                pageSize: rowsPerPage,
+                pageNumber: currentPage,
             });
 
             const response = await getApi(`/Smart/getInvoiceGenerateData?${queryParams.toString()}`);
@@ -154,7 +309,7 @@ function ViewInvoice() {
                                     }))}
                                     value={
                                         formData.customer
-                                            ? { value: formData.customer,label:getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name}
+                                            ? { value: formData.customer, label: getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name }
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -217,6 +372,9 @@ function ViewInvoice() {
                             </div>
                             <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
                                 <button className="ok-btn" style={{ height: "35px" }} type="submit">Submit</button>
+                            </div>
+                            <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
+                                <button className="ok-btn" style={{ height: "35px" }} type="submit" onClick={() => setModalIsOpen(true)}>SetUp</button>
                             </div>
                         </div>
                     </form>
@@ -327,6 +485,133 @@ function ViewInvoice() {
                             </select>
                         </div>
                     </div>
+                    <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
+                        className="custom-modal-setup" contentLabel="Modal"
+                        style={{
+                            content: {
+                                width: '80%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap",
+                                minHeight: "60%",
+                                display: "flex",
+                                justifyContent: "center",
+
+                            },
+                        }}>
+                        <div className="custom modal-content">
+                            <div className="header-tittle">
+                                <header>Charges</header>
+                            </div>
+
+                            <div className='container2'>
+                                <form>
+                                    <div className="fields2">
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isAllChecked}
+                                                onChange={handleAllChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                All Select</label>
+                                        </div>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isFovChecked}
+                                                onChange={handleFovChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Fov Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isDocketChecked}
+                                                onChange={handleDocketChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="docket" id="docket" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Docket Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isDeliveryChecked}
+                                                onChange={handleDeliveryChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="delivery" id="delivery" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Delivery Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isPackingChecked}
+                                                onChange={handlePackingChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="packing" id="packing" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Packing Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isGreenChecked}
+                                                onChange={handleGreenChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="green" id="green" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Green Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isHamaliChecked}
+                                                onChange={handleHamaliChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="hamali" id="hamali" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Hamali Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isOtherChecked}
+                                                onChange={handleOtherChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="other" id="other" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Other Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isInsuranceChecked}
+                                                onChange={handleInsuranceChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="insurance" id="insurance" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Insurance Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isODAChecked}
+                                                onChange={handleODAChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="oda" id="oda" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                ODA Charges</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isFuelChecked}
+                                                onChange={handleFuelChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Fuel Charges</label>
+                                        </div>
+                                    </div>
+                                    <div className='bottom-buttons'>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen(false) }} className='ok-btn'>close</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </Modal >
 
                 </div>
             </div>

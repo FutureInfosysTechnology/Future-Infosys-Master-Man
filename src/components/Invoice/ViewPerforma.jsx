@@ -150,6 +150,7 @@ function ViewPerforma() {
                             <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
                                 <button className="ok-btn" style={{ height: "35px" }} type="submit">Submit</button>
                             </div>
+                            
                         </div>
                     </form>
                     <div style={{ width: "100%", display: "flex", justifyContent: "end", marginTop: "10px" }}>
