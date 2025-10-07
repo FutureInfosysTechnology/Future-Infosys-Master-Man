@@ -110,21 +110,21 @@ function FirstInvoice() {
     useEffect(() => {
         console.log("useEffect", invoiceData);
     }, [invoiceData]);
-const handleDownloadPDF = async () => {
-    const element = document.querySelector("#pdf");
-    if (!element) return;
+    const handleDownloadPDF = async () => {
+        const element = document.querySelector("#pdf");
+        if (!element) return;
 
-    const canvas = await html2canvas(element, { scale: 4 }); // high resolution
-    const imgData = canvas.toDataURL("image/jpeg", 0.8); // compress to JPEG, quality = 0.8
+        const canvas = await html2canvas(element, { scale: 4 }); // high resolution
+        const imgData = canvas.toDataURL("image/jpeg", 0.8); // compress to JPEG, quality = 0.8
 
-    const imgWidth = 210; // A4 width in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
-    pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+        const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
+        pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
 
-    pdf.save(`Invoice_${invNo}.pdf`);
-};
+        pdf.save(`Invoice_${invNo}.pdf`);
+    };
 
     const docketTotal = isDocketChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.DocketChrgs || 0), 0) : 0;
     const hamaliTotal = isHamaliChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.HamaliChrgs || 0), 0) : 0;
@@ -163,65 +163,54 @@ const handleDownloadPDF = async () => {
 
     return (
         <>
-      <style>
-{`
-  @media print {
-    @page {
-      size: A4 portrait;
-      margin: 0; /* remove printer default margin */
-    }
-
-    body {
-      margin: 0 !important;
-      padding: 0 !important;
-      background: white !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-
+            <style>
+                {`
+    @media print {
     body * {
-      visibility: hidden;
+        visibility: hidden;
     }
 
     #pdf, #pdf * {
-      visibility: visible;
+        visibility: visible;
     }
 
     #pdf {
-      position: absolute;
-      left: 0;
-      top: 0;
-      margin: 0 auto !important;
-      width: 932px !important;
-      padding: 0 !important;
-      border:  !important;
-      background: white !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box;
     }
 
-    .container-3 {
-      border: 1px solid black !important;
-      width: 100% !important;
-      height: 1130px !important;
-      box-sizing: border-box !important;
+    table {
+        width: 100% !important;  /* Let table auto-expand */
+        border-collapse: collapse;
+        font-size: 10px !important;
     }
-       .logo img {
-    display: block;
-    background: transparent !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-  }
 
-  .logo {
-    background: transparent !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-  }
+    th, td {
+        border: 1px solid black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 
-  }
+    .th {
+        background-color: rgba(36, 98, 113, 1) !important;
+        color: white !important;
+    }
+
+    button {
+        display: none !important;
+    }
+
+    .container-2, .container-3 {
+        height:auto !important;
+    }
+}
 `}
-</style>
+            </style>
 
 
 
@@ -245,7 +234,7 @@ const handleDownloadPDF = async () => {
                             Print
                         </button>
                         <button
-                            onClick={() => navigate(fromPath, { state: { tab: "state" } })}
+                            onClick={() => navigate(fromPath, { state: { tab: "multiple" } })}
                             style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Exit
@@ -264,71 +253,60 @@ const handleDownloadPDF = async () => {
                         < div id="printable-section" className="container-3" style={{ padding: "0px", minHeight: "500px" }}>
                             <div className="container-3" style={{ border: "5px double black", minHeight: "500px" }}>
 
-                                <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px",gap:"50px"}}>
+                                <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", gap: "50px" }}>
                                     <div style={{ width: "25%" }}>
-                                        <img src={invoiceData[0]?.Branch_Logo} alt="" style={{ height: "120px" ,width: "100%"}} />
+                                        <img src={invoiceData[0]?.Branch_Logo} alt="" style={{ height: "120px", width: "100%" }} />
                                     </div>
                                     <div style={{ width: "75%", display: "flex", flexDirection: "column" }}>
                                         <div style={{ textAlign: "center", height: "40%" }}>
-                                            <p><b style={{ fontSize: "24px",fontWeight:"bold"}}>{invoiceData[0]?.Company_Name}</b></p>
+                                            <p><b style={{ fontSize: "24px", fontWeight: "bold" }}>{invoiceData[0]?.Company_Name}</b></p>
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "12px", textAlign: "start" }}>
                                             <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Address :</div><div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.Branch_Add1},{invoiceData[0]?.Branch_PIN}</div></div>
-                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>(+91) {invoiceData[0]?.MobileNo}</div></div>
-                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{getBranch?.Email}</div></div>
-                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.BranchGSTNo}</div></div>
+                                            <div style={{ display: "flex", whiteSpace: "nowrap", gap: "20px" }}>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>(+91) {invoiceData[0]?.MobileNo}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.Email}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.BranchGSTNo}</div></div>
+                                            </div>
+                                            <div style={{ display: "flex", whiteSpace: "nowrap", gap: "20px" }}>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>City :</div>    <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.Branch_Name[0]}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>State :</div>  <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.State_Name}</div></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px", marginTop: "" }}>
-                                    <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
-                                        <div style={{ fontWeight: "bold" }}>TO,</div>
-                                        <div>
+                                <div style={{ display: "flex", fontSize: "12px", border: "1px solid black", marginBottom: "5px",padding:"10px"}}>
+                                        <div style={{ display: "flex", width: "50%",justifyContent:"start"}}>
+                                        <div style={{ display: "flex", flexDirection: "column"}}>
                                             <label htmlFor=""><b>CLIENT NAME :</b></label>
-                                            <span style={{ marginLeft: "10px" }}>{invoiceData[0]?.customerName}</span>
-                                        </div>
-
-                                        <div>
                                             <label htmlFor=""><b>ADDRESS :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Add1},{invoiceData[0]?.Customer_Add2},{invoiceData[0]?.Customer_Add3}</label>
-                                        </div>
-                                        <div>
-                                            <label htmlFor=""><b>CLIENT MOBILE NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>(+91) {invoiceData[0]?.Customer_Mob}</label>
-                                        </div>
-
-                                        <div>
+                                            <label htmlFor=""><b>CLIENT MOBILE NO  :</b></label>
                                             <label htmlFor=""><b>PIN CODE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Pin_Code}</label>
-                                        </div>
-                                        <div>
                                             <label htmlFor=""><b>GST NO :</b></label>
+                                         </div>    
+                                        <div style={{ display: "flex", flexDirection: "column"}}>  
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.customerName}</label>   
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Add1},{invoiceData[0]?.Customer_Add2},{invoiceData[0]?.Customer_Add3}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Mob}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Pin_Code}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Gst_No}</label>
                                         </div>
                                     </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px", paddingTop: "20px" }}>
-                                        <div>
+                                      
+                                    <div style={{ display: "flex", width: "50%",justifyContent:"end",alignItems:"center",marginRight:"50px"}}>
+                                        <div style={{ display: "flex", flexDirection: "column",}}>
                                             <label htmlFor=""><b>INVOICE NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillNo}</label>
-                                        </div>
-
-                                        <div>
                                             <label htmlFor=""><b>INVOICE DATE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillDate[0]}</label>
-                                        </div>
-
-                                        <div>
                                             <label htmlFor=""><b>INVOICE FROM :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{formatDateToDDMMYYYY(invoiceData[0]?.billfrom)}</label>
-                                        </div>
-
-                                        <div>
                                             <label htmlFor=""><b>INVOICE TO :</b></label>
+                                         </div>    
+                                        <div style={{ display: "flex", flexDirection: "column"}}>       
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillNo}</label>  
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillDate[0]}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{formatDateToDDMMYYYY(invoiceData[0]?.billfrom)}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{formatDateToDDMMYYYY(invoiceData[0]?.BillTo)}</label>
                                         </div>
-
                                     </div>
                                 </div>
 
@@ -505,6 +483,29 @@ const handleDownloadPDF = async () => {
                                         </div>
 
 
+                                    </div>
+                                </div>
+
+                                <div style={{ width: "100%", display: "flex", whiteSpace:"nowrap", border: "1px solid black",borderTop:"none" ,justifyContent:"space-around", fontSize: "15px" }}>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Bank Name :</div>    <div style={{textAlign: "start" }}>{invoiceData[0]?.Bank_Name}</div></div>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Branch :</div>  <div style={{textAlign: "start" }}>{getBranch?.Company_Name}</div></div>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>A/C No :</div> <div style={{textAlign: "start" }}>{invoiceData[0]?.AccountNo}</div></div>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>IFSC Code :</div> <div style={{textAlign: "start" }}>{invoiceData[0]?.IFSC_Code}</div></div>
+                                </div>
+                                <div style={{ width: "100%", display: "flex", whiteSpace:"nowrap", border: "1px solid black",borderTop:"none" , padding:"5px", fontSize: "10px",paddingRight:"80px"}}>
+                                    <div style={{ display: "flex", width:"60%", gap: "2px" ,flexDirection:"column"}}>
+                                        <div style={{fontWeight:"bold",fontSize:"11px"}}> TERMS :</div>
+                                        <div style={{marginLeft:"5px"}}> 1. Payment should be made by cheque in favour of  <b style={{marginLeft:"2px",fontWeight:"bold",fontSize:"11px"}}>{invoiceData[0]?.Company_Name}</b></div>
+                                        <div style={{marginLeft:"5px"}}> 2. Payment  must be cleared within 15 days after submission of bill.</div>
+                                        <div style={{marginLeft:"5px"}}> 3. Please do not deduct any amount without proper confirmation.</div>
+                                        <div style={{marginLeft:"5px"}}> 4. Subject to Mumbai Jurisdiction</div>
+                                        <div style={{fontWeight:"bold",fontSize:"11px",marginLeft:"10px",marginTop:"20px",marginBottom:"20px"}}> This is Computerised Generated Bill hence does not require any  signature & Stam</div>
+                                    </div>
+                                    <div style={{ display: "flex",width:"40%",justifyContent:"center",alignItems:"center"}}>
+                                        <div style={{ display: "flex",flexDirection:"column",justifyContent:"center",alignItems:"center", width:"100%",  gap: "30px",fontWeight:"bold",fontSize:"13px"}}>
+                                            <div style={{}}>For <b style={{marginLeft:"5px",fontWeight:"bold",fontSize:"11px"}}>{invoiceData[0]?.Company_Name}</b></div>
+                                            <div style={{display: "flex",width:"30%",justifyContent:"center",alignItems:"center"}}> Auth. Signatory</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

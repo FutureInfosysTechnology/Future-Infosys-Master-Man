@@ -218,19 +218,16 @@ function BankName() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Bank Code</th>
                                     <th scope="col">Bank Name</th>
-                                    <th scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
 
                                 {currentRows.map((bank, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{bank.Bank_Code}</td>
-                                        <td>{bank.Bank_Name}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -246,6 +243,10 @@ function BankName() {
                                                 <button onClick={() => handleDeleteBank(bank.Bank_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{bank.Bank_Code}</td>
+                                        <td>{bank.Bank_Name}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

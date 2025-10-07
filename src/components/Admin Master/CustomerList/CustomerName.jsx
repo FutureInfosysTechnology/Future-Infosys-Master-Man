@@ -164,7 +164,7 @@ function CustomerName() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi('/Master/getBranch');
+                const response = await getApi('/Master/getAllBranchData');
                 setGetBranchName(Array.isArray(response.Data) ? response.Data : []);
             } catch (err) {
                 console.error('Fetch Error:', err);
@@ -563,6 +563,7 @@ function CustomerName() {
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Branch_Name</th>
                                     <th scope="col">Customer_Code</th>
@@ -574,24 +575,13 @@ function CustomerName() {
                                     <th scope="col">Pin_Code</th>
                                     <th scope="col">GST</th>
                                     <th scope="col">HSN_No</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((cust, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{cust.Branch_Name}</td>
-                                        <td>{cust.Customer_Code}</td>
-                                        <td>{cust.Customer_Name}</td>
-                                        <td>{cust.Booking_Type}</td>
-                                        <td>{cust.Customer_Mob}</td>
-                                        <td>{cust.Email_Id}</td>
-                                        <td>{cust.Customer_Add1}</td>
-                                        <td>{cust.Pin_Code}</td>
-                                        <td>{cust.Gst_No}</td>
-                                        <td>{cust.HSN_NO}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -647,6 +637,18 @@ function CustomerName() {
                                                     <i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{cust.Branch_Name}</td>
+                                        <td>{cust.Customer_Code}</td>
+                                        <td>{cust.Customer_Name}</td>
+                                        <td>{cust.Booking_Type}</td>
+                                        <td>{cust.Customer_Mob}</td>
+                                        <td>{cust.Email_Id}</td>
+                                        <td>{cust.Customer_Add1}</td>
+                                        <td>{cust.Pin_Code}</td>
+                                        <td>{cust.Gst_No}</td>
+                                        <td>{cust.HSN_NO}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>
@@ -770,29 +772,29 @@ function CustomerName() {
                                                 <div className="input-field3">
                                                     <label htmlFor="">Cash / Credit</label>
                                                     <Select
-    className="blue-selectbooking"
-    classNamePrefix="blue-selectbooking"
-    options={[
-        { value: "Cash", label: "Cash" },
-        { value: "Credit", label: "Credit" },
-    ]}
-    value={
-        addCustData.bookingType
-            ? { value: addCustData.bookingType, label: addCustData.bookingType }
-            : null
-    }
-    onChange={(selected) =>
-        setAddCustData({
-            ...addCustData,
-            bookingType: selected ? selected.value : "",
-        })
-    }
-    placeholder="Cash / Credit"
-    isSearchable={false}
-    isClearable={false}
-    menuPortalTarget={document.body}
-    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-/>
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={[
+                                                            { value: "Cash", label: "Cash" },
+                                                            { value: "Credit", label: "Credit" },
+                                                        ]}
+                                                        value={
+                                                            addCustData.bookingType
+                                                                ? { value: addCustData.bookingType, label: addCustData.bookingType }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                bookingType: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="Cash / Credit"
+                                                        isSearchable={false}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                                    />
 
                                                 </div>
 
@@ -927,30 +929,30 @@ function CustomerName() {
 
                                                 <div className="input-field3">
                                                     <label>GST Type</label>
-<Select
-    className="blue-selectbooking"
-    classNamePrefix="blue-selectbooking"
-    options={[
-        { value: "Transport", label: "Transport" },
-        { value: "Client", label: "Client" },
-    ]}
-    value={
-        addCustData.gstType
-            ? { value: addCustData.gstType, label: addCustData.gstType }
-            : null
-    }
-    onChange={(selected) =>
-        setAddCustData({
-            ...addCustData,
-            gstType: selected ? selected.value : "",
-        })
-    }
-    placeholder="Select GST Type"
-    isSearchable={false}
-    isClearable={false}
-    menuPortalTarget={document.body}
-    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-/>
+                                                    <Select
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={[
+                                                            { value: "Transport", label: "Transport" },
+                                                            { value: "Client", label: "Client" },
+                                                        ]}
+                                                        value={
+                                                            addCustData.gstType
+                                                                ? { value: addCustData.gstType, label: addCustData.gstType }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                gstType: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="Select GST Type"
+                                                        isSearchable={false}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                                    />
 
                                                 </div>
 
@@ -1020,31 +1022,31 @@ function CustomerName() {
                                                 <div className="input-field3">
                                                     <label htmlFor="">Billing Period</label>
                                                     <Select
-    className="blue-selectbooking"
-    classNamePrefix="blue-selectbooking"
-    options={[
-        { value: "Monthly", label: "Monthly" },
-        { value: "Quarterly", label: "Quarterly" },
-        { value: "Half Yearly", label: "Half Yearly" },
-        { value: "Yearly", label: "Yearly" },
-    ]}
-    value={
-        addCustData.billPeriod
-            ? { value: addCustData.billPeriod, label: addCustData.billPeriod }
-            : null
-    }
-    onChange={(selected) =>
-        setAddCustData({
-            ...addCustData,
-            billPeriod: selected ? selected.value : "",
-        })
-    }
-    placeholder="Billing Period"
-    isSearchable={false}
-    isClearable={false}
-    menuPortalTarget={document.body}
-    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-/>
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={[
+                                                            { value: "Monthly", label: "Monthly" },
+                                                            { value: "Quarterly", label: "Quarterly" },
+                                                            { value: "Half Yearly", label: "Half Yearly" },
+                                                            { value: "Yearly", label: "Yearly" },
+                                                        ]}
+                                                        value={
+                                                            addCustData.billPeriod
+                                                                ? { value: addCustData.billPeriod, label: addCustData.billPeriod }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                billPeriod: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="Billing Period"
+                                                        isSearchable={false}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                                    />
 
                                                 </div>
 
@@ -1061,29 +1063,29 @@ function CustomerName() {
                                                 <div className="input-field3">
                                                     <label htmlFor="">Customer Status</label>
                                                     <Select
-    className="blue-selectbooking"
-    classNamePrefix="blue-selectbooking"
-    options={[
-        { value: "Active", label: "Active" },
-        { value: "Inactive", label: "Inactive" },
-    ]}
-    value={
-        addCustData.custStatus
-            ? { value: addCustData.custStatus, label: addCustData.custStatus }
-            : null
-    }
-    onChange={(selected) =>
-        setAddCustData({
-            ...addCustData,
-            custStatus: selected ? selected.value : "",
-        })
-    }
-    placeholder="Customer Status"
-    isSearchable={false}
-    isClearable={false}
-    menuPortalTarget={document.body}
-    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-/>
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={[
+                                                            { value: "Active", label: "Active" },
+                                                            { value: "Inactive", label: "Inactive" },
+                                                        ]}
+                                                        value={
+                                                            addCustData.custStatus
+                                                                ? { value: addCustData.custStatus, label: addCustData.custStatus }
+                                                                : null
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                custStatus: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="Customer Status"
+                                                        isSearchable={false}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                                    />
 
                                                 </div>
 
@@ -1136,29 +1138,29 @@ function CustomerName() {
                                                 <div className="input-field3">
                                                     <label htmlFor="">Department</label>
                                                     <Select
-    className="blue-selectbooking"
-    classNamePrefix="blue-selectbooking"
-    options={[
-        { value: "1", label: "1" },
-        { value: "2", label: "2" },
-    ]}
-    value={
-        addCustData.DepartmentCode
-            ? { value: addCustData.DepartmentCode, label: addCustData.DepartmentCode }
-            : { value: "1", label: "1" }
-    }
-    onChange={(selected) =>
-        setAddCustData({
-            ...addCustData,
-            DepartmentCode: selected ? selected.value : "",
-        })
-    }
-    placeholder="Select Department"
-    isSearchable={false}
-    isClearable={false}
-    menuPortalTarget={document.body}
-    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-/>
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={[
+                                                            { value: "1", label: "1" },
+                                                            { value: "2", label: "2" },
+                                                        ]}
+                                                        value={
+                                                            addCustData.DepartmentCode
+                                                                ? { value: addCustData.DepartmentCode, label: addCustData.DepartmentCode }
+                                                                : { value: "1", label: "1" }
+                                                        }
+                                                        onChange={(selected) =>
+                                                            setAddCustData({
+                                                                ...addCustData,
+                                                                DepartmentCode: selected ? selected.value : "",
+                                                            })
+                                                        }
+                                                        placeholder="Select Department"
+                                                        isSearchable={false}
+                                                        isClearable={false}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                                    />
 
                                                 </div>
 

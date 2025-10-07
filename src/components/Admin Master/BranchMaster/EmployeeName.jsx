@@ -69,7 +69,7 @@ function EmployeeName() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi('/Master/getBranch');
+                const response = await getApi('/Master/getAllBranchData');
                 setGetBranch(Array.isArray(response.Data) ? response.Data : []);
             } catch (err) {
                 console.error('Fetch Error:', err);
@@ -264,6 +264,7 @@ function EmployeeName() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col" >Actions</th>
                                     <th scope="col" >Sr.No</th>
                                     <th scope="col" >Employee_Code</th>
                                     <th scope="col" >Employee_Name</th>
@@ -271,21 +272,14 @@ function EmployeeName() {
                                     <th scope="col" >User_Name</th>
                                     <th scope="col" >Password</th>
                                     <th scope="col" >CIty_Name</th>
-                                    <th scope="col" >Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((emp, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{emp.Employee_Code}</td>
-                                        <td>{emp.Employee_Name}</td>
-                                        <td>{emp.Employee_Mob}</td>
-                                        <td>{emp.User_Name}</td>
-                                        <td>{emp.Password}</td>
-                                        <td>{emp.CIty_Name}</td>
-                                        <td>
+                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
@@ -304,6 +298,14 @@ function EmployeeName() {
                                                 <button onClick={() => handleDeleteEmp(emp.Employee_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{emp.Employee_Code}</td>
+                                        <td>{emp.Employee_Name}</td>
+                                        <td>{emp.Employee_Mob}</td>
+                                        <td>{emp.User_Name}</td>
+                                        <td>{emp.Password}</td>
+                                        <td>{emp.CIty_Name}</td>
+                                       
                                     </tr>
                                 ))}
                             </tbody>

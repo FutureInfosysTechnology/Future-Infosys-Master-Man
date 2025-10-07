@@ -9,33 +9,17 @@ import html2canvas from 'html2canvas';
 import { deleteApi, getApi, postApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Select from 'react-select';
+import Select, { components } from 'react-select';
 import 'react-toggle/style.css';
 
 
 function CustomerRate() {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const methodOptions = [
-        { value: "Express", label: "Express" },
-        { value: "Domestic", label: "Domestic" },
-    ];
-    const rateModeOptions = [
-        { value: "Addition", label: "Addition" },
-        { value: "Subtraction", label: "Subtraction" },
-    ];
-    const slabOptions = [
-        { value: "5 Kg", label: "5 Kg" },
-        { value: "10 Kg", label: "10 Kg" },
-        { value: "20 Kg", label: "20 Kg" },
-        { value: "50 Kg", label: "50 Kg" },
-        { value: "100 Kg", label: "100 Kg" },
-        { value: "200 Kg", label: "200 Kg" },
-        { value: "500 Kg", label: "500 Kg" },
-    ];
     const flagOptions = [
-        { value: "Active", label: "Active" },
-        { value: "Inactive", label: "Inactive" },
+        { value: "RatePerKg", label: "RatePerKg" },
+        { value: "DocumentRate", label: "DocumentRate" },
+        { value: "Box", label: "Box" },
     ];
 
     const [getCustRate, setGetCustRate] = useState([]);
@@ -54,20 +38,15 @@ function CustomerRate() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [formdata, setFormdata] = useState({
         Client_Code: "",
-        Vendor_Code: "",
-        Flag: "",
         Mode_Code: "",
         Zone_Code: "",
         State_Code: "",
         Destination_Code: "",
-        Method: "",
-        Slab: "",
+        Origin_Code: "",
         Active_Date: firstDayOfMonth,
         Closing_Date: today,
-        RatePer: "",
         Amount: "",
         Weight: "",
-        ConnectingHub: ""
     });
     console.log(formdata);
     const [submittedData, setSubmittedData] = useState([]);
@@ -224,8 +203,7 @@ function CustomerRate() {
 
     const handlesave = async (e) => {
         e.preventDefault();
-        if(!formdata.Client_Code || !formdata.Mode_Code || !formdata.Vendor_Code)
-        {
+        if (!formdata.Client_Code || !formdata.Mode_Code || !formdata.Vendor_Code) {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Missing Information',
@@ -235,20 +213,14 @@ function CustomerRate() {
         }
         const requestBody = {
             Client_Code: formdata.Client_Code.toString(),
-            Vendor_Code: formdata.Vendor_Code,
-            Flag: formdata.Flag,
             Mode_Code: formdata.Mode_Code,
             Zone_Code: formdata.Zone_Code,
             State_Code: formdata.State_Code,
             Destination_Code: formdata.Destination_Code,
-            Method: formdata.Method,
-            Slab: formdata.Slab,
             Active_Date: formdata.Active_Date,
             Closing_Date: formdata.Closing_Date,
-            RatePer: formdata.RatePer,
             Amount: formdata.Amount,
             Weight: formdata.Weight,
-            ConnectingHub: "HUB01",
             RateDetails: submittedData.map((data) => ({
                 On_Addition: data.On_Addition,
                 Lower_Wt: data.Lower_Wt,
@@ -264,20 +236,15 @@ function CustomerRate() {
                 setGetCustRate([...getCustRate, response.data]);
                 setFormdata({
                     Client_Code: "",
-                    Vendor_Code: "",
-                    Flag: "",
                     Mode_Code: "",
                     Zone_Code: "",
                     State_Code: "",
                     Destination_Code: "",
-                    Method: "",
-                    Slab: "",
-                    Active_Date: "",
-                    Closing_Date: "",
-                    RatePer: "",
+                    Origin_Code: "",
+                    Active_Date: firstDayOfMonth,
+                    Closing_Date: today,
                     Amount: "",
                     Weight: "",
-                    ConnectingHub: ""
                 });
                 setTableRowData({
                     On_Addition: "",
@@ -297,28 +264,24 @@ function CustomerRate() {
 
     const handleupdate = async (e) => {
         e.preventDefault();
-        return Swal.fire({
+        if (!formdata.Client_Code || !formdata.Mode_Code || !formdata.Vendor_Code) {
+            return Swal.fire({
                 icon: 'warning',
                 title: 'Missing Information',
                 text: 'Please fill in the empty fields.',
                 confirmButtonText: 'OK',
             });
+        }
         const requestBody = {
             Client_Code: formdata.Client_Code.toString(),
-            Vendor_Code: formdata.Vendor_Code,
-            Flag: formdata.Flag,
             Mode_Code: formdata.Mode_Code,
             Zone_Code: formdata.Zone_Code,
             State_Code: formdata.State_Code,
             Destination_Code: formdata.Destination_Code,
-            Method: formdata.Method,
-            Slab: formdata.Slab,
             Active_Date: formdata.Active_Date,
             Closing_Date: formdata.Closing_Date,
-            RatePer: formdata.RatePer,
             Amount: formdata.Amount,
             Weight: formdata.Weight,
-            ConnectingHub: "HUB01",
             RateDetails: submittedData.map((data) => ({
                 On_Addition: data.On_Addition,
                 Lower_Wt: data.Lower_Wt,
@@ -334,20 +297,15 @@ function CustomerRate() {
                 setGetCustRate(getCustRate.map((cust) => cust.Client_Code === formdata.Client_Code ? response.data : cust));
                 setFormdata({
                     Client_Code: "",
-                    Vendor_Code: "",
-                    Flag: "",
                     Mode_Code: "",
                     Zone_Code: "",
                     State_Code: "",
                     Destination_Code: "",
-                    Method: "",
-                    Slab: "",
-                    Active_Date: "",
-                    Closing_Date: "",
-                    RatePer: "",
+                    Origin_Code: "",
+                    Active_Date: firstDayOfMonth,
+                    Closing_Date: today,
                     Amount: "",
                     Weight: "",
-                    ConnectingHub: ""
                 });
                 setTableRowData({
                     On_Addition: "",
@@ -432,6 +390,26 @@ function CustomerRate() {
 
     return (
         <>
+            <style>{`
+  @media only screen and (max-width: 767px) {
+      .min {
+        width: 100% !important; /* full width for mobile */
+         margin-right: 5px;
+      }
+    }
+
+    @media only screen and (min-width: 768px) {
+      .min {
+        width: 215px !important; /* fixed for tablet & desktop */
+      }
+    }
+
+     @media only screen and (min-width: 1024px) {
+      .min {
+        width: 122px !important; /* fixed for tablet & desktop */
+      }
+    }
+`}</style>
 
             <div className="body">
                 <div className="container1">
@@ -482,6 +460,7 @@ function CustomerRate() {
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Customer_Name</th>
                                     <th scope="col">Mode_Name</th>
@@ -494,24 +473,12 @@ function CustomerRate() {
                                     <th scope="col">Rate/Kg</th>
                                     <th scope="col">Amount</th>
                                     <th scope="col">Weight</th>
-                                    <th scope="col">Actions</th>
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
                                 {currentRows.map((rate, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{rate?.Customer_Name}</td>
-                                        <td>{rate?.Mode_Name}</td>
-                                        <td>{rate?.Zone_Name}</td>
-                                        <td>{rate?.Origin_Name}</td>
-                                        <td>{rate?.Destination_Name}</td>
-                                        <td>{rate?.State_Name}</td>
-                                        <td>{rate?.Method}</td>
-                                        <td>{rate?.Slab}</td>
-                                        <td>{rate?.RatePer}</td>
-                                        <td>{rate?.Amount}</td>
-                                        <td>{rate?.Weight}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -540,6 +507,19 @@ function CustomerRate() {
                                                 </button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{rate?.Customer_Name}</td>
+                                        <td>{rate?.Mode_Name}</td>
+                                        <td>{rate?.Zone_Name}</td>
+                                        <td>{rate?.Origin_Name}</td>
+                                        <td>{rate?.Destination_Name}</td>
+                                        <td>{rate?.State_Name}</td>
+                                        <td>{rate?.Method}</td>
+                                        <td>{rate?.Slab}</td>
+                                        <td>{rate?.RatePer}</td>
+                                        <td>{rate?.Amount}</td>
+                                        <td>{rate?.Weight}</td>
+
                                     </tr>
                                 ))}
                             </tbody>
@@ -579,7 +559,15 @@ function CustomerRate() {
                     </div>
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal" contentLabel="Modal">
+                        className="custom-modal" contentLabel="Modal"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Customer Rate Master</header>
@@ -618,24 +606,26 @@ function CustomerRate() {
                                         </div>
 
                                         <div className="input-field1">
-                                            <label htmlFor="">Vendor Name</label>
+                                            <label htmlFor="">Origin</label>
                                             <Select
-                                                options={getVendor.map(vendor => ({
-                                                    value: vendor.Vendor_Code,   // adjust keys from your API
-                                                    label: vendor.Vendor_Name
+                                                options={getCity.map(city => ({
+                                                    value: city.City_Code,   // adjust keys from your API
+                                                    label: city.City_Name
                                                 }))}
                                                 value={
-                                                    formdata.Vendor_Code
-                                                        ? { value: formdata.Vendor_Code, label: getVendor.find(c => c.Vendor_Code === formdata.Vendor_Code)?.Vendor_Name || "" }
+                                                    formdata.Origin_Code
+                                                        ? { value: formdata.Origin_Code, label: getCity.find(c => c.City_Code === formdata.Origin_Code)?.City_Name || "" }
                                                         : null
                                                 }
-                                                onChange={(selectedOption) =>
+                                                onChange={(selectedOption) => {
+                                                    console.log(selectedOption);
                                                     setFormdata({
                                                         ...formdata,
-                                                        Vendor_Code: selectedOption ? selectedOption.value : ""
+                                                        Origin_Code: selectedOption ? selectedOption.value : ""
                                                     })
                                                 }
-                                                placeholder="Vendor Name"
+                                                }
+                                                placeholder="Select Origin"
                                                 isSearchable
                                                 classNamePrefix="blue-selectbooking"
                                                 className="blue-selectbooking"
@@ -650,112 +640,245 @@ function CustomerRate() {
                                                     menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                                 }}
                                             />
-
                                         </div>
-
-
                                         <div className="input-field1">
                                             <label htmlFor="">Mode</label>
                                             <Select
                                                 options={getMode.map(mode => ({
-                                                    value: mode.Mode_Code,   // adjust keys from your API
+                                                    value: mode.Mode_Code,
                                                     label: mode.Mode_Name
                                                 }))}
                                                 value={
-                                                    formdata.Mode_Code
-                                                        ? { value: formdata.Mode_Code, label: getMode.find(c => c.Mode_Code === formdata.Mode_Code)?.Mode_Name || "" }
-                                                        : null
+                                                    formdata.Mode_Code && Array.isArray(formdata.Mode_Code)
+                                                        ? formdata.Mode_Code.map(code => ({
+                                                            value: code,
+                                                            label: getMode.find(c => c.Mode_Code === code)?.Mode_Name || ""
+                                                        }))
+                                                        : []
                                                 }
-                                                onChange={(selectedOption) =>
+                                                onChange={(selectedOptions) =>
                                                     setFormdata({
                                                         ...formdata,
-                                                        Mode_Code: selectedOption ? selectedOption.value : ""
+                                                        Mode_Code: selectedOptions ? selectedOptions.map(opt => opt.value) : []
                                                     })
                                                 }
                                                 placeholder="Select Mode"
                                                 isSearchable
+                                                isMulti
+                                                closeMenuOnSelect={false}
+                                                hideSelectedOptions={false}
+                                                components={{
+                                                    Option: (props) => (
+                                                        <components.Option {...props}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={props.isSelected}
+                                                                onChange={() => null}
+                                                                style={{ marginRight: "8px", verticalAlign: "middle" }}
+                                                            />
+                                                            <label style={{ verticalAlign: "middle" }}>{props.label}</label>
+                                                        </components.Option>
+                                                    ),
+                                                }}
                                                 classNamePrefix="blue-selectbooking"
                                                 className="blue-selectbooking"
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                menuPortalTarget={document.body}
                                                 styles={{
-                                                    placeholder: (base) => ({
+                                                    control: (base) => ({
                                                         ...base,
                                                         whiteSpace: "nowrap",
                                                         overflow: "hidden",
-                                                        textOverflow: "ellipsis"
+                                                        textOverflow: "ellipsis",
+                                                        minHeight: "38px",
+                                                        display: "flex",
+                                                        alignItems: "center", // ✅ Center vertically
                                                     }),
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                    valueContainer: (base) => ({
+                                                        ...base,
+                                                        flexWrap: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        whiteSpace: "nowrap",
+                                                        maxWidth: "100%",
+                                                        alignItems: "center", // ✅ Center text vertically
+                                                    }),
+                                                    multiValue: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: "100px",
+                                                    }),
+                                                    multiValueLabel: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: "80px",
+                                                    }),
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                                                 }}
                                             />
-
                                         </div>
 
                                         <div className="input-field1">
                                             <label htmlFor="">Zone Name</label>
                                             <Select
-                                                options={getZone.map((zone) => ({
-                                                    value: zone.Zone_Code,   // adjust keys from your API
+                                                options={getZone.map(zone => ({
+                                                    value: zone.Zone_Code,
                                                     label: zone.Zone_Name
                                                 }))}
                                                 value={
-                                                    formdata.Zone_Code
-                                                        ? { value: formdata.Zone_Code, label: getZone.find(c => c.Zone_Code === formdata.Zone_Code)?.Zone_Name || "" }
-                                                        : null
+                                                    formdata.Zone_Code && Array.isArray(formdata.Zone_Code)
+                                                        ? formdata.Zone_Code.map(code => ({
+                                                            value: code,
+                                                            label: getZone.find(c => c.Zone_Code === code)?.Zone_Name || ""
+                                                        }))
+                                                        : []
                                                 }
-                                                onChange={(selectedOption) =>
+                                                onChange={(selectedOptions) =>
                                                     setFormdata({
                                                         ...formdata,
-                                                        Zone_Code: selectedOption ? selectedOption.value : ""
+                                                        Zone_Code: selectedOptions ? selectedOptions.map(opt => opt.value) : []
                                                     })
                                                 }
                                                 placeholder="Select Zone"
                                                 isSearchable
+                                                isMulti
+                                                closeMenuOnSelect={false}
+                                                hideSelectedOptions={false}
+                                                components={{
+                                                    Option: (props) => (
+                                                        <components.Option {...props}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={props.isSelected}
+                                                                onChange={() => null}
+                                                                style={{ marginRight: "8px", verticalAlign: "middle" }}
+                                                            />
+                                                            <label style={{ verticalAlign: "middle" }}>{props.label}</label>
+                                                        </components.Option>
+                                                    ),
+                                                }}
                                                 classNamePrefix="blue-selectbooking"
                                                 className="blue-selectbooking"
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                menuPortalTarget={document.body}
                                                 styles={{
-                                                    placeholder: (base) => ({
+                                                    control: (base) => ({
                                                         ...base,
                                                         whiteSpace: "nowrap",
                                                         overflow: "hidden",
-                                                        textOverflow: "ellipsis"
+                                                        textOverflow: "ellipsis",
+                                                        minHeight: "38px",
+                                                        display: "flex",
+                                                        alignItems: "center", // ✅ Center vertically
                                                     }),
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                    valueContainer: (base) => ({
+                                                        ...base,
+                                                        flexWrap: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        whiteSpace: "nowrap",
+                                                        maxWidth: "100%",
+                                                        alignItems: "center", // ✅ Center text vertically
+                                                    }),
+                                                    multiValue: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: "100px",
+                                                    }),
+                                                    multiValueLabel: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: "80px",
+                                                    }),
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                                                 }}
                                             />
                                         </div>
 
+
                                         <div className="input-field1">
                                             <label htmlFor="">State Name</label>
                                             <Select
-                                                options={getState.map((state) => ({
-                                                    value: state.State_Code,   // adjust keys from your API
+                                                options={getState.map(state => ({
+                                                    value: state.State_Code,
                                                     label: state.State_Name
                                                 }))}
                                                 value={
-                                                    formdata.State_Code
-                                                        ? { value: formdata.State_Code, label: getState.find(c => c.State_Code === formdata.State_Code)?.State_Name || "" }
-                                                        : null
+                                                    formdata.State_Code && Array.isArray(formdata.State_Code)
+                                                        ? formdata.State_Code.map(code => ({
+                                                            value: code,
+                                                            label: getState.find(c => c.State_Code === code)?.State_Name || ""
+                                                        }))
+                                                        : []
                                                 }
-                                                onChange={(selectedOption) =>
+                                                onChange={(selectedOptions) =>
                                                     setFormdata({
                                                         ...formdata,
-                                                        State_Code: selectedOption ? selectedOption.value : ""
+                                                        State_Code: selectedOptions ? selectedOptions.map(opt => opt.value) : []
                                                     })
                                                 }
                                                 placeholder="Select State"
                                                 isSearchable
+                                                isMulti
+                                                closeMenuOnSelect={false}
+                                                hideSelectedOptions={false}
+                                                components={{
+                                                    Option: (props) => (
+                                                        <components.Option {...props}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={props.isSelected}
+                                                                onChange={() => null}
+                                                                style={{ marginRight: "8px", verticalAlign: "middle" }}
+                                                            />
+                                                            <label style={{ verticalAlign: "middle" }}>{props.label}</label>
+                                                        </components.Option>
+                                                    ),
+                                                }}
                                                 classNamePrefix="blue-selectbooking"
                                                 className="blue-selectbooking"
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                menuPortalTarget={document.body}
                                                 styles={{
-                                                    placeholder: (base) => ({
+                                                    control: (base) => ({
                                                         ...base,
                                                         whiteSpace: "nowrap",
                                                         overflow: "hidden",
-                                                        textOverflow: "ellipsis"
+                                                        textOverflow: "ellipsis",
+                                                        minHeight: "38px",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        borderRadius: "6px",
                                                     }),
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                    valueContainer: (base) => ({
+                                                        ...base,
+                                                        flexWrap: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        whiteSpace: "nowrap",
+                                                        maxWidth: "100%",
+                                                        alignItems: "center",
+                                                    }),
+                                                    multiValue: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: "100px",
+                                                    }),
+                                                    multiValueLabel: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: "80px",
+                                                    }),
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                                                 }}
                                             />
                                         </div>
@@ -764,163 +887,86 @@ function CustomerRate() {
                                             <label htmlFor="">Destination</label>
                                             <Select
                                                 options={getCity.map(city => ({
-                                                    value: city.City_Code,   // adjust keys from your API
+                                                    value: city.City_Code,
                                                     label: city.City_Name
                                                 }))}
                                                 value={
-                                                    formdata.Destination_Code
-                                                        ? { value: formdata.Destination_Code, label: getCity.find(c => c.City_Code === formdata.Destination_Code)?.City_Name || "" }
-                                                        : null
+                                                    formdata.Destination_Code && Array.isArray(formdata.Destination_Code)
+                                                        ? formdata.Destination_Code.map(code => ({
+                                                            value: code,
+                                                            label: getCity.find(c => c.City_Code === code)?.City_Name || ""
+                                                        }))
+                                                        : []
                                                 }
-                                                onChange={(selectedOption) => {
-                                                    console.log(selectedOption);
+                                                onChange={(selectedOptions) =>
                                                     setFormdata({
                                                         ...formdata,
-                                                        Destination_Code: selectedOption ? selectedOption.value : ""
+                                                        Destination_Code: selectedOptions ? selectedOptions.map(opt => opt.value) : []
                                                     })
-                                                }
                                                 }
                                                 placeholder="Select Destination"
                                                 isSearchable
+                                                isMulti
+                                                closeMenuOnSelect={false}
+                                                hideSelectedOptions={false}
+                                                components={{
+                                                    Option: (props) => (
+                                                        <components.Option {...props}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={props.isSelected}
+                                                                onChange={() => null} // handled internally by react-select
+                                                                style={{ marginRight: "8px", verticalAlign: "middle" }}
+                                                            />
+                                                            <label style={{ verticalAlign: "middle" }}>{props.label}</label>
+                                                        </components.Option>
+                                                    ),
+                                                }}
                                                 classNamePrefix="blue-selectbooking"
                                                 className="blue-selectbooking"
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                menuPortalTarget={document.body}
                                                 styles={{
-                                                    placeholder: (base) => ({
+                                                    control: (base) => ({
                                                         ...base,
                                                         whiteSpace: "nowrap",
                                                         overflow: "hidden",
-                                                        textOverflow: "ellipsis"
+                                                        textOverflow: "ellipsis",
+                                                        minHeight: "38px",
+                                                        display: "flex",
+                                                        alignItems: "center", // ✅ Center vertically
                                                     }),
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                    valueContainer: (base) => ({
+                                                        ...base,
+                                                        flexWrap: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        whiteSpace: "nowrap",
+                                                        maxWidth: "100%",
+                                                        alignItems: "center", // ✅ Center tags vertically
+                                                    }),
+                                                    multiValue: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: "100px",
+                                                    }),
+                                                    multiValueLabel: (base) => ({
+                                                        ...base,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: "80px",
+                                                    }),
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                                                 }}
                                             />
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label htmlFor="">Method</label>
-                                            <Select
-                                                options={methodOptions}
-                                                value={methodOptions.find((opt) => opt.value === formdata.Method) || null}
-                                                onChange={(selectedOption) =>
-                                                    setFormdata({ ...formdata, Method: selectedOption?.value || "" })
-                                                }
-                                                placeholder="Select Method"
-                                                isSearchable
-                                                classNamePrefix="blue-selectbooking"
-                                                className="blue-selectbooking"
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                                styles={{
-                                                    placeholder: (base) => ({
-                                                        ...base,
-                                                        whiteSpace: "nowrap",
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis"
-                                                    }),
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="input-field1">
-                                            <label htmlFor="">Rate Mode</label>
-                                            <Select
-                                                options={rateModeOptions}
-                                                value={rateModeOptions.find((opt) => opt.value === formdata.RateMode) || null}
-                                                onChange={(selectedOption) =>
-                                                    setFormdata({ ...formdata, RateMode: selectedOption?.value || "" })
-                                                }
-                                                placeholder="Select Rate Mode"
-                                                isSearchable
-                                                classNamePrefix="blue-selectbooking"
-                                                className="blue-selectbooking"
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                                styles={{
-                                                    placeholder: (base) => ({
-                                                        ...base,
-                                                        whiteSpace: "nowrap",
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis"
-                                                    }),
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="input-field1">
-                                            <label htmlFor="">Slab</label>
-                                            <Select
-                                                options={slabOptions}
-                                                value={slabOptions.find((opt) => opt.value === formdata.Slab) || null}
-                                                onChange={(selectedOption) =>
-                                                    setFormdata({ ...formdata, Slab: selectedOption?.value || "" })
-                                                }
-                                                placeholder="Select Slab"
-                                                isSearchable
-                                                classNamePrefix="blue-selectbooking"
-                                                className="blue-selectbooking"
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                                styles={{
-                                                    placeholder: (base) => ({
-                                                        ...base,
-                                                        whiteSpace: "nowrap",
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis"
-                                                    }),
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                                }}
-                                            />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Flag</label>
-                                            <Select
-                                                options={flagOptions}
-                                                value={flagOptions.find((opt) => opt.value === formdata.Flag) || null}
-                                                onChange={(selectedOption) =>
-                                                    setFormdata({ ...formdata, Flag: selectedOption?.value || "" })
-                                                }
-                                                placeholder="Select Flag"
-                                                isSearchable
-                                                classNamePrefix="blue-selectbooking"
-                                                className="blue-selectbooking"
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                                styles={{
-                                                    placeholder: (base) => ({
-                                                        ...base,
-                                                        whiteSpace: "nowrap",
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis"
-                                                    }),
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                                }}
-                                            />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Rate/Kg</label>
-                                            <input type="tel" placeholder="Rate/Kg" value={formdata.RatePer}
-                                                onChange={(e) => setFormdata({ ...formdata, RatePer: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Increase Rate %</label>
-                                            <input type="tel" placeholder="Increase Rate %" />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Min Weight</label>
-                                            <input type="tel" placeholder="Min Weight" value={formdata.Weight}
-                                                onChange={(e) => setFormdata({ ...formdata, Weight: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Min Amount</label>
-                                            <input type="tel" placeholder="Amount" value={formdata.Amount}
-                                                onChange={(e) => setFormdata({ ...formdata, Amount: e.target.value })} />
-                                        </div>
                                         <div className="input-field1" >
                                             <label htmlFor="">Active Date</label>
                                             <DatePicker
-                                            required
+                                                required
                                                 portalId="root-portal"
                                                 selected={formdata.Active_Date}
                                                 onChange={(date) => handleDateChange("Active_Date", date)}
@@ -933,13 +979,26 @@ function CustomerRate() {
                                             <label htmlFor="">Closing Date</label>
 
                                             <DatePicker
-                                            required
+                                                required
                                                 portalId="root-portal"
                                                 selected={formdata.Closing_Date}
                                                 onChange={(date) => handleDateChange("Closing_Date", date)}
                                                 dateFormat="dd/MM/yyyy"
                                                 className="form-control form-control-sm"
                                             />
+                                        </div>
+
+                                        <div className="input-field3 min"  >
+                                            <label htmlFor="">Min Weight</label>
+                                            <input type="tel" placeholder="Min Weight" value={formdata.Weight}
+                                                onChange={(e) => setFormdata({ ...formdata, Weight: e.target.value })} />
+                                        </div>
+
+                                        <div className="input-field3 min"
+                                        >
+                                            <label htmlFor="">Min Amount</label>
+                                            <input type="tel" placeholder="Amount" value={formdata.Amount}
+                                                onChange={(e) => setFormdata({ ...formdata, Amount: e.target.value })} />
                                         </div>
                                         <div className='bottom-buttons' style={{ marginTop: "22px", marginLeft: "10px" }}>
                                             {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
@@ -950,39 +1009,21 @@ function CustomerRate() {
                                     </div>
                                 </form>
                             </div>
-                            <div className='container2' style={{width:"100%"}}>
-                                <div className="table-container1" style={{width:"100%"}}>
-                                    <table className="table table-bordered table-sm" style={{width:"97%", whiteSpace: "nowrap" }}>
+                            <div className='container2' style={{ width: "100%" }}>
+                                <div className="table-container1" style={{ width: "100%" }}>
+                                    <table className="table table-bordered table-sm" style={{ width: "97%", whiteSpace: "nowrap" }}>
                                         <thead>
                                             <tr>
-                                                <th>Sr No</th>
+                                                <th>Rate Type</th>
                                                 <th>Document Rate</th>
                                                 <th>Min Weight</th>
                                                 <th>Max Weight</th>
                                                 <th>Rate</th>
-                                                <th>Rate Flag</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td></td>
-                                                <td>
-                                                    <input type="text" className="form-control" placeholder="Document Rate" value={tableRowData.On_Addition}
-                                                        name="On_Addition" onChange={handleChange} />
-                                                </td>
-                                                <td>
-                                                    <input type="text" className="form-control" placeholder="Min Weight" value={tableRowData.Lower_Wt}
-                                                        name="Lower_Wt" onChange={handleChange} />
-                                                </td>
-                                                <td>
-                                                    <input type="text" className="form-control" placeholder="Max Weight" value={tableRowData.Upper_Wt}
-                                                        name="Upper_Wt" onChange={handleChange} />
-                                                </td>
-                                                <td>
-                                                    <input type="text" className="form-control" placeholder="Rate" value={tableRowData.Rate}
-                                                        name="Rate" onChange={handleChange} />
-                                                </td>
                                                 <td>
                                                     <Select
                                                         options={flagOptions}
@@ -1002,18 +1043,45 @@ function CustomerRate() {
                                                                 overflow: "hidden",
                                                                 textOverflow: "ellipsis",
                                                                 width: "100px",
-                                                                marginLeft: "5px"
+                                                                marginLeft: "5px",
+                                                                fontWeight: "normal", // ✅ make placeholder not bold
+                                                                color: "#999" // optional: softer color for placeholder
                                                             }),
-                                                            input: (base) =>
-                                                            ({
+                                                            input: (base) => ({
                                                                 ...base,
                                                                 width: "100px",
-                                                                paddingLeft: "10px"
+                                                                paddingLeft: "10px",
+                                                                fontWeight: "normal", // ✅ ensure typed text also not bold
                                                             }),
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                            singleValue: (base) => ({
+                                                                ...base,
+                                                                fontWeight: "normal", // ✅ make selected value not bold
+                                                            }),
+                                                            menuPortal: (base) => ({
+                                                                ...base,
+                                                                zIndex: 9999
+                                                            })
                                                         }}
+
                                                     />
                                                 </td>
+                                                <td>
+                                                    <input type="text" className="form-control" placeholder="Document Rate" value={tableRowData.On_Addition}
+                                                        name="On_Addition" onChange={handleChange} />
+                                                </td>
+                                                <td>
+                                                    <input type="text" className="form-control" placeholder="Min Weight" value={tableRowData.Lower_Wt}
+                                                        name="Lower_Wt" onChange={handleChange} />
+                                                </td>
+                                                <td>
+                                                    <input type="text" className="form-control" placeholder="Max Weight" value={tableRowData.Upper_Wt}
+                                                        name="Upper_Wt" onChange={handleChange} />
+                                                </td>
+                                                <td>
+                                                    <input type="text" className="form-control" placeholder="Rate" value={tableRowData.Rate}
+                                                        name="Rate" onChange={handleChange} />
+                                                </td>
+
                                                 <td >
                                                     <button className="ok-btn" style={{ padding: "2px", fontSize: "30px", width: "40px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center" }}
                                                         onClick={handleAddRow}>

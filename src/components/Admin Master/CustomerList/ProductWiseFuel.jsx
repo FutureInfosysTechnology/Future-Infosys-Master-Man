@@ -404,6 +404,7 @@ function ProductWiseFuel() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Customer_Name</th>
                                     <th scope="col">Mode</th>
@@ -418,27 +419,13 @@ function ProductWiseFuel() {
                                     <th scope="col">Insurance_Charge</th>
                                     <th scope="col">From_Date</th>
                                     <th scope="col">To_Date</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((cust, index) => (
                                     <tr key={index}>
-                                        <td>{cust.ID}</td>
-                                        <td>{getCustomerNameByCode(cust.Customer_Code)}</td>
-                                        <td>{getModeNameByCode(cust.Mode_Code)}</td>
-                                        <td>{cust.Fuel_Charges}</td>
-                                        <td>{cust.Fov_Charges}</td>
-                                        <td>{cust.Docket_Charges}</td>
-                                        <td>{cust.Dilivery_Charges}</td>
-                                        <td>{cust.Packing_Charges}</td>
-                                        <td>{cust.Green_Charges}</td>
-                                        <td>{cust.Hamali_Charges}</td>
-                                        <td>{cust.Other_Charges}</td>
-                                        <td>{cust.Insurance_Charges}</td>
-                                        <td>{formatDate(cust.From_Date)}</td>
-                                        <td>{formatDate(cust.To_Date)}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -466,6 +453,21 @@ function ProductWiseFuel() {
                                                     <i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{cust.ID}</td>
+                                        <td>{getCustomerNameByCode(cust.Customer_Code)}</td>
+                                        <td>{getModeNameByCode(cust.Mode_Code)}</td>
+                                        <td>{cust.Fuel_Charges}</td>
+                                        <td>{cust.Fov_Charges}</td>
+                                        <td>{cust.Docket_Charges}</td>
+                                        <td>{cust.Dilivery_Charges}</td>
+                                        <td>{cust.Packing_Charges}</td>
+                                        <td>{cust.Green_Charges}</td>
+                                        <td>{cust.Hamali_Charges}</td>
+                                        <td>{cust.Other_Charges}</td>
+                                        <td>{cust.Insurance_Charges}</td>
+                                        <td>{formatDate(cust.From_Date)}</td>
+                                        <td>{formatDate(cust.To_Date)}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

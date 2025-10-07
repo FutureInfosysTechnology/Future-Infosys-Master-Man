@@ -392,7 +392,7 @@ function PerformanceInvoice() {
                                             <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>IGST%{invoiceData.IGST_Per}</div>
+                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>IGST {invoiceData.IGST_Per}%</div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.IGST_Amount}</div>
                                         </div>
                                         <div className="div6" style={{ height: "25px", textAlign: "center", display: "flex", flexDirection: "row", }}>
@@ -400,7 +400,7 @@ function PerformanceInvoice() {
                                             <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>CGST%{invoiceData.CGST_Per}</div>
+                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>CGST {invoiceData.CGST_Per}%</div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.CGST_Amount}</div>
                                         </div>
                                         <div className="div7" style={{ height: "25px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black" }}>
@@ -408,7 +408,7 @@ function PerformanceInvoice() {
                                             <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                             <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>SGST%{invoiceData.SGST_Per}</div>
+                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>SGST {invoiceData.SGST_Per}%</div>
                                             <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.SGST_Amount}</div>
                                         </div>
                                     </div>

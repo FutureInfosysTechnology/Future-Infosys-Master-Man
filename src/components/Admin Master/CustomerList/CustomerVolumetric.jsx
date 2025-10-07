@@ -324,6 +324,7 @@ console.log(addVolumteric);
                         <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Code</th>
                                     <th scope="col">Customer Name</th>
@@ -333,22 +334,13 @@ console.log(addVolumteric);
                                     <th scope="col">Feet</th>
                                     <th scope="col">Inches</th>
                                     <th scope="col">Inches Feet</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((vol, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{vol.Customer_Code}</td>
-                                        <td>{vol.Customer_Name}</td>
-                                        <td>{vol.Mode_Code}</td>
-                                        <td>{vol.Mode_Name}</td>
-                                        <td>{vol.Centimeter}</td>
-                                        <td>{vol.Feet}</td>
-                                        <td>{vol.Inches}</td>
-                                        <td>{vol.Inches_Feet}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -372,6 +364,16 @@ console.log(addVolumteric);
                                                 <button className='edit-btn' onClick={() => handleDeleteVolumetric(vol.Customer_Code)}><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{vol.Customer_Code}</td>
+                                        <td>{vol.Customer_Name}</td>
+                                        <td>{vol.Mode_Code}</td>
+                                        <td>{vol.Mode_Name}</td>
+                                        <td>{vol.Centimeter}</td>
+                                        <td>{vol.Feet}</td>
+                                        <td>{vol.Inches}</td>
+                                        <td>{vol.Inches_Feet}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

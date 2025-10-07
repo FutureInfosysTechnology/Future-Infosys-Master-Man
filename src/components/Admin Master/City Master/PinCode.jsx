@@ -151,7 +151,19 @@ function PinCode() {
 
     const handleSavePinCode = async (e) => {
         e.preventDefault();
-
+ const errors = [];
+    
+        if (!addData.pinCode) errors.push("Pin Code is required");
+        if (!addData.areaName) errors.push("Area  is required");
+        if (!addData.stateCode) errors.push("State is required");
+        if (errors.length > 0) {
+                   Swal.fire({
+                       icon: 'error',
+                       title: 'Validation Error',
+                       html: errors.map(err => `<div>${err}</div>`).join(''),
+                   });
+                   return;
+               }
         const requestBody = {
             pincode: addData.pinCode,
             AreaName: addData.areaName,
@@ -348,6 +360,7 @@ function PinCode() {
                     <table className='table table-bordered table-sm'>
                         <thead className='table-sm'>
                             <tr>
+                                <th scope="col">Actions</th>
                                 <th scope="col">Sr.No</th>
                                 <th scope="col">Pin_Code</th>
                                 <th scope="col">Area_Name</th>
@@ -358,24 +371,14 @@ function PinCode() {
                                 <th scope="col">State Name</th>
                                 <th scope="col">Vendor Name</th>
                                 <th scope="col">Country Name</th>
-                                <th scope="col">Actions</th>
+                                
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((pin, index) => (
                                 <tr key={index}>
-                                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                    <td>{pin.Pincode}</td>
-                                    <td>{pin.Area_Name}</td>
-                                    <td>{pin.City_Name}</td>
-                                    <td>{pin.ODA_OPA}</td>
-                                    <td>{pin.Serviceable}</td>
-                                    <td>{pin.Zone_Name}</td>
-                                    <td>{pin.State_Name}</td>
-                                    <td>{pin.Vendor_Name}</td>
-                                    <td>{pin.Country_Name}</td>
-                                    <td>
+                                     <td>
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                             <button className='edit-btn' onClick={() => {
                                                 setIsEditMode(true);
@@ -397,6 +400,17 @@ function PinCode() {
                                             <button className='edit-btn' onClick={() => handleDeletePinCode(pin.Pincode)}><i className='bi bi-trash'></i></button>
                                         </div>
                                     </td>
+                                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                    <td>{pin.Pincode}</td>
+                                    <td>{pin.Area_Name}</td>
+                                    <td>{pin.City_Name}</td>
+                                    <td>{pin.ODA_OPA}</td>
+                                    <td>{pin.Serviceable}</td>
+                                    <td>{pin.Zone_Name}</td>
+                                    <td>{pin.State_Name}</td>
+                                    <td>{pin.Vendor_Name}</td>
+                                    <td>{pin.Country_Name}</td>
+                                   
                                 </tr>
                             ))}
                         </tbody>
@@ -449,7 +463,7 @@ function PinCode() {
                                     <div className="input-field1">
                                         <label htmlFor="">Pin Code</label>
                                         <input type="tel" id="pincode" name="pincode" maxLength="6"
-                                            placeholder="Pin Code" required
+                                            placeholder="Pin Code" 
                                             value={addData.pinCode}
                                             onChange={(e) => setAddData({ ...addData, pinCode: e.target.value })}
                                             readOnly={isEditMode} />
@@ -458,7 +472,7 @@ function PinCode() {
                                     <div className="input-field1">
                                         <label htmlFor="">Area Name</label>
                                         <input type="text" placeholder="Area Name" value={addData.areaName}
-                                            onChange={(e) => setAddData({ ...addData, areaName: e.target.value })} required />
+                                            onChange={(e) => setAddData({ ...addData, areaName: e.target.value })}  />
                                     </div>
                                     <div className="input-field1">
                                         <label>City Name</label>
@@ -597,7 +611,7 @@ function PinCode() {
                                     <div className="input-field1">
                                         <label htmlFor="">Kilometers</label>
                                         <input type="text" placeholder="Km" value={addData.km}
-                                            onChange={(e) => setAddData({ ...addData, km: e.target.value })} required />
+                                            onChange={(e) => setAddData({ ...addData, km: e.target.value })}  />
                                     </div>
 
                                     <div className="input-field1">

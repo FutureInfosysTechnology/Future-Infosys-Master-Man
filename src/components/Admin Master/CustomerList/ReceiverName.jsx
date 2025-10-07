@@ -333,6 +333,7 @@ function ReceiverName() {
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Receiver_Code</th>
                                     <th scope="col">Receiver_Name</th>
@@ -344,25 +345,14 @@ function ReceiverName() {
                                     <th scope="col">Email_ID</th>
                                     <th scope="col">GST_No</th>
                                     <th scope="col">HSN_No</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((receiver, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{receiver.Receiver_Code}</td>
-                                        <td>{receiver.Receiver_Name}</td>
-                                        <td>{receiver.Receiver_Add1}</td>
-                                        <td>{receiver.Receiver_Pin}</td>
-                                        <td>{receiver.City_Name}</td>
-                                        <td>{receiver.State_Name}</td>
-                                        <td>{receiver.Receiver_Mob}</td>
-                                        <td>{receiver.Receiver_Email}</td>
-                                        <td>{receiver.GSTNo}</td>
-                                        <td>{receiver.HSNNo}</td>
-                                        <td>
+                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
@@ -389,6 +379,18 @@ function ReceiverName() {
                                                 <button onClick={() => handleDeleteReceiver(receiver.Receiver_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{receiver.Receiver_Code}</td>
+                                        <td>{receiver.Receiver_Name}</td>
+                                        <td>{receiver.Receiver_Add1}</td>
+                                        <td>{receiver.Receiver_Pin}</td>
+                                        <td>{receiver.City_Name}</td>
+                                        <td>{receiver.State_Name}</td>
+                                        <td>{receiver.Receiver_Mob}</td>
+                                        <td>{receiver.Receiver_Email}</td>
+                                        <td>{receiver.GSTNo}</td>
+                                        <td>{receiver.HSNNo}</td>
+                                       
                                     </tr>
                                 ))}
                             </tbody>

@@ -11,7 +11,7 @@ import ViewPerforma from './ViewPerforma';
 import { useLocation } from 'react-router-dom';
 
 function Invoice() {
-     const location=useLocation();
+    const location=useLocation();
     const [activeTab, setActiveTab] = useState(location?.state?.tab ||'state');
 
     const handleChange = (event) => {

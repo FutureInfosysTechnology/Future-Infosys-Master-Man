@@ -330,6 +330,7 @@ function ShipperName() {
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Shipper_Code</th>
                                     <th scope="col">Shipper_Name</th>
@@ -341,26 +342,14 @@ function ShipperName() {
                                     <th scope="col">Email_ID</th>
                                     <th scope="col">GST_No</th>
                                     <th scope="col">Company</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((shipper, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{shipper.Shipper_Code}</td>
-                                        <td>{shipper.Shipper_Name}</td>
-                                        <td>{shipper.Add1}</td>
-                                        <td>{shipper.Pin}</td>
-                                        <td>{shipper.City_Name}</td>
-                                        <td>{shipper.State_Name}</td>
-                                        <td>{shipper.Mobile}</td>
-                                        <td>{shipper.Email}</td>
-                                        <td>{shipper.GSTNo}</td>
-                                        <td>{shipper.CompanyName}</td> {/* ✅ Fixed spelling */}
-
-                                        <td>
+                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
@@ -384,6 +373,19 @@ function ShipperName() {
                                                 <button onClick={() => handleDeleteShipper(shipper.Shipper_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{shipper.Shipper_Code}</td>
+                                        <td>{shipper.Shipper_Name}</td>
+                                        <td>{shipper.Add1}</td>
+                                        <td>{shipper.Pin}</td>
+                                        <td>{shipper.City_Name}</td>
+                                        <td>{shipper.State_Name}</td>
+                                        <td>{shipper.Mobile}</td>
+                                        <td>{shipper.Email}</td>
+                                        <td>{shipper.GSTNo}</td>
+                                        <td>{shipper.CompanyName}</td> {/* ✅ Fixed spelling */}
+
+                                       
                                     </tr>
                                 ))}
                             </tbody>

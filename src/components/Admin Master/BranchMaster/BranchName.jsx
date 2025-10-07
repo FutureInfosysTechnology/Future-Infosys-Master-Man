@@ -43,6 +43,7 @@ function BranchName() {
         accountNo: '',
         bankBranch: '',
         img: "",
+        companyName:"",
     });                                                            // to add Branch Data
     const [searchQuery, setSearchQuery] = useState('');
     useEffect(() => {
@@ -162,7 +163,8 @@ function BranchName() {
                     ifscCode: '',
                     mobileNo: '',
                     bankBranch: '',
-                    img: ''
+                    img: '',
+                    companyName:"",
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -181,10 +183,7 @@ function BranchName() {
          const errors = [];
         // if (!formData.DocketNo) errors.push("DocketNo is required");
         if (!branchData.branchCode) errors.push("Branch Name is required");
-        if (!branchData.invoiceNo) errors.push("InvoiceNo is required");
-        if (!branchData.runsheetNo) errors.push("RunsheetNo is required");
-        if (!branchData.manifestNo) errors.push("ManifestNo is required");
-        if (!branchData.branchPIN) errors.push("BranchPIN is required");
+        if (!branchData.stateCode) errors.push("Branch Satet is required");
         if (errors.length > 0) {
                    Swal.fire({
                        icon: 'error',
@@ -239,6 +238,7 @@ function BranchName() {
                     bankBranch: '',
                     accountNo: '',
                     img: '',
+                    companyName:"",
                 });
                 Swal.fire('Saved!', saveResponse.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -375,6 +375,7 @@ function BranchName() {
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Branch_Code</th>
                                     <th scope="col">Branch_Name</th>
@@ -387,25 +388,13 @@ function BranchName() {
                                     <th scope="col">GST_No</th>
                                     <th scope="col">Bank_Name</th>
                                     <th scope="col">State_Name</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((branch, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{branch.Branch_Code}</td>
-                                        <td>{branch.Branch_Name}</td>
-                                        <td>{branch.InvoiceNO}</td>
-                                        <td>{branch.ManifestNo}</td>
-                                        <td>{branch.RunsheetNo}</td>
-                                        <td>{branch.Branch_Add1}</td>
-                                        <td>{branch.Branch_PIN}</td>
-                                        <td>{branch.HSNNo}</td>
-                                        <td>{branch.GSTNo}</td>
-                                        <td>{branch.Bank_Name}</td>
-                                        <td>{branch.State_Name}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: 'center' }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -440,6 +429,19 @@ function BranchName() {
                                                     <i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{branch.Branch_Code}</td>
+                                        <td>{branch.Branch_Name}</td>
+                                        <td>{branch.InvoiceNO}</td>
+                                        <td>{branch.ManifestNo}</td>
+                                        <td>{branch.RunsheetNo}</td>
+                                        <td>{branch.Branch_Add1}</td>
+                                        <td>{branch.Branch_PIN}</td>
+                                        <td>{branch.HSNNo}</td>
+                                        <td>{branch.GSTNo}</td>
+                                        <td>{branch.Bank_Name}</td>
+                                        <td>{branch.State_Name}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>
@@ -738,6 +740,13 @@ function BranchName() {
                                             <input type="text" placeholder="Enter Branch Location"
                                                 value={branchData.bankBranch}
                                                 onChange={(e) => setBranchData({ ...branchData, bankBranch: e.target.value })}  />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Companty Name</label>
+                                            <input type="text" placeholder="Enter Companty Name"
+                                                value={branchData.companyName}
+                                                onChange={(e) => setBranchData({ ...branchData, companyName: e.target.value })}  />
                                         </div>
 
                                         <div className="input-field3">

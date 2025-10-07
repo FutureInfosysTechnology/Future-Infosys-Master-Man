@@ -211,19 +211,17 @@ function ModeMaster() {
                     <table className='table table-bordered table-sm'>
                         <thead className='table-sm'>
                             <tr>
+                                 <th scope="col">Actions</th>
                                 <th scope="col">Sr.No</th>
                                 <th scope="col">Mode Code</th>
                                 <th scope="col">Mode Name</th>
-                                <th scope="col">Actions</th>
+                               
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((mode, index) => (
                                 <tr key={`${mode.id}-${index}`}>
-                                    <td>{index + 1}</td>
-                                    <td>{mode.Mode_Code}</td>
-                                    <td>{mode.Mode_Name}</td>
                                     <td>
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                             <button className='edit-btn' onClick={() => {
@@ -238,6 +236,10 @@ function ModeMaster() {
                                             <button onClick={() => handleDeleteMode(mode.Mode_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                         </div>
                                     </td>
+                                    <td>{index + 1}</td>
+                                    <td>{mode.Mode_Code}</td>
+                                    <td>{mode.Mode_Name}</td>
+                                    
                                 </tr>
                             ))}
                         </tbody>

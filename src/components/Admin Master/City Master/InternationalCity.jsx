@@ -284,24 +284,19 @@ function InternationalCity() {
                     <table className='table table-bordered table-sm'>
                         <thead className='table-sm'>
                             <tr>
+                                <th scope="col" >Actions</th>
                                 <th scope="col" >Sr.No</th>
                                 <th scope="col" >City Code</th>
                                 <th scope="col" >City Name</th>
                                 <th scope="col" >Zone Name</th>
                                 <th scope="col" >State Name</th>
                                 <th scope="col" >Country Name</th>
-                                <th scope="col" >Actions</th>
+                                
                             </tr>
                         </thead>
                         <tbody className='table-body'>
                             {currentRows.map((city, index) => (
                                 <tr key={index}>
-                                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                    <td>{city.City_Code}</td>
-                                    <td>{city.City_Name}</td>
-                                    <td>{city.Zone_Name}</td>
-                                    <td>{city.State_Name}</td>
-                                    <td>{city.Country_Name}</td>
                                     <td>
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                             <button className='edit-btn'
@@ -323,6 +318,13 @@ function InternationalCity() {
                                             <button className='edit-btn' onClick={() => handleDeleteCity(city.City_Code)}><i className='bi bi-trash'></i></button>
                                         </div>
                                     </td>
+                                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                    <td>{city.City_Code}</td>
+                                    <td>{city.City_Name}</td>
+                                    <td>{city.Zone_Name}</td>
+                                    <td>{city.State_Name}</td>
+                                    <td>{city.Country_Name}</td>
+                                    
                                 </tr>
                             ))}
                         </tbody>
