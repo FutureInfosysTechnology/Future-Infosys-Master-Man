@@ -191,23 +191,24 @@ const TestingCountry = () => {
                         <div className='table-container'>
                             <table className='table table-bordered table-sm'>
                                 <thead className='table-info body-bordered table-sm'>
-                                    <tr>
+                                    <tr><th scope="col">Actions</th>
                                         <th scope="col">Sr.No</th>
                                         <th scope="col">Country_Code</th>
                                         <th scope="col">Country_Name</th>
-                                        <th scope="col">Actions</th>
+                                        
                                     </tr>
                                 </thead>
                                 <tbody className='table-body'>
                                     {currentItems.map((Storedata, index) => (
                                         <tr key={index}>
-                                            <td className="myCell">{((currentPage - 1) * itemsPerPage) + index + 1}</td>
-                                            <td>{Storedata.Country_Code}</td>
-                                            <td>{Storedata.Country_Name}</td>
                                             <td>
                                                 <button className='unvershaledit' onClick={() => editCountryData(Storedata.Country_ID)}>Edit</button>
                                                 <button className='unvershalsave' onClick={() => Delete(Storedata.Country_ID)}>Delete</button>
                                             </td>
+                                            <td className="myCell">{((currentPage - 1) * itemsPerPage) + index + 1}</td>
+                                            <td>{Storedata.Country_Code}</td>
+                                            <td>{Storedata.Country_Name}</td>
+                                            
                                         </tr>
                                     ))}
                                 </tbody>

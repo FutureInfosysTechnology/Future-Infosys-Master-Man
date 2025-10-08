@@ -226,26 +226,21 @@ function StockEntry() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                     <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">City Name</th>
                                     <th scope="col">Quantity</th>
                                     <th scope="col">From Docket No</th>
                                     <th scope="col">To Docket No</th>
                                     <th scope="col">Stock Date</th>
-                                    <th scope="col">Actions</th>
+                                   
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((stock, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{stock.City_Name}</td>
-                                        <td>{stock.Qty}</td>
-                                        <td>{stock.FromDocketNo}</td>
-                                        <td>{stock.ToDocketNo}</td>
-                                        <td>{stock.Stock_Date}</td>
-                                        <td>
+                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
@@ -264,6 +259,13 @@ function StockEntry() {
                                                     <i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{stock.City_Name}</td>
+                                        <td>{stock.Qty}</td>
+                                        <td>{stock.FromDocketNo}</td>
+                                        <td>{stock.ToDocketNo}</td>
+                                        <td>{stock.Stock_Date}</td>
+                                       
                                     </tr>
                                 ))}
                             </tbody>

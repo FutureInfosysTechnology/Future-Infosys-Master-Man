@@ -199,19 +199,17 @@ const Countrylist = () => {
             <table className='table table-bordered table-sm'>
               <thead className='table-sm'>
                 <tr>
+                  <th scope="col">Actions</th>
                   <th scope="col">Sr.No</th>
                   <th scope="col">Country Code</th>
                   <th scope="col">Country Name</th>
-                  <th scope="col">Actions</th>
+                  
                 </tr>
               </thead>
               <tbody className='table-body'>
 
                 {currentRows.map((country, index) => (
                   <tr key={index}>
-                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                    <td>{country.Country_Code}</td>
-                    <td>{country.Country_Name}</td>
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'row', justifyContent: "center" }}>
                         <button onClick={() => {
@@ -226,6 +224,10 @@ const Countrylist = () => {
                         </button>
                       </div>
                     </td>
+                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                    <td>{country.Country_Code}</td>
+                    <td>{country.Country_Name}</td>
+                    
                   </tr>
                 ))}
 

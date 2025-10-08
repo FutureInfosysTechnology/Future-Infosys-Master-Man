@@ -273,9 +273,10 @@ function DriverEntry() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Driver_Code</th>
                                     <th scope="col">Driver_Name</th>
@@ -289,26 +290,13 @@ function DriverEntry() {
                                     <th scope="col">ID_Proof1_No</th>
                                     <th scope="col">ID_Proof2</th>
                                     <th scope="col">ID_Proof2_No</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((driver, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                        <td>{driver.Driver_Code}</td>
-                                        <td>{driver.Driver_Name}</td>
-                                        <td>{driver.Address}</td>
-                                        <td>{driver.MobileNo}</td>
-                                        <td>{driver.Emergency_ContactNo}</td>
-                                        <td>{driver.Email_Id}</td>
-                                        <td>{driver.Gender}</td>
-                                        <td>{driver.Blood_Group}</td>
-                                        <td>{driver.Identity_Proof1}</td>
-                                        <td>{driver.ID_Proof1_Number}</td>
-                                        <td>{driver.Identity_Proof2}</td>
-                                        <td>{driver.ID_Proof2_Number}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -336,6 +324,20 @@ function DriverEntry() {
                                                 </button>
                                             </div>
                                         </td>
+                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                        <td>{driver.Driver_Code}</td>
+                                        <td>{driver.Driver_Name}</td>
+                                        <td>{driver.Address}</td>
+                                        <td>{driver.MobileNo}</td>
+                                        <td>{driver.Emergency_ContactNo}</td>
+                                        <td>{driver.Email_Id}</td>
+                                        <td>{driver.Gender}</td>
+                                        <td>{driver.Blood_Group}</td>
+                                        <td>{driver.Identity_Proof1}</td>
+                                        <td>{driver.ID_Proof1_Number}</td>
+                                        <td>{driver.Identity_Proof2}</td>
+                                        <td>{driver.ID_Proof2_Number}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

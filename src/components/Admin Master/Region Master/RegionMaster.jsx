@@ -49,10 +49,11 @@ function RegionMaster() {
                             <table className='table table-bordered table-sm' >
                                 <thead className='table-info body-bordered table-sm'>
                                     <tr>
+                                        <th scope="col">Actions</th>
                                         <th scope="col">Sr.No</th>
                                         <th scope="col">Region Code</th>
                                         <th scope="col">Region Name</th>
-                                        <th scope="col">Actions</th>
+                                        
                                     </tr>
                                 </thead>
                                 <tbody className='table-body'>

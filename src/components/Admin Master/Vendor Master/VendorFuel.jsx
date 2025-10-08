@@ -368,6 +368,7 @@ function VendorFuel() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Vendor_Code</th>
                                     <th scope="col">Mode</th>
@@ -382,27 +383,13 @@ function VendorFuel() {
                                     <th scope="col">Insurance_Charge</th>
                                     <th scope="col">From_Date</th>
                                     <th scope="col">To_Date</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((vendor, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                        <td>{vendor.Vendor_Name}</td>
-                                        <td>{vendor.Mode_Code}</td>
-                                        <td>{vendor.Fuel_Charges}</td>
-                                        <td>{vendor.Fov_Charges}</td>
-                                        <td>{vendor.Docket_Charges}</td>
-                                        <td>{vendor.Dilivery_Charges}</td>
-                                        <td>{vendor.Packing_Charges}</td>
-                                        <td>{vendor.Green_Charges}</td>
-                                        <td>{vendor.Hamali_Charges}</td>
-                                        <td>{vendor.Other_Charges}</td>
-                                        <td>{vendor.Insurance_Charges}</td>
-                                        <td>{formatDate(vendor.From_Date)}</td>
-                                        <td>{formatDate(vendor.To_Date)}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -431,6 +418,21 @@ function VendorFuel() {
                                                 </button>
                                             </div>
                                         </td>
+                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                        <td>{vendor.Vendor_Name}</td>
+                                        <td>{vendor.Mode_Code}</td>
+                                        <td>{vendor.Fuel_Charges}</td>
+                                        <td>{vendor.Fov_Charges}</td>
+                                        <td>{vendor.Docket_Charges}</td>
+                                        <td>{vendor.Dilivery_Charges}</td>
+                                        <td>{vendor.Packing_Charges}</td>
+                                        <td>{vendor.Green_Charges}</td>
+                                        <td>{vendor.Hamali_Charges}</td>
+                                        <td>{vendor.Other_Charges}</td>
+                                        <td>{vendor.Insurance_Charges}</td>
+                                        <td>{formatDate(vendor.From_Date)}</td>
+                                        <td>{formatDate(vendor.To_Date)}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

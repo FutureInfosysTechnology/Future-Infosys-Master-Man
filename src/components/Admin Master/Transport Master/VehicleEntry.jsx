@@ -289,6 +289,7 @@ function VehicleEntry() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Vehicle_Code</th>
                                     <th scope="col">Vehicle_No</th>
@@ -304,28 +305,13 @@ function VehicleEntry() {
                                     <th scope="col">Rate_Per/Kg</th>
                                     <th scope="col">Employee_Charges</th>
                                     <th scope="col">Detention_Charges</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((vehicle, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                        <td>{vehicle.Vehicle_Code}</td>
-                                        <td>{vehicle.vehicle_number}</td>
-                                        <td>{vehicle.vehicle_model}</td>
-                                        <td>{vehicle.registration_number}</td>
-                                        <td>{vehicle.vehicle_type}</td>
-                                        <td>{vehicle.insurance_company}</td>
-                                        <td>{vehicle.insurance_No}</td>
-                                        <td>{formatDate(vehicle.expiry_date_of_insurance)}</td>
-                                        <td>{vehicle.puc_number}</td>
-                                        <td>{formatDate(vehicle.expiry_date_of_puc)}</td>
-                                        <td>{vehicle.transport_name}</td>
-                                        <td>{vehicle.rate_per_kg}</td>
-                                        <td>{vehicle.EmployeeCharges}</td>
-                                        <td>{vehicle.DetentionCharges}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -353,6 +339,22 @@ function VehicleEntry() {
                                                 <button onClick={() => handleDeleteVehicle(vehicle.Vehicle_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                        <td>{vehicle.Vehicle_Code}</td>
+                                        <td>{vehicle.vehicle_number}</td>
+                                        <td>{vehicle.vehicle_model}</td>
+                                        <td>{vehicle.registration_number}</td>
+                                        <td>{vehicle.vehicle_type}</td>
+                                        <td>{vehicle.insurance_company}</td>
+                                        <td>{vehicle.insurance_No}</td>
+                                        <td>{formatDate(vehicle.expiry_date_of_insurance)}</td>
+                                        <td>{vehicle.puc_number}</td>
+                                        <td>{formatDate(vehicle.expiry_date_of_puc)}</td>
+                                        <td>{vehicle.transport_name}</td>
+                                        <td>{vehicle.rate_per_kg}</td>
+                                        <td>{vehicle.EmployeeCharges}</td>
+                                        <td>{vehicle.DetentionCharges}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

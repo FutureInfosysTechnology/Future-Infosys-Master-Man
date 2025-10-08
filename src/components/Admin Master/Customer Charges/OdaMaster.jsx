@@ -303,6 +303,7 @@ function OdaMaster() {
                     <table className='table table-bordered table-sm'>
                         <thead className='table-sm'>
                             <tr>
+                                <th scope="col">Actions</th>
                                 <th scope="col">Sr.No</th>
                                 <th scope="col">Customer Name</th>
                                 <th scope="col">Club No</th>
@@ -311,22 +312,14 @@ function OdaMaster() {
                                 <th scope="col">Amount</th>
                                 <th scope="col">Product_Code</th>
                                 <th scope="col">ConnectingHub</th>
-                                <th scope="col">Actions</th>
+                                
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((oda, index) => (
                                 <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{oda.Customer_Name}</td>
-                                    <td>{oda.Club_No}</td>
-                                    <td>{oda.Mode_Name}</td>
-                                    <td>{oda.Method}</td>
-                                    <td>{oda.Amount}</td>
-                                    <td>{oda.Product_Code}</td>
-                                    <td>{oda.ConnectingHub}</td>
-                                    <td>
+                                     <td>
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                             <button className='edit-btn' onClick={() => {
                                                 setIsEditMode(true);
@@ -347,6 +340,15 @@ function OdaMaster() {
                                             </button>
                                         </div>
                                     </td>
+                                    <td>{index + 1}</td>
+                                    <td>{oda.Customer_Name}</td>
+                                    <td>{oda.Club_No}</td>
+                                    <td>{oda.Mode_Name}</td>
+                                    <td>{oda.Method}</td>
+                                    <td>{oda.Amount}</td>
+                                    <td>{oda.Product_Code}</td>
+                                    <td>{oda.ConnectingHub}</td>
+                                   
                                 </tr>
                             ))}
                         </tbody>

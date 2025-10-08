@@ -236,6 +236,7 @@ function MultipleCity() {
                     <table className='table table-bordered table-sm'>
                         <thead className='table-sm'>
                             <tr>
+                                <th scope="col">Actions</th>
                                 <th scope="col">Sr.No</th>
                                 <th scope="col">Mode name</th>
                                 <th scope="col">Zone Name</th>
@@ -243,19 +244,12 @@ function MultipleCity() {
                                 <th scope="col">State Name</th>
                                 <th scope="col">City Name</th>
                                 <th scope="col">Vendor Name</th>
-                                <th scope="col">Actions</th>
+                                
                             </tr>
                         </thead>
                         <tbody className='table-body'>
                             {currentRows.map((multiple, index) => (
                                 <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{multiple.Mode_Name}</td>
-                                    <td>{multiple.Zone_Name}</td>
-                                    <td>{multiple.Country_Name}</td>
-                                    <td>{multiple.State_Name}</td>
-                                    <td>{multiple.City_Name}</td>
-                                    <td>{multiple.Vendor_Name}</td>
                                     <td>
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                             <button className='edit-btn' onClick={() => {
@@ -276,6 +270,14 @@ function MultipleCity() {
                                             <button onClick={() => handleDelete(index)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                         </div>
                                     </td>
+                                    <td>{index + 1}</td>
+                                    <td>{multiple.Mode_Name}</td>
+                                    <td>{multiple.Zone_Name}</td>
+                                    <td>{multiple.Country_Name}</td>
+                                    <td>{multiple.State_Name}</td>
+                                    <td>{multiple.City_Name}</td>
+                                    <td>{multiple.Vendor_Name}</td>
+                                    
                                 </tr>
                             ))}
                         </tbody>

@@ -98,24 +98,20 @@ function VendorGst() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Product Name</th>
                                     <th scope="col">GST %</th>
                                     <th scope="col">From Date</th>
                                     <th scope="col">To Date</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((zone, index) => (
                                     <tr key={zone.id}>
-                                        <td>{zone.id}</td>
-                                        <td>{zone.code}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
-                                        <td>
+                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn'>
                                                     <i className='bi bi-pen'></i></button>
@@ -123,6 +119,12 @@ function VendorGst() {
                                                     <i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{zone.id}</td>
+                                        <td>{zone.code}</td>
+                                        <td>{zone.name}</td>
+                                        <td>{zone.name}</td>
+                                        <td>{zone.name}</td>
+                                       
                                     </tr>
                                 ))}
                             </tbody>

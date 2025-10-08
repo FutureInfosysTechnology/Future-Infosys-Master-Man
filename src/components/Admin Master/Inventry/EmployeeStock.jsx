@@ -259,6 +259,7 @@ function EmployeeStock() {
                     <table className='table table-bordered table-sm'>
                         <thead className='table-sm'>
                             <tr>
+                                <th scope="col">Actions</th>
                                 <th scope="col">Sr.No</th>
                                 <th scope="col">Employee_Name</th>
                                 <th scope="col">Quantity</th>
@@ -266,21 +267,14 @@ function EmployeeStock() {
                                 <th scope="col">To_Docket_No</th>
                                 <th scope="col">City_Name</th>
                                 <th scope="col">Stock_Date</th>
-                                <th scope="col">Actions</th>
+                                
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((emp, index) => (
                                 <tr key={index}>
-                                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                    <td>{emp.Employee_Name}</td>
-                                    <td>{emp.Qty}</td>
-                                    <td>{emp.FromDocketNo}</td>
-                                    <td>{emp.ToDocketNo}</td>
-                                    <td>{emp.City_Name}</td>
-                                    <td>{emp.Stock_Date}</td>
-                                    <td>
+                                     <td>
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                             <button className='edit-btn' onClick={() => {
                                                 setIsEditMode(true);
@@ -300,6 +294,14 @@ function EmployeeStock() {
                                                 <i className='bi bi-trash'></i></button>
                                         </div>
                                     </td>
+                                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                    <td>{emp.Employee_Name}</td>
+                                    <td>{emp.Qty}</td>
+                                    <td>{emp.FromDocketNo}</td>
+                                    <td>{emp.ToDocketNo}</td>
+                                    <td>{emp.City_Name}</td>
+                                    <td>{emp.Stock_Date}</td>
+                                   
                                 </tr>
                             ))}
                         </tbody>

@@ -215,6 +215,7 @@ function CustomerStock() {
                     <table className='table table-bordered table-sm'>
                         <thead className='table-sm'>
                             <tr>
+                                <th scope="col">Actions</th>
                                 <th scope="col">Sr.No</th>
                                 <th scope="col">Customer_Name</th>
                                 <th scope="col">Quantity</th>
@@ -222,20 +223,13 @@ function CustomerStock() {
                                 <th scope="col">To_Docket_No</th>
                                 <th scope="col">City_Name</th>
                                 <th scope="col">Stock_Date</th>
-                                <th scope="col">Actions</th>
+                                
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((cust, index) => (
                                 <tr key={index}>
-                                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                    <td>{cust.Customer_Name}</td>
-                                    <td>{cust.Qty}</td>
-                                    <td>{cust.FromDocketNo}</td>
-                                    <td>{cust.ToDocketNo}</td>
-                                    <td>{cust.City_Name}</td>
-                                    <td>{cust.Stock_Date}</td>
                                     <td>
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                             <button className='edit-btn' onClick={() => {
@@ -256,6 +250,14 @@ function CustomerStock() {
                                                 <i className='bi bi-trash'></i></button>
                                         </div>
                                     </td>
+                                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                    <td>{cust.Customer_Name}</td>
+                                    <td>{cust.Qty}</td>
+                                    <td>{cust.FromDocketNo}</td>
+                                    <td>{cust.ToDocketNo}</td>
+                                    <td>{cust.City_Name}</td>
+                                    <td>{cust.Stock_Date}</td>
+                                    
                                 </tr>
                             ))}
                         </tbody>

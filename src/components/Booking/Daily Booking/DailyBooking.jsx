@@ -14,8 +14,7 @@ import BookingPrint from "./BookingPrint";
 import { useLocation } from "react-router-dom";
 function DailyBooking() {
   const location=useLocation();
-  const path=location?.state?.tab==="print4"? "print":""
-  const [activeTab, setActiveTab] = useState("vendor");
+  const [activeTab, setActiveTab] = useState(location?.state?.tab || "vendor");
 
   const handleChange = (event) => {
     setActiveTab(event.target.id);

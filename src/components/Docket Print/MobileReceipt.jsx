@@ -17,6 +17,7 @@ function MobileReceipt() {
     console.log(location);
     console.log(location.state);
     const fromPath = location?.state?.path || "/";
+    const tab=location?.state?.tab;
     const [data, setData] = useState([]);
     useEffect(() => {
         const fetchData = async () => {
@@ -119,38 +120,55 @@ function MobileReceipt() {
 
     return (
         <>
-            <style>{`
+<style>
+    {`
 @media print {
-    body, html {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
+  /* Hide everything else on the page */
+  body * {
+    visibility: hidden;
+  }
 
-    body * {
-        visibility: hidden;
-    }
+  /* Show only the docket container */
+  #pdf, #pdf * {
+    visibility: visible;
+  }
 
-    .docket, .docket * {
-        visibility: visible;
-    }
+  /* Fit docket perfectly on page */
+  #pdf {
+    position: absolute;
+    width: auto !important;         /* fill page width */
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden;
+  }
+  .docket{
+  margin:0;
+  padding:0;
+  }  
+    
+  /* Improve color & sharpness in print */
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border:none;
+  }
 
-    .docket {
-        display: flex;
-        flex-direction: column;
-        justify-content: center; /* vertical centering */
-        align-items: center;     /* horizontal centering */
-        height: 297mm;  
-        width:         /* exact A4 height */
-        margin: 0;
-        padding: 0;
-        page-break-after: always; /* one docket per page */
-        box-sizing: border-box;
-    }
+  @page {
+    size: A4 portrait;
+    margin:0;
+  padding:0;
+  }
 }
 
 
-`}</style>
+`}
+</style>
+
+
 
 
             <Header />
@@ -174,7 +192,7 @@ function MobileReceipt() {
                                     Print
                                 </button>
                                 <button
-                                    onClick={() => navigate(fromPath, { state: { tab: "print4" } })}
+                                    onClick={() => navigate(fromPath, { state: { tab: tab } })}
                                     style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
                                 >
                                     Exit
@@ -193,7 +211,7 @@ function MobileReceipt() {
                                                     <div style={{ fontSize: "15px", fontWeight: "bolder" }}>{getBranch?.Company_Name}</div>
                                                     <div style={{ lineHeight: "1.2", marginTop: "5px", fontSize: "10px", paddingRight: "10px" }}>{getBranch?.Branch_Add1},{getBranch.Branch_PIN}</div>
                                                     <div style={{ fontWeight: "bold", fontSize: "12px" }}>GST No: {getBranch?.GSTNo}</div>
-                                                    <div style={{ fontWeight: "bold", fontSize: "12px" }}>Mobile No: {getBranch?.MobileNo}</div>
+                                                    <div style={{ fontWeight: "bold", fontSize: "12px" }}>Mobile No: (+91) {getBranch?.MobileNo}</div>
                                                     <div style={{ fontWeight: "bold", fontSize: "12px" }}>Email: {getBranch?.Email}</div>
                                                 </div>
                                                 <div className='booking' style={{ width: "26%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
@@ -235,7 +253,7 @@ function MobileReceipt() {
                                                 <div className='consignor px-2' style={{ width: "37%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold" }}>{docket?.Customer_Name}</div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Address : </div><span>{docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3}</span></div>
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>{docket?.Customer_Mob}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Customer_Mob}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Pin Code : </div><span>{docket?.Pin_Code}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Email_Id}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.City}</span></div>
@@ -246,7 +264,7 @@ function MobileReceipt() {
                                                 <div className='consignee px-2' style={{ width: "37%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold" }}> {docket?.Consignee_Name}</div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Address : </div><span>{docket?.Consignee_Add1},{docket?.Consignee_Add2}</span></div>
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>{docket?.Consignee_Mob}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Consignee_Mob}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Pin Code : </div><span> {docket?.Consignee_Pin}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Consignee_Email}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.City}</span></div>
@@ -495,7 +513,7 @@ function MobileReceipt() {
                                                     <div style={{ fontSize: "15px", fontWeight: "bolder" }}>{getBranch?.Company_Name}</div>
                                                     <div style={{ lineHeight: "1.2", marginTop: "5px", fontSize: "10px", paddingRight: "10px" }}>{getBranch?.Branch_Add1},{getBranch.Branch_PIN}</div>
                                                     <div style={{ fontWeight: "bold", fontSize: "12px" }}>GST No: {getBranch?.GSTNo}</div>
-                                                    <div style={{ fontWeight: "bold", fontSize: "12px" }}>Mobile No: {getBranch?.MobileNo}</div>
+                                                    <div style={{ fontWeight: "bold", fontSize: "12px" }}>Mobile No: (+91) {getBranch?.MobileNo}</div>
                                                     <div style={{ fontWeight: "bold", fontSize: "12px" }}>Email: {getBranch?.Email}</div>
                                                 </div>
                                                 <div className='booking' style={{ width: "26%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
@@ -537,7 +555,7 @@ function MobileReceipt() {
                                                 <div className='consignor px-2' style={{ width: "37%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold" }}>{docket?.Customer_Name}</div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Address : </div><span>{docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3}</span></div>
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>{docket?.Customer_Mob}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Customer_Mob}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Pin Code : </div><span>{docket?.Pin_Code}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Email_Id}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.City}</span></div>
@@ -548,7 +566,7 @@ function MobileReceipt() {
                                                 <div className='consignee px-2' style={{ width: "37%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
                                                     <div style={{ fontWeight: "bold" }}> {docket?.Consignee_Name}</div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Address : </div><span>{docket?.Consignee_Add1},{docket?.Consignee_Add2}</span></div>
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>{docket?.Consignee_Mob}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Consignee_Mob}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Pin Code : </div><span> {docket?.Consignee_Pin}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Consignee_Email}</span></div>
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.City}</span></div>

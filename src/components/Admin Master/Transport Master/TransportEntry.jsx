@@ -241,6 +241,7 @@ function TransportEntry() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Transport_Code</th>
                                     <th scope="col">Transport_Name</th>
@@ -248,20 +249,13 @@ function TransportEntry() {
                                     <th scope="col">Address</th>
                                     <th scope="col">Mobile_No</th>
                                     <th scope="col">Email_ID</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((transport, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                        <td>{transport.Transport_Code}</td>
-                                        <td>{transport.Transport_Name}</td>
-                                        <td>{transport.Contact_Person}</td>
-                                        <td>{transport.Address}</td>
-                                        <td>{transport.MobileNo}</td>
-                                        <td>{transport.Email_Id}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -281,6 +275,14 @@ function TransportEntry() {
                                                 <button onClick={() => handleDeleteTransport(transport.Transport_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                        <td>{transport.Transport_Code}</td>
+                                        <td>{transport.Transport_Name}</td>
+                                        <td>{transport.Contact_Person}</td>
+                                        <td>{transport.Address}</td>
+                                        <td>{transport.MobileNo}</td>
+                                        <td>{transport.Email_Id}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

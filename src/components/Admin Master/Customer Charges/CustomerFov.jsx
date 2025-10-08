@@ -114,25 +114,21 @@ function CustomerFov() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-info body-bordered table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Club No</th>
                                     <th scope="col">Customer Name</th>
                                     <th scope="col">Mode</th>
                                     <th scope="col">Docket Point</th>
                                     <th scope="col">Docket Point 2</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((zone, index) => (
+
                                     <tr key={zone.id}>
-                                        <td>{zone.id}</td>
-                                        <td>{zone.code}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row" }}>
                                                 <button className='edit-btn'>
@@ -141,6 +137,13 @@ function CustomerFov() {
                                                     <i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{zone.id}</td>
+                                        <td>{zone.code}</td>
+                                        <td>{zone.name}</td>
+                                        <td>{zone.name}</td>
+                                        <td>{zone.name}</td>
+                                        <td>{zone.name}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

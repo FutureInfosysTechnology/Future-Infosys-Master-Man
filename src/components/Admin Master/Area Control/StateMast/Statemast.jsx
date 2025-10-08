@@ -223,11 +223,11 @@ const Statemast = () => {
                     <div className='table-container'>
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
-                                <tr>
+                                <tr><th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">State Code</th>
                                     <th scope="col">State Name</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
@@ -235,10 +235,7 @@ const Statemast = () => {
 
                                 {currentRows.map((state, index) => (
                                     <tr key={`${state.id}-${index}`}>
-                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                        <td>{state.State_Code}</td>
-                                        <td>{state.State_Name}</td>
-                                        <td>
+                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button onClick={() => {
                                                     setIsEditMode(true);
@@ -252,6 +249,10 @@ const Statemast = () => {
                                                 <button onClick={() => handleDeleteState(state.State_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                        <td>{state.State_Code}</td>
+                                        <td>{state.State_Name}</td>
+                                       
                                     </tr>
                                 ))}
 

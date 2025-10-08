@@ -212,19 +212,17 @@ const ZoneMaster = () => {
             <table className='table table-bordered table-sm' >
               <thead className='table-sm'>
                 <tr>
+                   <th scope="col">Actions</th>
                   <th scope="col">Sr.No</th>
                   <th scope="col">Zone Code</th>
                   <th scope="col">Zone Name</th>
-                  <th scope="col">Actions</th>
+                 
                 </tr>
               </thead>
               <tbody className='table-body'>
 
                 {currentRows.map((zone, index) => (
                   <tr key={`${zone.id}-${index}`}>
-                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                    <td>{zone.Zone_Code}</td>
-                    <td>{zone.Zone_Name}</td>
                     <td>
                       <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                         <button className='edit-btn' onClick={() => {
@@ -241,6 +239,10 @@ const ZoneMaster = () => {
                           <i className='bi bi-trash'></i></button>
                       </div>
                     </td>
+                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                    <td>{zone.Zone_Code}</td>
+                    <td>{zone.Zone_Name}</td>
+                    
                   </tr>
                 ))}
               </tbody>

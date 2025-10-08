@@ -202,28 +202,30 @@ function VendorRate() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Addition</th>
                                     <th scope="col">Minimum Weight</th>
                                     <th scope="col">Full Name</th>
                                     <th scope="col">Rate</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
                                 {currentRows.map((zone, index) => (
                                     <tr key={zone.id}>
-                                        <td>{zone.id}</td>
-                                        <td>{zone.code}</td>
-                                        <td>{zone.min}</td>
-                                        <td>{zone.max}</td>
-                                        <td>{zone.rate}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row" }}>
                                                 <button className='edit-btn'><i className='bi bi-pen'></i></button>
                                                 <button className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         </td>
+                                        <td>{zone.id}</td>
+                                        <td>{zone.code}</td>
+                                        <td>{zone.min}</td>
+                                        <td>{zone.max}</td>
+                                        <td>{zone.rate}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

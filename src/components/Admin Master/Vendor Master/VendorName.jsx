@@ -311,6 +311,7 @@ function VendorName() {
                         <table className='table table-bordered table-sm'>
                             <thead className='table-sm'>
                                 <tr>
+                                    <th scope="col" style={{ width: "250px" }}>Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Vendor_Code</th>
                                     <th scope="col">Vendor_Name</th>
@@ -321,22 +322,12 @@ function VendorName() {
                                     <th scope="col">Contact_Person</th>
                                     <th scope="col">State_Name</th>
                                     <th scope="col">City_Name</th>
-                                    <th scope="col" style={{ width: "250px" }}>Actions</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
                                 {currentRows.map((vendor, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                                        <td>{vendor.Vendor_Code}</td>
-                                        <td>{vendor.Vendor_Name}</td>
-                                        <td>{vendor.Mobile_No}</td>
-                                        <td>{vendor.Email}</td>
-                                        <td>{vendor.Vendor_Adr}</td>
-                                        <td>{vendor.Pin_Code}</td>
-                                        <td>{vendor.Contact_Person}</td>
-                                        <td>{vendor.State_Name}</td>
-                                        <td>{vendor.City_Name}</td>
                                         <td>
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                                                 <button className='edit-btn' onClick={() => {
@@ -363,6 +354,17 @@ function VendorName() {
                                                 </button>
                                             </div>
                                         </td>
+                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                        <td>{vendor.Vendor_Code}</td>
+                                        <td>{vendor.Vendor_Name}</td>
+                                        <td>{vendor.Mobile_No}</td>
+                                        <td>{vendor.Email}</td>
+                                        <td>{vendor.Vendor_Adr}</td>
+                                        <td>{vendor.Pin_Code}</td>
+                                        <td>{vendor.Contact_Person}</td>
+                                        <td>{vendor.State_Name}</td>
+                                        <td>{vendor.City_Name}</td>
+                                        
                                     </tr>
                                 ))}
                             </tbody>

@@ -24,7 +24,7 @@ const BookingPrint = () => {
                         console.log(response);
                         console.log(response.Data);
                         setData(response.Data);
-                        response.Data && navigate("/MobileReceipt", { state: { data:response.Data,path:location.pathname } });
+                        response.Data && navigate("/MobileReceipt", { state: { data:response.Data,path:location.pathname,tab:"print" } });
                     }
                     else
                     {
