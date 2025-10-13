@@ -40,9 +40,10 @@ function ViewPerforma() {
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = invoice.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(invoice.length / rowsPerPage);
-    const today = new Date();
+   const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
-        invDate: today,
+        invDate: firstDayOfMonth,
         dueDate: today,
         invoiceNo: "",
     });

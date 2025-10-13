@@ -8,10 +8,11 @@ import Modal from 'react-modal';
 import Select from 'react-select';
 import { getApi, postApi, deleteApi } from '../Area Control/Zonemaster/ServicesApi';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function EmployeeName() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getEmp, setGetEmp] = useState([]);               // to get Employee Data
     const [getBranch, setGetBranch] = useState([]);         //To Get Branch Name Data
     const [loading, setLoading] = useState(true);
@@ -261,7 +262,7 @@ function EmployeeName() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col" >Actions</th>
@@ -278,10 +279,31 @@ function EmployeeName() {
                             <tbody className='table-body'>
 
                                 {currentRows.map((emp, index) => (
-                                    <tr key={index}>
-                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                        <td>
+                                                                                    <PiDotsThreeOutlineVerticalFill
+                                                                                        style={{ fontSize: "20px", cursor: "pointer" }}
+                                                                                        onClick={() => setOpenRow(openRow === index ? null : index)}
+                                                                                    />
+                                                                                    {openRow === index && (
+                                                                                        <div
+                                                                                            style={{
+                                                                                                display: "flex",
+                                                                                                justifyContent: "center",
+                                                                                                flexDirection: "row",
+                                                                                                position: "absolute",
+                                                                                                alignItems: "center",
+                                                                                                left: "100px",
+                                                                                                top: "0px",
+                                                                                                borderRadius: "10px",
+                                                                                                backgroundColor: "white",
+                                                                                                zIndex: "999999",
+                                                                                                height: "30px",
+                                                                                                width: "50px",
+                                                                                                padding: "10px",
+                                                                                            }}
+                                                                                        >
+                                                                                             <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
                                                     setAddEmp({
                                                         empCode: emp.Employee_Code,
@@ -296,8 +318,10 @@ function EmployeeName() {
                                                     <i className='bi bi-pen'></i>
                                                 </button>
                                                 <button onClick={() => handleDeleteEmp(emp.Employee_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
-                                        </td>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </td>
+                                        
                                         <td>{index + 1}</td>
                                         <td>{emp.Employee_Code}</td>
                                         <td>{emp.Employee_Name}</td>

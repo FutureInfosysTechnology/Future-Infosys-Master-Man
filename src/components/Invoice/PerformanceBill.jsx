@@ -697,22 +697,41 @@ function PerformanceBill() {
                                                     : null
                                             }
                                             onChange={(selectedOption) => {
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    ConsigneeName: selectedOption.label,
-                                                    Consignee_City: selectedOption.City_Code,
-                                                    ConsigneeState: selectedOption.State_Code,
-                                                    ConsigneePin: selectedOption.Receiver_Pin,
-                                                    ConsigneeMob: selectedOption.Receiver_Mob,
-                                                    ConsigneeEmail: selectedOption.Receiver_Email,
-                                                    ConsigneeAdd1: selectedOption.Receiver_Add1,
-                                                    ConsigneeAdd2: selectedOption.Receiver_Add2,
-                                                    ConsigneeGST: selectedOption.GSTNo,
-                                                }));
+                                                if (selectedOption) {
+        // When user selects or creates a receiver
+        setFormData(prev => ({
+            ...prev,
+            ConsigneeName: selectedOption.label,
+            Consignee_City: selectedOption.City_Code,
+            ConsigneeState: selectedOption.State_Code,
+            ConsigneePin: selectedOption.Receiver_Pin,
+            ConsigneeMob: selectedOption.Receiver_Mob,
+            ConsigneeEmail: selectedOption.Receiver_Email,
+            ConsigneeAdd1: selectedOption.Receiver_Add1,
+            ConsigneeAdd2: selectedOption.Receiver_Add2,
+            ConsigneeGST: selectedOption.GSTNo,
+        }));
+    } else {
+        // When user clears the selection
+        setFormData(prev => ({
+            ...prev,
+            ConsigneeName: "",
+            Consignee_City: "",
+            ConsigneeState: "",
+            ConsigneePin: "",
+            ConsigneeMob: "",
+            ConsigneeEmail: "",
+            ConsigneeAdd1: "",
+            ConsigneeAdd2: "",
+            ConsigneeGST: "",
+        }));
+    }
+
                                                 // setSelectedOriginPinCode(selectedOption.Receiver_Pin)
                                             }}
                                             placeholder="Select Receiver Name"
                                             isSearchable
+                                            isClearable
                                             menuPortalTarget={document.body}
                                             styles={{
                                                 menuPortal: base => ({ ...base, zIndex: 9999 })

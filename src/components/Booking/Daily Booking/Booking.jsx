@@ -263,7 +263,8 @@ function Booking() {
         Width: 0,
         Height: 0,
         Qty: 0,
-        DivideBy: "",
+        DivideBy: 0,
+        cft:0,
         VolmetricWt: 0,
         ActualWt: 0,
         ChargeWt: 0
@@ -803,11 +804,20 @@ function Booking() {
     const handleAddRow = (e) => {
         e.preventDefault();
 
-        if (!volumetricData.ActualWt || !volumetricData.ChargeWt) {
+        if (!volumetricData.ActualWt || !volumetricData.ChargeWt || !volumetricData.VolmetricWt) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Missing Information',
                 text: 'Please fill in the empty fields.',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+        if (!volumetricData.Qty) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Qty Zero',
+                text: 'Qty should not be zero.',
                 confirmButtonText: 'OK',
             });
             return;
@@ -1034,7 +1044,53 @@ function Booking() {
             calculateGstDetails(formData.Customer_Code, formData.Mode_Code, formData.Rate);
         }
     }, [formData.Customer_Code, formData.Mode_Code, formData.Rate]);
+    useEffect(() => {
+        const getVolum = async (Customer_Code, Mode_Code) => {
+            try {
+                const response = await getApi(
+                    `/Master/GetVolume?Customer_Code=${Customer_Code}&Mode_Code=${Mode_Code}`
+                );
+                if (response?.status === 1) {
+                    const Data = response.data[0];
+                    console.log('✅ Data:', Data);
+                    setVolumetricData((prev) => ({
+                        ...prev,
+                        DivideBy: Number(Data.Centimeter),
+                        cft:Number(Data.Feet),
+                    }))
 
+                }
+            } catch (error) {
+                console.error("❌ Error in Volumetric:", error);
+            }
+        };
+        if (formData.Customer_Code && formData.Mode_Code) {
+            getVolum(formData.Customer_Code, formData.Mode_Code);
+        }
+    }, [formData.Customer_Code, formData.Mode_Code]);
+    useEffect(()=>{
+       
+        if(volumetricData.Length && volumetricData.Width && volumetricData.Height && volumetricData.Qty)
+        {
+            console.log(volumetricData)
+        let ans=1;
+        ans=ans*Number(volumetricData.Length);
+        ans=ans*Number(volumetricData.Width);
+        ans=ans*Number(volumetricData.Height);
+        console.log(ans);
+        if(volumetricData.cft) ans=ans*volumetricData.cft;
+        console.log(ans);
+        ans=ans/volumetricData.DivideBy;
+        console.log(ans);
+        ans=ans*Number(volumetricData.Qty);
+        console.log(ans);
+        setVolumetricData((prev)=>(
+            {...prev,
+                VolmetricWt:ans.toFixed(2),
+            }
+        ))
+        }
+    },[volumetricData.Length,volumetricData.Width,volumetricData.Height,volumetricData.Qty])
     // 📦 Auto calculate freight rate
     useEffect(() => {
         const actual = parseFloat(formData.ActualWt) || 0;
@@ -1178,6 +1234,7 @@ function Booking() {
             Height: 0,
             Qty: 0,
             DivideBy: 0,
+            cft:0,
             VolmetricWt: 0,
             ActualWt: 0,
             ChargeWt: 0,

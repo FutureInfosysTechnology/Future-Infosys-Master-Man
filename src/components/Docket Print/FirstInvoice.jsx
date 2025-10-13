@@ -31,6 +31,7 @@ function FirstInvoice() {
     const navigate = useNavigate();
     const invNo = location?.state?.invoiceNo || "";
     const fromPath = location?.state?.from || "/";
+    const termArr=location?.state?.termArr || [];
     const [getBranch, setGetBranch] = useState([]);
     const [invoiceData, setInvoiceData] = useState([]);
     console.log(location.state);
@@ -245,7 +246,7 @@ function FirstInvoice() {
                 <div className="container-2" id="pdf" style={{
                     borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px",
                     width: "992px", direction: "flex",
-                    flexDirection: "column", gap: "5px"
+                    flexDirection: "column", gap: "5px",fontFamily: '"Times New Roman", Times, serif',
                 }}>
 
                     <div className="container-2" style={{ borderRadius: "0px", width: "950px", display: "flex", flexDirection: "column" }}>
@@ -258,7 +259,7 @@ function FirstInvoice() {
                                         <img src={invoiceData[0]?.Branch_Logo} alt="" style={{ height: "120px", width: "100%" }} />
                                     </div>
                                     <div style={{ width: "75%", display: "flex", flexDirection: "column" }}>
-                                        <div style={{ textAlign: "center", height: "40%" }}>
+                                        <div style={{ textAlign: "start", height: "40%" }}>
                                             <p><b style={{ fontSize: "24px", fontWeight: "bold" }}>{invoiceData[0]?.Company_Name}</b></p>
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "12px", textAlign: "start" }}>
@@ -279,11 +280,18 @@ function FirstInvoice() {
                                 <div style={{ display: "flex", fontSize: "12px", border: "1px solid black", marginBottom: "5px",padding:"10px"}}>
                                         <div style={{ display: "flex", width: "50%",justifyContent:"start"}}>
                                         <div style={{ display: "flex", flexDirection: "column"}}>
-                                            <label htmlFor=""><b>CLIENT NAME :</b></label>
-                                            <label htmlFor=""><b>ADDRESS :</b></label>
-                                            <label htmlFor=""><b>CLIENT MOBILE NO  :</b></label>
-                                            <label htmlFor=""><b>PIN CODE :</b></label>
-                                            <label htmlFor=""><b>GST NO :</b></label>
+                                            <label htmlFor=""><b>CLIENT NAME</b></label>
+                                            <label htmlFor=""><b>ADDRESS</b></label>
+                                            <label htmlFor=""><b>CLIENT MOBILE NO </b></label>
+                                            <label htmlFor=""><b>PIN CODE</b></label>
+                                            <label htmlFor=""><b>GST NO</b></label>
+                                         </div> 
+                                         <div style={{ display: "flex", flexDirection: "column",marginLeft:"5px"}}>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
                                          </div>    
                                         <div style={{ display: "flex", flexDirection: "column"}}>  
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.customerName}</label>   
@@ -296,10 +304,16 @@ function FirstInvoice() {
                                       
                                     <div style={{ display: "flex", width: "50%",justifyContent:"end",alignItems:"center",marginRight:"50px"}}>
                                         <div style={{ display: "flex", flexDirection: "column",}}>
-                                            <label htmlFor=""><b>INVOICE NO :</b></label>
-                                            <label htmlFor=""><b>INVOICE DATE :</b></label>
-                                            <label htmlFor=""><b>INVOICE FROM :</b></label>
-                                            <label htmlFor=""><b>INVOICE TO :</b></label>
+                                            <label htmlFor=""><b>INVOICE NO</b></label>
+                                            <label htmlFor=""><b>INVOICE DATE</b></label>
+                                            <label htmlFor=""><b>INVOICE FROM</b></label>
+                                            <label htmlFor=""><b>INVOICE TO</b></label>
+                                         </div>    
+                                          <div style={{ display: "flex", flexDirection: "column",marginLeft:"5px"}}>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
                                          </div>    
                                         <div style={{ display: "flex", flexDirection: "column"}}>       
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillNo}</label>  
@@ -495,10 +509,12 @@ function FirstInvoice() {
                                 <div style={{ width: "100%", display: "flex", whiteSpace:"nowrap", border: "1px solid black",borderTop:"none" , padding:"5px", fontSize: "10px",paddingRight:"80px"}}>
                                     <div style={{ display: "flex", width:"60%", gap: "2px" ,flexDirection:"column"}}>
                                         <div style={{fontWeight:"bold",fontSize:"11px"}}> TERMS :</div>
-                                        <div style={{marginLeft:"5px"}}> 1. Payment should be made by cheque in favour of  <b style={{marginLeft:"2px",fontWeight:"bold",fontSize:"11px"}}>{invoiceData[0]?.Company_Name}</b></div>
-                                        <div style={{marginLeft:"5px"}}> 2. Payment  must be cleared within 15 days after submission of bill.</div>
-                                        <div style={{marginLeft:"5px"}}> 3. Please do not deduct any amount without proper confirmation.</div>
-                                        <div style={{marginLeft:"5px"}}> 4. Subject to Mumbai Jurisdiction</div>
+                                        { 
+                                           termArr.length>0 && termArr.map((data,index)=>(
+                                            <div style={{marginLeft:"5px"}}> {index+1}. {data}.</div>
+                                           ))
+                                           
+                                        }
                                         <div style={{fontWeight:"bold",fontSize:"11px",marginLeft:"10px",marginTop:"20px",marginBottom:"20px"}}> This is Computerised Generated Bill hence does not require any  signature & Stam</div>
                                     </div>
                                     <div style={{ display: "flex",width:"40%",justifyContent:"center",alignItems:"center"}}>

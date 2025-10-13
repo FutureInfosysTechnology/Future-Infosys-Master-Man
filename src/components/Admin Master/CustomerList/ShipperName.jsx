@@ -11,10 +11,11 @@ import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
 import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
 import { getApi, postApi, deleteApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 import Select from 'react-select';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function ShipperName() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getShipper, setGetShipper] = useState([]);  // To Get Receiver Data
     const [getCity, setGetCity] = useState([]); // To Get City Data
     const [getState, setGetState] = useState([]);  // To Get State Data
@@ -342,16 +343,37 @@ function ShipperName() {
                                     <th scope="col">Email_ID</th>
                                     <th scope="col">GST_No</th>
                                     <th scope="col">Company</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((shipper, index) => (
-                                    <tr key={index}>
-                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                        <td>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "60px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                     <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
                                                     setAddShipper({
                                                         shipperCode: shipper.Shipper_Code,
@@ -371,8 +393,10 @@ function ShipperName() {
                                                     <i className='bi bi-pen'></i>
                                                 </button>
                                                 <button onClick={() => handleDeleteShipper(shipper.Shipper_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{index + 1}</td>
                                         <td>{shipper.Shipper_Code}</td>
                                         <td>{shipper.Shipper_Name}</td>
@@ -385,7 +409,7 @@ function ShipperName() {
                                         <td>{shipper.GSTNo}</td>
                                         <td>{shipper.CompanyName}</td> {/* ✅ Fixed spelling */}
 
-                                       
+
                                     </tr>
                                 ))}
                             </tbody>

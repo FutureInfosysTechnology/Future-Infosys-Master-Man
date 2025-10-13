@@ -6,12 +6,13 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import Modal from 'react-modal';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 
 function ModeMaster() {
 
-
+    const [openRow, setOpenRow] = useState(null);
     const [getMode, setGetMode] = useState([]);              // To Get Mode Data
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -136,7 +137,7 @@ function ModeMaster() {
     };
 
     const handleGenerateCode = () => {
-        if(addMode.modeCode!=='') return;
+        if (addMode.modeCode !== '') return;
         const newCode = `${Math.floor(Math.random() * 1000)}`;
         setAddMode({ ...addMode, modeCode: newCode });
     };
@@ -208,81 +209,103 @@ function ModeMaster() {
                 </div>
 
                 <div className='table-container'>
-                    <table className='table table-bordered table-sm'>
+                    <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                         <thead className='table-sm'>
                             <tr>
-                                 <th scope="col">Actions</th>
+                                <th scope="col">Actions</th>
                                 <th scope="col">Sr.No</th>
                                 <th scope="col">Mode Code</th>
                                 <th scope="col">Mode Name</th>
-                               
+
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((mode, index) => (
-                                <tr key={`${mode.id}-${index}`}>
+                                <tr key={`${mode.id}-${index}`} style={{ fontSize: "12px", position: "relative" }}>
                                     <td>
-                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                            <button className='edit-btn' onClick={() => {
-                                                setIsEditMode(true);
-                                                setAddMode({
-                                                    modeCode: mode.Mode_Code,
-                                                    modeName: mode.Mode_Name
-                                                });
-                                                setModalIsOpen(true);
-                                            }}>
-                                                <i className='bi bi-pen'></i></button>
-                                            <button onClick={() => handleDeleteMode(mode.Mode_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                        </div>
+                                        <PiDotsThreeOutlineVerticalFill
+                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                            onClick={() => setOpenRow(openRow === index ? null : index)}
+                                        />
+                                        {openRow === index && (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    flexDirection: "row",
+                                                    position: "absolute",
+                                                    alignItems: "center",
+                                                    left: "150px",
+                                                    top: "0px",
+                                                    borderRadius: "10px",
+                                                    backgroundColor: "white",
+                                                    zIndex: "999999",
+                                                    height: "30px",
+                                                    width: "50px",
+                                                    padding: "10px",
+                                                }}
+                                            >
+                                                <button className='edit-btn' onClick={() => {
+                                                    setIsEditMode(true);
+                                                    setAddMode({
+                                                        modeCode: mode.Mode_Code,
+                                                        modeName: mode.Mode_Name
+                                                    });
+                                                    setModalIsOpen(true);
+                                                }}>
+                                                    <i className='bi bi-pen'></i></button>
+                                                <button onClick={() => handleDeleteMode(mode.Mode_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                            </div>
+                                        )}
                                     </td>
                                     <td>{index + 1}</td>
                                     <td>{mode.Mode_Code}</td>
                                     <td>{mode.Mode_Name}</td>
-                                    
+
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="row" style={{whiteSpace:"nowrap" }}>
-                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
-                        </div>
-
-                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "50px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
+                <div className="row" style={{ whiteSpace: "nowrap" }}>
+                    <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            {'<'}
+                        </button>
+                        <span style={{ color: "#333", padding: "5px" }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                            {'>'}
+                        </button>
                     </div>
+
+                    <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                        <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                        <select
+                            id="rowsPerPage"
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                                setRowsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            style={{ height: "40px", width: "50px" }}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
+                </div>
 
 
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                    className="custom-modal-mode" contentLabel="Modal" 
-                    >
+                    className="custom-modal-mode" contentLabel="Modal"
+                >
                     <div className="custom-modal-content">
                         <div className="header-tittle">
                             <header>Mode Master</header>

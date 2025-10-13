@@ -7,10 +7,11 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import { getApi, postApi, deleteApi, putApi } from '../Zonemaster/ServicesApi';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 const Statemast = () => {
-
+    const [openRow, setOpenRow] = useState(null);
     const [state, setState] = useState([]);                  // To Get State Data
     const [getCountry, setGetCountry] = useState([]);        // To Get Country Data
     const [error, setError] = useState(null);
@@ -221,23 +222,44 @@ const Statemast = () => {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr><th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">State Code</th>
                                     <th scope="col">State Name</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
 
                                 {currentRows.map((state, index) => (
-                                    <tr key={`${state.id}-${index}`}>
-                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button onClick={() => {
+                                    <tr key={`${state.id}-${index}`} style={{ fontSize: "12px", position: "relative" }}>
+                                        <td>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "150px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                   <button onClick={() => {
                                                     setIsEditMode(true);
                                                     setStateData({
                                                         stateCode: state.State_Code,
@@ -247,12 +269,14 @@ const Statemast = () => {
                                                 }} className='edit-btn'>
                                                     <i className='bi bi-pen'></i></button>
                                                 <button onClick={() => handleDeleteState(state.State_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                                         <td>{state.State_Code}</td>
                                         <td>{state.State_Name}</td>
-                                       
+
                                     </tr>
                                 ))}
 
@@ -261,7 +285,7 @@ const Statemast = () => {
                         </table>
                     </div>
 
-                   <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -275,7 +299,7 @@ const Statemast = () => {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}

@@ -9,10 +9,12 @@ import Modal from 'react-modal';
 import Select from 'react-select';
 import 'react-toggle/style.css';
 import { postApi, getApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function CustomerVolumetric() {
 
+    const [openRow, setOpenRow] = useState(null);
     const [getVolumetric, setGetVolumetric] = useState([]);                // To Get Volumetric Data
     const [getCustomerName, setGetCustomerName] = useState([]);            // To Get Customer Name Data
     const [getMode, setGetMode] = useState([]);                            // To Get Mode Data
@@ -178,18 +180,18 @@ function CustomerVolumetric() {
     }
 
 
-console.log(addVolumteric);
+    console.log(addVolumteric);
     const handleSaveVolumetric = async (e) => {
         e.preventDefault();
-          if (!addVolumteric.CustomerCode) {
-        Swal.fire('Error!', 'Please select a Customer Name.', 'error');
-        return;
-    }
+        if (!addVolumteric.CustomerCode) {
+            Swal.fire('Error!', 'Please select a Customer Name.', 'error');
+            return;
+        }
 
-    if (!addVolumteric.ModeCode) {
-        Swal.fire('Error!', 'Please select a Mode.', 'error');
-        return;
-    }
+        if (!addVolumteric.ModeCode) {
+            Swal.fire('Error!', 'Please select a Mode.', 'error');
+            return;
+        }
 
         const requestBody = {
             CustomerCode: addVolumteric.CustomerCode,
@@ -321,7 +323,7 @@ console.log(addVolumteric);
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Actions</th>
@@ -334,16 +336,37 @@ console.log(addVolumteric);
                                     <th scope="col">Feet</th>
                                     <th scope="col">Inches</th>
                                     <th scope="col">Inches Feet</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((vol, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "90px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                    <button className='edit-btn' onClick={() => {
                                                     setReadOnly(true);
                                                     setAddVolumetric({
                                                         CustomerCode: vol.Customer_Code,
@@ -362,7 +385,8 @@ console.log(addVolumteric);
                                                     <i className='bi bi-pen'></i>
                                                 </button>
                                                 <button className='edit-btn' onClick={() => handleDeleteVolumetric(vol.Customer_Code)}><i className='bi bi-trash'></i></button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
                                         <td>{index + 1}</td>
                                         <td>{vol.Customer_Code}</td>
@@ -373,14 +397,14 @@ console.log(addVolumteric);
                                         <td>{vol.Feet}</td>
                                         <td>{vol.Inches}</td>
                                         <td>{vol.Inches_Feet}</td>
-                                        
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -394,7 +418,7 @@ console.log(addVolumteric);
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -417,7 +441,7 @@ console.log(addVolumteric);
                         style={{
                             content:
                             {
-                                whiteSpace:"nowrap",
+                                whiteSpace: "nowrap",
                             }
                         }}>
                         <div className="custom-modal-content" style={{}}>
@@ -439,7 +463,7 @@ console.log(addVolumteric);
 
                                         <div className="input-field">
                                             <label htmlFor="">Customer Name</label>
-                                                 <Select
+                                            <Select
                                                 className="blue-selectbooking"
                                                 classNamePrefix="blue-selectbooking"
                                                 options={getCustomerName.map(cust => ({
@@ -448,7 +472,7 @@ console.log(addVolumteric);
                                                 }))}
                                                 value={
                                                     selectedCustName
-                                                        ? { value: selectedCustName, label:selectedCustName}
+                                                        ? { value: selectedCustName, label: selectedCustName }
                                                         : null
                                                 }
                                                 onChange={(selectedOption) => {
@@ -485,7 +509,7 @@ console.log(addVolumteric);
                                                 }))}
                                                 value={
                                                     selectedModeName
-                                                        ? { value: selectedModeName, label:selectedModeName}
+                                                        ? { value: selectedModeName, label: selectedModeName }
                                                         : null
                                                 }
                                                 onChange={(selectedOption) => {
@@ -496,17 +520,17 @@ console.log(addVolumteric);
                                                 menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
                                                 styles={{
                                                     menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                }}/>
+                                                }} />
                                         </div>
                                     </div>
 
-                                    <div className="fields2 mt-2 mb-1" style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
-                                        <div className="input-field1" style={{fontWeight:"bold",fontSize:"100px",textAlign:"center"}}>
+                                    <div className="fields2 mt-2 mb-1" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                        <div className="input-field1" style={{ fontWeight: "bold", fontSize: "100px", textAlign: "center" }}>
                                             <label htmlFor="">Volumetric Calculation Formula</label>
                                         </div>
                                     </div>
 
-                                    <div className="fields2" style={{display:"flex",gap:"4px"}}>
+                                    <div className="fields2" style={{ display: "flex", gap: "4px" }}>
                                         <div className="input-field1">
                                             <label htmlFor="">Centimeter</label>
                                             <input type="tel" value={addVolumteric.Centimeter}
@@ -515,7 +539,7 @@ console.log(addVolumteric);
                                         </div>
 
                                         <div className="input-field2">
-                                            <label htmlFor="">Feet</label>
+                                            <label htmlFor="">CFT</label>
                                             <input type="tel" value={addVolumteric.Feet}
                                                 onChange={(e) => setAddVolumetric({ ...addVolumteric, Feet: e.target.value })}
                                                 placeholder="Enter Feet" />
@@ -529,7 +553,7 @@ console.log(addVolumteric);
                                         </div>
 
                                         <div className="input-field1">
-                                            <label htmlFor="">Inches Feet</label>
+                                            <label htmlFor="">CFT</label>
                                             <input type="tel" value={addVolumteric.InchesFeet}
                                                 onChange={(e) => setAddVolumetric({ ...addVolumteric, InchesFeet: e.target.value })}
                                                 placeholder="Enter Inches Feet" />

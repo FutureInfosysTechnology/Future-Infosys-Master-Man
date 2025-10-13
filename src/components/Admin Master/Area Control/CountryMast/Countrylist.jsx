@@ -6,11 +6,12 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import { getApi, postApi, deleteApi, putApi } from '../Zonemaster/ServicesApi';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 
 const Countrylist = () => {
-
+  const [openRow, setOpenRow] = useState(null);
   const [country, setCountry] = useState([]);                 // to get country data
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -196,23 +197,43 @@ const Countrylist = () => {
           </div>
 
           <div className='table-container'>
-            <table className='table table-bordered table-sm'>
+            <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
               <thead className='table-sm'>
                 <tr>
                   <th scope="col">Actions</th>
                   <th scope="col">Sr.No</th>
                   <th scope="col">Country Code</th>
                   <th scope="col">Country Name</th>
-                  
+
                 </tr>
               </thead>
               <tbody className='table-body'>
-
                 {currentRows.map((country, index) => (
-                  <tr key={index}>
+                  <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                     <td>
-                      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: "center" }}>
-                        <button onClick={() => {
+                      <PiDotsThreeOutlineVerticalFill
+                        style={{ fontSize: "20px", cursor: "pointer" }}
+                        onClick={() => setOpenRow(openRow === index ? null : index)}
+                      />
+                      {openRow === index && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            flexDirection: "row",
+                            position: "absolute",
+                            alignItems: "center",
+                            left: "150px",
+                            top: "0px",
+                            borderRadius: "10px",
+                            backgroundColor: "white",
+                            zIndex: "999999",
+                            height: "30px",
+                            width: "50px",
+                            padding: "10px",
+                          }}
+                        >
+                          <button onClick={() => {
                           setReadOnly(true);
                           setCountryData({
                             countryCode: country.Country_Code,
@@ -222,12 +243,14 @@ const Countrylist = () => {
                         }} className='edit-btn'><i className='bi bi-pen'></i></button>
                         <button onClick={() => handleDeleteCountry(country.Country_Code)} className='edit-btn'><i className='bi bi-trash'></i>
                         </button>
-                      </div>
+                        </div>
+                      )}
                     </td>
+                    
                     <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                     <td>{country.Country_Code}</td>
                     <td>{country.Country_Name}</td>
-                    
+
                   </tr>
                 ))}
 
@@ -235,37 +258,37 @@ const Countrylist = () => {
             </table>
           </div>
 
-         <div className="row" style={{whiteSpace:"nowrap" }}>
-                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
-                        </div>
+          <div className="row" style={{ whiteSpace: "nowrap" }}>
+            <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+              <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                {'<'}
+              </button>
+              <span style={{ color: "#333", padding: "5px" }}>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                {'>'}
+              </button>
+            </div>
 
-                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "50px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
-                    </div>
+            <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+              <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+              <select
+                id="rowsPerPage"
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                style={{ height: "40px", width: "50px" }}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+          </div>
 
           <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
             className="custom-modal-mode" contentLabel='Modal'>

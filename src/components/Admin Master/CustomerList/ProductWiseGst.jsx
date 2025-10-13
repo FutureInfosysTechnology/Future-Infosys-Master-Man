@@ -6,10 +6,11 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import Modal from 'react-modal';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function ProductWiseGst() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getGST, setGetGST] = useState([]);                     // To Get GST Data
     const [getMode, setGetMode] = useState([]);                   // To Get Mode Data
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -229,26 +230,47 @@ function ProductWiseGst() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
-                                     <th scope="col">Actions</th>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Mode Code</th>
                                     <th scope="col">Mode Name</th>
                                     <th scope="col">GST %</th>
                                     <th scope="col">From Date</th>
                                     <th scope="col">To Date</th>
-                                   
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((gst, index) => (
-                                    <tr key={index}>
-                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                        <td>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "100px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                     <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
                                                     setAddGST({
                                                         modeCode: gst.Mode_Code,
@@ -262,22 +284,24 @@ function ProductWiseGst() {
                                                 </button>
                                                 <button className='edit-btn' onClick={() => handleDeleteGST(gst.Mode_Code)}>
                                                     <i className='bi bi-trash'></i></button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{index + 1}</td>
                                         <td>{gst.Mode_Code}</td>
                                         <td>{gst.Mode_Name}</td>
                                         <td>{gst.Services_Tax}</td>
                                         <td>{formatDate(gst.From_Date)}</td>
                                         <td>{formatDate(gst.To_Date)}</td>
-                                       
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -291,7 +315,7 @@ function ProductWiseGst() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}

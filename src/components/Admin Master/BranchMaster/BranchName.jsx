@@ -7,11 +7,12 @@ import jsPDF from 'jspdf';
 import Modal from 'react-modal';
 import Select from 'react-select';
 import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 
 function BranchName() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getBranchData, setGetBranchData] = useState([]);        // to get Branch Data
     const [getBankName, setGetBankName] = useState([]);            // To Get Bank Name Data
     const [error, setError] = useState(null);
@@ -43,7 +44,8 @@ function BranchName() {
         accountNo: '',
         bankBranch: '',
         img: "",
-        companyName:"",
+        companyName: "",
+        stamp: "",
     });                                                            // to add Branch Data
     const [searchQuery, setSearchQuery] = useState('');
     useEffect(() => {
@@ -86,32 +88,58 @@ function BranchName() {
 
         fetchInitialData();
     }, []);
-   const handleFileChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const img = new Image();
-      img.src = reader.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const img = new Image();
+                img.src = reader.result;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
 
-        // reduce size (max 300px wide for example)
-        const scale = 300 / img.width;
-        canvas.width = 300;
-        canvas.height = img.height * scale;
+                    // reduce size (max 300px wide for example)
+                    const scale = 300 / img.width;
+                    canvas.width = 300;
+                    canvas.height = img.height * scale;
 
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // convert back to base64 (smaller)
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7); 
-        setBranchData({ ...branchData, img: compressedBase64 });
-      };
+                    // convert back to base64 (smaller)
+                    const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+                    setBranchData({ ...branchData, img: compressedBase64 });
+                };
+            };
+            reader.readAsDataURL(file);
+        }
     };
-    reader.readAsDataURL(file);
-  }
-};
+    const handleFileChange1 = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const img = new Image();
+                img.src = reader.result;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+
+                    // reduce size (max 300px wide for example)
+                    const scale = 300 / img.width;
+                    canvas.width = 300;
+                    canvas.height = img.height * scale;
+
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // convert back to base64 (smaller)
+                    const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+                    setBranchData({ ...branchData, stamp: compressedBase64 });
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
 
     const handleUpdate = async (e) => {
@@ -164,7 +192,8 @@ function BranchName() {
                     mobileNo: '',
                     bankBranch: '',
                     img: '',
-                    companyName:"",
+                    companyName: "",
+                    stamp: "",
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -180,18 +209,18 @@ function BranchName() {
 
     const handleSaveBranchName = async (e) => {
         e.preventDefault();
-         const errors = [];
+        const errors = [];
         // if (!formData.DocketNo) errors.push("DocketNo is required");
         if (!branchData.branchCode) errors.push("Branch Name is required");
         if (!branchData.stateCode) errors.push("Branch Satet is required");
         if (errors.length > 0) {
-                   Swal.fire({
-                       icon: 'error',
-                       title: 'Validation Error',
-                       html: errors.map(err => `<div>${err}</div>`).join(''),
-                   });
-                   return;
-               }
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             branchCode: branchData.branchCode,
             branchName: branchData.branchName,
@@ -238,7 +267,8 @@ function BranchName() {
                     bankBranch: '',
                     accountNo: '',
                     img: '',
-                    companyName:"",
+                    companyName: "",
+                    stamp: "",
                 });
                 Swal.fire('Saved!', saveResponse.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -346,7 +376,7 @@ function BranchName() {
                                     branchCode: '', branchName: '', manifestNo: '', runsheetNo: '', invoiceNo: '',
                                     branchAdd1: '', branchPIN: '', email: '', website: '', gstNo: '', hsnNo: '', cityCode: '',
                                     stateCode: '', bankName: '', bankCode: '', bankBranch: '', accountNo: '', ifscCode: '',
-                                    mobileNo: '', img: ''
+                                    mobileNo: '', img: '', companyName: '', stamp: '',
                                 })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -388,16 +418,36 @@ function BranchName() {
                                     <th scope="col">GST_No</th>
                                     <th scope="col">Bank_Name</th>
                                     <th scope="col">State_Name</th>
-                                    
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((branch, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: 'center' }}>
-                                                <button className='edit-btn' onClick={() => {
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "60px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                   <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
                                                     setBranchData({
                                                         branchCode: branch.Branch_Code,
@@ -413,13 +463,13 @@ function BranchName() {
                                                         website: branch.Website,
                                                         mobileNo: branch.MobileNo,
                                                         stateCode: branch.State_Code,
-                                                        cityCode:branch.City_Code,
+                                                        cityCode: branch.City_Code,
                                                         bankCode: branch.Bank_Code,
-                                                        bankName:branch.Bank_Name,
+                                                        bankName: branch.Bank_Name,
                                                         accountNo: branch.AccountNo,
                                                         ifscCode: branch.IFSC_Code,
                                                         bankBranch: branch.Bank_Branch,
-                                                        img:branch.Branch_Logo,
+                                                        img: branch.Branch_Logo,
                                                     });
                                                     setModalIsOpen(true);
                                                 }}>
@@ -427,8 +477,10 @@ function BranchName() {
                                                 </button>
                                                 <button className='edit-btn' onClick={() => handleDeleteBranch(branch.Branch_Code)}>
                                                     <i className='bi bi-trash'></i></button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
+                                      
                                         <td>{index + 1}</td>
                                         <td>{branch.Branch_Code}</td>
                                         <td>{branch.Branch_Name}</td>
@@ -441,7 +493,7 @@ function BranchName() {
                                         <td>{branch.GSTNo}</td>
                                         <td>{branch.Bank_Name}</td>
                                         <td>{branch.State_Name}</td>
-                                        
+
                                     </tr>
                                 ))}
                             </tbody>
@@ -551,63 +603,63 @@ function BranchName() {
                                             <label htmlFor="">Start Invoice No.</label>
                                             <input type="tel" placeholder="Enter Start Invoice No"
                                                 value={branchData.invoiceNo}
-                                                onChange={(e) => setBranchData({ ...branchData, invoiceNo: e.target.value })}  />
+                                                onChange={(e) => setBranchData({ ...branchData, invoiceNo: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Start Manifest No.</label>
                                             <input type="tel" placeholder="Enter Start Manifest No"
                                                 value={branchData.manifestNo}
-                                                onChange={(e) => setBranchData({ ...branchData, manifestNo: e.target.value })}  />
+                                                onChange={(e) => setBranchData({ ...branchData, manifestNo: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Start Runsheet No.</label>
                                             <input type="tel" value={branchData.runsheetNo}
                                                 onChange={(e) => setBranchData({ ...branchData, runsheetNo: e.target.value })}
-                                                placeholder="Enter Start Bill No"  />
+                                                placeholder="Enter Start Bill No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" placeholder="Enter Address"
                                                 value={branchData.branchAdd1}
-                                                onChange={(e) => setBranchData({ ...branchData, branchAdd1: e.target.value })}  />
+                                                onChange={(e) => setBranchData({ ...branchData, branchAdd1: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Pin code</label>
                                             <input type="tel" id="pincode" name="pincode" maxLength="6"
                                                 placeholder="Enter Pin Code" value={branchData.branchPIN}
-                                                onChange={(e) => setBranchData({ ...branchData, branchPIN: e.target.value })}  />
+                                                onChange={(e) => setBranchData({ ...branchData, branchPIN: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">E-mail</label>
                                             <input type="email" placeholder="Enter Email"
                                                 value={branchData.email}
-                                                onChange={(e) => setBranchData({ ...branchData, email: e.target.value })}  />
+                                                onChange={(e) => setBranchData({ ...branchData, email: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Website</label>
                                             <input type="text" value={branchData.website}
                                                 onChange={(e) => setBranchData({ ...branchData, website: e.target.value })}
-                                                placeholder="Enter Website"  />
+                                                placeholder="Enter Website" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">GST No</label>
                                             <input type="text" value={branchData.gstNo}
                                                 onChange={(e) => setBranchData({ ...branchData, gstNo: e.target.value })}
-                                                placeholder="Enter GST No"  />
+                                                placeholder="Enter GST No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">HSN No</label>
                                             <input type="text" value={branchData.hsnNo}
                                                 onChange={(e) => setBranchData({ ...branchData, hsnNo: e.target.value })}
-                                                placeholder="Enter HSN No"  />
+                                                placeholder="Enter HSN No" />
                                         </div>
 
                                         <div className="input-field3">
@@ -717,14 +769,14 @@ function BranchName() {
                                             <label htmlFor="">AC/No</label>
                                             <input type="tel" value={branchData.accountNo}
                                                 onChange={(e) => setBranchData({ ...branchData, accountNo: e.target.value })}
-                                                placeholder="Enter Account No"  />
+                                                placeholder="Enter Account No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">IFSC</label>
                                             <input type="text" value={branchData.ifscCode}
                                                 onChange={(e) => setBranchData({ ...branchData, ifscCode: e.target.value })}
-                                                placeholder="Enter IFSC"  />
+                                                placeholder="Enter IFSC" />
                                         </div>
 
                                         <div className="input-field3">
@@ -732,21 +784,21 @@ function BranchName() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={branchData.mobileNo}
                                                 onChange={(e) => setBranchData({ ...branchData, mobileNo: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No"  />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Branch Location</label>
                                             <input type="text" placeholder="Enter Branch Location"
                                                 value={branchData.bankBranch}
-                                                onChange={(e) => setBranchData({ ...branchData, bankBranch: e.target.value })}  />
+                                                onChange={(e) => setBranchData({ ...branchData, bankBranch: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Companty Name</label>
                                             <input type="text" placeholder="Enter Companty Name"
                                                 value={branchData.companyName}
-                                                onChange={(e) => setBranchData({ ...branchData, companyName: e.target.value })}  />
+                                                onChange={(e) => setBranchData({ ...branchData, companyName: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
@@ -756,19 +808,39 @@ function BranchName() {
                                                 id="branchLogo"
                                                 accept="image/*"   // ✅ only allow image files
                                                 onChange={handleFileChange}
-                                                
+
                                                 style={{ paddingTop: "5px" }}
                                             />
                                         </div>
-                                        {branchData.img && 
-                                        (<div className="input-field3">
-                                            <img
-                                                src={branchData.img}
-                                                alt="Branch Logo"
-                                                style={{ width: "50px",height:"50px", marginTop: "10px" }}
+                                        {branchData.img &&
+                                            (<div className="input-field2" style={{ width: "60px" }}>
+                                                <img
+                                                    src={branchData.img}
+                                                    alt="Branch Logo"
+                                                    style={{ width: "50px", height: "50px", marginTop: "10px" }}
+                                                />
+                                            </div>
+                                            )}
+                                        <div className="input-field3">
+                                            <label htmlFor="branchLogo">Company Stamp</label>
+                                            <input
+                                                type="file"
+                                                id="branchLogo"
+                                                accept="image/*"   // ✅ only allow image files
+                                                onChange={handleFileChange1}
+
+                                                style={{ paddingTop: "5px" }}
                                             />
                                         </div>
-                                        )}
+                                        {branchData.stamp &&
+                                            (<div className="input-field2" style={{ width: "60px" }}>
+                                                <img
+                                                    src={branchData.stamp}
+                                                    alt="Branch Logo"
+                                                    style={{ width: "50px", height: "50px", marginTop: "10px" }}
+                                                />
+                                            </div>
+                                            )}
 
                                     </div>
 

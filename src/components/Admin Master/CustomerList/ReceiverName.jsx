@@ -11,10 +11,11 @@ import sms from '../../../Assets/Images/sms-svgrepo-com.png';
 import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
 import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function ReceiverName() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getReceiver, setGetReceiver] = useState([]);  // To Get Receiver Data
     const [getCity, setGetCity] = useState([]); // To Get City Data
     const [getState, setGetState] = useState([]);  // To Get State Data
@@ -345,16 +346,37 @@ function ReceiverName() {
                                     <th scope="col">Email_ID</th>
                                     <th scope="col">GST_No</th>
                                     <th scope="col">HSN_No</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((receiver, index) => (
-                                    <tr key={index}>
-                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                        <td>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "60px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+<button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
                                                     setAddReceiver({
                                                         receiverCode: receiver.Receiver_Code,
@@ -377,7 +399,8 @@ function ReceiverName() {
                                                     <i className='bi bi-pen'></i>
                                                 </button>
                                                 <button onClick={() => handleDeleteReceiver(receiver.Receiver_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
                                         <td>{index + 1}</td>
                                         <td>{receiver.Receiver_Code}</td>
@@ -390,7 +413,7 @@ function ReceiverName() {
                                         <td>{receiver.Receiver_Email}</td>
                                         <td>{receiver.GSTNo}</td>
                                         <td>{receiver.HSNNo}</td>
-                                       
+
                                     </tr>
                                 ))}
                             </tbody>

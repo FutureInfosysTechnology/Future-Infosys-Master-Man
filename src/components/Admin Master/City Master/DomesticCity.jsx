@@ -8,12 +8,13 @@ import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 import Select from 'react-select';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 
 
 function DomesticCity() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getCIty, setGetCIty] = useState([]);       // To Get Domestic City Data
     const [state, setState] = useState([]);           //to get state data
     const [country, setCountry] = useState([]);       //to get country data
@@ -306,7 +307,7 @@ function DomesticCity() {
                 </div>
 
                 <div className='table-container'>
-                    <table className='table table-bordered table-sm'>
+                    <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                         <thead className='table-sm'>
                             <tr>
                                 <th scope="col">Actions</th>
@@ -316,41 +317,64 @@ function DomesticCity() {
                                 <th scope="col">Zone Name</th>
                                 <th scope="col">State Name</th>
                                 <th scope="col">Country Name</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((city, index) => (
-                                <tr key={index}>
+                                <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                     <td>
-                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                            <button className='edit-btn' onClick={() => {
-                                                setReadOnly(true);
-                                                setAddCity({
-                                                    cityCode: city.City_Code,
-                                                    cityName: city.City_Name,
-                                                    zoneCode: city.Zone_Code,
-                                                    stateCode: city.State_Code,
-                                                    countryCode: city.Country_Name,
-                                                    destination: city.Manifest_Destination,
-                                                    delivery: city.Destination_DHours,
-                                                    pod: city.Destination_PHours
-                                                });
-                                                setModalIsOpen(true);
-                                            }}>
-                                                <i className='bi bi-pen'></i>
-                                            </button>
-                                            <button className='edit-btn' onClick={() => handleDeleteCity(city.City_Code)}><i className='bi bi-trash'></i></button>
-                                        </div>
+                                        <PiDotsThreeOutlineVerticalFill
+                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                            onClick={() => setOpenRow(openRow === index ? null : index)}
+                                        />
+                                        {openRow === index && (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    flexDirection: "row",
+                                                    position: "absolute",
+                                                    alignItems: "center",
+                                                    left: "90px",
+                                                    top: "0px",
+                                                    borderRadius: "10px",
+                                                    backgroundColor: "white",
+                                                    zIndex: "999999",
+                                                    height: "30px",
+                                                    width: "50px",
+                                                    padding: "10px",
+                                                }}
+                                            >
+                                                <button className='edit-btn' onClick={() => {
+                                                    setReadOnly(true);
+                                                    setAddCity({
+                                                        cityCode: city.City_Code,
+                                                        cityName: city.City_Name,
+                                                        zoneCode: city.Zone_Code,
+                                                        stateCode: city.State_Code,
+                                                        countryCode: city.Country_Name,
+                                                        destination: city.Manifest_Destination,
+                                                        delivery: city.Destination_DHours,
+                                                        pod: city.Destination_PHours
+                                                    });
+                                                    setModalIsOpen(true);
+                                                }}>
+                                                    <i className='bi bi-pen'></i>
+                                                </button>
+                                                <button className='edit-btn' onClick={() => handleDeleteCity(city.City_Code)}><i className='bi bi-trash'></i></button>
+                                            </div>
+                                        )}
                                     </td>
+
                                     <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                                     <td>{city.City_Code}</td>
                                     <td>{city.City_Name}</td>
                                     <td>{city.Zone_Name}</td>
                                     <td>{city.State_Name}</td>
                                     <td>{city.Country_Name}</td>
-                                    
+
                                 </tr>
                             ))}
                         </tbody>

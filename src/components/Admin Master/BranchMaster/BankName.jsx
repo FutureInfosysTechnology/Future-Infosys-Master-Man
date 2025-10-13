@@ -6,11 +6,12 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import Modal from 'react-modal';
 import { getApi, deleteApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 
 function BankName() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getBankName, setGetBankName] = useState([]);     // To Get Bank Data
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -137,7 +138,7 @@ function BankName() {
     };
 
     const handleGenerateCode = () => {
-        if(addBank.BankCode!=='') return;
+        if (addBank.BankCode !== '') return;
         const newCode = `${Math.floor(Math.random() * 1000)}`;
         setAddBank({ ...addBank, BankCode: newCode });
     };
@@ -215,7 +216,7 @@ function BankName() {
 
 
                     <div className="table-container">
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Actions</th>
@@ -227,10 +228,31 @@ function BankName() {
                             <tbody>
 
                                 {currentRows.map((bank, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "100px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                     <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
                                                     setAddBank({
                                                         BankCode: bank.Bank_Code,
@@ -241,19 +263,20 @@ function BankName() {
                                                     <i className='bi bi-pen'></i>
                                                 </button>
                                                 <button onClick={() => handleDeleteBank(bank.Bank_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
                                         <td>{index + 1}</td>
                                         <td>{bank.Bank_Code}</td>
                                         <td>{bank.Bank_Name}</td>
-                                        
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -267,7 +290,7 @@ function BankName() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
@@ -288,7 +311,7 @@ function BankName() {
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
                         className="custom-modal-mode" contentLabel="Modal"
-                        >
+                    >
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Bank Master</header>

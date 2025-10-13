@@ -53,6 +53,7 @@ function ViewInvoice() {
         invoiceNo: "",
     });
     const [isFovChecked, setIsFovChecked] = useState(false);
+    const [isTermChecked, setIsTermChecked] = useState(false);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [isDocketChecked, setIsDocketChecked] = useState(false);
     const [isDeliveryChecked, setIsDeliveryChecked] = useState(false);
@@ -63,6 +64,9 @@ function ViewInvoice() {
     const [isInsuranceChecked, setIsInsuranceChecked] = useState(false);
     const [isODAChecked, setIsODAChecked] = useState(false);
     const [isFuelChecked, setIsFuelChecked] = useState(false);
+    const [term,setTerm]=useState("");
+    const [termArr,setTermArr]=useState([]);
+    const [editIndex,setEditIndex]=useState(null);
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -75,7 +79,7 @@ function ViewInvoice() {
             setLoading(false);
         }
     };
-     const handleCheckboxChange = (field, value) => {
+    const handleCheckboxChange = (field, value) => {
         const newState = {
             [field]: value
         };
@@ -88,7 +92,7 @@ function ViewInvoice() {
         setIsAllChecked(newValue);
 
         const allFields = {
-            isAllChecked:newValue,
+            isAllChecked: newValue,
             isFovChecked: newValue,
             isDocketChecked: newValue,
             isDeliveryChecked: newValue,
@@ -99,6 +103,7 @@ function ViewInvoice() {
             isInsuranceChecked: newValue,
             isODAChecked: newValue,
             isFuelChecked: newValue,
+            isTermChecked: newValue,
         };
         // Update React states
         setIsAllChecked(newValue);
@@ -112,11 +117,30 @@ function ViewInvoice() {
         setIsInsuranceChecked(newValue);
         setIsODAChecked(newValue);
         setIsFuelChecked(newValue);
+        setIsTermChecked(newValue);
         // Save to localStorage
         localStorage.setItem("toggelChargs", JSON.stringify(allFields));
     };
     useEffect(() => {
-    const allFields = {
+        const allFields = {
+            isFovChecked,
+            isDocketChecked,
+            isDeliveryChecked,
+            isPackingChecked,
+            isGreenChecked,
+            isHamaliChecked,
+            isOtherChecked,
+            isInsuranceChecked,
+            isODAChecked,
+            isFuelChecked,
+            isTermChecked,
+        };
+
+        // Check if all are true
+        const allChecked = Object.values(allFields).every(Boolean);
+        setIsAllChecked(allChecked);
+        handleCheckboxChange('isAllChecked', allChecked)
+    }, [
         isFovChecked,
         isDocketChecked,
         isDeliveryChecked,
@@ -127,40 +151,33 @@ function ViewInvoice() {
         isInsuranceChecked,
         isODAChecked,
         isFuelChecked,
-    };
-
-    // Check if all are true
-    const allChecked = Object.values(allFields).every(Boolean);
-    setIsAllChecked(allChecked);
-    handleCheckboxChange('isAllChecked', allChecked)
-}, [
-    isFovChecked,
-    isDocketChecked,
-    isDeliveryChecked,
-    isPackingChecked,
-    isGreenChecked,
-    isHamaliChecked,
-    isOtherChecked,
-    isInsuranceChecked,
-    isODAChecked,
-    isFuelChecked
-]);
+        isTermChecked,
+    ]);
 
     const handleFovChange = (e) => {
         setIsFovChecked(e.target.checked);
-        
+
         handleCheckboxChange('isFovChecked', e.target.checked);
+    }
+
+    const handleTermChange = (e) => {
+        setIsTermChecked(e.target.checked);
+        if(!e.target.checked)
+        {
+            setTermArr([]);
+        }
+        handleCheckboxChange('isTermChecked', e.target.checked);
     }
 
     const handleDocketChange = (e) => {
         setIsDocketChecked(e.target.checked);
-        
+
         handleCheckboxChange('isDocketChecked', e.target.checked);
     }
 
     const handleDeliveryChange = (e) => {
         setIsDeliveryChecked(e.target.checked);
-        
+
         handleCheckboxChange('isDeliveryChecked', e.target.checked);
     }
 
@@ -171,37 +188,37 @@ function ViewInvoice() {
 
     const handleGreenChange = (e) => {
         setIsGreenChecked(e.target.checked);
-        
+
         handleCheckboxChange('isGreenChecked', e.target.checked);
     }
 
     const handleHamaliChange = (e) => {
         setIsHamaliChecked(e.target.checked);
-        
+
         handleCheckboxChange('isHamaliChecked', e.target.checked);
     }
 
     const handleOtherChange = (e) => {
         setIsOtherChecked(e.target.checked);
-        
+
         handleCheckboxChange('isOtherChecked', e.target.checked);
     }
 
     const handleInsuranceChange = (e) => {
         setIsInsuranceChecked(e.target.checked);
-        
+
         handleCheckboxChange('isInsuranceChecked', e.target.checked);
     }
 
     const handleODAChange = (e) => {
         setIsODAChecked(e.target.checked);
-        
+
         handleCheckboxChange('isODAChecked', e.target.checked);
     }
 
     const handleFuelChange = (e) => {
         setIsFuelChecked(e.target.checked);
-        
+
         handleCheckboxChange('isFuelChecked', e.target.checked);
     }
 
@@ -210,6 +227,7 @@ function ViewInvoice() {
         if (savedState) {
             setIsAllChecked(savedState.isAllChecked || false);
             setIsFovChecked(savedState.isFovChecked || false);
+            setIsTermChecked(savedState.isTermChecked || false);
             setIsDocketChecked(savedState.isDocketChecked || false);
             setIsDeliveryChecked(savedState.isDeliveryChecked || false);
             setIsPackingChecked(savedState.isPackingChecked || false);
@@ -290,9 +308,32 @@ function ViewInvoice() {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
     const handleOpenInvoicePrint = (invNo) => {
-        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname } })
+        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname ,termArr:termArr} })
     };
-
+    const handleAddRow = (e) => {
+            e.preventDefault();
+    
+            if (!term) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Input Empty',
+                    text: 'Terms is required.',
+                    confirmButtonText: 'OK',
+                });
+                return;
+            }
+            if (editIndex !== null) {
+                // update existing row
+                const updated = [...termArr];
+                updated[editIndex] = term;
+                setTermArr(updated);
+                setEditIndex(null);
+            } else {
+                // add new row
+                setTermArr((prev) => [...prev, term]);
+            }
+           setTerm("");
+        };
     return (
         <>
 
@@ -604,12 +645,78 @@ function ViewInvoice() {
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Fuel Charges</label>
                                         </div>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isTermChecked}
+                                                onChange={handleTermChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Terms & Conditions</label>
+                                        </div>
                                     </div>
                                     <div className='bottom-buttons'>
                                         <button onClick={(e) => { e.preventDefault(); setModalIsOpen(false) }} className='ok-btn'>close</button>
                                     </div>
                                 </form>
                             </div>
+                             {
+                                            isTermChecked && (
+                                                <>
+                                                {/* <div className="header-tittle"> */}
+                                                {/* <header>Terms & Conditions</header> */}
+                                                {/* </div> */}
+                                                <div className='container2' style={{borderRadius:"0px" }}>
+                                                    <div className="table-container" style={{borderRadius:"0px" }}>
+                                                        <table className="table table-bordered table-sm">
+                                                            <thead className="table-info">
+                                                                <tr>
+                                                                    <th style={{width:"95%"}}>Terms & Conditions</th>
+                                                                    <th style={{width:"5%"}}>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="table-body">
+                                                                <tr>
+                                                                    <td>
+                                                                        <input type="text" placeholder="Enter terms"
+                                                                            style={{ textAlign: "center" }} value={term}
+                                                                            onChange={(e)=>setTerm(e.target.value)} />
+                                                                    </td>
+                                                                    <td>
+                                                                        <button className="ok-btn" style={{ width: "30px", height: "30px"}} onClick={handleAddRow}>
+                                                                            <i className="bi bi-plus" style={{ fontSize: "18px" }}></i>
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                                {termArr.map((data, index) => (
+                                                                     <tr key={index}>
+                                                                         <td>{data}</td> 
+                                                                         <td> 
+                                                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                                                 <button className='edit-btn' 
+                                                                                    onClick={() => {
+                                                                                        setTerm(data);
+                                                                                        setEditIndex(index);
+                                                                                    }}>
+                                                                                    <i className='bi bi-pen'></i>
+                                                                                </button>
+                                                                                <button onClick={() => {
+                                                                                    setTermArr(termArr.filter((_, ind) => ind !== index));
+                                                                                    setEditIndex(null);
+                                                                                    setTerm('');
+                                                                                }}
+                                                                                    className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                </>
+
+                                            )
+                                        }
                         </div>
                     </Modal >
 

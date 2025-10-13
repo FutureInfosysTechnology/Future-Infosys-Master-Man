@@ -7,10 +7,11 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function ProductWiseFuel() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getCust, setGetCust] = useState([]);                    // to get customer charges data
     const [getCustName, setGetCustName] = useState([]);            // To Get Customer Name Data
     const [getMode, setGetMode] = useState([]);                    // To Get Mode Data
@@ -401,7 +402,7 @@ function ProductWiseFuel() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Actions</th>
@@ -419,40 +420,63 @@ function ProductWiseFuel() {
                                     <th scope="col">Insurance_Charge</th>
                                     <th scope="col">From_Date</th>
                                     <th scope="col">To_Date</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((cust, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setAddCust({
-                                                        custCode: cust.Customer_Code,
-                                                        modeCode: cust.Mode_Code,
-                                                        fuelCharge: cust.Fuel_Charges,
-                                                        fovCharge: cust.Fov_Charges,
-                                                        docketCharge: cust.Docket_Charges,
-                                                        deliveryCharge: cust.Dilivery_Charges,
-                                                        packingCharge: cust.Packing_Charges,
-                                                        greenCharge: cust.Green_Charges,
-                                                        hamaliCharge: cust.Hamali_Charges,
-                                                        otherCharge: cust.Other_Charges,
-                                                        insuranceCharge: cust.Insurance_Charges,
-                                                        fromDate: cust.From_Date,
-                                                        toDate: cust.To_Date
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button className='edit-btn' onClick={() => handleDeleteCustCharges(cust.Customer_Code)}>
-                                                    <i className='bi bi-trash'></i></button>
-                                            </div>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "60px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setIsEditMode(true);
+                                                        setAddCust({
+                                                            custCode: cust.Customer_Code,
+                                                            modeCode: cust.Mode_Code,
+                                                            fuelCharge: cust.Fuel_Charges,
+                                                            fovCharge: cust.Fov_Charges,
+                                                            docketCharge: cust.Docket_Charges,
+                                                            deliveryCharge: cust.Dilivery_Charges,
+                                                            packingCharge: cust.Packing_Charges,
+                                                            greenCharge: cust.Green_Charges,
+                                                            hamaliCharge: cust.Hamali_Charges,
+                                                            otherCharge: cust.Other_Charges,
+                                                            insuranceCharge: cust.Insurance_Charges,
+                                                            fromDate: cust.From_Date,
+                                                            toDate: cust.To_Date
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button className='edit-btn' onClick={() => handleDeleteCustCharges(cust.Customer_Code)}>
+                                                        <i className='bi bi-trash'></i></button>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{cust.ID}</td>
                                         <td>{getCustomerNameByCode(cust.Customer_Code)}</td>
                                         <td>{getModeNameByCode(cust.Mode_Code)}</td>
@@ -467,14 +491,14 @@ function ProductWiseFuel() {
                                         <td>{cust.Insurance_Charges}</td>
                                         <td>{formatDate(cust.From_Date)}</td>
                                         <td>{formatDate(cust.To_Date)}</td>
-                                        
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -488,7 +512,7 @@ function ProductWiseFuel() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}

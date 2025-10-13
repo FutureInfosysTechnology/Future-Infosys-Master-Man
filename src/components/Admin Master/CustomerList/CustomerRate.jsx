@@ -11,6 +11,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select, { components } from 'react-select';
 import 'react-toggle/style.css';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function CustomerRate() {
@@ -22,6 +23,7 @@ function CustomerRate() {
         { value: "Box", label: "Box" },
     ];
 
+    const [openRow, setOpenRow] = useState(null);
     const [getCustRate, setGetCustRate] = useState([]);
     const [getCustomer, setGetCustomer] = useState([]);       // To Get Customer Data
     const [getCity, setGetCity] = useState([]);               // To Get City Data
@@ -478,10 +480,31 @@ function CustomerRate() {
                             </thead>
                             <tbody className='table-body'>
                                 {currentRows.map((rate, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "60px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                    <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
                                                     setFormdata({
                                                         Client_Code: rate.Customer_Name,
@@ -505,8 +528,10 @@ function CustomerRate() {
                                                 <button className='edit-btn' onClick={() => handledelete(rate.Club_No)}>
                                                     <i className='bi bi-trash'></i>
                                                 </button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{index + 1}</td>
                                         <td>{rate?.Customer_Name}</td>
                                         <td>{rate?.Mode_Name}</td>
@@ -1040,6 +1065,7 @@ function CustomerRate() {
                                                             placeholder: (base) => ({
                                                                 ...base,
                                                                 whiteSpace: "nowrap",
+                                                                textAlign: "center",
                                                                 overflow: "hidden",
                                                                 textOverflow: "ellipsis",
                                                                 width: "100px",
@@ -1049,12 +1075,14 @@ function CustomerRate() {
                                                             }),
                                                             input: (base) => ({
                                                                 ...base,
+                                                                textAlign: "center",
                                                                 width: "100px",
                                                                 paddingLeft: "10px",
                                                                 fontWeight: "normal", // ✅ ensure typed text also not bold
                                                             }),
                                                             singleValue: (base) => ({
                                                                 ...base,
+                                                                textAlign: "center",
                                                                 fontWeight: "normal", // ✅ make selected value not bold
                                                             }),
                                                             menuPortal: (base) => ({
@@ -1067,19 +1095,19 @@ function CustomerRate() {
                                                 </td>
                                                 <td>
                                                     <input type="text" className="form-control" placeholder="Document Rate" value={tableRowData.On_Addition}
-                                                        name="On_Addition" onChange={handleChange} />
+                                                        name="On_Addition" onChange={handleChange} style={{ textAlign: "center" }} />
                                                 </td>
                                                 <td>
                                                     <input type="text" className="form-control" placeholder="Min Weight" value={tableRowData.Lower_Wt}
-                                                        name="Lower_Wt" onChange={handleChange} />
+                                                        name="Lower_Wt" onChange={handleChange} style={{ textAlign: "center" }} />
                                                 </td>
                                                 <td>
                                                     <input type="text" className="form-control" placeholder="Max Weight" value={tableRowData.Upper_Wt}
-                                                        name="Upper_Wt" onChange={handleChange} />
+                                                        name="Upper_Wt" onChange={handleChange} style={{ textAlign: "center" }} />
                                                 </td>
                                                 <td>
                                                     <input type="text" className="form-control" placeholder="Rate" value={tableRowData.Rate}
-                                                        name="Rate" onChange={handleChange} />
+                                                        name="Rate" onChange={handleChange} style={{ textAlign: "center" }} />
                                                 </td>
 
                                                 <td >
