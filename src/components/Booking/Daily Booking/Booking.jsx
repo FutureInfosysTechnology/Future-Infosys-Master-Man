@@ -239,7 +239,8 @@ function Booking() {
         Width: 0,
         Height: 0,
         Qty: 0,
-        DivideBy: "",
+        DivideBy: 0,
+        cft: 0,
         VolmetricWt: 0,
         ActualWt: 0,
         ChargeWt: 0
@@ -264,7 +265,7 @@ function Booking() {
         Height: 0,
         Qty: 0,
         DivideBy: 0,
-        cft:0,
+        cft: 0,
         VolmetricWt: 0,
         ActualWt: 0,
         ChargeWt: 0
@@ -1056,7 +1057,7 @@ function Booking() {
                     setVolumetricData((prev) => ({
                         ...prev,
                         DivideBy: Number(Data.Centimeter),
-                        cft:Number(Data.Feet),
+                        cft: Number(Data.Feet),
                     }))
 
                 }
@@ -1068,29 +1069,76 @@ function Booking() {
             getVolum(formData.Customer_Code, formData.Mode_Code);
         }
     }, [formData.Customer_Code, formData.Mode_Code]);
-    useEffect(()=>{
-       
-        if(volumetricData.Length && volumetricData.Width && volumetricData.Height && volumetricData.Qty)
-        {
+    useEffect(() => {
+
+        if (volumetricData.Length && volumetricData.Width && volumetricData.Height && volumetricData.Qty) {
             console.log(volumetricData)
-        let ans=1;
-        ans=ans*Number(volumetricData.Length);
-        ans=ans*Number(volumetricData.Width);
-        ans=ans*Number(volumetricData.Height);
-        console.log(ans);
-        if(volumetricData.cft) ans=ans*volumetricData.cft;
-        console.log(ans);
-        ans=ans/volumetricData.DivideBy;
-        console.log(ans);
-        ans=ans*Number(volumetricData.Qty);
-        console.log(ans);
-        setVolumetricData((prev)=>(
-            {...prev,
-                VolmetricWt:ans.toFixed(2),
-            }
-        ))
+            let ans = 1;
+            ans = ans * Number(volumetricData.Length);
+            ans = ans * Number(volumetricData.Width);
+            ans = ans * Number(volumetricData.Height);
+            console.log(ans);
+            if (volumetricData.cft) ans = ans * volumetricData.cft;
+            console.log(ans);
+            ans = ans / volumetricData.DivideBy;
+            console.log(ans);
+            ans = ans * Number(volumetricData.Qty);
+            console.log(ans);
+            setVolumetricData((prev) => (
+                {
+                    ...prev,
+                    VolmetricWt: ans.toFixed(2),
+                }
+            ))
         }
-    },[volumetricData.Length,volumetricData.Width,volumetricData.Height,volumetricData.Qty])
+    }, [volumetricData.Length, volumetricData.Width, volumetricData.Height, volumetricData.Qty])
+    useEffect(() => {
+        const getVolum = async (Vendor_Code, Mode_Code) => {
+            try {
+                const response = await getApi(
+                    `Master/VendorVolumetric?Vondor_Code=${Vendor_Code}&Mode_Code=${Mode_Code}`
+                );
+                if (response?.status === 1) {
+                    const Data = response.data[0];
+                    console.log('✅ Data:', Data);
+                    setVendorvolumetric((prev) => ({
+                        ...prev,
+                        DivideBy: Number(Data.Centimeter),
+                        cft: Number(Data.Feet),
+                    }))
+
+                }
+            } catch (error) {
+                console.error("❌ Error in Volumetric:", error);
+            }
+        };
+        if (formData.Vendor_Code && formData.Mode_Code) {
+            getVolum(formData.Vendor_Code, formData.Mode_Code);
+        }
+    }, [formData.Vendor_Code, formData.Mode_Code]);
+    useEffect(() => {
+
+        if (vendorVolumetric.Length && vendorVolumetric.Width && vendorVolumetric.Height && vendorVolumetric.Qty) {
+            console.log(vendorVolumetric)
+            let ans = 1;
+            ans = ans * Number(vendorVolumetric.Length);
+            ans = ans * Number(vendorVolumetric.Width);
+            ans = ans * Number(vendorVolumetric.Height);
+            console.log(ans);
+            if (vendorVolumetric.cft) ans = ans * vendorVolumetric.cft;
+            console.log(ans);
+            ans = ans / vendorVolumetric.DivideBy;
+            console.log(ans);
+            ans = ans * Number(vendorVolumetric.Qty);
+            console.log(ans);
+            setVendorvolumetric((prev) => (
+                {
+                    ...prev,
+                    VolmetricWt: ans.toFixed(2),
+                }
+            ))
+        }
+    }, [vendorVolumetric.Length, vendorVolumetric.Width, vendorVolumetric.Height, vendorVolumetric.Qty])
     // 📦 Auto calculate freight rate
     useEffect(() => {
         const actual = parseFloat(formData.ActualWt) || 0;
@@ -1223,6 +1271,7 @@ function Booking() {
             Height: 0,
             Qty: 0,
             DivideBy: 0,
+            cft: 0,
             VolmetricWt: 0,
             ActualWt: 0,
             ChargeWt: 0
@@ -1234,7 +1283,7 @@ function Booking() {
             Height: 0,
             Qty: 0,
             DivideBy: 0,
-            cft:0,
+            cft: 0,
             VolmetricWt: 0,
             ActualWt: 0,
             ChargeWt: 0,

@@ -335,13 +335,13 @@ function ShipperName() {
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Shipper_Code</th>
                                     <th scope="col">Shipper_Name</th>
+                                    <th scope="col">GST_No</th>
                                     <th scope="col">Shipper_Add</th>
                                     <th scope="col">Pin_Code</th>
                                     <th scope="col">City_Name</th>
                                     <th scope="col">State_Name</th>
                                     <th scope="col">Mobile_No</th>
                                     <th scope="col">Email_ID</th>
-                                    <th scope="col">GST_No</th>
                                     <th scope="col">Company</th>
 
                                 </tr>
@@ -373,8 +373,9 @@ function ShipperName() {
                                                         padding: "10px",
                                                     }}
                                                 >
-                                                     <button className='edit-btn' onClick={() => {
+                                                    <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setAddShipper({
                                                         shipperCode: shipper.Shipper_Code,
                                                         shipperName: shipper.Shipper_Name,
@@ -392,7 +393,13 @@ function ShipperName() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button onClick={() => handleDeleteShipper(shipper.Shipper_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                <button onClick={() => {
+                                                    setOpenRow(null);
+                                                    handleDeleteShipper(shipper.Shipper_Code);
+                                                }}
+                                                className='edit-btn'>
+                                               <i className='bi bi-trash'></i>
+                                               </button>
                                                 </div>
                                             )}
                                         </td>
@@ -400,13 +407,13 @@ function ShipperName() {
                                         <td>{index + 1}</td>
                                         <td>{shipper.Shipper_Code}</td>
                                         <td>{shipper.Shipper_Name}</td>
+                                        <td>{shipper.GSTNo}</td>
                                         <td>{shipper.Add1}</td>
                                         <td>{shipper.Pin}</td>
                                         <td>{shipper.City_Name}</td>
                                         <td>{shipper.State_Name}</td>
                                         <td>{shipper.Mobile}</td>
                                         <td>{shipper.Email}</td>
-                                        <td>{shipper.GSTNo}</td>
                                         <td>{shipper.CompanyName}</td> {/* ✅ Fixed spelling */}
 
 

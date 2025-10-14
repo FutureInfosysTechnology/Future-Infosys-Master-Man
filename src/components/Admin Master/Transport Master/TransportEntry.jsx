@@ -6,10 +6,11 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function TransportEntry() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getTransport, setGetTransport] = useState([]);            // To Get Transport Data
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -238,7 +239,7 @@ function TransportEntry() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Actions</th>
@@ -249,17 +250,40 @@ function TransportEntry() {
                                     <th scope="col">Address</th>
                                     <th scope="col">Mobile_No</th>
                                     <th scope="col">Email_ID</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((transport, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "80px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+
+                                                    <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                     setOpenRow(null);
                                                     setAddTransport({
                                                         TransportCode: transport.Transport_Code,
                                                         TransportName: transport.Transport_Name,
@@ -272,9 +296,14 @@ function TransportEntry() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button onClick={() => handleDeleteTransport(transport.Transport_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
+                                                <button onClick={() => {
+                                                     setOpenRow(null);
+                                                     handleDeleteTransport(transport.Transport_Code);
+                                                     }} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                                         <td>{transport.Transport_Code}</td>
                                         <td>{transport.Transport_Name}</td>
@@ -282,14 +311,14 @@ function TransportEntry() {
                                         <td>{transport.Address}</td>
                                         <td>{transport.MobileNo}</td>
                                         <td>{transport.Email_Id}</td>
-                                        
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                   <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -303,7 +332,7 @@ function TransportEntry() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}

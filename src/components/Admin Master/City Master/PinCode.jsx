@@ -416,10 +416,14 @@ function PinCode() {
                                                     km: pin.KM
                                                 });
                                                 setModalIsOpen(true);
+                                                setOpenRow(null);
                                             }}>
                                                 <i className='bi bi-pen'></i>
                                             </button>
-                                            <button className='edit-btn' onClick={() => handleDeletePinCode(pin.Pincode)}><i className='bi bi-trash'></i></button>
+                                            <button className='edit-btn' onClick={() => { 
+                                                setOpenRow(null); 
+                                                handleDeletePinCode(pin.Pincode);
+                                                }}><i className='bi bi-trash'></i></button>
                                             </div>
                                         )}
                                     </td>

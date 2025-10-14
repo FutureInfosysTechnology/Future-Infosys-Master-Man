@@ -272,6 +272,7 @@ function ProductWiseGst() {
                                                 >
                                                      <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setAddGST({
                                                         modeCode: gst.Mode_Code,
                                                         serviceTax: gst.Services_Tax,
@@ -282,7 +283,10 @@ function ProductWiseGst() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button className='edit-btn' onClick={() => handleDeleteGST(gst.Mode_Code)}>
+                                                <button className='edit-btn' onClick={() => { 
+                                                    handleDeleteGST(gst.Mode_Code);
+                                                    setOpenRow(null);
+                                                }}>
                                                     <i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}

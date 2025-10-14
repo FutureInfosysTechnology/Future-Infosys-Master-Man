@@ -252,8 +252,9 @@ function BankName() {
                                                         padding: "10px",
                                                     }}
                                                 >
-                                                     <button className='edit-btn' onClick={() => {
+                                                    <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setAddBank({
                                                         BankCode: bank.Bank_Code,
                                                         BankName: bank.Bank_Name
@@ -262,7 +263,10 @@ function BankName() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button onClick={() => handleDeleteBank(bank.Bank_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                <button onClick={() =>{
+                                                 handleDeleteBank(bank.Bank_Code);
+                                                 setOpenRow(null);
+                                                 }} className='edit-btn'><i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}
                                         </td>
@@ -351,7 +355,7 @@ function BankName() {
                                         <div className='bottom-buttons'>
                                             {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
                                             {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
-                                            <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
+                                            <button onClick={() => {setModalIsOpen(false)}} className='ok-btn'>close</button>
                                         </div>
                                     </div>
                                 </form>

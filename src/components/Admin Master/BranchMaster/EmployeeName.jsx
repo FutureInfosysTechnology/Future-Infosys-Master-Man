@@ -273,7 +273,7 @@ function EmployeeName() {
                                     <th scope="col" >User_Name</th>
                                     <th scope="col" >Password</th>
                                     <th scope="col" >CIty_Name</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
@@ -281,47 +281,51 @@ function EmployeeName() {
                                 {currentRows.map((emp, index) => (
                                     <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                                                                    <PiDotsThreeOutlineVerticalFill
-                                                                                        style={{ fontSize: "20px", cursor: "pointer" }}
-                                                                                        onClick={() => setOpenRow(openRow === index ? null : index)}
-                                                                                    />
-                                                                                    {openRow === index && (
-                                                                                        <div
-                                                                                            style={{
-                                                                                                display: "flex",
-                                                                                                justifyContent: "center",
-                                                                                                flexDirection: "row",
-                                                                                                position: "absolute",
-                                                                                                alignItems: "center",
-                                                                                                left: "100px",
-                                                                                                top: "0px",
-                                                                                                borderRadius: "10px",
-                                                                                                backgroundColor: "white",
-                                                                                                zIndex: "999999",
-                                                                                                height: "30px",
-                                                                                                width: "50px",
-                                                                                                padding: "10px",
-                                                                                            }}
-                                                                                        >
-                                                                                             <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setAddEmp({
-                                                        empCode: emp.Employee_Code,
-                                                        empName: emp.Employee_Name,
-                                                        mobileNo: emp.Employee_Mob,
-                                                        userName: emp.User_Name,
-                                                        pass: emp.Password,
-                                                        cityCode: emp.City_Code
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button onClick={() => handleDeleteEmp(emp.Employee_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                                                                        </div>
-                                                                                    )}
-                                                                                </td>
-                                        
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "100px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setAddEmp({
+                                                            empCode: emp.Employee_Code,
+                                                            empName: emp.Employee_Name,
+                                                            mobileNo: emp.Employee_Mob,
+                                                            userName: emp.User_Name,
+                                                            pass: emp.Password,
+                                                            cityCode: emp.City_Code
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button onClick={() =>{
+                                                     handleDeleteEmp(emp.Employee_Code);
+                                                     setOpenRow(null);
+                                                     }} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                </div>
+                                            )}
+                                        </td>
+
                                         <td>{index + 1}</td>
                                         <td>{emp.Employee_Code}</td>
                                         <td>{emp.Employee_Name}</td>
@@ -329,7 +333,7 @@ function EmployeeName() {
                                         <td>{emp.User_Name}</td>
                                         <td>{emp.Password}</td>
                                         <td>{emp.CIty_Name}</td>
-                                       
+
                                     </tr>
                                 ))}
                             </tbody>

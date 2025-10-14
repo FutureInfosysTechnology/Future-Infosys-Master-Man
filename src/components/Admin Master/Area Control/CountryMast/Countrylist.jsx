@@ -235,13 +235,17 @@ const Countrylist = () => {
                         >
                           <button onClick={() => {
                           setReadOnly(true);
+                          setOpenRow(null);
                           setCountryData({
                             countryCode: country.Country_Code,
                             countryName: country.Country_Name
                           });
                           setModalIsOpen(true);
                         }} className='edit-btn'><i className='bi bi-pen'></i></button>
-                        <button onClick={() => handleDeleteCountry(country.Country_Code)} className='edit-btn'><i className='bi bi-trash'></i>
+                        <button onClick={() => {
+                          setOpenRow(null);
+                          handleDeleteCountry(country.Country_Code);
+                          }} className='edit-btn'><i className='bi bi-trash'></i>
                         </button>
                         </div>
                       )}

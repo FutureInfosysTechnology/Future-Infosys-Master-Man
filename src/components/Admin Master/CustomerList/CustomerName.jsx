@@ -569,12 +569,12 @@ function CustomerName() {
                                     <th scope="col">Branch_Name</th>
                                     <th scope="col">Customer_Code</th>
                                     <th scope="col">Customer_Name</th>
+                                    <th scope="col">GST</th>
                                     <th scope="col">Booking_Type</th>
                                     <th scope="col">Mobile_No</th>
                                     <th scope="col">Email_ID</th>
                                     <th scope="col">Address</th>
                                     <th scope="col">Pin_Code</th>
-                                    <th scope="col">GST</th>
                                     <th scope="col">HSN_No</th>
 
                                 </tr>
@@ -607,56 +607,60 @@ function CustomerName() {
                                                     }}
                                                 >
                                                     <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setAddCustData({
-                                                        custCode: cust.Customer_Code,
-                                                        custName: cust.Customer_Name,
-                                                        bookingType: cust.Booking_Type,
-                                                        custAdd1: cust.Customer_Add1,
-                                                        custAdd2: cust.Customer_Add2,
-                                                        custAdd3: cust.Customer_Add3,
-                                                        contactPerson: cust.Contact_Person,
-                                                        contactPersonMob: cust.Contact_Person_Mob.trim(),
-                                                        emailID: cust.Email_Id,
-                                                        pinCode: cust.Pin_Code,
-                                                        cityCode: cust.City_Code,
-                                                        bankBranch: cust.Branch_Code,
-                                                        gstType: cust.Gst_Type,
-                                                        gstNo: cust.Gst_No,
-                                                        hsnNo: cust.HSN_NO,
-                                                        custMob: cust.Customer_Mob,
-                                                        description: cust.Description,
-                                                        stateCode: cust.State_Code,
-                                                        discount: cust.Discount,
-                                                        gst: cust.CustomerGst,
-                                                        fuel: cust.CustomerFuel,
-                                                        sms: cust.SMS,
-                                                        whatApp: cust.WhatApp,
-                                                        email: cust.Email,
-                                                        userName: cust.userName,
-                                                        Password: cust.Password,
-                                                        billPeriod: cust.Billing_Period,
-                                                        custStatus: cust.Customer_Status,
-                                                        DepartmentCode: cust.DepartmentCode,
-                                                        multiBranch: cust.Manage_Code
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setAddCustData({
+                                                            custCode: cust.Customer_Code,
+                                                            custName: cust.Customer_Name,
+                                                            bookingType: cust.Booking_Type,
+                                                            custAdd1: cust.Customer_Add1,
+                                                            custAdd2: cust.Customer_Add2,
+                                                            custAdd3: cust.Customer_Add3,
+                                                            contactPerson: cust.Contact_Person,
+                                                            contactPersonMob: cust.Contact_Person_Mob.trim(),
+                                                            emailID: cust.Email_Id,
+                                                            pinCode: cust.Pin_Code,
+                                                            cityCode: cust.City_Code,
+                                                            bankBranch: cust.Branch_Code,
+                                                            gstType: cust.Gst_Type,
+                                                            gstNo: cust.Gst_No,
+                                                            hsnNo: cust.HSN_NO,
+                                                            custMob: cust.Customer_Mob,
+                                                            description: cust.Description,
+                                                            stateCode: cust.State_Code,
+                                                            discount: cust.Discount,
+                                                            gst: cust.CustomerGst,
+                                                            fuel: cust.CustomerFuel,
+                                                            sms: cust.SMS,
+                                                            whatApp: cust.WhatApp,
+                                                            email: cust.Email,
+                                                            userName: cust.userName,
+                                                            Password: cust.Password,
+                                                            billPeriod: cust.Billing_Period,
+                                                            custStatus: cust.Customer_Status,
+                                                            DepartmentCode: cust.DepartmentCode,
+                                                            multiBranch: cust.Manage_Code
 
-                                                    });
-                                                    setGstOption(cust.Gst_Yes_No);
-                                                    setFuelOption(cust.Fuel_Yes_No1);
-                                                    setContractData({
-                                                        contractAmount: cust.Contact_Amount,
-                                                        creditDate: cust.Credit_Date === null ? firstDayOfMonth : cust.Credit_Date,
-                                                        dueDate: cust.Due_Date === null ? today : cust.Due_Date,
-                                                        advAmt: cust.AdvanceAmt,
-                                                        balance: cust.Balance_Amount,
-                                                        depositAmount: cust.Deposit_Amount
-                                                    })
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button onClick={() => handleDeleteCustName(cust.Customer_Code)} className='edit-btn'>
-                                                    <i className='bi bi-trash'></i></button>
+                                                        });
+                                                        setGstOption(cust.Gst_Yes_No);
+                                                        setFuelOption(cust.Fuel_Yes_No1);
+                                                        setContractData({
+                                                            contractAmount: cust.Contact_Amount,
+                                                            creditDate: cust.Credit_Date === null ? firstDayOfMonth : cust.Credit_Date,
+                                                            dueDate: cust.Due_Date === null ? today : cust.Due_Date,
+                                                            advAmt: cust.AdvanceAmt,
+                                                            balance: cust.Balance_Amount,
+                                                            depositAmount: cust.Deposit_Amount
+                                                        })
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button onClick={() =>{
+                                                        handleDeleteCustName(cust.Customer_Code);
+                                                        setOpenRow(null);
+                                                    }} className='edit-btn'>
+                                                        <i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}
                                         </td>
@@ -665,12 +669,12 @@ function CustomerName() {
                                         <td>{cust.Branch_Name}</td>
                                         <td>{cust.Customer_Code}</td>
                                         <td>{cust.Customer_Name}</td>
+                                        <td>{cust.Gst_No}</td>
                                         <td>{cust.Booking_Type}</td>
                                         <td>{cust.Customer_Mob}</td>
                                         <td>{cust.Email_Id}</td>
                                         <td>{cust.Customer_Add1}</td>
                                         <td>{cust.Pin_Code}</td>
-                                        <td>{cust.Gst_No}</td>
                                         <td>{cust.HSN_NO}</td>
 
                                     </tr>

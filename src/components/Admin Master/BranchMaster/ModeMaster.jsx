@@ -130,6 +130,7 @@ function ModeMaster() {
                 Swal.fire('Deleted!', 'Mode has been deleted.', 'success');
                 await fetchModeData();
             }
+            setOpenRow(null);
         } catch (err) {
             console.error('Delete Error:', err);
             Swal.fire('Error', 'Failed to delete Mode', 'error');
@@ -248,6 +249,7 @@ function ModeMaster() {
                                             >
                                                 <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setAddMode({
                                                         modeCode: mode.Mode_Code,
                                                         modeName: mode.Mode_Name
@@ -255,7 +257,10 @@ function ModeMaster() {
                                                     setModalIsOpen(true);
                                                 }}>
                                                     <i className='bi bi-pen'></i></button>
-                                                <button onClick={() => handleDeleteMode(mode.Mode_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                <button onClick={() =>{
+                                                     handleDeleteMode(mode.Mode_Code);
+                                                    setOpenRow(null);
+                                                }} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         )}
                                     </td>

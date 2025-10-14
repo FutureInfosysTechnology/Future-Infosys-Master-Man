@@ -6,6 +6,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
@@ -13,6 +14,7 @@ import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesA
 function OdaMaster() {
 
     const [getODA, setGetODA] = useState([]);
+    const [openRow, setOpenRow] = useState(null);
     const [getCustomer, setGetCustomer] = useState([]);         // To Get Customer Data
     const [getCity, setGetCity] = useState([]);
     const [getMode, setGetMode] = useState([]);
@@ -300,7 +302,7 @@ function OdaMaster() {
                 </div>
 
                 <div className='table-container'>
-                    <table className='table table-bordered table-sm'>
+                    <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
                         <thead className='table-sm'>
                             <tr>
                                 <th scope="col">Actions</th>
@@ -318,11 +320,34 @@ function OdaMaster() {
                         <tbody className='table-body'>
 
                             {currentRows.map((oda, index) => (
-                                <tr key={index}>
-                                     <td>
-                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                            <button className='edit-btn' onClick={() => {
+                                <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                    <td>
+                                        <PiDotsThreeOutlineVerticalFill
+                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                            onClick={() => setOpenRow(openRow === index ? null : index)}
+                                        />
+                                        {openRow === index && (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    flexDirection: "row",
+                                                    position: "absolute",
+                                                    alignItems: "center",
+                                                    left: "90px",
+                                                    top: "0px",
+                                                    borderRadius: "10px",
+                                                    backgroundColor: "white",
+                                                    zIndex: "999999",
+                                                    height: "30px",
+                                                    width: "50px",
+                                                    padding: "10px",
+                                                }}
+                                            >
+                                                
+                                                <button className='edit-btn' onClick={() => {
                                                 setIsEditMode(true);
+                                                 setOpenRow(null);
                                                 setFormdata({
                                                     Customer_Code: oda.Customer_Code,
                                                     Product_Code: oda.Product_Code,
@@ -335,10 +360,14 @@ function OdaMaster() {
                                             }}>
                                                 <i className='bi bi-pen'></i>
                                             </button>
-                                            <button className='edit-btn' onClick={() => handledelete(oda.Club_No)}>
+                                            <button className='edit-btn' onClick={() =>{
+                                                 setOpenRow(null);
+                                                 handledelete(oda.Club_No);
+                                                 }}>
                                                 <i className='bi bi-trash'></i>
                                             </button>
-                                        </div>
+                                            </div>
+                                        )}
                                     </td>
                                     <td>{index + 1}</td>
                                     <td>{oda.Customer_Name}</td>

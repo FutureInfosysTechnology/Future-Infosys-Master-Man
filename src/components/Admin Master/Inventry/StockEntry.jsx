@@ -6,11 +6,12 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function StockEntry() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getStockEntry, setGetStockEntry] = useState([]);                 // To Get Stock Entry Data
     const [getBranch, setGetBranch] = useState([]);                         // To Get Branch Data
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -223,27 +224,50 @@ function StockEntry() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
-                                     <th scope="col">Actions</th>
+                                    <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">City Name</th>
                                     <th scope="col">Quantity</th>
                                     <th scope="col">From Docket No</th>
                                     <th scope="col">To Docket No</th>
                                     <th scope="col">Stock Date</th>
-                                   
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((stock, index) => (
-                                    <tr key={index}>
-                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                        <td>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "100px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+
+                                                    <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setAddStock({
                                                         cityCode: stock.City_Code,
                                                         qty: stock.Qty,
@@ -255,24 +279,29 @@ function StockEntry() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button className='edit-btn' onClick={() => handleDeleteStock(stock.City_Code)}>
+                                                <button className='edit-btn' onClick={() =>{
+                                                    setOpenRow(null);
+                                                    handleDeleteStock(stock.City_Code);
+                                                }}>
                                                     <i className='bi bi-trash'></i></button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{index + 1}</td>
                                         <td>{stock.City_Name}</td>
                                         <td>{stock.Qty}</td>
                                         <td>{stock.FromDocketNo}</td>
                                         <td>{stock.ToDocketNo}</td>
                                         <td>{stock.Stock_Date}</td>
-                                       
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                   <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -286,7 +315,7 @@ function StockEntry() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}

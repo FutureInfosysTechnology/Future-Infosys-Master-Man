@@ -349,6 +349,7 @@ function DomesticCity() {
                                             >
                                                 <button className='edit-btn' onClick={() => {
                                                     setReadOnly(true);
+                                                    setOpenRow(null);
                                                     setAddCity({
                                                         cityCode: city.City_Code,
                                                         cityName: city.City_Name,
@@ -363,7 +364,10 @@ function DomesticCity() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button className='edit-btn' onClick={() => handleDeleteCity(city.City_Code)}><i className='bi bi-trash'></i></button>
+                                                <button className='edit-btn' onClick={() => {
+                                                     setOpenRow(null);
+                                                     handleDeleteCity(city.City_Code);
+                                                }}><i className='bi bi-trash'></i></button>
                                             </div>
                                         )}
                                     </td>

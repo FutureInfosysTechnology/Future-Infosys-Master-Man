@@ -5,12 +5,13 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 
 function BranchStock() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getBranchStock, setGetBranchStock] = useState([]);                    // To Get Branch Stock Data
     const [getBranch, setGetBranch] = useState([]);                              // To Get Branch Name Data
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -197,7 +198,7 @@ function BranchStock() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Actions</th>
@@ -207,46 +208,74 @@ function BranchStock() {
                                     <th scope="col">From_Docket_No</th>
                                     <th scope="col">To_Docket_No</th>
                                     <th scope="col">Stock_Date</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((branch, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setAddBranchStock({
-                                                        cityCode: branch.City_Code,
-                                                        qty: branch.Qty,
-                                                        fromDocketNo: branch.FromDocketNo,
-                                                        toDocketNo: branch.ToDocketNo,
-                                                        stockDate: branch.Stock_Date
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button className='edit-btn' onClick={() => handleDeleteBranchStock(branch.Branch_Code)}>
-                                                    <i className='bi bi-trash'></i></button>
-                                            </div>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "100px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setAddBranchStock({
+                                                            cityCode: branch.City_Code,
+                                                            qty: branch.Qty,
+                                                            fromDocketNo: branch.FromDocketNo,
+                                                            toDocketNo: branch.ToDocketNo,
+                                                            stockDate: branch.Stock_Date
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setOpenRow(null);
+                                                        handleDeleteBranchStock(branch.Branch_Code);
+                                                    }}>
+                                                        <i className='bi bi-trash'></i></button>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                                         <td>{branch.City_Name}</td>
                                         <td>{branch.Qty}</td>
                                         <td>{branch.FromDocketNo}</td>
                                         <td>{branch.ToDocketNo}</td>
                                         <td>{branch.Stock_Date}</td>
-                                        
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                  <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -260,7 +289,7 @@ function BranchStock() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}

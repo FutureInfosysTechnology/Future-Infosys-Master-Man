@@ -449,6 +449,7 @@ function BranchName() {
                                                 >
                                                    <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setBranchData({
                                                         branchCode: branch.Branch_Code,
                                                         branchName: branch.Branch_Name,
@@ -475,7 +476,7 @@ function BranchName() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button className='edit-btn' onClick={() => handleDeleteBranch(branch.Branch_Code)}>
+                                                <button className='edit-btn' onClick={() => {handleDeleteBranch(branch.Branch_Code);setOpenRow(null);}}>
                                                     <i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}

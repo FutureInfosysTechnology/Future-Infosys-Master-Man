@@ -9,11 +9,12 @@ import html2canvas from 'html2canvas';
 import sms from '../../../Assets/Images/sms-svgrepo-com.png';
 import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
 import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function VendorName() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getVendor, setGetVendor] = useState([]);            // to get vendor data
     const [international, setInternational] = useState([]);    //  to get city data
     const [state, setState] = useState([]);                    // to get state data
@@ -308,7 +309,7 @@ function VendorName() {
                         </div>
                     </div>
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col" style={{ width: "250px" }}>Actions</th>
@@ -322,16 +323,39 @@ function VendorName() {
                                     <th scope="col">Contact_Person</th>
                                     <th scope="col">State_Name</th>
                                     <th scope="col">City_Name</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
                                 {currentRows.map((vendor, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "130px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+
+                                                    <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setVendorData({
                                                         vendorCode: vendor.Vendor_Code,
                                                         vendorName: vendor.Vendor_Name,
@@ -349,10 +373,14 @@ function VendorName() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button className='edit-btn' onClick={() => handleDeleteVendor(vendor.Vendor_Code)}>
+                                                <button className='edit-btn' onClick={() =>{ 
+                                                    setOpenRow(null);
+                                                    handleDeleteVendor(vendor.Vendor_Code);
+                                                    }}>
                                                     <i className='bi bi-trash'></i>
                                                 </button>
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
                                         <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                                         <td>{vendor.Vendor_Code}</td>
@@ -364,14 +392,14 @@ function VendorName() {
                                         <td>{vendor.Contact_Person}</td>
                                         <td>{vendor.State_Name}</td>
                                         <td>{vendor.City_Name}</td>
-                                        
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                   <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -385,7 +413,7 @@ function VendorName() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}

@@ -64,9 +64,13 @@ function ViewInvoice() {
     const [isInsuranceChecked, setIsInsuranceChecked] = useState(false);
     const [isODAChecked, setIsODAChecked] = useState(false);
     const [isFuelChecked, setIsFuelChecked] = useState(false);
-    const [term,setTerm]=useState("");
-    const [termArr,setTermArr]=useState([]);
-    const [editIndex,setEditIndex]=useState(null);
+    const [isCharedChecked, setIsCharedChecked] = useState(false);
+    const [isVolChecked, setIsVolChecked] = useState(false);
+    const [isActualChecked, setIsActualChecked] = useState(false);
+    const [isRateChecked, setIsRateChecked] = useState(false);
+    const [term, setTerm] = useState("");
+    const [termArr, setTermArr] = useState([]);
+    const [editIndex, setEditIndex] = useState(null);
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -104,6 +108,10 @@ function ViewInvoice() {
             isODAChecked: newValue,
             isFuelChecked: newValue,
             isTermChecked: newValue,
+            isCharedChecked: newValue,
+            isActualChecked: newValue,
+            isVolChecked: newValue,
+            isRateChecked: newValue,
         };
         // Update React states
         setIsAllChecked(newValue);
@@ -118,6 +126,10 @@ function ViewInvoice() {
         setIsODAChecked(newValue);
         setIsFuelChecked(newValue);
         setIsTermChecked(newValue);
+        setIsCharedChecked(newValue);
+        setIsActualChecked(newValue);
+        setIsVolChecked(newValue);
+        setIsRateChecked(newValue);
         // Save to localStorage
         localStorage.setItem("toggelChargs", JSON.stringify(allFields));
     };
@@ -134,6 +146,10 @@ function ViewInvoice() {
             isODAChecked,
             isFuelChecked,
             isTermChecked,
+            isActualChecked,
+            isCharedChecked,
+            isVolChecked,
+            isRateChecked,
         };
 
         // Check if all are true
@@ -152,6 +168,10 @@ function ViewInvoice() {
         isODAChecked,
         isFuelChecked,
         isTermChecked,
+        isActualChecked,
+        isCharedChecked,
+        isVolChecked,
+        isRateChecked,
     ]);
 
     const handleFovChange = (e) => {
@@ -162,8 +182,7 @@ function ViewInvoice() {
 
     const handleTermChange = (e) => {
         setIsTermChecked(e.target.checked);
-        if(!e.target.checked)
-        {
+        if (!e.target.checked) {
             setTermArr([]);
         }
         handleCheckboxChange('isTermChecked', e.target.checked);
@@ -221,6 +240,26 @@ function ViewInvoice() {
 
         handleCheckboxChange('isFuelChecked', e.target.checked);
     }
+    const handleRateChange = (e) => {
+        setIsRateChecked(e.target.checked);
+
+        handleCheckboxChange('isRateChecked', e.target.checked);
+    }
+    const handleActualChange = (e) => {
+        setIsActualChecked(e.target.checked);
+
+        handleCheckboxChange('isActualChecked', e.target.checked);
+    }
+    const handleVolChange = (e) => {
+        setIsVolChecked(e.target.checked);
+
+        handleCheckboxChange('isVolChecked', e.target.checked);
+    }
+    const handleCharedChange = (e) => {
+        setIsCharedChecked(e.target.checked);
+
+        handleCheckboxChange('isCharedChecked', e.target.checked);
+    }
 
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("toggelChargs"));
@@ -237,6 +276,12 @@ function ViewInvoice() {
             setIsInsuranceChecked(savedState.isInsuranceChecked || false);
             setIsODAChecked(savedState.isODAChecked || false);
             setIsFuelChecked(savedState.isFuelChecked || false);
+
+            setIsRateChecked(savedState.isRateChecked || false);
+            setIsActualChecked(savedState.isActualChecked || false);
+            setIsVolChecked(savedState.isVolChecked || false);
+            setIsCharedChecked(savedState.isCharedChecked || false);
+            
         }
         fetchData('/Master/getCustomerdata', setGetCustomer);
     }, []);
@@ -308,38 +353,38 @@ function ViewInvoice() {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
     const handleOpenInvoicePrint = (invNo) => {
-        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname ,termArr:termArr} })
+        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname, termArr: termArr } })
     };
     const handleAddRow = (e) => {
-            e.preventDefault();
-    
-            if (!term) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Input Empty',
-                    text: 'Terms is required.',
-                    confirmButtonText: 'OK',
-                });
-                return;
-            }
-            if (editIndex !== null) {
-                // update existing row
-                const updated = [...termArr];
-                updated[editIndex] = term;
-                setTermArr(updated);
-                setEditIndex(null);
-            } else {
-                // add new row
-                setTermArr((prev) => [...prev, term]);
-            }
-           setTerm("");
-        };
+        e.preventDefault();
+
+        if (!term) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Input Empty',
+                text: 'Terms is required.',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+        if (editIndex !== null) {
+            // update existing row
+            const updated = [...termArr];
+            updated[editIndex] = term;
+            setTermArr(updated);
+            setEditIndex(null);
+        } else {
+            // add new row
+            setTermArr((prev) => [...prev, term]);
+        }
+        setTerm("");
+    };
     return (
         <>
 
             <div className="body">
                 <div className="container1">
-                    <form style={{ margin: "0px", padding: "0px" }} onSubmit={handleSubmit}>
+                    <form style={{ margin: "0px", padding: "0px" }} onSubmit={(e) => e.preventDefault()}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
                             <div className="input-field1">
                                 <label htmlFor="">Customer</label>
@@ -412,10 +457,10 @@ function ViewInvoice() {
                                 <input type="text" placeholder="Invoice No" value={formData.invoiceNo} onChange={(e) => handleFormChange(e.target.value, "invoiceNo")} />
                             </div>
                             <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
-                                <button className="ok-btn" style={{ height: "35px" }} type="submit">Submit</button>
+                                <button className="ok-btn" style={{ height: "35px" }} onClick={handleSubmit}>Submit</button>
                             </div>
                             <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
-                                <button className="ok-btn" style={{ height: "35px" }} type="submit" onClick={() => setModalIsOpen(true)}>SetUp</button>
+                                <button className="ok-btn" style={{ height: "35px" }} onClick={() => setModalIsOpen(true)}>SetUp</button>
                             </div>
                         </div>
                     </form>
@@ -647,6 +692,39 @@ function ViewInvoice() {
                                         </div>
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
+                                                checked={isActualChecked}
+                                                onChange={handleActualChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Actual Weight</label>
+                                        </div>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isCharedChecked}
+                                                onChange={handleCharedChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                 Charged Weight</label>
+                                        </div>
+                                        
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isVolChecked}
+                                                onChange={handleVolChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                               Volumetric Weight</label>
+                                        </div>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isRateChecked}
+                                                onChange={handleRateChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Rate Per Kg</label>
+                                        </div>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
                                                 checked={isTermChecked}
                                                 onChange={handleTermChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
@@ -659,64 +737,64 @@ function ViewInvoice() {
                                     </div>
                                 </form>
                             </div>
-                             {
-                                            isTermChecked && (
-                                                <>
-                                                {/* <div className="header-tittle"> */}
-                                                {/* <header>Terms & Conditions</header> */}
-                                                {/* </div> */}
-                                                <div className='container2' style={{borderRadius:"0px" }}>
-                                                    <div className="table-container" style={{borderRadius:"0px" }}>
-                                                        <table className="table table-bordered table-sm">
-                                                            <thead className="table-info">
-                                                                <tr>
-                                                                    <th style={{width:"95%"}}>Terms & Conditions</th>
-                                                                    <th style={{width:"5%"}}>Action</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody className="table-body">
-                                                                <tr>
-                                                                    <td>
-                                                                        <input type="text" placeholder="Enter terms"
-                                                                            style={{ textAlign: "center" }} value={term}
-                                                                            onChange={(e)=>setTerm(e.target.value)} />
-                                                                    </td>
-                                                                    <td>
-                                                                        <button className="ok-btn" style={{ width: "30px", height: "30px"}} onClick={handleAddRow}>
-                                                                            <i className="bi bi-plus" style={{ fontSize: "18px" }}></i>
+                            {
+                                isTermChecked && (
+                                    <>
+                                        {/* <div className="header-tittle"> */}
+                                        {/* <header>Terms & Conditions</header> */}
+                                        {/* </div> */}
+                                        <div className='container2' style={{ borderRadius: "0px" }}>
+                                            <div className="table-container" style={{ borderRadius: "0px" }}>
+                                                <table className="table table-bordered table-sm">
+                                                    <thead className="table-info">
+                                                        <tr>
+                                                            <th style={{ width: "95%" }}>Terms & Conditions</th>
+                                                            <th style={{ width: "5%" }}>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="table-body">
+                                                        <tr>
+                                                            <td>
+                                                                <input type="text" placeholder="Enter terms"
+                                                                    style={{ textAlign: "center" }} value={term}
+                                                                    onChange={(e) => setTerm(e.target.value)} />
+                                                            </td>
+                                                            <td>
+                                                                <button className="ok-btn" style={{ width: "30px", height: "30px" }} onClick={handleAddRow}>
+                                                                    <i className="bi bi-plus" style={{ fontSize: "18px" }}></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        {termArr.map((data, index) => (
+                                                            <tr key={index}>
+                                                                <td>{data}</td>
+                                                                <td>
+                                                                    <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                                        <button className='edit-btn'
+                                                                            onClick={() => {
+                                                                                setTerm(data);
+                                                                                setEditIndex(index);
+                                                                            }}>
+                                                                            <i className='bi bi-pen'></i>
                                                                         </button>
-                                                                    </td>
-                                                                </tr>
-                                                                {termArr.map((data, index) => (
-                                                                     <tr key={index}>
-                                                                         <td>{data}</td> 
-                                                                         <td> 
-                                                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                                                 <button className='edit-btn' 
-                                                                                    onClick={() => {
-                                                                                        setTerm(data);
-                                                                                        setEditIndex(index);
-                                                                                    }}>
-                                                                                    <i className='bi bi-pen'></i>
-                                                                                </button>
-                                                                                <button onClick={() => {
-                                                                                    setTermArr(termArr.filter((_, ind) => ind !== index));
-                                                                                    setEditIndex(null);
-                                                                                    setTerm('');
-                                                                                }}
-                                                                                    className='edit-btn'><i className='bi bi-trash'></i></button>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                                </>
+                                                                        <button onClick={() => {
+                                                                            setTermArr(termArr.filter((_, ind) => ind !== index));
+                                                                            setEditIndex(null);
+                                                                            setTerm('');
+                                                                        }}
+                                                                            className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </>
 
-                                            )
-                                        }
+                                )
+                            }
                         </div>
                     </Modal >
 

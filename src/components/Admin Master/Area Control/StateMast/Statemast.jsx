@@ -261,6 +261,7 @@ const Statemast = () => {
                                                 >
                                                    <button onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setStateData({
                                                         stateCode: state.State_Code,
                                                         stateName: state.State_Name
@@ -268,7 +269,10 @@ const Statemast = () => {
                                                     setModalIsOpen(true);
                                                 }} className='edit-btn'>
                                                     <i className='bi bi-pen'></i></button>
-                                                <button onClick={() => handleDeleteState(state.State_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                <button onClick={() => {
+                                                    setOpenRow(null);
+                                                    handleDeleteState(state.State_Code);
+                                                    }} className='edit-btn'><i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}
                                         </td>

@@ -51,6 +51,7 @@ function CustomerRate() {
         Weight: "",
     });
     console.log(formdata);
+    const [editIndex, setEditIndex] = useState(null);
     const [submittedData, setSubmittedData] = useState([]);
     const [tableRowData, setTableRowData] = useState({
         On_Addition: "",
@@ -193,8 +194,15 @@ function CustomerRate() {
             });
             return;
         }
-
-        setSubmittedData((prev) => [...prev, tableRowData]);
+        if (editIndex !== null) {
+            // update existing row
+            const updated = [...submittedData];
+            updated[editIndex] = tableRowData;
+            setSubmittedData(updated);
+            setEditIndex(null);
+        } else {
+            setSubmittedData((prev) => [...prev, tableRowData]);
+        }
         setTableRowData({
             On_Addition: "",
             Lower_Wt: "",
@@ -505,29 +513,33 @@ function CustomerRate() {
                                                     }}
                                                 >
                                                     <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setFormdata({
-                                                        Client_Code: rate.Customer_Name,
-                                                        Mode_Code: rate.Mode_Name,
-                                                        Zone_Code: rate.Zone_Name,
-                                                        State_Code: rate.State_Name,
-                                                        Destination_Code: rate.Destination_Name,
-                                                        Method: rate.Method,
-                                                        Slab: rate.Slab,
-                                                        Active_Date: rate.Active_Date,
-                                                        Closing_Date: rate.Closing_Date,
-                                                        RatePer: rate.RatePer,
-                                                        Weight: rate.Weight,
-                                                        Amount: rate.Amount
-                                                    });
-                                                    setSubmittedData(rate.RateDetails || [])
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button className='edit-btn' onClick={() => handledelete(rate.Club_No)}>
-                                                    <i className='bi bi-trash'></i>
-                                                </button>
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setFormdata({
+                                                            Client_Code: rate.Customer_Name,
+                                                            Mode_Code: rate.Mode_Name,
+                                                            Zone_Code: rate.Zone_Name,
+                                                            State_Code: rate.State_Name,
+                                                            Destination_Code: rate.Destination_Name,
+                                                            Method: rate.Method,
+                                                            Slab: rate.Slab,
+                                                            Active_Date: rate.Active_Date,
+                                                            Closing_Date: rate.Closing_Date,
+                                                            RatePer: rate.RatePer,
+                                                            Weight: rate.Weight,
+                                                            Amount: rate.Amount
+                                                        });
+                                                        setSubmittedData(rate.RateDetails || [])
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        handledelete(rate.Club_No);
+                                                        setOpenRow(null);
+                                                    }}>
+                                                        <i className='bi bi-trash'></i>
+                                                    </button>
                                                 </div>
                                             )}
                                         </td>
@@ -1110,7 +1122,7 @@ function CustomerRate() {
                                                         name="Rate" onChange={handleChange} style={{ textAlign: "center" }} />
                                                 </td>
 
-                                                <td >
+                                                <td style={{display:"flex",justifyContent:"center"}}>
                                                     <button className="ok-btn" style={{ padding: "2px", fontSize: "30px", width: "40px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center" }}
                                                         onClick={handleAddRow}>
                                                         <i className="bi bi-plus" ></i>
@@ -1119,12 +1131,40 @@ function CustomerRate() {
                                             </tr>
                                             {submittedData.map((data, index) => (
                                                 <tr key={index}>
-                                                    <td>{index + 1}</td>
+                                                    <td>{data.Rate_Flag}</td>
                                                     <td>{data.On_Addition}</td>
                                                     <td>{data.Lower_Wt}</td>
                                                     <td>{data.Upper_Wt}</td>
                                                     <td>{data.Rate}</td>
-                                                    <td>{data.Rate_Flag}</td>
+                                                    <td>
+                                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                            <button className='edit-btn'
+                                                                onClick={() => {
+                                                                    setTableRowData({
+                                                                        On_Addition:data.On_Addition,
+                                                                        Lower_Wt:data.Lower_Wt,
+                                                                        Upper_Wt:data.Upper_Wt,
+                                                                        Rate:data.Rate,
+                                                                        Rate_Flag: data.Rate_Flag,
+                                                                    })
+                                                                    setEditIndex(index);
+                                                                }}>
+                                                                <i className='bi bi-pen'></i>
+                                                            </button>
+                                                            <button onClick={() => {
+                                                                setSubmittedData(submittedData.filter((_, ind) => ind !== index));
+                                                                setEditIndex(null);
+                                                                setTableRowData({
+                                                                    On_Addition: "",
+                                                                    Lower_Wt: "",
+                                                                    Upper_Wt: "",
+                                                                    Rate: "",
+                                                                    Rate_Flag: ""
+                                                                })
+                                                            }}
+                                                                className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -1134,8 +1174,8 @@ function CustomerRate() {
                             </div>
                         </div>
                     </Modal >
-                </div>
-            </div>
+                </div >
+            </div >
 
         </>
     );

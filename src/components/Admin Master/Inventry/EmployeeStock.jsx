@@ -9,10 +9,11 @@ import Swal from "sweetalert2";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function EmployeeStock() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getEmpStock, setGetEmpStock] = useState([]);                // To Get Employee Stock Data
     const [getBranch, setGetBranch] = useState([]);                    // To Get Branch Data
     const [getEmp, setGetEmp] = useState([]);                          // To Get Employee Data
@@ -256,7 +257,7 @@ function EmployeeStock() {
                 </div>
 
                 <div className='table-container'>
-                    <table className='table table-bordered table-sm'>
+                    <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                         <thead className='table-sm'>
                             <tr>
                                 <th scope="col">Actions</th>
@@ -267,17 +268,40 @@ function EmployeeStock() {
                                 <th scope="col">To_Docket_No</th>
                                 <th scope="col">City_Name</th>
                                 <th scope="col">Stock_Date</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((emp, index) => (
-                                <tr key={index}>
-                                     <td>
-                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                            <button className='edit-btn' onClick={() => {
+                                <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                    <td>
+                                        <PiDotsThreeOutlineVerticalFill
+                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                            onClick={() => setOpenRow(openRow === index ? null : index)}
+                                        />
+                                        {openRow === index && (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    flexDirection: "row",
+                                                    position: "absolute",
+                                                    alignItems: "center",
+                                                    left: "100px",
+                                                    top: "0px",
+                                                    borderRadius: "10px",
+                                                    backgroundColor: "white",
+                                                    zIndex: "999999",
+                                                    height: "30px",
+                                                    width: "50px",
+                                                    padding: "10px",
+                                                }}
+                                            >
+
+                                                 <button className='edit-btn' onClick={() => {
                                                 setIsEditMode(true);
+                                                setOpenRow(null);
                                                 setAddEmpStock({
                                                     empCode: emp.Employee_Code,
                                                     qty: emp.Qty,
@@ -290,10 +314,15 @@ function EmployeeStock() {
                                             }}>
                                                 <i className='bi bi-pen'></i>
                                             </button>
-                                            <button className='edit-btn' onClick={() => handleDeleteEmpStock(emp.Employee_Code)}>
+                                            <button className='edit-btn' onClick={() => {
+                                                setOpenRow(null);
+                                                handleDeleteEmpStock(emp.Employee_Code);
+                                            }}>
                                                 <i className='bi bi-trash'></i></button>
-                                        </div>
+                                            </div>
+                                        )}
                                     </td>
+
                                     <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                                     <td>{emp.Employee_Name}</td>
                                     <td>{emp.Qty}</td>
@@ -301,7 +330,7 @@ function EmployeeStock() {
                                     <td>{emp.ToDocketNo}</td>
                                     <td>{emp.City_Name}</td>
                                     <td>{emp.Stock_Date}</td>
-                                   
+
                                 </tr>
                             ))}
                         </tbody>

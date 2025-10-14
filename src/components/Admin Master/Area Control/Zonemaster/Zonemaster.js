@@ -249,6 +249,7 @@ const ZoneMaster = () => {
                         >
                           <button className='edit-btn' onClick={() => {
                             setIsEditMode(true);
+                            setOpenRow(null);
                             setZoneData({
                               zoneCode: zone.Zone_Code,
                               zoneName: zone.Zone_Name
@@ -257,7 +258,10 @@ const ZoneMaster = () => {
                           }}>
                             <i className='bi bi-pen'></i>
                           </button>
-                          <button className='edit-btn' onClick={() => handleDeleteZone(zone.Zone_Code)}>
+                          <button className='edit-btn' onClick={() =>{
+                             setOpenRow(null);
+                             handleDeleteZone(zone.Zone_Code);
+                          }}>
                             <i className='bi bi-trash'></i></button>
                         </div>
                       )}

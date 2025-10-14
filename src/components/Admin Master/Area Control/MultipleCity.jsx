@@ -234,7 +234,7 @@ function MultipleCity() {
                 </div>
 
                 <div className='table-container'>
-                    <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
+                    <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                         <thead className='table-sm'>
                             <tr>
                                 <th scope="col">Actions</th>
@@ -245,54 +245,58 @@ function MultipleCity() {
                                 <th scope="col">State Name</th>
                                 <th scope="col">City Name</th>
                                 <th scope="col">Vendor Name</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody className='table-body'>
                             {currentRows.map((multiple, index) => (
                                 <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
-                                     <td>
-                                                                                <PiDotsThreeOutlineVerticalFill
-                                                                                    style={{ fontSize: "20px", cursor: "pointer" }}
-                                                                                    onClick={() => setOpenRow(openRow === index ? null : index)}
-                                                                                />
-                                                                                {openRow === index && (
-                                                                                    <div
-                                                                                        style={{
-                                                                                            display: "flex",
-                                                                                            justifyContent: "center",
-                                                                                            flexDirection: "row",
-                                                                                            position: "absolute",
-                                                                                            alignItems: "center",
-                                                                                            left: "90px",
-                                                                                            top: "0px",
-                                                                                            borderRadius: "10px",
-                                                                                            backgroundColor: "white",
-                                                                                            zIndex: "999999",
-                                                                                            height: "30px",
-                                                                                            width: "50px",
-                                                                                            padding: "10px",
-                                                                                        }}
-                                                                                    >
-                                                                                         <button className='edit-btn' onClick={() => {
-                                                setIsEditMode(true);
-                                                setAddCity({
-                                                    ModeCode: multiple.Mode_Code,
-                                                    ZoneCode: multiple.Zone_Code,
-                                                    CountryCode: multiple.Country_Code,
-                                                    StateCode: multiple.State_Code,
-                                                    CityCode: multiple.City_Code,
-                                                    ProductType: multiple.ProductType,
-                                                    VendorCode: multiple.Vendor_Code
-                                                });
-                                                setModalIsOpen(true);
-                                            }}>
-                                                <i className='bi bi-pen'></i>
-                                            </button>
-                                            <button onClick={() => handleDelete(index)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                                                                    </div>
-                                                                                )}
-                                                                            </td>
+                                    <td>
+                                        <PiDotsThreeOutlineVerticalFill
+                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                            onClick={() => setOpenRow(openRow === index ? null : index)}
+                                        />
+                                        {openRow === index && (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    flexDirection: "row",
+                                                    position: "absolute",
+                                                    alignItems: "center",
+                                                    left: "90px",
+                                                    top: "0px",
+                                                    borderRadius: "10px",
+                                                    backgroundColor: "white",
+                                                    zIndex: "999999",
+                                                    height: "30px",
+                                                    width: "50px",
+                                                    padding: "10px",
+                                                }}
+                                            >
+                                                <button className='edit-btn' onClick={() => {
+                                                    setIsEditMode(true);
+                                                    setOpenRow(null);
+                                                    setAddCity({
+                                                        ModeCode: multiple.Mode_Code,
+                                                        ZoneCode: multiple.Zone_Code,
+                                                        CountryCode: multiple.Country_Code,
+                                                        StateCode: multiple.State_Code,
+                                                        CityCode: multiple.City_Code,
+                                                        ProductType: multiple.ProductType,
+                                                        VendorCode: multiple.Vendor_Code
+                                                    });
+                                                    setModalIsOpen(true);
+                                                }}>
+                                                    <i className='bi bi-pen'></i>
+                                                </button>
+                                                <button onClick={() => {
+                                                    setOpenRow(null);
+                                                     handleDelete(index);
+                                                }} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                            </div>
+                                        )}
+                                    </td>
 
                                     <td>{index + 1}</td>
                                     <td>{multiple.Mode_Name}</td>
@@ -301,44 +305,44 @@ function MultipleCity() {
                                     <td>{multiple.State_Name}</td>
                                     <td>{multiple.City_Name}</td>
                                     <td>{multiple.Vendor_Name}</td>
-                                    
+
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="row" style={{whiteSpace:"nowrap" }}>
-                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
-                        </div>
-
-                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "50px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
+                <div className="row" style={{ whiteSpace: "nowrap" }}>
+                    <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            {'<'}
+                        </button>
+                        <span style={{ color: "#333", padding: "5px" }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                            {'>'}
+                        </button>
                     </div>
+
+                    <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                        <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                        <select
+                            id="rowsPerPage"
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                                setRowsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            style={{ height: "40px", width: "50px" }}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
+                </div>
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
                     className="custom-modal-volumetric" contentLabel="Modal">

@@ -452,6 +452,7 @@ function ProductWiseFuel() {
                                                 >
                                                     <button className='edit-btn' onClick={() => {
                                                         setIsEditMode(true);
+                                                        setOpenRow(null);
                                                         setAddCust({
                                                             custCode: cust.Customer_Code,
                                                             modeCode: cust.Mode_Code,
@@ -471,7 +472,10 @@ function ProductWiseFuel() {
                                                     }}>
                                                         <i className='bi bi-pen'></i>
                                                     </button>
-                                                    <button className='edit-btn' onClick={() => handleDeleteCustCharges(cust.Customer_Code)}>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        handleDeleteCustCharges(cust.Customer_Code);
+                                                        setOpenRow(null);
+                                                    }}>
                                                         <i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}

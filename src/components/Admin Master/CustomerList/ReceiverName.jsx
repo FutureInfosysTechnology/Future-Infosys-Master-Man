@@ -338,13 +338,14 @@ function ReceiverName() {
                                     <th scope="col">Sr.No</th>
                                     <th scope="col">Receiver_Code</th>
                                     <th scope="col">Receiver_Name</th>
+                                    <th scope="col">GST_No</th>
                                     <th scope="col">Receiver_Add</th>
                                     <th scope="col">Pin_Code</th>
                                     <th scope="col">City_Name</th>
                                     <th scope="col">State_Name</th>
                                     <th scope="col">Mobile_No</th>
                                     <th scope="col">Email_ID</th>
-                                    <th scope="col">GST_No</th>
+
                                     <th scope="col">HSN_No</th>
 
                                 </tr>
@@ -376,42 +377,47 @@ function ReceiverName() {
                                                         padding: "10px",
                                                     }}
                                                 >
-<button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setAddReceiver({
-                                                        receiverCode: receiver.Receiver_Code,
-                                                        receiverName: receiver.Receiver_Name,
-                                                        gstNo: receiver.GSTNo,
-                                                        receiverAdd1: receiver.Receiver_Add1,
-                                                        receiverAdd2: receiver.Receiver_Add2,
-                                                        receiverPin: receiver.Receiver_Pin,
-                                                        receiverMob: receiver.Receiver_Mob,
-                                                        stateCode: receiver.State_Code,
-                                                        cityCode:receiver.City_Code,
-                                                        receiverEmail: receiver.Receiver_Email,
-                                                        hsnNo: receiver.HSNNo,
-                                                        sms: false,
-                                                        emailId: false,
-                                                        whatApp: false
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button onClick={() => handleDeleteReceiver(receiver.Receiver_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setAddReceiver({
+                                                            receiverCode: receiver.Receiver_Code,
+                                                            receiverName: receiver.Receiver_Name,
+                                                            gstNo: receiver.GSTNo,
+                                                            receiverAdd1: receiver.Receiver_Add1,
+                                                            receiverAdd2: receiver.Receiver_Add2,
+                                                            receiverPin: receiver.Receiver_Pin,
+                                                            receiverMob: receiver.Receiver_Mob,
+                                                            stateCode: receiver.State_Code,
+                                                            cityCode: receiver.City_Code,
+                                                            receiverEmail: receiver.Receiver_Email,
+                                                            hsnNo: receiver.HSNNo,
+                                                            sms: false,
+                                                            emailId: false,
+                                                            whatApp: false
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button onClick={() => {
+                                                        handleDeleteReceiver(receiver.Receiver_Code);
+                                                        setOpenRow(null);
+                                                    }}
+                                                        className='edit-btn'><i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}
                                         </td>
                                         <td>{index + 1}</td>
                                         <td>{receiver.Receiver_Code}</td>
                                         <td>{receiver.Receiver_Name}</td>
+                                        <td>{receiver.GSTNo}</td>
                                         <td>{receiver.Receiver_Add1}</td>
                                         <td>{receiver.Receiver_Pin}</td>
                                         <td>{receiver.City_Name}</td>
                                         <td>{receiver.State_Name}</td>
                                         <td>{receiver.Receiver_Mob}</td>
                                         <td>{receiver.Receiver_Email}</td>
-                                        <td>{receiver.GSTNo}</td>
                                         <td>{receiver.HSNNo}</td>
 
                                     </tr>

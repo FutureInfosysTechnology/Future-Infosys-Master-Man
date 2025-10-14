@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import Modal from 'react-modal';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { postApi, getApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function CustomerStock() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getCustStock, setGetCustStock] = useState([]);                   // To Get Customer Stock Data
     const [getBranch, setGetBranch] = useState([]);                         // To Get Branch Data
     const [getCustomer, setGetCustomer] = useState([]);                     // To Get Customer Data
@@ -212,7 +213,7 @@ function CustomerStock() {
                 </div>
 
                 <div className='table-container'>
-                    <table className='table table-bordered table-sm'>
+                    <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                         <thead className='table-sm'>
                             <tr>
                                 <th scope="col">Actions</th>
@@ -223,17 +224,40 @@ function CustomerStock() {
                                 <th scope="col">To_Docket_No</th>
                                 <th scope="col">City_Name</th>
                                 <th scope="col">Stock_Date</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody className='table-body'>
 
                             {currentRows.map((cust, index) => (
-                                <tr key={index}>
+                                <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                     <td>
-                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                            <button className='edit-btn' onClick={() => {
+                                        <PiDotsThreeOutlineVerticalFill
+                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                            onClick={() => setOpenRow(openRow === index ? null : index)}
+                                        />
+                                        {openRow === index && (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    flexDirection: "row",
+                                                    position: "absolute",
+                                                    alignItems: "center",
+                                                    left: "100px",
+                                                    top: "0px",
+                                                    borderRadius: "10px",
+                                                    backgroundColor: "white",
+                                                    zIndex: "999999",
+                                                    height: "30px",
+                                                    width: "50px",
+                                                    padding: "10px",
+                                                }}
+                                            >
+
+                                                <button className='edit-btn' onClick={() => {
                                                 setIsEditMode(true);
+                                                setOpenRow(null);
                                                 setAddCustStock({
                                                     custCode: cust.Customer_Name,
                                                     qty: cust.Qty,
@@ -246,10 +270,15 @@ function CustomerStock() {
                                             }}>
                                                 <i className='bi bi-pen'></i>
                                             </button>
-                                            <button className='edit-btn' onClick={() => handleDeleteCustStock(cust.Customer_Code)}>
+                                            <button className='edit-btn' onClick={() =>{
+                                                setOpenRow(null);
+                                                handleDeleteCustStock(cust.Customer_Code);
+                                            }}>
                                                 <i className='bi bi-trash'></i></button>
-                                        </div>
+                                            </div>
+                                        )}
                                     </td>
+
                                     <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                                     <td>{cust.Customer_Name}</td>
                                     <td>{cust.Qty}</td>
@@ -257,44 +286,44 @@ function CustomerStock() {
                                     <td>{cust.ToDocketNo}</td>
                                     <td>{cust.City_Name}</td>
                                     <td>{cust.Stock_Date}</td>
-                                    
+
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="row" style={{whiteSpace:"nowrap" }}>
-                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
-                        </div>
-
-                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "50px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
+                <div className="row" style={{ whiteSpace: "nowrap" }}>
+                    <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            {'<'}
+                        </button>
+                        <span style={{ color: "#333", padding: "5px" }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                            {'>'}
+                        </button>
                     </div>
+
+                    <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                        <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                        <select
+                            id="rowsPerPage"
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                                setRowsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            style={{ height: "40px", width: "50px" }}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
+                </div>
 
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}

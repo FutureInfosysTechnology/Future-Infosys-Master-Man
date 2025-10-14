@@ -368,6 +368,7 @@ function CustomerVolumetric() {
                                                 >
                                                     <button className='edit-btn' onClick={() => {
                                                     setReadOnly(true);
+                                                    setOpenRow(null);
                                                     setAddVolumetric({
                                                         CustomerCode: vol.Customer_Code,
                                                         ModeCode: vol.Mode_Code,
@@ -384,7 +385,10 @@ function CustomerVolumetric() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button className='edit-btn' onClick={() => handleDeleteVolumetric(vol.Customer_Code)}><i className='bi bi-trash'></i></button>
+                                                <button className='edit-btn' onClick={() => {
+                                                    handleDeleteVolumetric(vol.Customer_Code);
+                                                    setOpenRow(null);
+                                                }}><i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}
                                         </td>

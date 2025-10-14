@@ -6,10 +6,11 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function VehicleEntry() {
-
+    const [openRow, setOpenRow] = useState(null);
     const [getVehicle, setGetVehicle] = useState([]);               // To Get Vehicle Data
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -286,7 +287,7 @@ function VehicleEntry() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Actions</th>
@@ -305,17 +306,40 @@ function VehicleEntry() {
                                     <th scope="col">Rate_Per/Kg</th>
                                     <th scope="col">Employee_Charges</th>
                                     <th scope="col">Detention_Charges</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
 
                                 {currentRows.map((vehicle, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                <button className='edit-btn' onClick={() => {
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "60px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+
+                                                   <button className='edit-btn' onClick={() => {
                                                     setIsEditMode(true);
+                                                    setOpenRow(null);
                                                     setAddVehicle({
                                                         VehicleCode: vehicle.Vehicle_Code,
                                                         vehicleNumber: vehicle.vehicle_number,
@@ -336,9 +360,14 @@ function VehicleEntry() {
                                                 }}>
                                                     <i className='bi bi-pen'></i>
                                                 </button>
-                                                <button onClick={() => handleDeleteVehicle(vehicle.Vehicle_Code)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
+                                                <button onClick={() => {
+                                                    setOpenRow(null);
+                                                    handleDeleteVehicle(vehicle.Vehicle_Code);
+                                                    }} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                </div>
+                                            )}
                                         </td>
+
                                         <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                                         <td>{vehicle.Vehicle_Code}</td>
                                         <td>{vehicle.vehicle_number}</td>
@@ -354,14 +383,14 @@ function VehicleEntry() {
                                         <td>{vehicle.rate_per_kg}</td>
                                         <td>{vehicle.EmployeeCharges}</td>
                                         <td>{vehicle.DetentionCharges}</td>
-                                        
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="row" style={{whiteSpace:"nowrap" }}>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
                         <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
                             <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
                                 {'<'}
@@ -375,7 +404,7 @@ function VehicleEntry() {
                         </div>
 
                         <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
                             <select
                                 id="rowsPerPage"
                                 value={rowsPerPage}
