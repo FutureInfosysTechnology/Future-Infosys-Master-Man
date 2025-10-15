@@ -52,6 +52,7 @@ function FirstInvoice() {
     const [isVolChecked, setIsVolChecked] = useState(false);
     const [isActualChecked, setIsActualChecked] = useState(false);
     const [isRateChecked, setIsRateChecked] = useState(false);
+    const [isTermChecked, setIsTermChecked] = useState(false);
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("toggelChargs"));
         if (savedState) {
@@ -70,6 +71,7 @@ function FirstInvoice() {
             setIsActualChecked(savedState.isActualChecked || false);
             setIsVolChecked(savedState.isVolChecked || false);
             setIsCharedChecked(savedState.isCharedChecked || false);
+            setIsTermChecked(savedState.isTermChecked || false);
 
         }
     }, []);
@@ -345,16 +347,18 @@ function FirstInvoice() {
                                         >
                                             <thead style={{ backgroundColor: "rgba(36, 98, 113, 1)", color: "white" }}>
                                                 <tr>
-                                                    <th style={headerCellStyle}>Sr.No</th>
+                                                    <th style={headerCellStyle}>Sr No</th>
                                                     <th style={headerCellStyle}>Docket No</th>
                                                     <th style={headerCellStyle}>Date</th>
                                                     <th style={headerCellStyle}>Origin</th>
                                                     <th style={headerCellStyle}>Destination</th>
                                                     <th style={headerCellStyle}>Mode</th>
                                                     <th style={headerCellStyle}>Pieces</th>
-                                                    <th style={headerCellStyle}>Weight</th>
+                                                    {isActualChecked && <th style={headerCellStyle}>Weight</th>}
+                                                    {isVolChecked && <th style={headerCellStyle}>Volumetric Wt</th>}
+                                                    {isCharedChecked && <th style={headerCellStyle}>Charged Wt</th>}
+                                                    {isRateChecked && <th style={headerCellStyle}>Rate Per Kg</th>}
                                                     <th style={headerCellStyle}>Rate</th>
-
                                                     {isDocketChecked && <th style={headerCellStyle}>Dkt Chrgs</th>}
                                                     {isHamaliChecked && <th style={headerCellStyle}>Pickup Chrgs</th>}
                                                     {isDeliveryChecked && <th style={headerCellStyle}>Delivery Chrgs</th>}
@@ -374,26 +378,29 @@ function FirstInvoice() {
                                                     invoiceData.map((invoice, index) => (
                                                         <tr key={index} style={rowStyle}>
                                                             <td style={cellStyle}>{index + 1}</td>
-                                                            <td style={cellStyle}>{invoice.DocketNo}</td>
-                                                            <td style={cellStyle}>{invoice.BillDate[0]}</td>
-                                                            <td style={cellStyle}>{invoice.fromDest}</td>
-                                                            <td style={cellStyle}>{invoice.toDest}</td>
-                                                            <td style={cellStyle}>{invoice.ModeName}</td>
-                                                            <td style={cellStyle}>{invoice.pcs}</td>
-                                                            <td style={cellStyle}>{invoice.actualWt}</td>
-                                                            <td style={cellStyle}>{invoice.Rate}</td>
+                                                            <td style={cellStyle}>{invoice?.DocketNo}</td>
+                                                            <td style={cellStyle}>{invoice?.BillDate[0]}</td>
+                                                            <td style={cellStyle}>{invoice?.fromDest}</td>
+                                                            <td style={cellStyle}>{invoice?.toDest}</td>
+                                                            <td style={cellStyle}>{invoice?.ModeName}</td>
+                                                            <td style={cellStyle}>{invoice?.pcs}</td>
+                                                            {isActualChecked && <td style={cellStyle}>{invoice?.actualWt}</td>}
+                                                            {isVolChecked && <td style={cellStyle}>{invoice?.VolumetricWt}</td>}
+                                                            {isCharedChecked && <td style={cellStyle}>{invoice?.ChargedWt}</td>}
+                                                            {isRateChecked && <td style={cellStyle}>{invoice?.RatePerkg}</td>}
+                                                            <td style={cellStyle}>{invoice?.Rate}</td>
 
-                                                            {isDocketChecked && <td style={cellStyle}>{invoice.DocketChrgs}</td>}
-                                                            {isHamaliChecked && <td style={cellStyle}>{invoice.HamaliChrgs}</td>}
-                                                            {isDeliveryChecked && <td style={cellStyle}>{invoice.DeliveryChrgs}</td>}
-                                                            {isFovChecked && <td style={cellStyle}>{invoice.Fov_Chrgs}</td>}
-                                                            {isFuelChecked && <td style={cellStyle}>{invoice.FuelCharges}</td>}
-                                                            {isODAChecked && <td style={cellStyle}>{invoice.ODA_Chrgs}</td>}
-                                                            {isInsuranceChecked && <td style={cellStyle}>{invoice.InsuranceChrgs}</td>}
-                                                            {isPackingChecked && <td style={cellStyle}>{invoice.PackingChrgs}</td>}
-                                                            {isOtherChecked && <td style={cellStyle}>{invoice.OtherCharges}</td>}
+                                                            {isDocketChecked && <td style={cellStyle}>{invoice?.DocketChrgs}</td>}
+                                                            {isHamaliChecked && <td style={cellStyle}>{invoice?.HamaliChrgs}</td>}
+                                                            {isDeliveryChecked && <td style={cellStyle}>{invoice?.DeliveryChrgs}</td>}
+                                                            {isFovChecked && <td style={cellStyle}>{invoice?.Fov_Chrgs}</td>}
+                                                            {isFuelChecked && <td style={cellStyle}>{invoice?.FuelCharges}</td>}
+                                                            {isODAChecked && <td style={cellStyle}>{invoice?.ODA_Chrgs}</td>}
+                                                            {isInsuranceChecked && <td style={cellStyle}>{invoice?.InsuranceChrgs}</td>}
+                                                            {isPackingChecked && <td style={cellStyle}>{invoice?.PackingChrgs}</td>}
+                                                            {isOtherChecked && <td style={cellStyle}>{invoice?.OtherCharges}</td>}
 
-                                                            <td style={cellStyle}>{invoice.TotalAmount}</td>
+                                                            <td style={cellStyle}>{invoice?.TotalAmount}</td>
                                                         </tr>
                                                     ))
                                                 ) : (
@@ -519,7 +526,7 @@ function FirstInvoice() {
                                     <div style={{ display: "flex", width: "60%", gap: "2px", flexDirection: "column" }}>
                                         <div style={{ fontWeight: "bold", fontSize: "11px" }}> TERMS :</div>
                                         {
-                                            termArr.length > 0 && termArr.map((data, index) => (
+                                            isTermChecked && termArr.length > 0 && termArr.map((data, index) => (
                                                 <div style={{ marginLeft: "5px" }}> {index + 1}. {data}.</div>
                                             ))
 

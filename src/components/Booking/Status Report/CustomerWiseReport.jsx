@@ -14,16 +14,29 @@ import { FaPaperPlane, FaFileExcel, FaFilePdf } from "react-icons/fa";
 function CustomerWiseReport() {
   const today = new Date();
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const [EmailData, setEmailData] = useState([]);
+  const [getCustomer, setGetCustomer] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(15);
+  const [selectedDockets, setSelectedDockets] = useState([]);
+    const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [getBranch, setGetBranch] = useState([]);
+
   const getStatus = [{ value: "ALL STATUS DATA", label: "ALL STATUS DATA" },
   { value: "Intransit", label: "Intransit" },
   { value: "OutForDelivery", label: "OutForDelivery" },
   { value: "Delivered", label: "Delivered" },
   { value: "RTO", label: "RTO" },
   { value: "Shipment Booked", label: "Shipment Booked" },
-  ]
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [getBranch, setGetBranch] = useState([]);
+  ];
+  const allOptions = [
+    { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
+    ...getCustomer.map((cust) => ({
+      label: cust.Customer_Name,
+      value: cust.Customer_Name,
+    })),
+  ];
   const branchOptions = [
     { value: "All BRANCH DATA", label: "All BRANCH DATA" }, // default option
     ...getBranch.map(city => ({
@@ -35,16 +48,11 @@ function CustomerWiseReport() {
   const [formData, setFormData] = useState({
     fromdt: firstDayOfMonth,
     todt: today,
-    CustomerName: "",
-    status: "",
-    branch: "",
+    CustomerName: "ALL CLIENT DATA",
+    status: "ALL STATUS DATA",
+    branch: "All BRANCH DATA",
   });
 
-  const [EmailData, setEmailData] = useState([]);
-  const [getCustomer, setGetCustomer] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(15);
-  const [selectedDockets, setSelectedDockets] = useState([]);
 
   const formatDate = (date) => {
     if (!date) return "";
@@ -69,16 +77,9 @@ function CustomerWiseReport() {
 
   useEffect(() => {
     fetchData('/Master/getCustomerdata', setGetCustomer)
-    fetchData('/Master/getBranch', setGetBranch);
+    fetchData('/Master/getAllBranchData', setGetBranch);
   }, []);
 
-  const allOptions = [
-    { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
-    ...getCustomer.map((cust) => ({
-      label: cust.Customer_Name,
-      value: cust.Customer_Name,
-    })),
-  ];
 
   const handleSearchChange = (selectedOption) => {
     setFormData({ ...formData, CustomerName: selectedOption ? selectedOption.value : "" });
@@ -254,10 +255,10 @@ function CustomerWiseReport() {
               className="blue-selectbooking"
               classNamePrefix="blue-selectbooking"
               options={allOptions}
+              isSearchable
               value={formData.CustomerName ? { label: formData.CustomerName, value: formData.CustomerName } : null}
               onChange={handleSearchChange}
               placeholder="Search Customer..."
-              isClearable
               menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
               styles={{
                 placeholder: (base) => ({

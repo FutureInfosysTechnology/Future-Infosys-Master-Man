@@ -52,9 +52,9 @@ function ModeWiseReport() {
     const [formData, setFormData] = useState({
         fromdt: firstDayOfMonth,
         todt: today,
-        report:"",
-        mode:"",
-        vendorCode:"",
+        report:"All REPORT DATA",
+        mode:"ALL MODE DATA",
+        vendorCode:"ALL VENDOR DATA",
     });
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
@@ -217,7 +217,7 @@ function ModeWiseReport() {
                                     setFormData({...formData,mode:selected?selected.value:""})
                                 }
                                 placeholder="Select Mode"
-                                isClearable
+                                isSearchable
                                 menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                 styles={{
                                     placeholder: (base) => ({

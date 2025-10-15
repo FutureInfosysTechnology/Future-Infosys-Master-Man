@@ -61,9 +61,9 @@ function ChecklistWiseReport() {
     const [formData, setFormData] = useState({
         fromdt: firstDayOfMonth,
         todt: today,
-        CustomerName: "",
-        booking: "",
-        branch: "",
+        CustomerName: "ALL CLIENT DATA",
+        booking: "ALL BOOKING TYPE",
+        branch: "All BRANCH DATA",
     });
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
@@ -85,7 +85,7 @@ function ChecklistWiseReport() {
 
     useEffect(() => {
         fetchData('/Master/getMode', setGetMode);
-        fetchData('/Master/getBranch', setGetBranch);
+        fetchData('/Master/getAllBranchData', setGetBranch);
         fetchData('/Master/getCustomerData', setGetCustomer);
     }, []);
     const exportSelectedToPDF = () => {
@@ -225,7 +225,7 @@ function ChecklistWiseReport() {
                                 value={formData.CustomerName ? { label: formData.CustomerName, value: formData.CustomerName } : null}
                                 onChange={handleSearchChange}
                                 placeholder="Search Customer..."
-                                isClearable
+                                isSearchable
                                 menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                 styles={{
                                     placeholder: (base) => ({

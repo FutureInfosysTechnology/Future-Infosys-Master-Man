@@ -43,9 +43,9 @@ function VendorWiseReport() {
     const [formData, setFormData] = useState({
         fromdt: firstDayOfMonth,
         todt: today,
-        vendorCode: "",
-        status: "",
-        branch: "",
+        vendorCode: "ALL VENDOR TYPE",
+        status: "ALL STATUS DATA",
+        branch: "ALL BRANCH DATA",
     });
 
     const [EmailData, setEmailData] = useState([]);
@@ -76,7 +76,7 @@ function VendorWiseReport() {
 
     useEffect(() => {
         fetchData('/Master/getVendor', setGetVendor);
-        fetchData('/Master/getBranch', setGetBranch);
+        fetchData('/Master/getAllBranchData', setGetBranch);
     }, []);
 
     const handleSearchChange = (selectedOption) => {

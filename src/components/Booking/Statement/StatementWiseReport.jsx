@@ -58,9 +58,9 @@ function StatementWiseReport() {
     const [formData, setFormData] = useState({
         fromdt: firstDayOfMonth,
         todt: today,
-        CustomerName: "",
-        booking: "",
-        branch: "",
+        CustomerName: "ALL CLIENT DATA",
+        booking: "ALL BOOKING TYPE",
+        branch: "All BRANCH DATA",
     });
     const handleSearchChange = (selectedOption) => {
         setFormData({ ...formData, CustomerName: selectedOption ? selectedOption.value : "" });
@@ -145,7 +145,7 @@ function StatementWiseReport() {
 
     useEffect(() => {
         fetchData('/Master/getCustomerdata', setGetCustomer)
-        fetchData('/Master/getBranch', setGetBranch);
+        fetchData('/Master/getAllBranchData', setGetBranch);
     }, []);
     const handlesave = async (e) => {
     e.preventDefault();
@@ -217,7 +217,7 @@ function StatementWiseReport() {
                                 value={formData.CustomerName ? { label: formData.CustomerName, value: formData.CustomerName } : null}
                                 onChange={handleSearchChange}
                                 placeholder="Search Customer..."
-                                isClearable
+                                isSearchable
                                 menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                 styles={{
                                     placeholder: (base) => ({

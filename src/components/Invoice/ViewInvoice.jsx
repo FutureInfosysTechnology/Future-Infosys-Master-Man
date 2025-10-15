@@ -182,9 +182,6 @@ function ViewInvoice() {
 
     const handleTermChange = (e) => {
         setIsTermChecked(e.target.checked);
-        if (!e.target.checked) {
-            setTermArr([]);
-        }
         handleCheckboxChange('isTermChecked', e.target.checked);
     }
 
@@ -281,7 +278,7 @@ function ViewInvoice() {
             setIsActualChecked(savedState.isActualChecked || false);
             setIsVolChecked(savedState.isVolChecked || false);
             setIsCharedChecked(savedState.isCharedChecked || false);
-            
+
         }
         fetchData('/Master/getCustomerdata', setGetCustomer);
     }, []);
@@ -304,6 +301,15 @@ function ViewInvoice() {
             }
         });
     };
+    useEffect(() => {
+        const saved = localStorage.getItem("termArr");
+        if (saved) setTermArr(JSON.parse(saved));
+    }, []);
+
+    // Save whenever it changes
+    useEffect(() => {
+        localStorage.setItem("termArr", JSON.stringify(termArr));
+    }, [termArr]);
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -704,16 +710,16 @@ function ViewInvoice() {
                                                 onChange={handleCharedChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                 Charged Weight</label>
+                                                Charged Weight</label>
                                         </div>
-                                        
+
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isVolChecked}
                                                 onChange={handleVolChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                               Volumetric Weight</label>
+                                                Volumetric Weight</label>
                                         </div>
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
@@ -756,7 +762,7 @@ function ViewInvoice() {
                                                         <tr>
                                                             <td>
                                                                 <input type="text" placeholder="Enter terms"
-                                                                    style={{ textAlign: "center" }} value={term}
+                                                                    style={{ textAlign: "start" }} value={term}
                                                                     onChange={(e) => setTerm(e.target.value)} />
                                                             </td>
                                                             <td>

@@ -19,7 +19,7 @@ function CustomerRate() {
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const flagOptions = [
         { value: "RatePerKg", label: "RatePerKg" },
-        { value: "DocumentRate", label: "DocumentRate" },
+        { value: "Dox", label: "Dox" },
         { value: "Box", label: "Box" },
     ];
 
