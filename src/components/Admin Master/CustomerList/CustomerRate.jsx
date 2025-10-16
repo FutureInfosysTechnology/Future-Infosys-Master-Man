@@ -40,10 +40,10 @@ function CustomerRate() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [formdata, setFormdata] = useState({
         Client_Code: "",
-        Mode_Code: "",
-        Zone_Code: "",
-        State_Code: "",
-        Destination_Code: "",
+        Mode_Code: [],
+        Zone_Code: [],
+        State_Code: [],
+        Destination_Code:[],
         Origin_Code: "",
         Active_Date: firstDayOfMonth,
         Closing_Date: today,
@@ -173,6 +173,9 @@ function CustomerRate() {
         fetchStateData();
         fetchVendorData();
     }, [])
+     useEffect(() => {
+       console.log(formdata);
+    }, [formdata])
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -213,7 +216,7 @@ function CustomerRate() {
 
     const handlesave = async (e) => {
         e.preventDefault();
-        if (!formdata.Client_Code || !formdata.Mode_Code || !formdata.Vendor_Code) {
+        if (!formdata.Client_Code || !formdata.Mode_Code) {
             return Swal.fire({
                 icon: 'warning',
                 title: 'Missing Information',
@@ -223,25 +226,25 @@ function CustomerRate() {
         }
         const requestBody = {
             Client_Code: formdata.Client_Code.toString(),
-            Mode_Code: formdata.Mode_Code,
-            Zone_Code: formdata.Zone_Code,
-            State_Code: formdata.State_Code,
-            Destination_Code: formdata.Destination_Code,
+            Mode_Codes: formdata.Mode_Code,
+            Zone_Codes: formdata.Zone_Code,
+            State_Codes: formdata.State_Code,
+            Destination_Codes: formdata.Destination_Code,
             Active_Date: formdata.Active_Date,
             Closing_Date: formdata.Closing_Date,
             Amount: formdata.Amount,
             Weight: formdata.Weight,
+            RatePer:100,
             RateDetails: submittedData.map((data) => ({
                 On_Addition: data.On_Addition,
                 Lower_Wt: data.Lower_Wt,
                 Upper_Wt: data.Upper_Wt,
                 Rate: data.Rate,
-                Rate_Flag: data.Rate_Flag
+                Rate_Flag: data.Rate_Flag,
             }))
         }
-
         try {
-            const response = await postApi('/Master/addRateData', requestBody, 'POST')
+            const response = await postApi('Master/addRateData', requestBody, 'POST')
             if (response.status === 1) {
                 setGetCustRate([...getCustRate, response.data]);
                 setFormdata({
@@ -262,7 +265,8 @@ function CustomerRate() {
                     Upper_Wt: "",
                     Rate: "",
                     Rate_Flag: ""
-                })
+                });
+                setSubmittedData([]);
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
                 await fetchCustomerRateData();

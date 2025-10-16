@@ -9,10 +9,11 @@ import PendingInvoice from './PendingInvoice';
 import "./permonce.css"
 import ViewPerforma from './ViewPerforma';
 import { useLocation } from 'react-router-dom';
+import InvoiceSum from './InvoiceSum';
 
 function Invoice() {
-    const location=useLocation();
-    const [activeTab, setActiveTab] = useState(location?.state?.tab ||'state');
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(location?.state?.tab || 'state');
 
     const handleChange = (event) => {
         setActiveTab(event.target.id);
@@ -25,25 +26,27 @@ function Invoice() {
             <Sidebar1 />
             <div className="main-body" id="main-body">
 
-                    <div className="container">
-                        <nav>
-                            <label onClick={() => setActiveTab("state")}>Pending Invoice</label>
-                            <label onClick={() => setActiveTab("zone")}>Generate Invoice</label>
-                            <label onClick={() => setActiveTab("multiple")}>View Invoice</label>
-                            <label onClick={() => setActiveTab("country")}>Performance Invoice</label>
-                            <label onClick={() => setActiveTab("view")}>View Performance Invoice</label>
+                <div className="container">
+                    <nav>
+                        <label onClick={() => setActiveTab("state")}>Pending Invoice</label>
+                        <label onClick={() => setActiveTab("zone")}>Generate Invoice</label>
+                        <label onClick={() => setActiveTab("multiple")}>View Invoice</label>
+                        <label onClick={() => setActiveTab("country")}>Performance Invoice</label>
+                        <label onClick={() => setActiveTab("view")}>View Performance Invoice</label>
+                        <label onClick={() => setActiveTab("Sum")}>Invoice Summary</label>
 
-                            <div
-                                className="slider"
-                                style={{ left: `${[ "state","zone", "multiple", "country", "view"].indexOf(activeTab) * 20}%` ,width: "20%",}}
-                            />
-                        </nav>
+                        <div
+                            className="slider"
+                            style={{ left: `${["state", "zone", "multiple", "country", "view", "Sum"].indexOf(activeTab) * 16.80}%`, width: "16%", }}
+                        />
+                    </nav>
                     <section>
                         {activeTab === 'state' && <PendingInvoice />}
                         {activeTab === 'zone' && <GenerateInvoice />}
                         {activeTab === 'multiple' && <ViewInvoice />}
                         {activeTab === 'country' && <PerformanceBill />}
                         {activeTab === 'view' && <ViewPerforma />}
+                        {activeTab === 'Sum' && <InvoiceSum />}
 
                     </section>
                 </div>

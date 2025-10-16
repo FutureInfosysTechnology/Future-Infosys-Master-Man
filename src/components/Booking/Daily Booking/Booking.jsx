@@ -767,6 +767,7 @@ function Booking() {
         }));
     };
     useEffect(() => {
+        if (!submittedData || submittedData.length === 0) return; // prevent zero overwrite
         const totalVol1 = submittedData.reduce(
             (acc, d) => acc + parseFloat(d.VolmetricWt || 0), 0
         );
@@ -1455,7 +1456,7 @@ function Booking() {
             if (response.Success === 1) {
                 setFecthed('');
                 console.log(response);
-                const generatedDocketNo = formData.DocketNo;
+                const generatedDocketNo = formData.DocketNo || response?.DocketNo;
 
                 // Show confirmation popup
                 const result = await Swal.fire({
@@ -1498,7 +1499,6 @@ function Booking() {
                     Mode_Code: mode,
                 }));
                 setSelectedOriginPinCode(Pincode);
-                Swal.fire('Saved!', response.Message || 'Your changes have been saved.', 'success');
                 setModalIsOpen8(false);
             }
 
@@ -1678,7 +1678,9 @@ function Booking() {
                 const data = res.OrderEntry;
                 console.log(data);
 
-                setFormData({
+                setFormData(
+                    prev=>({
+                        ...prev,
                     Location_Code: data.Location_Code,
                     DocketNo: data.DocketNo,
                     BookDate: data.BookDate,
@@ -1745,7 +1747,7 @@ function Booking() {
                     DestName: "",
                     BookMode: data.T_Flag,
 
-                });
+                    }));
                 setRemarkData({
                     Remark: data.Remark,
                     MHWNo: data.MHWNo,
