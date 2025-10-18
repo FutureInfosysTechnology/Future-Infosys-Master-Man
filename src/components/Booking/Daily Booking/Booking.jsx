@@ -1883,7 +1883,7 @@ function Booking() {
                                             disabled={!toggleActive}
                                             value={formData.DocketNo}
                                             onKeyDown={(e) => {
-                                                if (toggleActive && e.key === "Enter") {
+                                                if (toggleActive && e.key === "Enter" || toggleActive && e.key==="Tab") {
                                                     handleSearch(formData.DocketNo);
                                                 }
                                             }}
@@ -2584,7 +2584,7 @@ function Booking() {
                                             <DatePicker
                                                 selected={formData.DispatchDate ? new Date(formData.DispatchDate) : null}
                                                 onChange={(date) =>
-                                                    setInvoiceData({ ...formData, DispatchDate: date })
+                                                    setFormData({ ...formData, DispatchDate: date })
                                                 }
                                                 dateFormat="dd/MM/yyyy"
                                                 placeholderText="dd/mm/yyyy"

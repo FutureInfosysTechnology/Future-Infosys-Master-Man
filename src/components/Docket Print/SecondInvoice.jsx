@@ -7,30 +7,43 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Header from '../../Components-2/Header/Header';
 import Sidebar1 from '../../Components-2/Sidebar1';
+import "./firstinvoice.css"
+import { toWords } from "number-to-words";
 
 
 function SecondInvoice() {
+    function toTitleCase(str) {
+        return str
+            .split(" ")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+    }
+    function formatDateToDDMMYYYY(dateStr) {
+        const date = new Date(dateStr);
 
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
     const location = useLocation();
     const navigate = useNavigate();
-    const manifest = location?.state?.data || {};
+    const invNo = location?.state?.invoiceNo || "";
+    const fromPath = location?.state?.from || "/";
+    const termArr = location?.state?.termArr || [];
     const [getBranch, setGetBranch] = useState([]);
-    const [manifestData, setGetManifestData] = useState([]);
+    const [invoiceData, setInvoiceData] = useState([]);
     console.log(location.state);
-    const manifestNo = manifest?.manifestNo || "";
-    const sumQty = manifest?.sumQty || 0;
-    const sumActualWt = manifest?.sumActualWt || 0;
     const [loading, setLoading] = useState(true);
-    const [isDataLoaded, setIsDataLoaded] = useState(false);
-    console.log(manifestNo, sumQty, sumActualWt);
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
-                                if (response.status === 1) {
-                                    console.log(response.Data);
-                                    setGetBranch(response.Data[0]);
-                                }
+                if (response.status === 1) {
+                    console.log(response.Data);
+                    setGetBranch(response.Data[0]);
+                }
             }
             catch (error) {
                 console.log(error);
@@ -38,67 +51,83 @@ function SecondInvoice() {
         }
         fetchData();
     }, [])
-    const BranchData = getBranch.length > 0 ? getBranch[1] : {};
-
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchInvoiceData = async () => {
+            const loginData = JSON.parse(localStorage.getItem("Login"));
             try {
-                const response = await getApi(`/Manifest/viewManifestPrint?sessionLocationCode=MUM&manifestNo=${manifestNo}`);
-                setGetManifestData(Array.isArray(response.data) ? response.data : []);
-                console.log(response);
-            } catch (err) {
-                console.error('Fetch Error:', err);
+                const response = await getApi(`/Smart/InvoicePrintPdf?InvoiceNos=${invNo}`);
+
+                console.log("Raw Response:", response);
+
+                if (response.status === 1) {
+                    setInvoiceData(response?.Data || []);
+                    console.log("Data:", response.Data);
+                    // 👈 match backend key
+                } else {
+                    setInvoiceData([]);
+                }
+
+                console.log("Invoice Response:", response.Data);
+
+            } catch (error) {
+                console.error("Invoice Fetch Error:", error);
+                setInvoiceData([]);
             } finally {
                 setLoading(false);
-                setIsDataLoaded(true);
-                // generatePDF();
             }
         };
-        if (manifestNo) {
-            fetchData();
-        }
-    }, [manifestNo]);
 
-    // useEffect(() => {
-    //     if (!loading && manifestData.length > 0 && getBranch.length > 0) {
-    //         setTimeout(generatePDF, 1000);
-    //     }
-    // }, [loading, manifestData, getBranch]);
+        fetchInvoiceData();
+    }, [invNo]);
 
-    // const generatePDF = async () => {
-    //     if (!pageRef.current) return;
-    //     const canvas = await html2canvas(pageRef.current, { scale: 2 });
-    //     const imgData = canvas.toDataURL('image/png');
+    useEffect(() => {
+        console.log("useEffect", invoiceData);
+    }, [invoiceData]);
+   const handleDownloadPDF = async () => {
+    const element = document.querySelector("#pdf");
+    if (!element) return;
 
-    //     const pdf = new jsPDF('p', 'mm', 'a4');
-    //     const pdfWidth = pdf.internal.pageSize.getWidth();
-    //     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    // Capture the HTML as a high-resolution canvas
+    const canvas = await html2canvas(element, {
+        scale: 8, // higher = clearer
+        useCORS: true,
+        scrollY: -window.scrollY,
+    });
 
-    //     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    //     pdf.save(`Manifest_${manifestNo}.pdf`);
-    // };
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-    // if (loading) return <p>Loading...</p>;
-    const handleDownloadPDF = async () => {
-        const element = document.querySelector("#pdf");
-        if (!element) return;
-        
-        const canvas = await html2canvas(element, { scale: 4 });
-        const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-        const imgWidth = 210; // A4 width in mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        // Create PDF with dynamic height = content height
-        const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-        pdf.save(`Manifest_${manifestNo}.pdf`);
-    };
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Add first page
+    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // If content is taller than one page, add more pages
+    while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+    }
+
+    pdf.save(`Invoice_${invNo}.pdf`);
+};
+
+
 
     return (
         <>
-                    <style>
-                {`@media print {
+            <style>
+                {`
+    @media print {
     body * {
         visibility: hidden;
     }
@@ -118,14 +147,12 @@ function SecondInvoice() {
     }
 
     table {
-        width: auto !important;  /* Let table auto-expand */
-        table-layout: auto;      /* Use auto layout */
+        width: 100% !important;  /* Let table auto-expand */
         border-collapse: collapse;
         font-size: 10px !important;
     }
 
     th, td {
-        white-space: nowrap !important;
         border: 1px solid black !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -141,204 +168,176 @@ function SecondInvoice() {
     }
 
     .container-2, .container-3 {
-        width: auto !important;
+        height:auto !important;
     }
 }
-     th, td {
-        white-space: nowrap !important;
-        border: 1px solid black !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .th {
-        background-color: rgba(36, 98, 113, 1) !important;
-        color: white !important;
-    }
-
 `}
             </style>
+
+
+
             <Header />
             <Sidebar1 />
             <div className="main-body" id="main-body">
-                <div className="container">
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", margin: "10px 20px" }}>
+
+                <div className="container-2" style={{ borderRadius: "0px", width: "840px", height: "40px", border: "none" }}>
+
+                    <div className="container-2" style={{ borderRadius: "0px", width: "840px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px", alignItems: "center" }}>
                         <button
                             onClick={handleDownloadPDF}
-                            style={{ padding: "8px 10px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
+                            style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Download
                         </button>
                         <button
                             onClick={() => window.print()}
-                            style={{ padding: "8px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Print
                         </button>
                         <button
-                            onClick={() => navigate(-1)}
-                            style={{ padding: "8px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" ,fontWeight:"bold"}}
+                            onClick={() => navigate(fromPath, { state: { tab: "multiple" } })}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Exit
                         </button>
                     </div>
+                </div>
 
+                <div className="container-2" id="pdf" style={{
+                    borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px",
+                    width: "840px", direction: "flex",
+                    flexDirection: "column", gap: "5px", fontFamily: '"Times New Roman", Times, serif',
+                }}>
 
-                    <div className="container-2" id="pdf" style={{ borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
+                    <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
 
-                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
+                        < div id="printable-section" className="container-3" style={{ padding: "0px", minHeight: "500px" }}>
+                            <div className="container-3" style={{ border: "5px double black", minHeight: "500px" }}>
 
-                            < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
-                                <div className="container-3" style={{ border: "7px double black" }}>
-
-                                   <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px" }}>
-                                    <div style={{ width: "40%" }}>
-                                        <img src={getBranch.Branch_Logo} alt="" style={{ height: "120px" }} />
+                                <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", gap: "50px" }}>
+                                    <div style={{ width: "25%" }}>
+                                        <img src={invoiceData[0]?.Branch_Logo} alt="" style={{ height: "120px", width: "100%" }} />
                                     </div>
-                                    <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
-                                        <div style={{ textAlign: "center", height: "40%" }}>
-                                            <p><b style={{ fontSize: "24px" }}>{getBranch.Company_Name}manifest</b></p>
+                                    <div style={{ width: "75%", display: "flex", flexDirection: "column" }}>
+                                        <div style={{ textAlign: "start", height: "40%" }}>
+                                            <p><b style={{ fontSize: "24px", fontWeight: "bold" }}>{invoiceData[0]?.Company_Name}</b></p>
                                         </div>
-                                        <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "10px", textAlign: "start" }}>
-                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Address :</div><div style={{ width: "100%", textAlign: "start" }}>{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div></div>
-                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>{getBranch.MobileNo}</div></div>
-                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{getBranch.Email}</div></div>
-                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{getBranch.GSTNo}</div></div>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "12px", textAlign: "start" }}>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Address :</div><div style={{ textAlign: "start" }}>{invoiceData[0]?.Branch_Add1},{invoiceData[0]?.Branch_PIN}</div></div>
+                                            <div style={{ display: "flex", whiteSpace: "nowrap", gap: "20px" }}>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>(+91) {invoiceData[0]?.MobileNo}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.Email}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.BranchGSTNo}</div></div>
+                                            </div>
+                                            <div style={{ display: "flex", whiteSpace: "nowrap", gap: "20px" }}>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>City :</div>    <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.Branch_Name[0]}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>State :</div>  <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.State_Name}</div></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                    <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px", marginTop: "20px" }}>
-                                        <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
-                                            <div style={{ fontWeight: "bold" }}>TO,</div>
-                                            <div>
-                                                <label htmlFor=""><b>CLIENT NAME :</b></label>
-                                                <span style={{ marginLeft: "10px" }}>{manifest.vendorName}</span>
-                                            </div>
-
-                                            <div>
-                                                <label htmlFor=""><b>ADDRESS :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.vehicleNo}</label>
-                                            </div>
-                                            <div>
-                                                <label htmlFor=""><b>CLIENT MOBILE NO :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.driverMobile}</label>
-                                            </div>
-
-                                            <div>
-                                                <label htmlFor=""><b>PIN CODE :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.Remark}</label>
-                                            </div>
-                                            <div>
-                                                <label htmlFor=""><b>GST NO :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.Remark}</label>
-                                            </div>
+                                <div style={{ display: "flex", fontSize: "12px", border: "1px solid black", marginBottom: "5px", padding: "10px" }}>
+                                    <div style={{ display: "flex", width: "50%", justifyContent: "start" }}>
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <label htmlFor=""><b>CLIENT NAME</b></label>
+                                            <label htmlFor=""><b>ADDRESS</b></label>
+                                            <label htmlFor=""><b>CLIENT MOBILE NO </b></label>
+                                            <label htmlFor=""><b>PIN CODE</b></label>
+                                            <label htmlFor=""><b>GST NO</b></label>
                                         </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px" }}>
-                                            <div>
-                                                <label htmlFor=""><b>INVOICE NO :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestNo}</label>
-                                            </div>
-
-                                            <div>
-                                                <label htmlFor=""><b>INVOICE DATE :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestDt}</label>
-                                            </div>
-
-                                            <div>
-                                                <label htmlFor=""><b>INVOICE FROM :</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.fromDest}</label>
-                                            </div>
-
-                                            <div>
-                                                <label htmlFor=""><b>INVOICE TO:</b></label>
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.toDest}</label>
-                                            </div>
+                                        <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                        </div>
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.customerName}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Add1},{invoiceData[0]?.Customer_Add2},{invoiceData[0]?.Customer_Add3}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Mob}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Pin_Code}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Gst_No}</label>
                                         </div>
                                     </div>
 
-                                    <div className="table-container2" style={{ borderBottom: "1px solid black" }}>
-                                        <table className='table table-bordered table-sm' style={{ border: "1px solid black" }}>
-                                            <thead className='thead'>
-                                                <tr className='tr' style={{border:"2px solid black"}}>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr.No</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Date</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket No</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Destination</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Boxes</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>QTY</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Freight</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Fuel</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Delivery</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Handle</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Green</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Others</th>
-                                                    <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Amount</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody className='tbody'>
-                                                {manifestData.length > 0 ?
-                                                    manifestData.map((manifest, index) => (
-                                                        <tr key={index} className='tr'>
-                                                            <td className='td'>{index + 1}</td>
-                                                            <td className='td'>{manifest.bookDate}</td>
-                                                            <td className='td'>{manifest.DocketNo}</td>
-                                                            <td className='td'>{manifest.customerName}</td>
-                                                            <td className='td'>{manifest.Consignee}</td>
-                                                            <td className='td'>{manifest.fromDestName}</td>
-                                                            <td className='td'>{manifest.toDestName}</td>
-                                                            <td className='td'>{manifest.modeName}</td>
-                                                            <td className='td'>{manifest.Qty}</td>
-                                                            <td className='td'>{manifest.ActualWt}</td>
-                                                            <td className='td'>{manifest.Qty}</td>
-                                                            <td className='td'>{manifest.ActualWt}</td>
-                                                            <td className='td'>{manifest.Qty}</td>
-                                                            <td className='td'>{manifest.ActualWt}</td>
-                                                        </tr>
-                                                    )) : (
-                                                        <tr>
-                                                            <td colSpan="14">No data available</td>
-                                                        </tr>
-                                                    )}
-                                            </tbody>
-                                        </table>
-
-                                        <div className='page'>
-                                            <div>
-                                                <label htmlFor="">Total QTY :</label>
-                                                <label htmlFor="" style={{ width: "40px", marginLeft: "5px" }}>{sumQty}</label>
-                                            </div>
-
+                                    <div style={{ display: "flex", width: "50%", justifyContent: "end", alignItems: "center", marginRight: "50px" }}>
+                                        <div style={{ display: "flex", flexDirection: "column", }}>
+                                            <label htmlFor=""><b>INVOICE NO</b></label>
+                                            <label htmlFor=""><b>INVOICE DATE</b></label>
+                                            <label htmlFor=""><b>INVOICE FROM</b></label>
+                                            <label htmlFor=""><b>INVOICE TO</b></label>
                                         </div>
+                                        <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                            <label htmlFor=""><b>:</b></label>
+                                        </div>
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillNo}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillDate[0]}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{formatDateToDDMMYYYY(invoiceData[0]?.billfrom)}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{formatDateToDDMMYYYY(invoiceData[0]?.BillTo)}</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="table-container2" style={{ borderBottom: "1px solid black" }}>
+                                    <table className='table table-bordered table-sm' style={{ border: "1px solid black" }}>
+                                        <thead className='thead'>
+                                            <tr className='tr'>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr No</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Date</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket No</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Destination</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Boxes</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Qty</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Freight</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Fuel</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Delivery</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Handle</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Green</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Other</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Amount</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody className='tbody'>
+
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                                <div className='page' style={{ marginTop: "20px" }}>
+                                    <p>Received by :</p><span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
+                                </div>
+
+                                <div className='page' style={{ justifyContent: "space-between" }}>
+                                    <div className='page' style={{ marginTop: "20px" }}>
+                                        <p>Prepared by :</p>
+                                        <p style={{ textAlign: "start", paddingLeft: "5px" }}><b style={{ fontSize: "12px", marginRight: "10px" }}>{ }</b></p>
+                                    </div>
+                                    <div className='page' style={{ marginTop: "20px" }}>
+                                        <p>Checked by :</p>
+                                        <span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
                                     </div>
 
                                     <div className='page' style={{ marginTop: "20px" }}>
-                                        <p>Received by :</p><span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
-                                    </div>
-
-                                    <div className='page' style={{ justifyContent: "space-between" }}>
-                                        <div className='page' style={{ marginTop: "20px" }}>
-                                            <p>Prepared by :</p>
-                                            <p style={{ textAlign: "start", paddingLeft: "5px" }}><b style={{ fontSize: "12px", marginRight: "10px" }}>{BranchData.Company_Name}</b></p>
-                                        </div>
-                                        <div className='page' style={{ marginTop: "20px" }}>
-                                            <p>Checked by :</p>
-                                            <span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
-                                        </div>
-
-                                        <div className='page' style={{ marginTop: "20px" }}>
-                                            <p>Signature With Stamp :</p><span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
-                                        </div>
+                                        <p>Signature With Stamp :</p><span style={{ height: "1px", width: "150px", color: "black", border: "1px solid black", marginTop: "20px" }}></span>
                                     </div>
                                 </div>
-                            </div >
-                        </div>
+
+                            </div>
+
+                        </div >
                     </div>
-                    
                 </div>
+
+
             </div >
         </>
     );

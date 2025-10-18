@@ -5,11 +5,16 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import Modal from 'react-modal';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import Select, { components } from 'react-select';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function ProductWiseGst() {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [openRow, setOpenRow] = useState(null);
     const [getGST, setGetGST] = useState([]);                     // To Get GST Data
     const [getMode, setGetMode] = useState([]);                   // To Get Mode Data
@@ -23,8 +28,8 @@ function ProductWiseGst() {
     const [addGST, setAddGST] = useState({
         modeCode: "",
         serviceTax: "",
-        fromDate: "",
-        toDate: ""
+        fromDate: firstDayOfMonth,
+        toDate: today,
     })
 
 
@@ -71,7 +76,10 @@ function ProductWiseGst() {
             const response = await postApi('/Master/UpdateGST', requestBody, 'POST');
             if (response.status === 1) {
                 setGetGST(getGST.map((gst) => gst.Mode_Code === addGST.modeCode ? response.Data : gst));
-                setAddGST({ modeCode: '', serviceTax: '', fromDate: '', toDate: '' });
+                setAddGST({
+                    modeCode: '', serviceTax: '', fromDate: firstDayOfMonth,
+                    toDate: today,
+                });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
                 await fetchGSTData();
@@ -102,7 +110,10 @@ function ProductWiseGst() {
 
             if (response.status === 1) {
                 setGetGST([...getGST, response.Data]);
-                setAddGST({ modeCode: '', serviceTax: '', fromDate: '', toDate: '' });
+                setAddGST({
+                    modeCode: '', serviceTax: '', fromDate: firstDayOfMonth,
+                    toDate: today,
+                });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
                 await fetchGSTData();
@@ -205,7 +216,10 @@ function ProductWiseGst() {
                         <div>
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
-                                setAddGST({ modeCode: "", serviceTax: "", fromDate: "", toDate: "" })
+                                setAddGST({
+                                    modeCode: "", serviceTax: "", fromDate: firstDayOfMonth,
+                                    toDate: today,
+                                })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
                                 <span>ADD NEW</span>
@@ -270,24 +284,24 @@ function ProductWiseGst() {
                                                         padding: "10px",
                                                     }}
                                                 >
-                                                     <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setOpenRow(null);
-                                                    setAddGST({
-                                                        modeCode: gst.Mode_Code,
-                                                        serviceTax: gst.Services_Tax,
-                                                        fromDate: gst.From_Date,
-                                                        toDate: gst.To_Date
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button className='edit-btn' onClick={() => { 
-                                                    handleDeleteGST(gst.Mode_Code);
-                                                    setOpenRow(null);
-                                                }}>
-                                                    <i className='bi bi-trash'></i></button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setAddGST({
+                                                            modeCode: gst.Mode_Code,
+                                                            serviceTax: gst.Services_Tax,
+                                                            fromDate: gst.From_Date,
+                                                            toDate: gst.To_Date
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        handleDeleteGST(gst.Mode_Code);
+                                                        setOpenRow(null);
+                                                    }}>
+                                                        <i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}
                                         </td>
@@ -339,7 +353,16 @@ function ProductWiseGst() {
 
 
                     <Modal id="modal" overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-gst" contentLabel="Modal">
+                        className="custom-modal-gst"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}
+                        contentLabel="Modal">
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Customer GST Master</header>
@@ -349,36 +372,62 @@ function ProductWiseGst() {
                                 <form onSubmit={handleSaveGST}>
 
                                     <div className="fields2">
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">Mode</label>
-                                            <select value={addGST.modeCode}
-                                                onChange={(e) => setAddGST({ ...addGST, modeCode: e.target.value })} required>
-                                                <option value="" disabled >Select Mode</option>
-                                                {getMode.map((mode, index) => (
-                                                    <option value={mode.Mode_Code} key={index}>{mode.Mode_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getMode.map(mode => ({
+                                                    value: mode.Mode_Code,   // adjust keys from your API
+                                                    label: mode.Mode_Name
+                                                }))}
+                                                value={
+                                                    addGST.modeCode
+                                                        ? { value: addGST.modeCode, label: getMode.find(mode => mode.Mode_Code === addGST.modeCode)?.Mode_Name || '' }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setAddGST({
+                                                        ...addGST,
+                                                        modeCode: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }}
+                                                placeholder="Select Mode"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }} />
                                         </div>
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">Good Service Tax %</label>
                                             <input type="text" placeholder="GST %" required
                                                 value={addGST.serviceTax}
                                                 onChange={(e) => setAddGST({ ...addGST, serviceTax: e.target.value })} />
                                         </div>
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">From Date</label>
-                                            <input type="date" required
-                                                value={addGST.fromDate}
-                                                onChange={(e) => setAddGST({ ...addGST, fromDate: e.target.value })} />
+                                            <DatePicker
+                                                required
+                                                portalId="root-portal"
+                                                selected={addGST.fromDate}
+                                                onChange={(date) => setAddGST({ ...addGST, fromDate: date })}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
                                         </div>
-
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label htmlFor="">To Date</label>
-                                            <input type="date" required
-                                                value={addGST.toDate}
-                                                onChange={(e) => setAddGST({ ...addGST, toDate: e.target.value })} />
+                                            <DatePicker
+                                                required
+                                                portalId="root-portal"
+                                                selected={addGST.toDate}
+                                                onChange={(date) => setAddGST({ ...addGST, toDate: date })}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
                                         </div>
                                     </div>
                                     <div className='bottom-buttons' style={{ marginTop: "20px" }}>

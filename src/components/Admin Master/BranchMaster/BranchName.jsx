@@ -30,6 +30,7 @@ function BranchName() {
         invoiceNo: '',
         runsheetNo: '',
         branchAdd1: '',
+        branchAdd2: '',
         branchPIN: '',
         email: '',
         website: '',
@@ -145,27 +146,32 @@ function BranchName() {
     const handleUpdate = async (e) => {
         e.preventDefault();
         const requestBody = {
-            Branch_Code: branchData.branchCode.trim(),
-            Branch_Name: branchData.branchName,
-            InvoiceNo: branchData.invoiceNo,
-            ManifestNo: branchData.manifestNo,
-            RunsheetNo: branchData.runsheetNo,
-            Branch_Add1: branchData.branchAdd1,
-            Branch_PIN: branchData.branchPIN,
-            Email: branchData.email,
-            Website: branchData.website,
-            GSTNo: branchData.gstNo.toUpperCase(),
-            HSNNo: branchData.hsnNo,
-            City_Code: branchData.cityCode,
-            State_Code: branchData.stateCode,
-            Bank_Code: branchData.bankCode,
-            AccountNo: branchData.accountNo,
-            Bank_Name: branchData.bankName,
-            IFSC_Code: branchData.ifscCode,
-            MobileNo: branchData.mobileNo,
-            Bank_Branch: branchData.bankBranch,
-            Branch_Logo: branchData.img,
-        }
+            branchCode: branchData.branchCode,
+            branchName: branchData.branchName,
+            invoiceNo: branchData.invoiceNo,
+            manifestNo: branchData.manifestNo,
+            runsheetNo: branchData.runsheetNo,
+            branchAdd1: branchData.branchAdd1,
+            branchAdd2: branchData.branchAdd2,
+            branchPIN: branchData.branchPIN,
+            email: branchData.email,
+            website: branchData.website,
+            gstNo: branchData.gstNo?.toUpperCase() || '',
+            hsnNo: branchData.hsnNo,
+            cityCode: branchData.cityCode,
+            stateCode: branchData.stateCode,
+            bankCode: branchData.bankCode,
+            anotherBranch: branchData.anotherBranch || 'No',   // ✅ added
+            accountNo: branchData.accountNo,
+            bankName: branchData.bankName,
+            ifscCode: branchData.ifscCode,
+            mobileNo: branchData.mobileNo,
+            bankBranch: branchData.bankBranch,
+            branchLogo: branchData.img,
+            companyStamp: branchData.stamp,
+            companyName: branchData.companyName,
+        };
+
 
         try {
             const response = await postApi('/Master/updateBranch', requestBody);
@@ -178,6 +184,7 @@ function BranchName() {
                     manifestNo: '',
                     runsheetNo: '',
                     branchAdd1: '',
+                    branchAdd2: '',
                     branchPIN: '',
                     email: '',
                     website: '',
@@ -228,20 +235,26 @@ function BranchName() {
             manifestNo: branchData.manifestNo,
             runsheetNo: branchData.runsheetNo,
             branchAdd1: branchData.branchAdd1,
+            branchAdd2: branchData.branchAdd2,
             branchPIN: branchData.branchPIN,
             email: branchData.email,
-            gstNo: branchData.gstNo.toUpperCase(),
+            website: branchData.website,
+            gstNo: branchData.gstNo?.toUpperCase() || '',
             hsnNo: branchData.hsnNo,
             cityCode: branchData.cityCode,
             stateCode: branchData.stateCode,
             bankCode: branchData.bankCode,
+            anotherBranch: branchData.anotherBranch || 'No',   // ✅ added
+            accountNo: branchData.accountNo,
             bankName: branchData.bankName,
             ifscCode: branchData.ifscCode,
             mobileNo: branchData.mobileNo,
             bankBranch: branchData.bankBranch,
-            accountNo: branchData.accountNo,
-            Branch_Logo: branchData.img,
-        }
+            branchLogo: branchData.img,
+            companyStamp: branchData.stamp,
+            companyName: branchData.companyName,
+        };
+
 
         try {
             const saveResponse = await postApi('/Master/addBranch', requestBody, 'POST');
@@ -253,6 +266,7 @@ function BranchName() {
                     manifestNo: '',
                     runsheetNo: '',
                     branchAdd1: '',
+                    branchAdd2: '',
                     branchPIN: '',
                     email: '',
                     website: '',
@@ -374,7 +388,7 @@ function BranchName() {
                                 setModalIsOpen(true); setIsEditMode(false);
                                 setBranchData({
                                     branchCode: '', branchName: '', manifestNo: '', runsheetNo: '', invoiceNo: '',
-                                    branchAdd1: '', branchPIN: '', email: '', website: '', gstNo: '', hsnNo: '', cityCode: '',
+                                    branchAdd1: '', branchAdd2: '', branchPIN: '', email: '', website: '', gstNo: '', hsnNo: '', cityCode: '',
                                     stateCode: '', bankName: '', bankCode: '', bankBranch: '', accountNo: '', ifscCode: '',
                                     mobileNo: '', img: '', companyName: '', stamp: '',
                                 })
@@ -447,41 +461,44 @@ function BranchName() {
                                                         padding: "10px",
                                                     }}
                                                 >
-                                                   <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setOpenRow(null);
-                                                    setBranchData({
-                                                        branchCode: branch.Branch_Code,
-                                                        branchName: branch.Branch_Name,
-                                                        invoiceNo: branch.InvoiceNO,
-                                                        manifestNo: branch.ManifestNo,
-                                                        runsheetNo: branch.RunsheetNo,
-                                                        branchAdd1: branch.Branch_Add1,
-                                                        branchPIN: branch.Branch_PIN,
-                                                        hsnNo: branch.HSNNo,
-                                                        gstNo: branch.GSTNo,
-                                                        email: branch.Email,
-                                                        website: branch.Website,
-                                                        mobileNo: branch.MobileNo,
-                                                        stateCode: branch.State_Code,
-                                                        cityCode: branch.City_Code,
-                                                        bankCode: branch.Bank_Code,
-                                                        bankName: branch.Bank_Name,
-                                                        accountNo: branch.AccountNo,
-                                                        ifscCode: branch.IFSC_Code,
-                                                        bankBranch: branch.Bank_Branch,
-                                                        img: branch.Branch_Logo,
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button className='edit-btn' onClick={() => {handleDeleteBranch(branch.Branch_Code);setOpenRow(null);}}>
-                                                    <i className='bi bi-trash'></i></button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setBranchData({
+                                                            branchCode: branch.Branch_Code,
+                                                            branchName: branch.Branch_Name,
+                                                            invoiceNo: branch.InvoiceNO,
+                                                            manifestNo: branch.ManifestNo,
+                                                            runsheetNo: branch.RunsheetNo,
+                                                            branchAdd1: branch.Branch_Add1,
+                                                            branchAdd2: branch.Branch_Add2,
+                                                            branchPIN: branch.Branch_PIN,
+                                                            hsnNo: branch.HSNNo,
+                                                            gstNo: branch.GSTNo,
+                                                            email: branch.Email,
+                                                            website: branch.Website,
+                                                            mobileNo: branch.MobileNo,
+                                                            stateCode: branch.State_Code,
+                                                            cityCode: branch.City_Code,
+                                                            bankCode: branch.Bank_Code,
+                                                            bankName: branch.Bank_Name,
+                                                            accountNo: branch.AccountNo,
+                                                            ifscCode: branch.IFSC_Code,
+                                                            bankBranch: branch.Bank_Branch,
+                                                            img: branch.Branch_Logo,
+                                                            companyName: branch.Company_Name,
+                                                            stamp: branch.Company_Stamp,
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button className='edit-btn' onClick={() => { handleDeleteBranch(branch.Branch_Code); setOpenRow(null); }}>
+                                                        <i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}
                                         </td>
-                                      
+
                                         <td>{index + 1}</td>
                                         <td>{branch.Branch_Code}</td>
                                         <td>{branch.Branch_Name}</td>
@@ -626,6 +643,13 @@ function BranchName() {
                                             <input type="text" placeholder="Enter Address"
                                                 value={branchData.branchAdd1}
                                                 onChange={(e) => setBranchData({ ...branchData, branchAdd1: e.target.value })} />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Address</label>
+                                            <input type="text" placeholder="Enter Address"
+                                                value={branchData.branchAdd2}
+                                                onChange={(e) => setBranchData({ ...branchData, branchAdd2: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">

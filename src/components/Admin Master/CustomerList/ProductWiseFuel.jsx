@@ -6,11 +6,16 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import Select, { components } from 'react-select';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function ProductWiseFuel() {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [openRow, setOpenRow] = useState(null);
     const [getCust, setGetCust] = useState([]);                    // to get customer charges data
     const [getCustName, setGetCustName] = useState([]);            // To Get Customer Name Data
@@ -36,6 +41,7 @@ function ProductWiseFuel() {
         custCode: '',
         modeCode: '',
         fuelCharge: '',
+        fovper:0,
         fovCharge: '',
         docketCharge: '',
         deliveryCharge: '',
@@ -44,8 +50,8 @@ function ProductWiseFuel() {
         hamaliCharge: '',
         otherCharge: '',
         insuranceCharge: '',
-        fromDate: '',
-        toDate: ''
+        fromDate: firstDayOfMonth,
+        toDate: today,
     })
 
 
@@ -198,6 +204,7 @@ function ProductWiseFuel() {
                     custCode: '',
                     modeCode: '',
                     fuelCharge: '',
+                    fovper:0,
                     fovCharge: '',
                     docketCharge: '',
                     deliveryCharge: '',
@@ -206,8 +213,8 @@ function ProductWiseFuel() {
                     hamaliCharge: '',
                     otherCharge: '',
                     insuranceCharge: '',
-                    fromDate: '',
-                    toDate: ''
+                    fromDate: firstDayOfMonth,
+                    toDate: today
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -224,6 +231,19 @@ function ProductWiseFuel() {
 
     const handleSaveCustomer = async (e) => {
         e.preventDefault();
+        const errors = [];
+        if (!addCust.custCode) errors.push("Customer is required");
+        if (!addCust.modeCode) errors.push("Mode is required");
+        if (!addCust.fromDate) errors.push("From Date is required");
+        if (!addCust.toDate) errors.push("To Date is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
 
         const requestBody = {
             customerCode: addCust.custCode,
@@ -249,6 +269,7 @@ function ProductWiseFuel() {
                     custCode: '',
                     modeCode: '',
                     fuelCharge: '',
+                     fovper:0,
                     fovCharge: '',
                     docketCharge: '',
                     deliveryCharge: '',
@@ -257,8 +278,8 @@ function ProductWiseFuel() {
                     hamaliCharge: '',
                     otherCharge: '',
                     insuranceCharge: '',
-                    fromDate: '',
-                    toDate: ''
+                    fromDate: firstDayOfMonth,
+                    toDate: today
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -374,9 +395,9 @@ function ProductWiseFuel() {
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
                                 setAddCust({
-                                    custCode: '', modeCode: '', fuelCharge: '', fovCharge: '', docketCharge: '',
+                                    custCode: '', modeCode: '', fuelCharge: '', fovCharge: '', fovper:0, docketCharge: '',
                                     deliveryCharge: '', packingCharge: '', greenCharge: '', hamaliCharge: '',
-                                    otherCharge: '', insuranceCharge: '', fromDate: '', toDate: ''
+                                    otherCharge: '', insuranceCharge: '', fromDate: firstDayOfMonth, toDate: today
                                 })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -536,7 +557,16 @@ function ProductWiseFuel() {
 
 
                     <Modal id="modal" overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-custCharges" contentLabel="Modal">
+                        className="custom-modal"
+                        style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}
+                        contentLabel="Modal">
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Customer Charges Master</header>
@@ -551,31 +581,65 @@ function ProductWiseFuel() {
                                             <div className="fields2">
                                                 <div className="input-field1">
                                                     <label htmlFor="">Customer Name</label>
-                                                    <select value={addCust.custCode}
-                                                        onChange={(e) => setAddCust({ ...addCust, custCode: e.target.value })} required
-                                                        aria-readonly={isEditMode}>
-                                                        <option value="" disabled >Select Customer Name</option>
-                                                        {getCustName.map((cust, index) => (
-                                                            <option value={cust.Customer_Name} key={index}>{cust.Customer_Name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <Select
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={getCustName.map(cust => ({
+                                                            value: cust.Customer_Code,   // adjust keys from your API
+                                                            label: cust.Customer_Name
+                                                        }))}
+                                                        value={
+                                                            addCust.custCode
+                                                                ? { value: addCust.custCode, label: getCustName.find(cust => cust.Customer_Code === addCust.custCode)?.Customer_Name || "" }
+                                                                : null
+                                                        }
+                                                        onChange={(selectedOption) => {
+                                                            setAddCust({
+                                                                ...addCust,
+                                                                custCode: selectedOption ? selectedOption.value : ""
+                                                            })
+                                                        }}
+                                                        placeholder="Select Customer"
+                                                        isSearchable
+                                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                        styles={{
+                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                        }}
+                                                    />
                                                 </div>
 
                                                 <div className="input-field1">
                                                     <label htmlFor="">Mode</label>
-                                                    <select required value={addCust.modeCode}
-                                                        onChange={(e) => setAddCust({ ...addCust, modeCode: e.target.value })}>
-                                                        <option value="" disabled >Select Mode</option>
-                                                        {getMode.map((mode, index) => (
-                                                            <option value={mode.Mode_Code} key={index}>{mode.Mode_Name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <Select
+                                                        className="blue-selectbooking"
+                                                        classNamePrefix="blue-selectbooking"
+                                                        options={getMode.map(mode => ({
+                                                            value: mode.Mode_Code,   // adjust keys from your API
+                                                            label: mode.Mode_Name
+                                                        }))}
+                                                        value={
+                                                            addCust.modeCode
+                                                                ? { value: addCust.modeCode, label: getMode.find(mode => mode.Mode_Code === addCust.modeCode)?.Mode_Name || '' }
+                                                                : null
+                                                        }
+                                                        onChange={(selectedOption) => {
+                                                            setAddCust({
+                                                                ...addCust,
+                                                                modeCode: selectedOption ? selectedOption.value : ""
+                                                            })
+                                                        }}
+                                                        placeholder="Select Mode"
+                                                        isSearchable
+                                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                        styles={{
+                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                        }} />
                                                 </div>
 
                                                 <div className="input-field1">
                                                     <label htmlFor="">Fuel Charges</label>
                                                     <div style={{ display: "flex", flexDirection: "row" }}>
-                                                        <input required style={{
+                                                        <input style={{
                                                             width: "80%",
                                                             borderBottomRightRadius: "0px",
                                                             borderTopRightRadius: "0px",
@@ -597,65 +661,77 @@ function ProductWiseFuel() {
 
                                             <div className="fields2">
                                                 {isFovChecked && (
-                                                    <div className="input-field2">
+                                                    <div className="input-field3">
                                                         <label htmlFor="">FOV </label>
-                                                        <input type="text" value={addCust.fovCharge}
+                                                        <div style={{ display: "flex", flexDirection: "row" }}>
+                                                            <input type="text" value={addCust.fovCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, fovCharge: e.target.value })}
-                                                            placeholder="Enter FOV " required />
+                                                            placeholder="Enter FOV " style={{
+                                                            width: "80%",
+                                                            borderBottomRightRadius: "0px",
+                                                            borderTopRightRadius: "0px",
+                                                            borderRightColor: "transparent"
+                                                        }}/>
+                                                         <input type="text" value={addCust.fovper}
+                                                            onChange={(e) => setAddCust({ ...addCust, fovper: e.target.value })}
+                                                            placeholder="% " style={{
+                                                            width: "20%",
+                                                        }}/>
+                                                        </div>
                                                     </div>
                                                 )}
 
                                                 {isDocketChecked && (
-                                                    <div className="input-field2">
+                                                    <div className="input-field3">
                                                         <label htmlFor="">Docket Charges</label>
                                                         <input type="text" value={addCust.docketCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, docketCharge: e.target.value })}
-                                                            placeholder="Enter Docket Charges" required />
+                                                            placeholder="Enter Docket Charges" />
                                                     </div>
                                                 )}
 
                                                 {isDeliveryChecked && (
-                                                    <div className="input-field2">
+                                                    <div className="input-field3">
                                                         <label htmlFor="">Delivery Charges</label>
                                                         <input type="text" value={addCust.deliveryCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, deliveryCharge: e.target.value })}
-                                                            placeholder="Enter Delivery Charges" required />
+                                                            placeholder="Enter Delivery Charges" />
                                                     </div>
                                                 )}
 
                                                 {isPackingChecked && (
-                                                    <div className="input-field2">
+                                                    <div className="input-field3">
                                                         <label htmlFor="">Packing Charges</label>
                                                         <input type="text" value={addCust.packingCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, packingCharge: e.target.value })}
-                                                            placeholder="Enter Packing Charges" required />
+                                                            placeholder="Enter Packing Charges" />
                                                     </div>
                                                 )}
 
                                                 {isGreenChecked && (
-                                                    <div className="input-field2">
+                                                    <div className="input-field3">
                                                         <label htmlFor="">Green Charges</label>
                                                         <input type="text" value={addCust.greenCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, greenCharge: e.target.value })}
-                                                            placeholder="Enter Green Charges" required />
+                                                            placeholder="Enter Green Charges" />
                                                     </div>
                                                 )}
 
                                                 {isHamaliChecked && (
-                                                    <div className="input-field2">
+                                                    <div className="input-field3">
                                                         <label htmlFor="">Hamali Charges</label>
                                                         <input type="text" value={addCust.hamaliCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, hamaliCharge: e.target.value })}
-                                                            placeholder="Enter Hamali Charges" required />
+                                                            placeholder="Enter Hamali Charges" />
                                                     </div>
                                                 )}
 
                                                 {isOtherChecked && (
-                                                    <div className="input-field2">
+                                                    <div className="input-field3">
                                                         <label htmlFor="">Other Charges</label>
                                                         <input type="text" value={addCust.otherCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, otherCharge: e.target.value })}
-                                                            placeholder="Enter Other Charges" required />
+                                                            placeholder="Enter Other Charges" />
                                                     </div>
                                                 )}
 
@@ -664,31 +740,42 @@ function ProductWiseFuel() {
                                                         <label htmlFor="">Insurance Charges</label>
                                                         <input type="text" value={addCust.insuranceCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, insuranceCharge: e.target.value })}
-                                                            placeholder="Enter Insurance Charges" required />
+                                                            placeholder="Enter Insurance Charges" />
                                                     </div>
                                                 )}
 
-                                                <div className="input-field2">
+                                                <div className="input-field3">
                                                     <label htmlFor="">From</label>
-                                                    <input type="date" value={addCust.fromDate}
-                                                        onChange={(e) => setAddCust({ ...addCust, fromDate: e.target.value })}
-                                                        placeholder="enter from date" required />
+                                                    <DatePicker
+                                                        required
+                                                        portalId="root-portal"
+                                                        selected={addCust.fromDate}
+                                                        onChange={(date) => setAddCust({ ...addCust, fromDate: date })}
+                                                        dateFormat="dd/MM/yyyy"
+                                                        className="form-control form-control-sm"
+                                                    />
                                                 </div>
 
-                                                <div className="input-field2">
+                                                <div className="input-field3">
                                                     <label htmlFor="">To Date</label>
-                                                    <input type="date" value={addCust.toDate}
-                                                        onChange={(e) => setAddCust({ ...addCust, toDate: e.target.value })}
-                                                        placeholder="enter till date" required />
+                                                    <DatePicker
+                                                        required
+                                                        portalId="root-portal"
+                                                        selected={addCust.toDate}
+                                                        onChange={(date) => setAddCust({ ...addCust, toDate: date })}
+                                                        dateFormat="dd/MM/yyyy"
+                                                        className="form-control form-control-sm"
+                                                    />
                                                 </div>
 
-                                                <div className='bottom-buttons' style={{ marginTop: "18px", marginLeft: "25px" }}>
+                                                
+
+                                            </div>
+                                            <div className='bottom-buttons' style={{ marginTop: "18px", marginLeft: "25px" }}>
                                                     {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
                                                     {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
                                                     <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                                 </div>
-
-                                            </div>
                                         </div>
                                     </div>
                                 </form>
@@ -697,7 +784,16 @@ function ProductWiseFuel() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen1}
-                        className="custom-modal-charges" contentLabel="Modal">
+                        className="custom-modal"
+                        style={{
+                            content: {
+                                height: "auto",
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}
+                        contentLabel="Modal">
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Charges</header>
@@ -707,7 +803,7 @@ function ProductWiseFuel() {
                                 <form>
                                     <div className="fields2">
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isFovChecked}
                                                 onChange={handleFovChange}
@@ -716,7 +812,7 @@ function ProductWiseFuel() {
                                                 Fov Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isDocketChecked}
                                                 onChange={handleDocketChange}
@@ -725,7 +821,7 @@ function ProductWiseFuel() {
                                                 Docket Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isDeliveryChecked}
                                                 onChange={handleDeliveryChange}
@@ -734,7 +830,7 @@ function ProductWiseFuel() {
                                                 Delivery Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isPackingChecked}
                                                 onChange={handlePackingChange}
@@ -743,7 +839,7 @@ function ProductWiseFuel() {
                                                 Packing Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isGreenChecked}
                                                 onChange={handleGreenChange}
@@ -752,7 +848,7 @@ function ProductWiseFuel() {
                                                 Green Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isHamaliChecked}
                                                 onChange={handleHamaliChange}
@@ -761,7 +857,7 @@ function ProductWiseFuel() {
                                                 Hamali Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isOtherChecked}
                                                 onChange={handleOtherChange}
@@ -770,7 +866,7 @@ function ProductWiseFuel() {
                                                 Other Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isODAChecked}
                                                 onChange={handleODAChange}
@@ -779,7 +875,7 @@ function ProductWiseFuel() {
                                                 ODA Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isInsuranceChecked}
                                                 onChange={handleInsuranceChange}
@@ -787,12 +883,10 @@ function ProductWiseFuel() {
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Insurance Charges</label>
                                         </div>
-
-                                        <div className='bottom-buttons' style={{ marginLeft: "25px", marginTop: "18px" }}>
-                                            <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(false) }} className='ok-btn'>Submit</button>
-                                            <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(false) }} className='ok-btn'>close</button>
-                                        </div>
-
+                                    </div>
+                                    <div className='bottom-buttons' style={{ marginLeft: "25px", marginTop: "18px" }}>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(false) }} className='ok-btn'>Submit</button>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(false) }} className='ok-btn'>close</button>
                                     </div>
                                 </form>
                             </div>

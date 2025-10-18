@@ -8,6 +8,7 @@ import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
+import Select, { components } from 'react-select';
 
 
 
@@ -30,15 +31,17 @@ function OdaMaster() {
         Product_Code: "",
         Method: "",
         Amount: "",
-        ConnectingHub: ""
+        ConnectingHub: "",
+        modeCode: "",
     });
+    const [editIndex, setEditIndex] = useState(null);
     const [submittedData, setSubmittedData] = useState([]);
     const [tableRowData, setTableRowData] = useState({
         Rd_Number: "",
+        km_kg: "",
         Amount_1: "",
         Amount_2: "",
         Amount_3: "",
-        Amount_4: ""
     })
 
 
@@ -110,21 +113,28 @@ function OdaMaster() {
         e.preventDefault();
 
         if (!tableRowData.Amount_1) {
-            Swal.fire({
+            return Swal.fire({
                 icon: 'warning',
                 title: 'Missing Information',
                 text: 'Please fill in the empty fields.',
                 confirmButtonText: 'OK',
             });
-            return;
         }
-
-        setSubmittedData((prev) => [...prev, tableRowData]);
+        if (editIndex !== null) {
+            // update existing row
+            const updated = [...submittedData];
+            updated[editIndex] = tableRowData;
+            setSubmittedData(updated);
+            setEditIndex(null);
+        } else {
+            setSubmittedData((prev) => [...prev, tableRowData]);
+        }
         setTableRowData({
             Rd_Number: "",
+            km_kg: "",
             Amount_1: "",
             Amount_2: "",
-            Amount_3: ""
+            Amount_3: "",
         });
     };
 
@@ -157,7 +167,13 @@ function OdaMaster() {
                     Amount: "",
                     ConnectingHub: ""
                 });
-                setTableRowData({ Rd_Number: "", Amount_1: "", Amount_2: "", Amount_3: "", Amount_4: "" })
+                setTableRowData({
+                    Rd_Number: "",
+                    km_kg: "",
+                    Amount_1: "",
+                    Amount_2: "",
+                    Amount_3: "",
+                })
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
                 await fetchODAData();
@@ -197,10 +213,10 @@ function OdaMaster() {
                 });
                 setTableRowData({
                     Rd_Number: "",
+                    km_kg: "",
                     Amount_1: "",
                     Amount_2: "",
                     Amount_3: "",
-                    Amount_4: ""
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -302,7 +318,7 @@ function OdaMaster() {
                 </div>
 
                 <div className='table-container'>
-                    <table className='table table-bordered table-sm' style={{whiteSpace:"nowrap"}}>
+                    <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                         <thead className='table-sm'>
                             <tr>
                                 <th scope="col">Actions</th>
@@ -314,7 +330,7 @@ function OdaMaster() {
                                 <th scope="col">Amount</th>
                                 <th scope="col">Product_Code</th>
                                 <th scope="col">ConnectingHub</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody className='table-body'>
@@ -344,28 +360,28 @@ function OdaMaster() {
                                                     padding: "10px",
                                                 }}
                                             >
-                                                
+
                                                 <button className='edit-btn' onClick={() => {
-                                                setIsEditMode(true);
-                                                 setOpenRow(null);
-                                                setFormdata({
-                                                    Customer_Code: oda.Customer_Code,
-                                                    Product_Code: oda.Product_Code,
-                                                    Method: oda.Method,
-                                                    Amount: oda.Amount,
-                                                    ConnectingHub: oda.ConnectingHub
-                                                });
-                                                setSubmittedData(oda.ODADetailJson || []);
-                                                setModalIsOpen(true);
-                                            }}>
-                                                <i className='bi bi-pen'></i>
-                                            </button>
-                                            <button className='edit-btn' onClick={() =>{
-                                                 setOpenRow(null);
-                                                 handledelete(oda.Club_No);
-                                                 }}>
-                                                <i className='bi bi-trash'></i>
-                                            </button>
+                                                    setIsEditMode(true);
+                                                    setOpenRow(null);
+                                                    setFormdata({
+                                                        Customer_Code: oda.Customer_Code,
+                                                        Product_Code: oda.Product_Code,
+                                                        Method: oda.Method,
+                                                        Amount: oda.Amount,
+                                                        ConnectingHub: oda.ConnectingHub
+                                                    });
+                                                    setSubmittedData(oda.ODADetailJson || []);
+                                                    setModalIsOpen(true);
+                                                }}>
+                                                    <i className='bi bi-pen'></i>
+                                                </button>
+                                                <button className='edit-btn' onClick={() => {
+                                                    setOpenRow(null);
+                                                    handledelete(oda.Club_No);
+                                                }}>
+                                                    <i className='bi bi-trash'></i>
+                                                </button>
                                             </div>
                                         )}
                                     </td>
@@ -377,61 +393,57 @@ function OdaMaster() {
                                     <td>{oda.Amount}</td>
                                     <td>{oda.Product_Code}</td>
                                     <td>{oda.ConnectingHub}</td>
-                                   
+
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="row" style={{whiteSpace:"nowrap" }}>
-                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
-                        </div>
-
-                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage"  className="me-2">Rows per page: </label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "50px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
+                <div className="row" style={{ whiteSpace: "nowrap" }}>
+                    <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            {'<'}
+                        </button>
+                        <span style={{ color: "#333", padding: "5px" }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                            {'>'}
+                        </button>
                     </div>
+
+                    <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                        <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                        <select
+                            id="rowsPerPage"
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                                setRowsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            style={{ height: "40px", width: "50px" }}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
+                </div>
 
                 <Modal id="modal" overlayClassName="custom-overlay" isOpen={modalIsOpen}
                     style={{
                         content: {
-                            top: '55%',
-                            left: '55%',
-                            right: 'auto',
-                            bottom: 'auto',
-                            marginRight: '-50%',
-                            transform: 'translate(-50%, -50%)',
-                            height: '386px',
-                            width: '50%',
-                            padding: "0px",
-                            borderRadius: '10px',
+                            width: '90%',
+                            top: '50%',             // Center vertically
+                            left: '50%',
+                            whiteSpace: "nowrap"
                         },
-                    }}>
-                    <div>
+                    }}
+                    className="custom-modal"
+                    contentLabel="Modal">
+                    <div className="custom-modal-content">
                         <div className="header-tittle">
                             <header>ODA Master Entry</header>
                         </div>
@@ -442,23 +454,59 @@ function OdaMaster() {
                                 <div className="fields2">
                                     <div className="input-field1">
                                         <label htmlFor="">Customer Name</label>
-                                        <select required value={formdata.Customer_Code}
-                                            onChange={(e) => setFormdata({ ...formdata, Customer_Code: e.target.value })}>
-                                            <option value="" disabled >Customer Name</option>
-                                            {getCustomer.map((cust, index) => (
-                                                <option value={cust.Customer_Code} key={index}>{cust.Customer_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getCustomer.map(cust => ({
+                                                value: cust.Customer_Code,   // adjust keys from your API
+                                                label: cust.Customer_Name
+                                            }))}
+                                            value={
+                                                formdata.Customer_Code
+                                                    ? { value: formdata.Customer_Code, label: getCustomer.find(cust => cust.Customer_Code === formdata.Customer_Code)?.Customer_Name || "" }
+                                                    : null
+                                            }
+                                            onChange={(selectedOption) => {
+                                                setFormdata({
+                                                    ...formdata,
+                                                    Customer_Code: selectedOption ? selectedOption.value : ""
+                                                })
+                                            }}
+                                            placeholder="Select Customer"
+                                            isSearchable
+                                            menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                            styles={{
+                                                menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                            }}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
                                         <label htmlFor="">Mode</label>
-                                        <select>
-                                            <option value="" disabled >Select Mode</option>
-                                            {getMode.map((mode, index) => (
-                                                <option value={mode.Mode_Code} key={index}>{mode.Mode_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getMode.map(mode => ({
+                                                value: mode.Mode_Code,   // adjust keys from your API
+                                                label: mode.Mode_Name
+                                            }))}
+                                            value={
+                                                formdata.modeCode
+                                                    ? { value: formdata.modeCode, label: getMode.find(mode => mode.Mode_Code === formdata.modeCode)?.Mode_Name || '' }
+                                                    : null
+                                            }
+                                            onChange={(selectedOption) => {
+                                                setFormdata({
+                                                    ...formdata,
+                                                    modeCode: selectedOption ? selectedOption.value : ""
+                                                })
+                                            }}
+                                            placeholder="Select Mode"
+                                            isSearchable
+                                            menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                            styles={{
+                                                menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                            }} />
                                     </div>
 
                                     <div className="input-field1">
@@ -481,12 +529,32 @@ function OdaMaster() {
 
                                     <div className="input-field1">
                                         <label htmlFor="">Method</label>
-                                        <select value={formdata.Method} required
-                                            onChange={(e) => setFormdata({ ...formdata, Method: e.target.value })}>
-                                            <option value="" disabled >Select Method</option>
-                                            <option value="Online">Online</option>
-                                            <option value="Offline">Offline</option>
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={[
+                                                { value: "Online", label: "Online" },
+                                                { value: "Offline", label: "Offline" },
+                                            ]}
+                                            value={
+                                                formdata.Method
+                                                    ? { value: formdata.Method, label: formdata.Method }
+                                                    : null
+                                            }
+                                            onChange={(selectedOption) => {
+                                                setFormdata({
+                                                    ...formdata,
+                                                    Method: selectedOption ? selectedOption.value : "",
+                                                });
+                                            }}
+                                            placeholder="Select Method"
+                                            isSearchable
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
+
                                     </div>
 
                                     {/* <div className="input-field1">
@@ -520,84 +588,89 @@ function OdaMaster() {
                                 </div>
                             </form>
 
-                            <div className='table-container1' style={{ padding: "10px" }}>
-                                <table className='table table-bordered table-sm'>
-                                    <thead className=''>
-                                        <tr>
-                                            <th scope="col">RD Number</th>
-                                            <th scope="col">KMs / KGs</th>
-                                            <th scope="col">1-20</th>
-                                            <th scope="col">21-100</th>
-                                            <th scope="col">101-300</th>
-                                            <th>Save</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className='table-body'>
-                                        <tr>
-                                            <td>
-                                                <input type="tel" placeholder="RD Number" value={tableRowData.Rd_Number}
-                                                    onChange={handleChange} name="Rd_Number" />
-                                            </td>
-                                            <td>
-                                                <input type="text" placeholder="KMs/KGs" value={tableRowData.Amount_1}
-                                                    onChange={handleChange} name="Amount_1" />
-                                            </td>
-                                            <td>
-                                                <input type="text" placeholder="1-20" value={tableRowData.Amount_2}
-                                                    onChange={handleChange} name="Amount_2" />
-                                            </td>
-                                            <td>
-                                                <input type="text" placeholder="21-100" value={tableRowData.Amount_3}
-                                                    onChange={handleChange} name="Amount_3" />
-                                            </td>
-                                            <td>
-                                                <input type="text" placeholder="101-300" value={tableRowData.Amount_4}
-                                                    onChange={handleChange} name="Amount_4" />
-                                            </td>
-                                            <td>
-                                                <button className="ok-btn" style={{ padding: "2px", fontSize: "20px" }}
-                                                    onClick={handleAddRow}>
-                                                    <i className="bi bi-plus"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className='table-container1' style={{ padding: "10px" }}>
-                                <table className='table table-bordered table-sm'>
-                                    <thead className=''>
-                                        <tr>
-                                            <th>Sr No</th>
-                                            <th scope="col" style={{ width: "100px" }}>KMs / KGs</th>
-                                            <th scope="col" style={{ width: "100px" }}>1-20</th>
-                                            <th scope="col" style={{ width: "100px" }}>21-100</th>
-                                            <th scope="col" style={{ width: "100px" }}>101-300</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className='table-body'>
-                                        {submittedData.map((data, index) => (
-                                            <tr key={index}>
-                                                <td>{index + 1}</td>
-                                                <td>{data.Amount}</td>
-                                                <td>100</td>
-                                                <td>500</td>
-                                                <td>1000</td>
+                            <div className='container2' style={{ width: "100%" }}>
+                                <div className="table-container1" style={{ width: "100%" }}>
+                                    <table className="table table-bordered table-sm" style={{ width: "97%", whiteSpace: "nowrap" }}>
+                                        <thead className=''>
+                                            <tr>
+                                                <th scope="col">RD Number</th>
+                                                <th scope="col">KMs / KGs</th>
+                                                <th scope="col">1-20</th>
+                                                <th scope="col">21-100</th>
+                                                <th scope="col">101-300</th>
+                                                <th>Save</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="pagination">
-                                <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                    {'<'}
-                                </button>
-                                <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                                <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                    {'>'}
-                                </button>
+                                        </thead>
+                                        <tbody className='table-body'>
+                                            <tr>
+                                                <td>
+                                                    <input type="tel" placeholder="RD Number" value={tableRowData.Rd_Number}
+                                                        onChange={handleChange} name="Rd_Number" style={{ textAlign: "center" }} />
+                                                </td>
+                                                <td>
+                                                    <input type="text" placeholder="KMs/KGs" value={tableRowData.km_kg}
+                                                        onChange={handleChange} name="km_kg" style={{ textAlign: "center" }} />
+                                                </td>
+                                                <td>
+                                                    <input type="text" placeholder="1-20" value={tableRowData.Amount_1}
+                                                        onChange={handleChange} name="Amount_1" style={{ textAlign: "center" }} />
+                                                </td>
+                                                <td>
+                                                    <input type="text" placeholder="21-100" value={tableRowData.Amount_2}
+                                                        onChange={handleChange} name="Amount_2" style={{ textAlign: "center" }} />
+                                                </td>
+                                                <td>
+                                                    <input type="text" placeholder="101-300" value={tableRowData.Amount_3}
+                                                        onChange={handleChange} name="Amount_3" style={{ textAlign: "center" }} />
+                                                </td>
+                                                <td style={{ display: "flex", justifyContent: "center" }}>
+                                                    <button className="ok-btn" style={{ padding: "2px", fontSize: "30px", width: "40px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                                        onClick={handleAddRow}>
+                                                        <i className="bi bi-plus" ></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {submittedData.map((data, index) => (
+                                                <tr key={index}>
+                                                    <td>{data.Rd_Number}</td>
+                                                    <td>{data.km_kg}</td>
+                                                    <td>{data.Amount_1}</td>
+                                                    <td>{data.Amount_2}</td>
+                                                    <td>{data.Amount_3}</td>
+                                                    <td>
+                                                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                            <button className='edit-btn'
+                                                                onClick={() => {
+                                                                    setTableRowData({
+                                                                        Rd_Number: data.Rd_Number,
+                                                                        km_kg: data.km_kg,
+                                                                        Amount_1: data.Amount_1,
+                                                                        Amount_2: data.Amount_2,
+                                                                        Amount_3: data.Amount_3,
+                                                                    })
+                                                                    setEditIndex(index);
+                                                                }}>
+                                                                <i className='bi bi-pen'></i>
+                                                            </button>
+                                                            <button onClick={() => {
+                                                                setSubmittedData(submittedData.filter((_, ind) => ind !== index));
+                                                                setEditIndex(null);
+                                                                setTableRowData({
+                                                                    Rd_Number: "",
+                                                                    km_kg: "",
+                                                                    Amount_1: "",
+                                                                    Amount_2: "",
+                                                                    Amount_3: ""
+                                                                })
+                                                            }}
+                                                                className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

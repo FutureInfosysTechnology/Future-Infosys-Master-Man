@@ -71,7 +71,7 @@ function CustomerRate() {
 
     const fetchCustomerRateData = async () => {
         try {
-            const response = await getApi('/Master/GetRateMaster');
+            const response = await getApi('/Master/GetRateMasterData');
             setGetCustRate(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
             setError(err);
@@ -229,6 +229,7 @@ function CustomerRate() {
             Mode_Codes: formdata.Mode_Code,
             Zone_Codes: formdata.Zone_Code,
             State_Codes: formdata.State_Code,
+            Origin_Code:formdata.Origin_Code,
             Destination_Codes: formdata.Destination_Code,
             Active_Date: formdata.Active_Date,
             Closing_Date: formdata.Closing_Date,
