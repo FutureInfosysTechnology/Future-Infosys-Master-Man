@@ -18,6 +18,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 function Booking() {
     const navigate = useNavigate();
     const location = useLocation();
+    const [skipGstCalc, setSkipGstCalc] = useState(false);
     // Utility function to format date safely
     const formatDate = (inputDate) => {
         if (!inputDate) return null; // if undefined or null
@@ -1007,8 +1008,8 @@ function Booking() {
                 if (response?.status === 1) {
                     const gst = response.Data;
                     console.log('✅ GST API Response:', gst);
-
-                    setFormData((prev) => ({
+                    if (!skipGstCalc) {
+                         setFormData((prev) => ({
                         ...prev,
                         FovChrgs: gst.Fov_Charges,
                         DocketChrgs: gst.Docket_Charges,
@@ -1026,6 +1027,8 @@ function Booking() {
                         TotalGST: gst.TotalGST,
                         TotalAmt: gst.TotalAmt
                     }));
+
+                    }
 
                     setGstData({
                         CGSTAMT: gst.CGSTAMT,
@@ -1550,7 +1553,7 @@ function Booking() {
             Rate: formData.Rate,
             FuelPer: formData.FuelPer,
             FuelCharges: formData.FuelCharges,
-            FovChrgs: formData.FovChrgs,
+            Fov_Chrgs: formData.FovChrgs,
             DocketChrgs: formData.DocketChrgs,
             ODA_Chrgs: formData.ODAChrgs,
             DeliveryChrgs: formData.DeliveryChrgs,
@@ -1674,78 +1677,79 @@ function Booking() {
                     text: "Data Fecthed Successfuly",
                     icon: 'success',
                 });
+                setSkipGstCalc(true);
                 setFecthed(docket);
                 const data = res.OrderEntry;
                 console.log(data);
 
                 setFormData(
-                    prev=>({
+                    prev => ({
                         ...prev,
-                    Location_Code: data.Location_Code,
-                    DocketNo: data.DocketNo,
-                    BookDate: data.BookDate,
-                    Customer_Code: data.Customer_Code,
-                    ConsigneeName: data.Receiver_Code,
-                    ConsigneeAdd1: data.Consignee_Add1,
-                    ConsigneeAdd2: data.Consignee_Add2,
-                    ConsigneeState: data.Consignee_State,
-                    ConsigneePin: data.Consignee_Pin,
-                    Consignee_City: data.Consignee_City,
-                    ConsigneeMob: data.Consignee_Mob,
-                    ConsigneeEmail: data.Consignee_Email,
-                    ConsigneeGST: data.Consignee_GST,
-                    ConsigneeCountry: data.Consignee_Country,
-                    Mode_Code: data.Mode_Code,
-                    OriginCode: data.Origin_code,
-                    DestinationCode: data.Destination_Code,
-                    Origin_zone: data.Origin_Zone,
-                    Zone_Name: data.Dest_Zone,
-                    DispatchDate: data.DispatchDate,
-                    DoxSpx: data.DoxSpx,
-                    RateType: data.RateType,
-                    QtyOrderEntry: data.Qty,
-                    ActualWt: data.ActualWt,
-                    VendorWt: data.VendorWt,
-                    VendorAmt: data.VendorAmt,
-                    VolumetricWt: data.VolumetricWt,
-                    ChargedWt: data.ChargedWt,
-                    RatePerkg: data.RatePerKg,
-                    Rate: data.Rate,
-                    FuelPer: data.FuelPer,
-                    FuelCharges: data.FuelCharges,
-                    FovChrgs: data.Fov_Chrgs,
-                    DocketChrgs: data.DocketChrgs,
-                    ODAChrgs: data.ODA_Chrgs,
-                    DeliveryChrgs: data.DeliveryChrgs,
-                    PackingChrgs: data.PackingChrgs,
-                    GreenChrgs: data.GreenChrgs,
-                    HamaliChrgs: data.HamaliChrgs,
-                    OtherCharges: data.OtherCharges,
-                    InsuranceChrgs: data.InsuranceChrgs,
-                    TotalAmt: data.TotalAmt,
-                    Status: data.Remark,
-                    Vendor_Code: data.Vendor_Code,
-                    VendorAwbNo: data.VendorAwbNo,
-                    WebAgent: "",
-                    ExptDateOfDelvDt: data.ExptDateOfDelvDt,
-                    Shipper_Name: data.Shipper_Code,
-                    ShipperAdd: data.ShipperAdd,
-                    ShipperAdd2: data.ShipperAdd2,
-                    ShipperAdd3: data.ShipperAdd3,
-                    ShipperPin: data.ShipperPin,
-                    ShipperPhone: data.ShipperPhone,
-                    ShipperCity: data.ShipperCity,
-                    Shipper_StateCode: data.Shipper_StateCode,
-                    Shipper_GstNo: data.Shipper_GstNo,
-                    ShipperEmail: data.ShipperEmail,
-                    UserName: data.UserName,
-                    InvoiceNo: data.InvoiceNo,
-                    InvValue: data.InvValue,
-                    EwayBill: data.EwayBill,
-                    InvDate: data.InvDate,
-                    BillParty: data.BillParty,
-                    DestName: "",
-                    BookMode: data.T_Flag,
+                        Location_Code: data.Location_Code,
+                        DocketNo: data.DocketNo,
+                        BookDate: data.BookDate,
+                        Customer_Code: data.Customer_Code,
+                        ConsigneeName: data.Receiver_Code,
+                        ConsigneeAdd1: data.Consignee_Add1,
+                        ConsigneeAdd2: data.Consignee_Add2,
+                        ConsigneeState: data.Consignee_State,
+                        ConsigneePin: data.Consignee_Pin,
+                        Consignee_City: data.Consignee_City,
+                        ConsigneeMob: data.Consignee_Mob,
+                        ConsigneeEmail: data.Consignee_Email,
+                        ConsigneeGST: data.Consignee_GST,
+                        ConsigneeCountry: data.Consignee_Country,
+                        Mode_Code: data.Mode_Code,
+                        OriginCode: data.Origin_code,
+                        DestinationCode: data.Destination_Code,
+                        Origin_zone: data.Origin_Zone,
+                        Zone_Name: data.Dest_Zone,
+                        DispatchDate: data.DispatchDate,
+                        DoxSpx: data.DoxSpx,
+                        RateType: data.RateType,
+                        QtyOrderEntry: data.Qty,
+                        ActualWt: data.ActualWt,
+                        VendorWt: data.VendorWt,
+                        VendorAmt: data.VendorAmt,
+                        VolumetricWt: data.VolumetricWt,
+                        ChargedWt: data.ChargedWt,
+                        RatePerkg: data.RatePerKg,
+                        Rate: data.Rate,
+                        FuelPer: data.FuelPer,
+                        FuelCharges: data.FuelCharges,        // ✅ matches API
+                        FovChrgs: data.Fov_Chrgs,             // ✅ underscore in API
+                        DocketChrgs: data.DocketChrgs,        // ✅ matches API
+                        ODAChrgs: data.ODA_Chrgs,             // ✅ underscore in API
+                        DeliveryChrgs: data.DeliveryChrgs,    // ✅ matches API
+                        PackingChrgs: data.PackingChrgs,      // ✅ matches API
+                        GreenChrgs: data.GreenChrgs,          // ✅ matches API
+                        HamaliChrgs: data.HamaliChrgs,        // ✅ matches API
+                        OtherCharges: data.OtherCharges,      // ✅ matches API
+                        InsuranceChrgs: data.InsuranceChrgs,  // ✅ matches API
+                        TotalAmt: data.TotalAmt,
+                        Status: data.Remark,
+                        Vendor_Code: data.Vendor_Code,
+                        VendorAwbNo: data.VendorAwbNo,
+                        WebAgent: "",
+                        ExptDateOfDelvDt: data.ExptDateOfDelvDt,
+                        Shipper_Name: data.Shipper_Code,
+                        ShipperAdd: data.ShipperAdd,
+                        ShipperAdd2: data.ShipperAdd2,
+                        ShipperAdd3: data.ShipperAdd3,
+                        ShipperPin: data.ShipperPin,
+                        ShipperPhone: data.ShipperPhone,
+                        ShipperCity: data.ShipperCity,
+                        Shipper_StateCode: data.Shipper_StateCode,
+                        Shipper_GstNo: data.Shipper_GstNo,
+                        ShipperEmail: data.ShipperEmail,
+                        UserName: data.UserName,
+                        InvoiceNo: data.InvoiceNo,
+                        InvValue: data.InvValue,
+                        EwayBill: data.EwayBill,
+                        InvDate: data.InvDate,
+                        BillParty: data.BillParty,
+                        DestName: "",
+                        BookMode: data.T_Flag,
 
                     }));
                 setRemarkData({
@@ -1883,7 +1887,7 @@ function Booking() {
                                             disabled={!toggleActive}
                                             value={formData.DocketNo}
                                             onKeyDown={(e) => {
-                                                if (toggleActive && e.key === "Enter" || toggleActive && e.key==="Tab") {
+                                                if (toggleActive && e.key === "Enter" || toggleActive && e.key === "Tab") {
                                                     handleSearch(formData.DocketNo);
                                                 }
                                             }}
@@ -2719,7 +2723,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>FOV Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="FOV Charges"
                                                     value={formData.FovChrgs}
                                                     onChange={(e) => setFormData({ ...formData, FovChrgs: e.target.value })}
@@ -2731,7 +2735,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>Docket Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="Docket Charges"
                                                     value={formData.DocketChrgs}
                                                     onChange={(e) => setFormData({ ...formData, DocketChrgs: e.target.value })}
@@ -2743,7 +2747,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>Delivery Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="Delivery Charges"
                                                     value={formData.DeliveryChrgs}
                                                     onChange={(e) => setFormData({ ...formData, DeliveryChrgs: e.target.value })}
@@ -2755,7 +2759,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>Packing Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="Packing Charges"
                                                     value={formData.PackingChrgs}
                                                     onChange={(e) => setFormData({ ...formData, PackingChrgs: e.target.value })}
@@ -2767,7 +2771,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>Green Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="Green Charges"
                                                     value={formData.GreenChrgs}
                                                     onChange={(e) => setFormData({ ...formData, GreenChrgs: e.target.value })}
@@ -2779,7 +2783,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>Hamali Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="Hamali Charges"
                                                     value={formData.HamaliChrgs}
                                                     onChange={(e) => setFormData({ ...formData, HamaliChrgs: e.target.value })}
@@ -2791,7 +2795,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>Other Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="Other Charges"
                                                     value={formData.OtherCharges}
                                                     onChange={(e) => setFormData({ ...formData, OtherCharges: e.target.value })}
@@ -2803,7 +2807,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>Insurance Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="Insurance Charges"
                                                     value={formData.InsuranceChrgs}
                                                     onChange={(e) => setFormData({ ...formData, InsuranceChrgs: e.target.value })}
@@ -2815,7 +2819,7 @@ function Booking() {
                                             <div className="input-field1">
                                                 <label>ODA Charges</label>
                                                 <input
-                                                    type="text"
+                                                    type="tel"
                                                     placeholder="ODA Charges"
                                                     value={formData.ODAChrgs}
                                                     onChange={(e) => setFormData({ ...formData, ODAChrgs: e.target.value })}
@@ -2828,14 +2832,14 @@ function Booking() {
                                                 <label>Fuel Charges</label>
                                                 <div style={{ display: "flex", flexDirection: "row" }}>
                                                     <input
-                                                        type="text"
+                                                        type="tel"
                                                         placeholder="Fuel Ch."
                                                         style={{ width: "50%", borderRight: "transparent" }}
                                                         value={formData.FuelCharges}
                                                         onChange={(e) => setFormData({ ...formData, FuelCharges: e.target.value })}
                                                     />
                                                     <input
-                                                        type="text"
+                                                        type="tel"
                                                         placeholder="Fuel %"
                                                         style={{ width: "50%", borderLeft: "transparent" }}
                                                         value={`${formData.FuelPer}%`}

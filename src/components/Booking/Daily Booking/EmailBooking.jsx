@@ -146,33 +146,115 @@ function EmailBooking() {
     doc.save("SelectedDockets.pdf");
   };
 
-  const exportSelectedToExcel = () => {
-    {/*if (selectedDockets.length === 0) {
-    Swal.fire("Error", "Please select at least one docket", "error");
+ const exportSelectedToExcel = () => {
+  if (selectedDockets.length === 0) {
+    Swal.fire("Error", "Please select at least one docket to export", "error");
     return;
   }
 
-  // filter only selected rows
-   const selectedData = EmailData.filter((row) =>
-     selectedDockets.includes(row.DocketNo)
-  );*/}
-    if (currentRows.length === 0) {
-      Swal.fire("Error", "No data available on this page to export", "error");
-      return;
+  // Filter only selected rows
+  const selectedData = EmailData.filter((row) =>
+    selectedDockets.includes(row.DocketNo)
+  );
+
+  // Format the BookDate properly
+  const formattedData = selectedData.map((row) => ({
+    ...row,
+    BookDate: row.BookDate ? new Date(row.BookDate).toLocaleDateString("en-GB") : "",
+  }));
+
+  // Create Excel workbook
+  const worksheet = XLSX.utils.json_to_sheet(formattedData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Data");
+
+  // Write to file
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+  saveAs(data, `SelectedDockets_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+};
+const sendMail = async () => {
+  if (selectedDockets.length === 0) {
+    Swal.fire("Error", "Please select at least one docket to export", "error");
+    return;
+  }
+
+  // Filter only selected rows
+  const selectedData = EmailData.filter((row) =>
+    selectedDockets.includes(row.DocketNo)
+  );
+
+  if (selectedData.length === 0) {
+    Swal.fire("Error", "No matching data found for selected dockets", "error");
+    return;
+  }
+
+  // ✅ Get the first customer's name (assuming all selected rows belong to same customer)
+  const customerName = selectedData[0].Customer_Name;
+  const customerInfo = getCustomer.find(
+    (cust) => cust.Customer_Name === customerName
+  );
+
+  // ✅ Check if email exists and is enabled
+  if (!customerInfo || !customerInfo.Email_Id || !customerInfo.Email) {
+    Swal.fire(
+      "Email Not Found",
+      `Customer "${customerName}" does not have a valid email or email option is disabled.`,
+      "warning"
+    );
+    return;
+  }
+
+  // Prepare Excel data
+  const formattedData = selectedData.map((row) => ({
+    ...row,
+    BookDate: row.BookDate
+      ? new Date(row.BookDate).toLocaleDateString("en-GB")
+      : "",
+  }));
+
+  // Create workbook
+  const worksheet = XLSX.utils.json_to_sheet(formattedData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Data");
+
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+  const fileName = `SelectedDockets_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+  // Save locally (optional)
+  saveAs(data, fileName);
+
+  // ✅ Auto-send email if valid
+  try {
+    const fromDate = formatDate(formData.fromdt);
+    const toDate = formatDate(formData.todt);
+
+    const response = await fetch(
+      `http://localhost:3200/Master/sendBookingExcelEmail?CustomerName=${encodeURIComponent(
+        customerName
+      )}&fromdt=${fromDate}&todt=${toDate}&recipientEmail=${
+        customerInfo.Email_Id
+      }&fileType=excel`
+    );
+
+    const result = await response.json();
+
+    if (result.status === 1) {
+      Swal.fire(
+        "Success",
+        `Excel file sent successfully to ${customerInfo.Email_Id}`,
+        "success"
+      );
+    } else {
+      Swal.fire("Error", result.message || "Email sending failed", "error");
     }
-
-    const formattedData = currentRows.map(row => ({
-      ...row,
-      BookDate: row.BookDate ? new Date(row.BookDate).toLocaleDateString("en-GB") : "",
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "CurrentPageData");
-
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, `CurrentPageData_Page${currentPage}.xlsx`);
-  };
+  } catch (error) {
+    console.error("Email send failed:", error);
+    Swal.fire("Error", "Failed to send email. Please check the server.", "error");
+  }
+};
 
   const handleSelectAll = () => {
     setSelectedDockets(
@@ -272,6 +354,7 @@ function EmailBooking() {
                 type="button"
                 className="btn btn-info btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
               // 🔹 send excel by default
+              onClick={sendMail}
               >
                 <MdEmail size={10} /><span style={{ marginRight: "2px" }}>Mail</span>
               </button>
