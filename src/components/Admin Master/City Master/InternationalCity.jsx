@@ -30,8 +30,8 @@ function InternationalCity() {
         countryCode: '',
         stateCode: '',
         destination: '',
-        delivery: '',
-        pod: '',
+        delivery: 0,
+        pod: 0,
         product: '',
         zoneCode: ''
     })
@@ -133,17 +133,22 @@ function InternationalCity() {
         };
         fetchData();
     }, []);
-
-
-    const handleGenerateCode = () => {
-        const newCode = `${Math.floor(Math.random() * 1000)}`;
-        setAddData({ ...addData, cityCode: newCode });
-    };
-
-
-    const handleSaveCity = async (e) => {
+ const handleSaveCity = async (e) => {
         e.preventDefault();
-
+        const errors = [];
+        if (!addData.cityCode || !addData.cityName) errors.push("City code && Name are required");
+        if (!addData.countryCode) errors.push("Country is required");
+        if (!addData.stateCode) errors.push("State is required");
+        if (!addData.zoneCode) errors.push("Zone is required");
+        if (!addData.product) errors.push("Product Type is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             cityCode: addData.cityCode,
             cityName: addData.cityName,
@@ -166,15 +171,69 @@ function InternationalCity() {
                     stateCode: '',
                     destination: '',
                     delivery: '',
-                    pod: '',
-                    product: '',
+                    delivery: 0,
+                    pod: 0,
                     zoneCode: ''
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
                 await fetchInternationalData();
             } else {
-                Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
+                Swal.fire('Error!', response.message || 'Your changes have not been saved .', 'error');
+            }
+        } catch (err) {
+            console.error('Save Error:', err);
+            Swal.fire('Error', 'Failed to add International City data', 'error');
+        }
+    };
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        const errors = [];
+        if (!addData.cityCode || !addData.cityName) errors.push("City code && Name are required");
+        if (!addData.countryCode) errors.push("Country is required");
+        if (!addData.stateCode) errors.push("State is required");
+        if (!addData.zoneCode) errors.push("Zone is required");
+        if (!addData.product) errors.push("Product Type is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
+        const requestBody = {
+            CityCode: addData.cityCode,
+            CityName: addData.cityName,
+            CountryCode: addData.countryCode,
+            StateCode: addData.stateCode,
+            ManifestDestination: addData.destination,
+            DestinationDHours: addData.delivery,
+            DestinationPHours: addData.pod,
+            ProductType: addData.product,
+            ZoneCode: addData.zoneCode
+        }
+        try {
+            const response = await postApi('/Master/updateinternational', requestBody, 'POST');
+            if (response.status === 1) {
+
+                setInternational(international.map((city) => city.City_Code === addData.cityCode ? response.Data : city));
+                setAddData({
+                    cityCode: '',
+                    cityName: '',
+                    countryCode: '',
+                    stateCode: '',
+                    destination: '',
+                    delivery: '',
+                    delivery: 0,
+                    pod: 0,
+                    zoneCode: ''
+                });
+                Swal.fire('Updated!', response.message || 'Your changes have been updated.', 'success');
+                setModalIsOpen(false);
+                await fetchInternationalData();
+            } else {
+                Swal.fire('Error!', response.message || 'Your changes have not been updated.', 'error');
             }
         } catch (err) {
             console.error('Save Error:', err);
@@ -255,8 +314,8 @@ function InternationalCity() {
                                 stateCode: '',
                                 destination: '',
                                 delivery: '',
-                                pod: '',
-                                product: '',
+                                delivery: 0,
+                                pod: 0,
                                 zoneCode: ''
                             });
                         }}>
@@ -322,25 +381,25 @@ function InternationalCity() {
                                                 }}
                                             >
                                                 <button className='edit-btn'
-                                                onClick={() => {
-                                                    setReadOnly(true);
+                                                    onClick={() => {
+                                                        setReadOnly(true);
+                                                        setOpenRow(null);
+                                                        setAddData({
+                                                            cityCode: city.City_Code,
+                                                            cityName: city.City_Name,
+                                                            zoneCode: city.Zone_Code,
+                                                            stateCode: city.State_Code,
+                                                            countryCode: city.Country_Code,
+                                                            destination: city.Manifest_Destination,
+                                                            delivery: city.Destination_DHours,
+                                                            pod: city.Destination_PHours,
+                                                            product:city.Product_Type,
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}><i className='bi bi-pen'></i></button>
+                                                <button className='edit-btn' onClick={() => {
                                                     setOpenRow(null);
-                                                    setAddData({
-                                                        cityCode: city.City_Code,
-                                                        cityName: city.City_Name,
-                                                        zoneCode: city.Zone_Code,
-                                                        stateCode: city.State_Code,
-                                                        countryCode: city.Country_Name,
-                                                        destination: city.Manifest_Destination,
-                                                        delivery: city.Destination_DHours,
-                                                        pod: city.Destination_PHours,
-                                                        product: '',
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}><i className='bi bi-pen'></i></button>
-                                            <button className='edit-btn' onClick={() => {
-                                                setOpenRow(null);
-                                                handleDeleteCity(city.City_Code);
+                                                    handleDeleteCity(city.City_Code);
                                                 }}><i className='bi bi-trash'></i></button>
                                             </div>
                                         )}
@@ -393,7 +452,15 @@ function InternationalCity() {
 
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                    className="custom-modal-receiver" contentLabel="Modal">
+                    className="custom-modal-receiver" contentLabel="Modal"
+                    style={{
+                        content: {
+                            width: '90%',
+                            top: '50%',             // Center vertically
+                            left: '50%',
+                            whiteSpace: "nowrap"
+                        }
+                    }}>
                     <div className="custom-modal-content">
                         <div className="header-tittle">
                             <header>InternationalCity Master</header>
@@ -413,7 +480,7 @@ function InternationalCity() {
                                     <div className="input-field3">
                                         <label htmlFor="">City Name</label>
                                         <input type="text" placeholder="Enter City Name" value={addData.cityName}
-                                            onChange={(e) => setAddData({ ...addData, cityName: e.target.value })} required />
+                                            onChange={(e) => setAddData({ ...addData, cityName: e.target.value })}/>
                                     </div>
 
                                     <div className="input-field3">
@@ -563,13 +630,13 @@ function InternationalCity() {
                                     <div className="input-field3">
                                         <label htmlFor="">Delivery Hours</label>
                                         <input type="text" placeholder="Enter Eelivery Hrs" value={addData.delivery}
-                                            onChange={(e) => setAddData({ ...addData, delivery: e.target.value })} required />
+                                            onChange={(e) => setAddData({ ...addData, delivery: e.target.value })} />
                                     </div>
 
                                     <div className="input-field3">
                                         <label htmlFor="">POD Hours</label>
                                         <input type="text" placeholder="Enter POD Hrs" value={addData.pod}
-                                            onChange={(e) => setAddData({ ...addData, pod: e.target.value })} required />
+                                            onChange={(e) => setAddData({ ...addData, pod: e.target.value })} />
                                     </div>
 
                                     <div className="input-field3">
@@ -603,7 +670,7 @@ function InternationalCity() {
                                 </div>
                                 <div className='bottom-buttons'>
                                     {!readOnly && (<button type='submit' className='ok-btn'>Submit</button>)}
-                                    {readOnly && (<button type='button' className='ok-btn'>Update</button>)}
+                                    {readOnly && (<button type='button' className='ok-btn' onClick={handleUpdate}>Update</button>)}
                                     <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                 </div>
                             </form>

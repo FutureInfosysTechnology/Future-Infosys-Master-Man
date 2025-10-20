@@ -191,22 +191,7 @@ function Sidebar1() {
                                 <i className="bi bi-printer"></i>
                                 <span>Docket Print</span>
                             </Link>
-                        </li>
-
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
-                            <Link to="/secondinvoice" className="link">
-                                <i className="bi bi-receipt-cutoff"></i>
-                                <span>Second Invoice</span>
-                            </Link>
-                        </li>
-
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
-                            <Link to="/performanceinvoice" className="link">
-                                <i className="bi bi-receipt-cutoff"></i>
-                                <span>Performance Invoice</span>
-                            </Link>
-                        </li>
-                        
+                        </li>                        
                     </ul>
                 </li>
 
@@ -235,7 +220,7 @@ function Sidebar1() {
                     <a href="#" className="nav-link collapsed"
                         onClick={() => toggleMenu('laiser')}>
                         <i className="bi bi-cash-coin"></i>
-                        <span>Laiser</span>
+                        <span>Laiser / Payment</span>
                         <i className={`bi ${openMenu === 'laiser' ? 'bi-chevron-up' : 'bi-chevron-down'} ms-auto`}></i>
                     </a>
 
@@ -245,7 +230,7 @@ function Sidebar1() {
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/laiser" className="link">
                                 <i className="bi bi-cash-stack"></i>
-                                <span>Laiser</span>
+                                <span>Laiser / Payment</span>
                             </Link>
                         </li>
                     </ul>

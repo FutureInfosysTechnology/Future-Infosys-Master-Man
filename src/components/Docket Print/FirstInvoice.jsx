@@ -38,7 +38,7 @@ function FirstInvoice() {
     const [loading, setLoading] = useState(true);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [isFovChecked, setIsFovChecked] = useState(false);
-    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [isConsigChecked, setIsConsigChecked] = useState(false);
     const [isDocketChecked, setIsDocketChecked] = useState(false);
     const [isDeliveryChecked, setIsDeliveryChecked] = useState(false);
     const [isPackingChecked, setIsPackingChecked] = useState(false);
@@ -56,7 +56,7 @@ function FirstInvoice() {
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("toggelChargs"));
         if (savedState) {
-            setIsAllChecked(savedState.isAllChecked || false);
+            setIsConsigChecked(savedState.isConsigChecked || false)
             setIsFovChecked(savedState.isFovChecked || false);
             setIsDocketChecked(savedState.isDocketChecked || false);
             setIsDeliveryChecked(savedState.isDeliveryChecked || false);
@@ -350,6 +350,7 @@ function FirstInvoice() {
                                                     <th style={headerCellStyle}>Sr No</th>
                                                     <th style={headerCellStyle}>Docket No</th>
                                                     <th style={headerCellStyle}>Date</th>
+                                                    {isConsigChecked && <th style={headerCellStyle}>Consignee Name</th>}
                                                     <th style={headerCellStyle}>Origin</th>
                                                     <th style={headerCellStyle}>Destination</th>
                                                     <th style={headerCellStyle}>Mode</th>
@@ -380,6 +381,7 @@ function FirstInvoice() {
                                                             <td style={cellStyle}>{index + 1}</td>
                                                             <td style={cellStyle}>{invoice?.DocketNo}</td>
                                                             <td style={cellStyle}>{invoice?.BillDate[0]}</td>
+                                                            {isConsigChecked && <td  style={cellStyle}>{invoice?.consigneeName}</td>}
                                                             <td style={cellStyle}>{invoice?.fromDest}</td>
                                                             <td style={cellStyle}>{invoice?.toDest}</td>
                                                             <td style={cellStyle}>{invoice?.ModeName}</td>
@@ -389,7 +391,6 @@ function FirstInvoice() {
                                                             {isCharedChecked && <td style={cellStyle}>{invoice?.ChargedWt}</td>}
                                                             {isRateChecked && <td style={cellStyle}>{invoice?.RatePerkg}</td>}
                                                             <td style={cellStyle}>{invoice?.Rate}</td>
-
                                                             {isDocketChecked && <td style={cellStyle}>{invoice?.DocketChrgs}</td>}
                                                             {isHamaliChecked && <td style={cellStyle}>{invoice?.HamaliChrgs}</td>}
                                                             {isDeliveryChecked && <td style={cellStyle}>{invoice?.DeliveryChrgs}</td>}

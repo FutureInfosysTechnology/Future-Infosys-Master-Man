@@ -54,6 +54,7 @@ function ViewInvoice() {
     });
     const [isFovChecked, setIsFovChecked] = useState(false);
     const [isTermChecked, setIsTermChecked] = useState(false);
+    const [isConsigChecked, setIsConsigChecked] = useState(false);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [isDocketChecked, setIsDocketChecked] = useState(false);
     const [isDeliveryChecked, setIsDeliveryChecked] = useState(false);
@@ -112,6 +113,7 @@ function ViewInvoice() {
             isActualChecked: newValue,
             isVolChecked: newValue,
             isRateChecked: newValue,
+            isConsigChecked:newValue,
         };
         // Update React states
         setIsAllChecked(newValue);
@@ -130,6 +132,7 @@ function ViewInvoice() {
         setIsActualChecked(newValue);
         setIsVolChecked(newValue);
         setIsRateChecked(newValue);
+        setIsConsigChecked(newValue);
         // Save to localStorage
         localStorage.setItem("toggelChargs", JSON.stringify(allFields));
     };
@@ -150,6 +153,7 @@ function ViewInvoice() {
             isCharedChecked,
             isVolChecked,
             isRateChecked,
+            isConsigChecked,
         };
 
         // Check if all are true
@@ -172,6 +176,7 @@ function ViewInvoice() {
         isCharedChecked,
         isVolChecked,
         isRateChecked,
+        isConsigChecked,
     ]);
 
     const handleFovChange = (e) => {
@@ -183,6 +188,11 @@ function ViewInvoice() {
     const handleTermChange = (e) => {
         setIsTermChecked(e.target.checked);
         handleCheckboxChange('isTermChecked', e.target.checked);
+    }
+
+    const handleConsigChange = (e) => {
+        setIsConsigChecked(e.target.checked);
+        handleCheckboxChange('isConsigChecked', e.target.checked);
     }
 
     const handleDocketChange = (e) => {
@@ -273,11 +283,11 @@ function ViewInvoice() {
             setIsInsuranceChecked(savedState.isInsuranceChecked || false);
             setIsODAChecked(savedState.isODAChecked || false);
             setIsFuelChecked(savedState.isFuelChecked || false);
-
             setIsRateChecked(savedState.isRateChecked || false);
             setIsActualChecked(savedState.isActualChecked || false);
             setIsVolChecked(savedState.isVolChecked || false);
             setIsCharedChecked(savedState.isCharedChecked || false);
+            setIsConsigChecked(savedState.isConsigChecked || false)
 
         }
         fetchData('/Master/getCustomerdata', setGetCustomer);
@@ -613,7 +623,7 @@ function ViewInvoice() {
                                                 onChange={handleFovChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Fov Charges</label>
+                                                Fov_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -622,7 +632,7 @@ function ViewInvoice() {
                                                 onChange={handleDocketChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="docket" id="docket" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Docket Charges</label>
+                                                Docket_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -631,7 +641,7 @@ function ViewInvoice() {
                                                 onChange={handleDeliveryChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="delivery" id="delivery" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Delivery Charges</label>
+                                                Delivery_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -640,7 +650,7 @@ function ViewInvoice() {
                                                 onChange={handlePackingChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="packing" id="packing" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Packing Charges</label>
+                                                Packing_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -649,7 +659,7 @@ function ViewInvoice() {
                                                 onChange={handleGreenChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="green" id="green" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Green Charges</label>
+                                                Green_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -658,7 +668,7 @@ function ViewInvoice() {
                                                 onChange={handleHamaliChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="hamali" id="hamali" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Hamali Charges</label>
+                                                Hamali_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -667,7 +677,7 @@ function ViewInvoice() {
                                                 onChange={handleOtherChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="other" id="other" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Other Charges</label>
+                                                Other_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -676,7 +686,7 @@ function ViewInvoice() {
                                                 onChange={handleInsuranceChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="insurance" id="insurance" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Insurance Charges</label>
+                                                Insurance_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -685,7 +695,7 @@ function ViewInvoice() {
                                                 onChange={handleODAChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="oda" id="oda" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                ODA Charges</label>
+                                                ODA_Charges</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -694,7 +704,7 @@ function ViewInvoice() {
                                                 onChange={handleFuelChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Fuel Charges</label>
+                                                Fuel_Charges</label>
                                         </div>
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
@@ -702,7 +712,7 @@ function ViewInvoice() {
                                                 onChange={handleActualChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Actual Weight</label>
+                                                Actual_Weight</label>
                                         </div>
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
@@ -710,7 +720,7 @@ function ViewInvoice() {
                                                 onChange={handleCharedChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Charged Weight</label>
+                                                Charged_Weight</label>
                                         </div>
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
@@ -719,7 +729,7 @@ function ViewInvoice() {
                                                 onChange={handleVolChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Volumetric Weight</label>
+                                                Volumetric_Weight</label>
                                         </div>
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
@@ -727,7 +737,15 @@ function ViewInvoice() {
                                                 onChange={handleRateChange}
                                                 style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Rate Per Kg</label>
+                                                Rate_Per_Kg</label>
+                                        </div>
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isConsigChecked}
+                                                onChange={handleConsigChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Consignee_Name</label>
                                         </div>
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"

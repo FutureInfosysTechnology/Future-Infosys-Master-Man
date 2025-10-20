@@ -165,7 +165,20 @@ function DomesticCity() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-
+         const errors = [];
+                if (!addCity.cityCode || !addCity.cityName) errors.push("City code && Name are required");
+                if (!addCity.countryCode) errors.push("Country is required");
+                if (!addCity.stateCode) errors.push("State is required");
+                if (!addCity.zoneCode) errors.push("Zone is required");
+                if (!addCity.product) errors.push("Product Type is required");
+                if (errors.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: errors.map(err => `<div>${err}</div>`).join(''),
+                    });
+                    return;
+                }
         const requestBody = {
             CityCode: addCity.cityCode,
             CityName: addCity.cityName,
@@ -193,7 +206,7 @@ function DomesticCity() {
                     product: '',
                     zoneCode: ''
                 });
-                Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
+                Swal.fire('Updated!', response.message || 'Your changes have been updated.', 'success');
                 setModalIsOpen(false);
                 await fetchCityData();
             } else {
@@ -355,10 +368,11 @@ function DomesticCity() {
                                                         cityName: city.City_Name,
                                                         zoneCode: city.Zone_Code,
                                                         stateCode: city.State_Code,
-                                                        countryCode: city.Country_Name,
+                                                        countryCode: city.Country_Code,
                                                         destination: city.Manifest_Destination,
                                                         delivery: city.Destination_DHours,
-                                                        pod: city.Destination_PHours
+                                                        pod: city.Destination_PHours,
+                                                        product:city.Product_Type,
                                                     });
                                                     setModalIsOpen(true);
                                                 }}>
@@ -419,7 +433,15 @@ function DomesticCity() {
 
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                    className="custom-modal-receiver" contentLabel="Modal">
+                    className="custom-modal-receiver" contentLabel="Modal" 
+                     style={{
+                        content: {
+                            width: '90%',
+                            top: '50%',             // Center vertically
+                            left: '50%',
+                            whiteSpace: "nowrap"
+                        }
+                    }}>
                     <div className="custom-modal-content">
                         <div className="header-tittle">
                             <header>Domestic City Master</header>
@@ -547,8 +569,8 @@ function DomesticCity() {
                                             className="blue-selectbooking"
                                             classNamePrefix="blue-selectbooking"
                                             options={getCIty.map((city) => ({
-                                                value: city.City_Code,
-                                                label: city.City_Name,
+                                                value: city?.City_Code,
+                                                label: city?.City_Name,
                                             }))}
                                             value={
                                                 addCity.destination
@@ -556,7 +578,7 @@ function DomesticCity() {
                                                         value: addCity.destination,
                                                         label:
                                                             getCIty.find(
-                                                                (c) => c.City_Code === addCity.destination
+                                                                (c) => c?.City_Code === addCity.destination
                                                             )?.City_Name || "",
                                                     }
                                                     : null

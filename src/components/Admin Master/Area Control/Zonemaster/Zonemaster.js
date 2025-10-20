@@ -116,13 +116,6 @@ const ZoneMaster = () => {
     }
   };
 
-
-  const handleGenerateCode = () => {
-    const newCode = `${Math.floor(Math.random() * 1000)}`;
-    setZoneData({ ...zoneData, zoneCode: newCode });
-  };
-
-
   const filteredZones = zones.filter((zone) =>
     (zone && zone.Zone_Code && zone.Zone_Code?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
     (zone && zone.Zone_Name && zone.Zone_Name?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
@@ -251,7 +244,7 @@ const ZoneMaster = () => {
                             setIsEditMode(true);
                             setOpenRow(null);
                             setZoneData({
-                              zoneCode: zone.Zone_Code,
+                              zoneCode: zone.Zone_Code?.trim(),
                               zoneName: zone.Zone_Name
                             });
                             setModalIsOpen(true);
@@ -320,15 +313,8 @@ const ZoneMaster = () => {
                       <label htmlFor="">Zone Code </label>
                       <input type='tel' value={zoneData.zoneCode}
                         onChange={(e) => setZoneData({ ...zoneData, zoneCode: e.target.value })}
-                        placeholder='Enter Zone Code' required readOnly={isEditMode} />
+                        placeholder='Enter Zone Code' required/>
                     </div>
-
-                    {!isEditMode && (
-                      <div className="input-field1">
-                        <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
-                          onClick={handleGenerateCode}>Generate Code</button>
-                      </div>
-                    )}
 
                     <div className="input-field1">
                       <label htmlFor="">Zone Name</label>
