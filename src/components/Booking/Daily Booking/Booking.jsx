@@ -14,10 +14,14 @@ import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
 import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
+import { flushSync } from "react-dom";
 
 function Booking() {
     const navigate = useNavigate();
     const location = useLocation();
+    const [inputValue, setInputValue] = useState("");
+    const [inputValue1, setInputValue1] = useState("");
+
     const [skipGstCalc, setSkipGstCalc] = useState(false);
     // Utility function to format date safely
     const formatDate = (inputDate) => {
@@ -97,7 +101,6 @@ function Booking() {
         const today = new Date();
         return today;
     };
-
     // ===============================Enter Block =============================
     const handleKeyDown = (e) => {
         // Prevent Enter key from submitting or opening anything unintentionally
@@ -144,6 +147,8 @@ function Booking() {
         Rate: 0,
         FuelPer: 0,
         FuelCharges: 0,
+        TotalGST: 0,
+        totalgstPer: 0,
         FovChrgs: 0,
         DocketChrgs: 0,
         ODAChrgs: 0,
@@ -271,7 +276,18 @@ function Booking() {
         ActualWt: 0,
         ChargeWt: 0
     })
-
+    useEffect(() => {
+        if (formData.freight) {
+            const freight = parseFloat(formData.freight) || 0;
+            const fuelPer = parseFloat(formData.FuelPer) || 0;
+            const fuel = (freight * fuelPer) / 100;
+            console.log("fuel", fuel);
+            setFormData((prev) => ({
+                ...prev,
+                FuelCharges: fuel.toFixed(2), // optional, rounds to 2 decimals
+            }));
+        }
+    }, [formData.freight])
     const handleClick = () => {
         console.log("Button clicked aaakkkka");
     };
@@ -461,6 +477,61 @@ function Booking() {
 
 
     const onToggle = () => setToggleActive(!toggleActive);
+    useEffect(() => {
+        // Parse all numeric fields safely
+        const freight = parseFloat(formData.Rate) || 0;
+        const fov = parseFloat(formData.FovChrgs) || 0;
+        const docket = parseFloat(formData.DocketChrgs) || 0;
+        const delivery = parseFloat(formData.DeliveryChrgs) || 0;
+        const packing = parseFloat(formData.PackingChrgs) || 0;
+        const green = parseFloat(formData.GreenChrgs) || 0;
+        const hamali = parseFloat(formData.HamaliChrgs) || 0;
+        const other = parseFloat(formData.OtherCharges) || 0;
+        const insurance = parseFloat(formData.InsuranceChrgs) || 0;
+        const oda = parseFloat(formData.ODAChrgs) || 0;
+        const fuel = parseFloat(formData.FuelCharges) || 0;
+
+        // Sum up all charge components + GST
+        let total =
+            freight +
+            fov +
+            docket +
+            delivery +
+            packing +
+            green +
+            hamali +
+            other +
+            insurance +
+            oda +
+            fuel;
+
+        if (total > 0 && formData.totalgstPer > 0) {
+            const gstAmount = (total * parseFloat(formData.totalgstPer)) / 100;
+            total = total + gstAmount;
+            setGstData((prev) => ({
+                ...prev,
+                TotalGST:gstAmount.toFixed(2),
+                GSTPer:total.toFixed(2), 
+            }));
+            setFormData((prev) => ({
+                ...prev,
+                TotalGST: gstAmount.toFixed(2),
+                TotalAmt: total.toFixed(2), // two decimal points
+            }));
+        }
+    }, [
+        formData.Rate,
+        formData.FovChrgs,
+        formData.DocketChrgs,
+        formData.DeliveryChrgs,
+        formData.PackingChrgs,
+        formData.GreenChrgs,
+        formData.HamaliChrgs,
+        formData.OtherCharges,
+        formData.InsuranceChrgs,
+        formData.ODAChrgs,
+        formData.FuelCharges,
+    ]);
 
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("bookingState"));
@@ -997,44 +1068,71 @@ function Booking() {
         }
     };
 
+    // Keep input synced with selected value
+    // 👈 formData.Shipper_Name हटा दिया
 
+
+
+    // ✅ Keep only this
+    const handleShipperChange = (selectedOption) => {
+        if (selectedOption) {
+            // ✅ Immediately show the label (for existing or created options)
+            setFormData((prev) => ({
+                ...prev,
+                Shipper_Name: selectedOption.value,
+                ShipperAdd: selectedOption.shipper_Add1,
+                ShipperAdd2: selectedOption.shipper_Add2,
+                ShipperAdd3: selectedOption.shipper_Add3,
+                ShipperCity: selectedOption.City_Code,
+                Shipper_StateCode: selectedOption.State_Code,
+                Shipper_GstNo: selectedOption.GSTNo,
+                ShipperPin: selectedOption.shipper_Pin,
+                ShipperPhone: selectedOption.shipper_Mob,
+                ShipperEmail: selectedOption.shipper_Email,
+            }));
+        } else {
+            setFormData((prev) => ({ ...prev, Shipper_Name: "" }));
+        }
+        setInputValue("");
+    };
 
     useEffect(() => {
-        const calculateGstDetails = async (Customer_Code, Mode_Code, Rate) => {
+        const calculateGstDetails = async (Customer_Code, Mode_Code, Rate, ODA_Chrgs, T_Flag) => {
             try {
                 const response = await getApi(
-                    `/Booking/calculateGST?Customer_Code=${Customer_Code}&Mode_Code=${Mode_Code}&Rate=${Rate}`
+                    `/Booking/calculateGST?Customer_Code=${Customer_Code}&Mode_Code=${Mode_Code}&Rate=${Rate}&ODA_Chrgs=${ODA_Chrgs}&T_Flag=${T_Flag}`
                 );
+
                 if (response?.status === 1) {
                     const gst = response.Data;
                     console.log('✅ GST API Response:', gst);
-                    if (!skipGstCalc) {
-                         setFormData((prev) => ({
-                        ...prev,
-                        FovChrgs: gst.Fov_Charges,
-                        DocketChrgs: gst.Docket_Charges,
-                        DeliveryChrgs: gst.Delivery_Charges,
-                        PackingChrgs: gst.Packing_Charges,
-                        GreenChrgs: gst.Green_Charges,
-                        HamaliChrgs: gst.Hamali_Charges,
-                        OtherCharges: gst.Other_Charges,
-                        InsuranceChrgs: gst.Insurance_Charges,
-                        FuelCharges: gst.Fuel_Charges,
-                        FuelPer: gst.CustomerFuel,
-                        CGST: gst.CGSTAMT,
-                        SGST: gst.SGSTAMT,
-                        IGST: gst.IGSTAMT,
-                        TotalGST: gst.TotalGST,
-                        TotalAmt: gst.TotalAmt
-                    }));
 
+                    if (!skipGstCalc) {
+                        setFormData((prev) => ({
+                            ...prev,
+                            FovChrgs: gst.Fov_Charges,
+                            DocketChrgs: gst.Docket_Charges,
+                            DeliveryChrgs: gst.Delivery_Charges,
+                            PackingChrgs: gst.Packing_Charges,
+                            GreenChrgs: gst.Green_Charges,
+                            HamaliChrgs: gst.Hamali_Charges,
+                            OtherCharges: gst.Other_Charges,
+                            InsuranceChrgs: gst.Insurance_Charges,
+                            FuelCharges: gst.Fuel_Charges,
+                            FuelPer: gst.CustomerFuel,
+                            CGST: gst.CGSTAMT,
+                            SGST: gst.SGSTAMT,
+                            IGST: gst.IGSTAMT,
+                            TotalGST: gst.TotalGST,
+                            TotalAmt: gst.TotalAmt
+                        }));
                     }
 
                     setGstData({
                         CGSTAMT: gst.CGSTAMT,
                         SGSTAMT: gst.SGSTAMT,
                         IGSTAMT: gst.IGSTAMT,
-                        TotalGST: gst.TotalGST,
+                        TotalGST: gst.TotalGSwT,
                         CGSTPer: gst.CGSTPer,
                         SGSTPer: gst.SGSTPer,
                         IGSTPer: gst.IGSTPer,
@@ -1045,10 +1143,28 @@ function Booking() {
                 console.error("❌ Error in GST API:", error);
             }
         };
-        if (formData.Customer_Code && formData.Mode_Code && formData.Rate) {
-            calculateGstDetails(formData.Customer_Code, formData.Mode_Code, formData.Rate);
+        console.log(formData.Customer_Code,
+            formData.Mode_Code,
+            formData.Rate,
+            formData.ODAChrgs,
+            formData.BookMode)
+        if (formData.Customer_Code && formData.Mode_Code && formData.Rate && formData.BookMode) {
+            calculateGstDetails(
+                formData.Customer_Code,
+                formData.Mode_Code,
+                formData.Rate,
+                formData.ODAChrgs,
+                formData.BookMode
+            );
         }
-    }, [formData.Customer_Code, formData.Mode_Code, formData.Rate]);
+    }, [
+        formData.Customer_Code,
+        formData.Mode_Code,
+        formData.Rate,
+        formData.ODAChrgs,
+        formData.BookMode
+    ]);
+
     useEffect(() => {
         const getVolum = async (Customer_Code, Mode_Code) => {
             try {
@@ -1154,6 +1270,14 @@ function Booking() {
         const freightAmount = highestWeight * ratePerKg;
 
         if (freightAmount > 0) {
+            const fuelPer = parseFloat(formData.FuelPer);
+            if (fuelPer > 0) {
+                const fuel = (freightAmount * fuelPer) / 100;
+                setFormData((prev) => ({
+                    ...prev,
+                    FuelCharges: fuel.toFixed(2),
+                }));
+            }
             setFormData((prev) => ({
                 ...prev,
                 Rate: freightAmount.toFixed(2)
@@ -1859,7 +1983,7 @@ function Booking() {
     //     value: receiver.Receiver_Code
     // }));
 
-    const allCustomerOptions = getCustomerdata?.length > 0 ? getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString(), Booking_Type: cust.Booking_Type })) : null;
+    const allCustomerOptions = getCustomerdata?.length > 0 ? getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString(), Booking_Type: cust.Booking_Type, CustomerGst: cust.CustomerGst, CustomerFuel: cust.CustomerFuel })) : null;
 
 
 
@@ -1940,6 +2064,8 @@ function Booking() {
                                                         Customer_Code: selectedOption.value,
                                                         Customer_Name: selectedOption.label,
                                                         BookMode: selectedOption.Booking_Type,
+                                                        totalgstPer: Number(selectedOption.CustomerGst),
+                                                        FuelPer: Number(selectedOption.CustomerFuel),
                                                     }));
                                                 }}
                                                 placeholder="Select Customer"
@@ -1974,38 +2100,35 @@ function Booking() {
                                                     classNamePrefix="blue-selectbooking"
                                                     options={allShipperOption}
                                                     value={
-                                                        formData.Shipper_Name ?
-                                                            {
-                                                                value: formData.Shipper_Name,
-                                                                label:
-                                                                    allShipperOption.find(opt => opt.value === formData.Shipper_Name)
-                                                                        ?.label || formData.Shipper_Name,
-                                                            }
+                                                        formData.Shipper_Name
+                                                            ? allShipperOption.find((opt) => opt.value === formData.Shipper_Name) ||
+                                                            { value: formData.Shipper_Name, label: inputValue || formData.Shipper_Name }
                                                             : null
                                                     }
-                                                    onChange={(selectedOption) => {
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            Shipper_Name: selectedOption.value,
-                                                            ShipperAdd: selectedOption.shipper_Add1,
-                                                            ShipperAdd2: selectedOption.shipper_Add2,
-                                                            ShipperAdd3: selectedOption.shipper_Add3,
-                                                            ShipperCity: selectedOption.City_Code,
-                                                            Shipper_StateCode: selectedOption.State_Code,
-                                                            Shipper_GstNo: selectedOption.GSTNo,
-                                                            ShipperPin: selectedOption.shipper_Pin,
-                                                            ShipperPhone: selectedOption.shipper_Mob,
-                                                            ShipperEmail: selectedOption.shipper_Email,
-                                                        }));
+                                                    inputValue={inputValue}
+                                                    onInputChange={(val, meta) => {
+                                                        if (meta.action === "input-change") {
+                                                            // ✅ Immediately reflect what user is typing
+                                                            setInputValue(val);
+
+                                                            // ✅ Also update formData live so label and value stay in sync
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                Shipper_Name: val,
+                                                            }));
+                                                        }
                                                     }}
-                                                    placeholder="Select Shipper Name"
+                                                    onChange={handleShipperChange}
+                                                    isClearable
                                                     isSearchable
+                                                    formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                                                    placeholder="Select Shipper Name"
                                                     menuPortalTarget={document.body}
                                                     styles={{
-                                                        menuPortal: base => ({ ...base, zIndex: 9999 })
+                                                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                                                     }}
-                                                    formatCreateLabel={(inputValue) => inputValue}
                                                 />
+
                                             </div>
                                         </div>
 
@@ -2314,7 +2437,18 @@ function Booking() {
                                                     />
                                                 </div>
 
-                                                <div className="input-field1 mt-2">
+                                                <div className="input-field3">
+                                                    <label className="form-label">Vendor Weight</label>
+                                                    <input
+                                                        type="tel"
+                                                        className="form-control"
+                                                        placeholder="V_Weight"
+                                                        value={formData.VendorWt}
+                                                        onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
+                                                    />
+                                                </div>
+
+                                                <div className="input-field2 mt-2">
                                                     <label>&nbsp;</label>
                                                     <button
                                                         type="button"
@@ -2360,38 +2494,56 @@ function Booking() {
                                                     options={allReceiverOption}
                                                     value={
                                                         formData.ConsigneeName
-                                                            ? {
-                                                                value: formData.ConsigneeName,
-                                                                label:
-                                                                    allReceiverOption.find(
-                                                                        (opt) => opt.value === formData.ConsigneeName
-                                                                    )?.label || formData.ConsigneeName, // fallback to typed text
-                                                            }
+                                                            ? allReceiverOption.find((opt) => opt.value === formData.ConsigneeName) ||
+                                                            { value: formData.ConsigneeName, label: inputValue || formData.ConsigneeName }
                                                             : null
                                                     }
                                                     onChange={(selectedOption) => {
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            ConsigneeName: selectedOption.value,
-                                                            Consignee_City: selectedOption.City_Code,
-                                                            ConsigneeState: selectedOption.State_Code,
-                                                            ConsigneePin: selectedOption.Receiver_Pin,
-                                                            ConsigneeMob: selectedOption.Receiver_Mob,
-                                                            ConsigneeEmail: selectedOption.Receiver_Email,
-                                                            ConsigneeAdd1: selectedOption.Receiver_Add1,
-                                                            ConsigneeAdd2: selectedOption.Receiver_Add2,
-                                                            ConsigneeGST: selectedOption.GSTNo,
-                                                        }));
+                                                        setInputValue1("");
+                                                        if (selectedOption) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                ConsigneeName: selectedOption.value,
+                                                                Consignee_City: selectedOption.City_Code,
+                                                                ConsigneeState: selectedOption.State_Code,
+                                                                ConsigneePin: selectedOption.Receiver_Pin,
+                                                                ConsigneeMob: selectedOption.Receiver_Mob,
+                                                                ConsigneeEmail: selectedOption.Receiver_Email,
+                                                                ConsigneeAdd1: selectedOption.Receiver_Add1,
+                                                                ConsigneeAdd2: selectedOption.Receiver_Add2,
+                                                                ConsigneeGST: selectedOption.GSTNo,
+                                                            }));
+                                                        }
+                                                        else {
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                ConsigneeName: "",
+                                                            }));
+                                                        }
                                                         // setSelectedOriginPinCode(selectedOption.Receiver_Pin)
                                                     }}
-                                                    placeholder="Select Receiver Name"
+                                                    inputValue={inputValue1}
+                                                    onInputChange={(val, meta) => {
+                                                        if (meta.action === "input-change") {
+                                                            // ✅ Immediately reflect what user is typing
+                                                            setInputValue1(val);
+                                                            // ✅ Also update formData live so label and value stay in sync
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                ConsigneeName: val,
+                                                            }));
+                                                        }
+                                                    }}
+                                                    isClearable
                                                     isSearchable
+                                                    formatCreateLabel={(inputValue1) => `Create "${inputValue1}"`}
+                                                    placeholder="Select Receiver Name"
                                                     menuPortalTarget={document.body}
                                                     styles={{
-                                                        menuPortal: base => ({ ...base, zIndex: 9999 })
+                                                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                                                     }}
-                                                    formatCreateLabel={(inputValue) => inputValue}
                                                 />
+
                                             </div>
 
 
@@ -2689,15 +2841,6 @@ function Booking() {
                                             />
                                         </div>
 
-                                        <div className="input-field1">
-                                            <label>Vendor Weight</label>
-                                            <input
-                                                type="tel"
-                                                placeholder="Vendor Weight"
-                                                value={formData.VendorWt}
-                                                onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
-                                            />
-                                        </div>
 
                                         <div className="input-field1">
                                             <label>Rate Per Kg</label>
@@ -2830,23 +2973,40 @@ function Booking() {
                                         {isFuelChecked && (
                                             <div className="input-field1">
                                                 <label>Fuel Charges</label>
-                                                <div style={{ display: "flex", flexDirection: "row" }}>
+                                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                                                     <input
                                                         type="tel"
                                                         placeholder="Fuel Ch."
-                                                        style={{ width: "50%", borderRight: "transparent" }}
+                                                        style={{
+                                                            width: "70%",
+                                                            borderRight: "1px solid #ccc",
+                                                            borderRadius: "4px 0 0 4px",
+                                                        }}
                                                         value={formData.FuelCharges}
-                                                        onChange={(e) => setFormData({ ...formData, FuelCharges: e.target.value })}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, FuelCharges: e.target.value })
+                                                        }
                                                     />
                                                     <input
                                                         type="tel"
-                                                        placeholder="Fuel %"
-                                                        style={{ width: "50%", borderLeft: "transparent" }}
-                                                        value={`${formData.FuelPer}%`}
-                                                        onChange={(e) => setFormData({ ...formData, FuelPer: e.target.value })}
+                                                        placeholder="%"
+                                                        style={{
+                                                            width: "30%",
+                                                            borderLeft: "none",
+                                                            borderRadius: "0 4px 4px 0",
+                                                            padding: "5px",
+                                                            textAlign: "center",
+                                                        }}
+                                                        value={formData.FuelPer !== "" ? `${formData.FuelPer}%` : ""}
+                                                        onChange={(e) => {
+                                                            // ✅ Strip non-numeric chars before saving
+                                                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                            setFormData({ ...formData, FuelPer: val });
+                                                        }}
                                                     />
                                                 </div>
                                             </div>
+
                                         )}
 
                                         {String(formData.State_Code || '').trim() === '27' ? (
@@ -2862,8 +3022,38 @@ function Booking() {
                                             </>
                                         ) : (
                                             <div className="input-field1">
-                                                <label>Total GST (18%)</label>
-                                                <input type="tel" placeholder="IGST" value={formData.TotalGST || ''} readOnly />
+                                                <label>Total GST</label>
+                                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                    <input
+                                                        type="tel" placeholder="IGST" value={formData.TotalGST || ''} readOnly
+
+                                                        style={{
+                                                            width: "70%",
+                                                            borderRight: "1px solid #ccc",
+                                                            borderRadius: "4px 0 0 4px",
+                                                        }}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, TotalGST: e.target.value })
+                                                        }
+                                                    />
+                                                    <input
+                                                        type="tel"
+                                                        placeholder="%"
+                                                        style={{
+                                                            width: "30%",
+                                                            borderLeft: "none",
+                                                            borderRadius: "0 4px 4px 0",
+                                                            padding: "5px",
+                                                            textAlign: "center",
+                                                        }}
+                                                        value={formData.totalgstPer !== "" ? `${formData.totalgstPer}%` : ""}
+                                                        onChange={(e) => {
+                                                            // ✅ Strip non-numeric chars before saving
+                                                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                            setFormData({ ...formData, totalgstPer: val });
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                         )}
 
