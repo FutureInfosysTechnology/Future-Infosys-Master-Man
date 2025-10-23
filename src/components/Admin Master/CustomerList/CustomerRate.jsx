@@ -12,8 +12,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import Select, { components } from 'react-select';
 import 'react-toggle/style.css';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-
-
 function CustomerRate() {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -40,13 +38,15 @@ function CustomerRate() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [formdata, setFormdata] = useState({
         Client_Code: "",
+        Club_No:"",
         Mode_Code: [],
         Zone_Code: [],
         State_Code: [],
-        Destination_Code:[],
+        Destination_Code: [],
         Origin_Code: "",
         Active_Date: firstDayOfMonth,
         Closing_Date: today,
+        Dox_Box: "Box",
         Amount: "",
         Weight: "",
     });
@@ -61,7 +61,7 @@ function CustomerRate() {
         Rate_Flag: ""
     })
 
-    const handleDateChange = (date, field) => {
+    const handleDateChange = (field, date) => {
         setFormdata({ ...formdata, [field]: date });
     };
     const indexOfLastRow = currentPage * rowsPerPage;
@@ -173,8 +173,8 @@ function CustomerRate() {
         fetchStateData();
         fetchVendorData();
     }, [])
-     useEffect(() => {
-       console.log(formdata);
+    useEffect(() => {
+        console.log(formdata);
     }, [formdata])
 
     const handleChange = (e) => {
@@ -184,7 +184,54 @@ function CustomerRate() {
             [name]: value,
         }));
     };
-
+    useEffect(()=>
+    {
+        const fetchCityState=async()=>
+        {
+            try
+        {
+            const res= await getApi("/Master/GetFilterZonewise",{Zone_Code:formdata.Zone_Code});
+            if(res.status===1)
+            {
+                console.log(res?.data);
+                setGetCity(res.data);
+                setGetState(res.data);
+            }
+           
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
+        
+        }
+        if(formdata.Zone_Code.length>0)
+        fetchCityState();
+        
+    },[formdata.Zone_Code])
+    useEffect(()=>
+    {
+        const fetchCity=async()=>
+        {
+            try
+        {
+            const res= await getApi("/Master/GetFilterZoneStatewise",{Zone_Code:formdata.Zone_Code,State_Code:formdata.State_Code});
+            if(res.status===1)
+            {
+                console.log(res?.data);
+                setGetCity(res.data);}
+           
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
+        
+        }
+        if(formdata.State_Code.length>0 && formdata.Zone_Code.length>0)
+        fetchCity();
+        
+    },[formdata.Zone_Code,formdata.State_Code])
     const handleAddRow = (e) => {
         e.preventDefault();
 
@@ -213,7 +260,14 @@ function CustomerRate() {
             Rate: ""
         });
     };
-
+const formatDate = (date) => {
+  if (!date) return null;
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${year}-${month}-${day}`; // ✅ consistent format
+};
     const handlesave = async (e) => {
         e.preventDefault();
         if (!formdata.Client_Code || !formdata.Mode_Code) {
@@ -225,17 +279,22 @@ function CustomerRate() {
             });
         }
         const requestBody = {
-            Client_Code: formdata.Client_Code.toString(),
-            Mode_Codes: formdata.Mode_Code,
-            Zone_Codes: formdata.Zone_Code,
-            State_Codes: formdata.State_Code,
-            Origin_Code:formdata.Origin_Code,
-            Destination_Codes: formdata.Destination_Code,
+            Client_Code: formdata.Client_Code?.toString(),
+            Vendor_Code: formdata.Vendor_Code || null,
+            Flag: "Active",
+            Mode_Codes: formdata.Mode_Code || [],
+            Zone_Codes: formdata.Zone_Code || [],
+            State_Codes: formdata.State_Code || [],
+            Destination_Codes: formdata.Destination_Code || [],
+            Origin_Code: formdata.Origin_Code,
+            Method: "Credit",
+            Dox_Spx: formdata.Dox_Box || "Dox_Spx", // match backend name
             Active_Date: formdata.Active_Date,
             Closing_Date: formdata.Closing_Date,
-            Amount: formdata.Amount,
-            Weight: formdata.Weight,
-            RatePer:100,
+            Amount: formdata.Amount || 0,
+            Weight: formdata.Weight || 0,
+            ConnectingHub: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || null,
+            RatePer: 100, // or calculate dynamically
             RateDetails: submittedData.map((data) => ({
                 On_Addition: data.On_Addition,
                 Lower_Wt: data.Lower_Wt,
@@ -243,20 +302,22 @@ function CustomerRate() {
                 Rate: data.Rate,
                 Rate_Flag: data.Rate_Flag,
             }))
-        }
+        };
+
         try {
             const response = await postApi('Master/addRateData', requestBody, 'POST')
             if (response.status === 1) {
-                setGetCustRate([...getCustRate, response.data]);
                 setFormdata({
                     Client_Code: "",
-                    Mode_Code: "",
-                    Zone_Code: "",
-                    State_Code: "",
-                    Destination_Code: "",
+                    Club_No:"",
+                    Mode_Code: [],
+                    Zone_Code: [],
+                    State_Code: [],
+                    Destination_Code: [],
                     Origin_Code: "",
                     Active_Date: firstDayOfMonth,
                     Closing_Date: today,
+                    Dox_Box: "Box",
                     Amount: "",
                     Weight: "",
                 });
@@ -276,69 +337,88 @@ function CustomerRate() {
             console.error('Unable to save Customer Rate:', error);
         }
     };
+const handleUpdate = async (e) => {
+  e.preventDefault();
 
-    const handleupdate = async (e) => {
-        e.preventDefault();
-        if (!formdata.Client_Code || !formdata.Mode_Code || !formdata.Vendor_Code) {
-            return Swal.fire({
-                icon: 'warning',
-                title: 'Missing Information',
-                text: 'Please fill in the empty fields.',
-                confirmButtonText: 'OK',
-            });
-        }
-        const requestBody = {
-            Client_Code: formdata.Client_Code.toString(),
-            Mode_Code: formdata.Mode_Code,
-            Zone_Code: formdata.Zone_Code,
-            State_Code: formdata.State_Code,
-            Destination_Code: formdata.Destination_Code,
-            Active_Date: formdata.Active_Date,
-            Closing_Date: formdata.Closing_Date,
-            Amount: formdata.Amount,
-            Weight: formdata.Weight,
-            RateDetails: submittedData.map((data) => ({
-                On_Addition: data.On_Addition,
-                Lower_Wt: data.Lower_Wt,
-                Upper_Wt: data.Upper_Wt,
-                Rate: data.Rate,
-                Rate_Flag: data.Rate_Flag
-            }))
-        }
+  if (!formdata.Client_Code || !formdata.Mode_Code) {
+    return Swal.fire({
+      icon: 'warning',
+      title: 'Missing Information',
+      text: 'Please fill in the empty fields.',
+      confirmButtonText: 'OK',
+    });
+  }
 
-        try {
-            const response = await putApi('/Master/updateRateMaster', requestBody, 'POST');
-            if (response.status === 1) {
-                setGetCustRate(getCustRate.map((cust) => cust.Client_Code === formdata.Client_Code ? response.data : cust));
-                setFormdata({
-                    Client_Code: "",
-                    Mode_Code: "",
-                    Zone_Code: "",
-                    State_Code: "",
-                    Destination_Code: "",
-                    Origin_Code: "",
-                    Active_Date: firstDayOfMonth,
-                    Closing_Date: today,
-                    Amount: "",
-                    Weight: "",
-                });
-                setTableRowData({
-                    On_Addition: "",
-                    Lower_Wt: "",
-                    Upper_Wt: "",
-                    Rate: "",
-                    Rate_Flag: ""
-                });
-                Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
-                setModalIsOpen(false);
-                await fetchCustomerRateData();
-            } else {
-                Swal.fire('Error!', response.message || 'Failed to update the Customer Rate.', 'error');
-            }
-        } catch (error) {
-            console.error('Unable to update Customer Rate:', error);
-        }
+  // ✅ Match backend key names exactly
+  const requestBody = {
+    Club_No: formdata.Club_No, // 🔑 REQUIRED for update
+    Client_Code: formdata.Client_Code?.toString(),
+    Vendor_Code: formdata.Vendor_Code || null,
+    Flag: "Active",
+    Mode_Code: formdata.Mode_Code || [],          // ✅ singular (array OK)
+    Zone_Code: formdata.Zone_Code || [],          // ✅ singular
+    State_Code: formdata.State_Code || [],        // ✅ singular
+    Destination_Code: formdata.Destination_Code || [], // ✅ singular
+    Origin_Code: formdata.Origin_Code,
+    Method: "Credit",
+    Dox_Box: formdata.Dox_Box || "Box",           // ✅ backend ignores but safe
+    Active_Date: formatDate(formdata.Active_Date),
+    Closing_Date: formatDate(formdata.Closing_Date),
+    Amount: formdata.Amount || 0,
+    Weight: formdata.Weight || 0,
+    ConnectingHub: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || null,
+    RatePer: 100, // or your own logic
+    RateDetails: submittedData.map((data) => ({
+      On_Addition: data.On_Addition,
+      Lower_Wt: data.Lower_Wt,
+      Upper_Wt: data.Upper_Wt,
+      Rate: data.Rate,
+      Rate_Flag: data.Rate_Flag,
+    })),
+  };
+
+  try {
+    const response = await putApi('Master/updateRateMaster', requestBody, 'PUT');
+
+    if (response.status === 1) {
+      // ✅ Reset state after success
+      setFormdata({
+        Client_Code: "",
+        Club_No:"",
+        Mode_Code: [],
+        Zone_Code: [],
+        State_Code: [],
+        Destination_Code: [],
+        Origin_Code: "",
+        Active_Date: firstDayOfMonth,
+        Closing_Date: today,
+        Dox_Box: "Box",
+        Amount: "",
+        Weight: "",
+      });
+
+      setTableRowData({
+        On_Addition: "",
+        Lower_Wt: "",
+        Upper_Wt: "",
+        Rate: "",
+        Rate_Flag: ""
+      });
+
+      setSubmittedData([]);
+
+      Swal.fire('Updated!', response.message || 'Rate master updated successfully.', 'success');
+      setModalIsOpen(false);
+      await fetchCustomerRateData();
+    } else {
+      Swal.fire('Error', response.message || 'Failed to update rate master.', 'error');
     }
+  } catch (error) {
+    console.error('Unable to update Customer Rate:', error);
+  }
+};
+
+
 
     const handledelete = async (Club_No) => {
         const confirmDelete = await Swal.fire({
@@ -353,6 +433,7 @@ function CustomerRate() {
             try {
                 await deleteApi(`/Master/DeleteRateMaster?clubNo=${Club_No}`);
                 Swal.fire('Deleted!', 'Customer Rate has been deleted.', 'success');
+                setSubmittedData([]);
                 await fetchCustomerRateData();
             } catch (error) {
                 console.error('Unable to delete Customer Rate:', error);
@@ -432,23 +513,28 @@ function CustomerRate() {
                         <div>
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
-                                setFormdata({
-                                    Client_Code: "",
-                                    Vendor_Code: "",
-                                    Flag: "",
-                                    Mode_Code: "",
-                                    Zone_Code: "",
-                                    State_Code: "",
-                                    Destination_Code: "",
-                                    Method: "",
-                                    Slab: "",
-                                    Active_Date: firstDayOfMonth,
-                                    Closing_Date: today,
-                                    RatePer: "",
-                                    Amount: "",
-                                    Weight: "",
-                                    ConnectingHub: ""
-                                })
+                               setFormdata({
+                    Client_Code: "",
+                    Club_No:"",
+                    Mode_Code: [],
+                    Zone_Code: [],
+                    State_Code: [],
+                    Destination_Code: [],
+                    Origin_Code: "",
+                    Active_Date: firstDayOfMonth,
+                    Closing_Date: today,
+                    Dox_Box: "Box",
+                    Amount: "",
+                    Weight: "",
+                });
+                setTableRowData({
+                    On_Addition: "",
+                    Lower_Wt: "",
+                    Upper_Wt: "",
+                    Rate: "",
+                    Rate_Flag: ""
+                });
+                setSubmittedData([]);
                             }}>
                                 <i className="bi bi-plus-lg"></i>
                                 <span>ADD NEW</span>
@@ -476,7 +562,7 @@ function CustomerRate() {
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col">Actions</th>
-                                    <th scope="col">Sr.No</th>
+                                    <th scope="col">Club.No</th>
                                     <th scope="col">Customer_Name</th>
                                     <th scope="col">Mode_Name</th>
                                     <th scope="col">Zone_Name</th>
@@ -484,8 +570,8 @@ function CustomerRate() {
                                     <th scope="col">Destination_Name</th>
                                     <th scope="col">State_Name</th>
                                     <th scope="col">Method</th>
-                                    <th scope="col">Slab</th>
-                                    <th scope="col">Rate/Kg</th>
+                                    <th scope="col">Dox_Spx</th>
+                                    <th scope="col">RatePerKg</th>
                                     <th scope="col">Amount</th>
                                     <th scope="col">Weight</th>
 
@@ -517,28 +603,44 @@ function CustomerRate() {
                                                         padding: "10px",
                                                     }}
                                                 >
-                                                    <button className='edit-btn' onClick={() => {
-                                                        setIsEditMode(true);
-                                                        setOpenRow(null);
-                                                        setFormdata({
-                                                            Client_Code: rate.Customer_Name,
-                                                            Mode_Code: rate.Mode_Name,
-                                                            Zone_Code: rate.Zone_Name,
-                                                            State_Code: rate.State_Name,
-                                                            Destination_Code: rate.Destination_Name,
-                                                            Method: rate.Method,
-                                                            Slab: rate.Slab,
-                                                            Active_Date: rate.Active_Date,
-                                                            Closing_Date: rate.Closing_Date,
-                                                            RatePer: rate.RatePer,
-                                                            Weight: rate.Weight,
-                                                            Amount: rate.Amount
-                                                        });
-                                                        setSubmittedData(rate.RateDetails || [])
-                                                        setModalIsOpen(true);
-                                                    }}>
-                                                        <i className='bi bi-pen'></i>
+                                                    <button
+                                                        className="edit-btn"
+                                                        onClick={() => {
+                                                            setIsEditMode(true);
+                                                            setOpenRow(null);
+
+                                                            const parseDate = (date) => {
+                                                                if (!date) return null;
+                                                                // handles both ISO & dd/MM/yyyy
+                                                                if (typeof date === "string" && date.includes("/")) {
+                                                                    const [day, month, year] = date.split("/");
+                                                                    return new Date(`${year}-${month}-${day}`);
+                                                                }
+                                                                return new Date(date);
+                                                            };
+                                                            console.log(rate?.Client_Code);
+                                                            setFormdata({
+                                                                Club_No:rate?.Club_No,
+                                                                Client_Code:Number( rate?.Client_Code) || "",
+                                                                Mode_Code: rate.Mode_Code ? [rate.Mode_Code] : [],
+                                                                Zone_Code: rate.Zone_Code ? [rate.Zone_Code] : [],
+                                                                State_Code: rate.State_Code ? [rate.State_Code] : [],
+                                                                Destination_Code: rate.Destination_Code ? [rate.Destination_Code] : [],
+                                                                Origin_Code: rate?.Origin_Code || "",
+                                                                Active_Date: parseDate(rate.Active_Date) || firstDayOfMonth,
+                                                                Closing_Date: parseDate(rate.Closing_Date) || today,
+                                                                Dox_Box: rate.Dox_Spx || "Box",
+                                                                Amount: rate.Amount || "",
+                                                                Weight: rate.Weight || "",
+                                                            });
+
+                                                            setSubmittedData(rate.RateDetails || []);
+                                                            setModalIsOpen(true);
+                                                        }}
+                                                    >
+                                                        <i className="bi bi-pen"></i>
                                                     </button>
+
                                                     <button className='edit-btn' onClick={() => {
                                                         handledelete(rate.Club_No);
                                                         setOpenRow(null);
@@ -549,7 +651,7 @@ function CustomerRate() {
                                             )}
                                         </td>
 
-                                        <td>{index + 1}</td>
+                                        <td>{rate?.Club_No}</td>
                                         <td>{rate?.Customer_Name}</td>
                                         <td>{rate?.Mode_Name}</td>
                                         <td>{rate?.Zone_Name}</td>
@@ -557,7 +659,7 @@ function CustomerRate() {
                                         <td>{rate?.Destination_Name}</td>
                                         <td>{rate?.State_Name}</td>
                                         <td>{rate?.Method}</td>
-                                        <td>{rate?.Slab}</td>
+                                        <td>{rate?.Dox_Spx}</td>
                                         <td>{rate?.RatePer}</td>
                                         <td>{rate?.Amount}</td>
                                         <td>{rate?.Weight}</td>
@@ -1029,7 +1131,33 @@ function CustomerRate() {
                                                 className="form-control form-control-sm"
                                             />
                                         </div>
+                                        <div className="input-field1">
+                                            <label htmlFor="">Dox_Spx</label>
+                                            <Select
+                                                options={[
+                                                    {
+                                                        value: "Dox", label: "Dox"
+                                                    }, {
+                                                        value: "Box", label: "Box"
+                                                    }
+                                                ]}
+                                                value={
+                                                    formdata.Dox_Box ? { value: formdata.Dox_Box, label: formdata.Dox_Box } : null
+                                                }
+                                                onChange={(selectedOption) =>
+                                                    setFormdata({ ...formdata, Dox_Box: selectedOption?.value || "" })
+                                                }
+                                                placeholder="Select Dox_Box"
+                                                isSearchable
+                                                classNamePrefix="blue-selectbooking"
+                                                className="blue-selectbooking"
 
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
+                                            />
+                                        </div>
                                         <div className="input-field3 min"  >
                                             <label htmlFor="">Min Weight</label>
                                             <input type="tel" placeholder="Min Weight" value={formdata.Weight}
@@ -1044,7 +1172,7 @@ function CustomerRate() {
                                         </div>
                                         <div className='bottom-buttons' style={{ marginTop: "22px", marginLeft: "10px" }}>
                                             {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
-                                            {isEditMode && (<button type='button' onClick={handleupdate} className='ok-btn'>Update</button>)}
+                                            {isEditMode && (<button type='button' onClick={ handleUpdate} className='ok-btn'>Update</button>)}
                                             <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                         </div>
 
@@ -1127,7 +1255,7 @@ function CustomerRate() {
                                                         name="Rate" onChange={handleChange} style={{ textAlign: "center" }} />
                                                 </td>
 
-                                                <td style={{display:"flex",justifyContent:"center"}}>
+                                                <td style={{ display: "flex", justifyContent: "center" }}>
                                                     <button className="ok-btn" style={{ padding: "2px", fontSize: "30px", width: "40px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center" }}
                                                         onClick={handleAddRow}>
                                                         <i className="bi bi-plus" ></i>
@@ -1146,10 +1274,10 @@ function CustomerRate() {
                                                             <button className='edit-btn'
                                                                 onClick={() => {
                                                                     setTableRowData({
-                                                                        On_Addition:data.On_Addition,
-                                                                        Lower_Wt:data.Lower_Wt,
-                                                                        Upper_Wt:data.Upper_Wt,
-                                                                        Rate:data.Rate,
+                                                                        On_Addition: data.On_Addition,
+                                                                        Lower_Wt: data.Lower_Wt,
+                                                                        Upper_Wt: data.Upper_Wt,
+                                                                        Rate: data.Rate,
                                                                         Rate_Flag: data.Rate_Flag,
                                                                     })
                                                                     setEditIndex(index);

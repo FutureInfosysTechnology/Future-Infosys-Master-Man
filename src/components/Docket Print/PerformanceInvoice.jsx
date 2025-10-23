@@ -59,11 +59,20 @@ function PerformanceInvoice() {
             fetchData();
         }
     }, [invoiceNo]);
-    function toTitleCase(str) {
-        return str
-            .split(" ")
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
+        function numberToIndianCurrency(num) {
+      if (!num || isNaN(num)) return "";
+    
+      const [rupees, paise] = num.toFixed(2).split(".");
+    
+      let result = toWords(Number(rupees))
+        .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Rupees";
+    
+      if (Number(paise) > 0) {
+        result += " and " + toWords(Number(paise))
+          .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Paise";
+      }
+    
+      return result + " Only";
     }
     const [totalQty, setTotalQty] = useState(0);
     useEffect(() => {
@@ -480,7 +489,7 @@ function PerformanceInvoice() {
                             <div style={{ display: "flex", flexDirection: "column", padding: "5px", borderBottom: "2px solid black" }}>
                                 <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Total Amount (in words)
                                 </div>
-                                <div> {invoiceData?.GrandTotal ? toTitleCase(toWords(Number(invoiceData.GrandTotal))) : ""}</div>
+                                <div> {invoiceData?.GrandTotal ? numberToIndianCurrency(Number(invoiceData?.GrandTotal)) : ""}</div>
                             </div>
                             <div style={{ display: "flex" }}>
                                 <div style={{ display: "flex", flexDirection: "column", fontSize: "11px", width: "50%", padding: "5px", borderRight: "2px solid black" }}>

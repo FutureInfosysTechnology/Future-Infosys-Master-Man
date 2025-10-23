@@ -14,7 +14,7 @@ import { toWords } from "number-to-words";
 function MobileReceipt() {
     const [getBranch, setGetBranch] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [total,setTotal]=useState(0);
+    const [total, setTotal] = useState(0);
     const navigate = useNavigate();
     const location = useLocation();
     console.log(location);
@@ -38,22 +38,31 @@ function MobileReceipt() {
         setData(location?.state?.data || []);
         fetchData();
     }, [])
-    function toTitleCase(str) {
-        return str
-            .split(" ")
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-    }
-     useEffect(() => {
-            const totalCharges = 
+    function numberToIndianCurrency(num) {
+  if (!num || isNaN(num)) return "";
+
+  const [rupees, paise] = num.toFixed(2).split(".");
+
+  let result = toWords(Number(rupees))
+    .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Rupees";
+
+  if (Number(paise) > 0) {
+    result += " and " + toWords(Number(paise))
+      .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Paise";
+  }
+
+  return result + " Only";
+}
+    useEffect(() => {
+        const totalCharges =
             (Number(data[0]?.Rate) || 0) +
-                (Number(data[0]?.FuelCharges) || 0) +
-                (Number(data[0]?.GreenChrgs) || 0) +
-                (Number(data[0]?.DocketChrgs) || 0) +
-                (Number(data[0]?.HamaliChrgs) || 0) +
-                (Number(data[0]?.OtherCharges) || 0);
-                setTotal(totalCharges);
-        }, [data]);
+            (Number(data[0]?.FuelCharges) || 0) +
+            (Number(data[0]?.GreenChrgs) || 0) +
+            (Number(data[0]?.DocketChrgs) || 0) +
+            (Number(data[0]?.HamaliChrgs) || 0) +
+            (Number(data[0]?.OtherCharges) || 0);
+        setTotal(totalCharges);
+    }, [data]);
     const formateDate = (dateString) => {
         if (!dateString) return "";
         const date = new Date(dateString);
@@ -69,10 +78,12 @@ function MobileReceipt() {
         textAlign: "start",
         whiteSpace: "nowrap",
         fontSize: "10px",
-        paddingLeft: "20px",
+        paddingLeft: "10px",
+        paddingRight:"10px",
     }
     const tableStyle = {
-        borderCollapse: "collapse"
+        borderCollapse: "collapse",
+        height:"120px",
     }
 
     const handleDownloadPDF = async () => {
@@ -88,7 +99,7 @@ function MobileReceipt() {
 
             // Capture element as high-res image
             const canvas = await html2canvas(element, {
-                scale: 3,
+                scale:4,
                 useCORS: true,
                 backgroundColor: "#ffffff",
                 scrollY: -window.scrollY,
@@ -223,7 +234,7 @@ function MobileReceipt() {
                                 (
                                     <div className="docket" key={index}>
                                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column", marginBottom: "10px" }}>
-                                            <div className='div1' style={{ width: "100%", height: "130px", border: "2px solid black", display: "flex", color: "black" }}>
+                                            <div className='div1' style={{ width: "100%", height: "150px", border: "2px solid black", display: "flex", color: "black" }}>
                                                 <div className='logo' style={{ width: "24%", height: "100%", padding: "5px" }}> <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
                                                 <div className='heading' style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", alignItems: "start", paddingLeft: "5px" }}>
                                                     <div style={{ fontSize: "15px", fontWeight: "bolder" }}>{getBranch?.Company_Name}</div>
@@ -232,28 +243,35 @@ function MobileReceipt() {
                                                     <div style={{ fontSize: "12px" }}><b>Mobile No :</b> (+91) {getBranch?.MobileNo}</div>
                                                     <div style={{ fontSize: "12px" }}><b>Email :</b> {getBranch?.Email}</div>
                                                 </div>
-                                                <div className='booking' style={{ width: "26%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                                    <div style={{
-                                                        display: "flex", justifyContent: "start",
-                                                        fontSize: "10px", gap: "5px",
-                                                    }}>
-                                                        <div ><b>Payment Type : </b>{docket?.T_Flag}
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ display: "flex", justifyContent: "start", flexDirection: "column", fontSize: "10px", }}>
-                                                        <div > <b>Vendor Name :</b> {docket?.Vendor_Name} </div>
-                                                        <div >  <b>Vendor Awb No :</b>  {docket?.vendorAwbno} </div>
-                                                    </div>
-                                                    <div style={{ display: "flex", justifyContent: "start", gap: "10px", fontSize: "10px" }}>
-                                                        <div><b>Origin : </b> {docket?.Origin_Name}</div>
-                                                        <div><b>Destination : </b> {docket?.Destination_Name}</div>
-                                                    </div>
+                                                <div className='booking' style={{ width: "26%", display: "flex", justifyContent: "end" ,alignItems:"center"}}>
                                                     <table style={tableStyle}>
                                                         <tbody >
+                                                            <tr>
+                                                                <td style={cellsStyle}>Payment Type:</td>
+                                                                <td style={cellsStyle}>{docket?.T_Flag}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style={cellsStyle}>Vendor Name:</td>
+                                                                <td style={cellsStyle}>{docket?.Vendor_Name}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style={cellsStyle}>Vendor Awb No:</td>
+                                                                <td style={cellsStyle}>{docket?.vendorAwbno}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style={cellsStyle}>Origin:</td>
+                                                                <td style={cellsStyle}>{docket?.Origin_Name}</td>
+                                                            </tr>
+                                                           
+                                                             <tr>
+                                                                <td style={cellsStyle}>Destination:</td>
+                                                                <td style={cellsStyle}>{docket?.Destination_Name}</td>
+                                                            </tr>
                                                             <tr>
                                                                 <td style={cellsStyle}>Booking Date:</td>
                                                                 <td style={cellsStyle}>{docket?.BookDate}</td>
                                                             </tr>
+                                                            
                                                             <tr>
                                                                 <td style={cellsStyle}>Booking Branch:</td>
                                                                 <td style={cellsStyle}>{docket?.Branch_Name}</td>
@@ -462,13 +480,13 @@ function MobileReceipt() {
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "11%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "70%", paddingLeft: "5px" }}>  GRAND TOTAL</span>
-                                                            <span style={{ width: "40%", textAlign: "center" }}>{total+docket?.CGSTAMT}</span>
+                                                            <span style={{ width: "40%", textAlign: "center" }}>{total + docket?.CGSTAMT}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className='payment' style={{ width: "30%" }}>
-                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                                        <div style={{ fontWeight: "bold", }}>  DOCKET No : </div>
+                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center"}}>
+                                                        <div style={{ fontWeight: "bold", }}>  DOCKET NO : </div>
                                                         <div style={{}}>
                                                             <BarCode
                                                                 value={docket?.DocketNo}
@@ -511,9 +529,11 @@ function MobileReceipt() {
                                                     </div>
                                                     <div style={{ fontWeight: "bold", textAlign: "center", fontSize: "9px" }} className='p-3'> Signature Receiver with Rubber Stamp & Date</div>
                                                 </div >
-                                                <div style={{ fontWeight: "bold", width: "44%" }}>
-                                                    <div style={{ borderBottom: "2px solid black", paddingLeft: "5px",minHeight:"34px" }}>Rs.......
-                                                        <div style={{marginLeft:"10px"}}>{toTitleCase(toWords(Number(docket?.CGSTAMT+total)))}</div>
+                                                <div style={{ fontWeight: "bold", width: "44%", }}>
+                                                    <div style={{ borderBottom: "2px solid black", paddingLeft: "5px", display: "flex", gap: "5px" }}>
+                                                        <span>Rs</span><div>
+                                                            {numberToIndianCurrency(Number(docket?.CGSTAMT + total))}
+                                                        </div>
 
                                                     </div>
                                                     <div style={{ display: "flex", flexDirection: "column", gap: "10px", borderBottom: "2px solid black", paddingLeft: "5px" }}>
@@ -534,7 +554,7 @@ function MobileReceipt() {
                                             </div>
                                         </div>
                                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column", marginBottom: "10px" }}>
-                                            <div className='div1' style={{ width: "100%", height: "130px", border: "2px solid black", display: "flex", color: "black" }}>
+                                            <div className='div1' style={{ width: "100%", height: "150px", border: "2px solid black", display: "flex", color: "black" }}>
                                                 <div className='logo' style={{ width: "24%", height: "100%", padding: "5px" }}> <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
                                                 <div className='heading' style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", alignItems: "start", paddingLeft: "5px" }}>
                                                     <div style={{ fontSize: "15px", fontWeight: "bolder" }}>{getBranch?.Company_Name}</div>
@@ -543,28 +563,35 @@ function MobileReceipt() {
                                                     <div style={{ fontSize: "12px" }}><b>Mobile No :</b> (+91) {getBranch?.MobileNo}</div>
                                                     <div style={{ fontSize: "12px" }}><b>Email :</b> {getBranch?.Email}</div>
                                                 </div>
-                                                <div className='booking' style={{ width: "26%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                                    <div style={{
-                                                        display: "flex", justifyContent: "start",
-                                                        fontSize: "10px", gap: "5px",
-                                                    }}>
-                                                        <div ><b>Payment Type : </b>{docket?.T_Flag}
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ display: "flex", justifyContent: "start", flexDirection: "column", fontSize: "10px", }}>
-                                                        <div > <b>Vendor Name :</b> {docket?.Vendor_Name} </div>
-                                                        <div >  <b>Vendor Awb No :</b>  {docket?.vendorAwbno} </div>
-                                                    </div>
-                                                    <div style={{ display: "flex", justifyContent: "start", gap: "10px", fontSize: "10px" }}>
-                                                        <div><b>Origin : </b> {docket?.Origin_Name}</div>
-                                                        <div><b>Destination : </b> {docket?.Destination_Name}</div>
-                                                    </div>
+                                                <div className='booking' style={{ width: "26%", display: "flex", justifyContent: "end" ,alignItems:"center"}}>
                                                     <table style={tableStyle}>
                                                         <tbody >
+                                                            <tr>
+                                                                <td style={cellsStyle}>Payment Type:</td>
+                                                                <td style={cellsStyle}>{docket?.T_Flag}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style={cellsStyle}>Vendor Name:</td>
+                                                                <td style={cellsStyle}>{docket?.Vendor_Name}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style={cellsStyle}>Vendor Awb No:</td>
+                                                                <td style={cellsStyle}>{docket?.vendorAwbno}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style={cellsStyle}>Origin:</td>
+                                                                <td style={cellsStyle}>{docket?.Origin_Name}</td>
+                                                            </tr>
+                                                           
+                                                             <tr>
+                                                                <td style={cellsStyle}>Destination:</td>
+                                                                <td style={cellsStyle}>{docket?.Destination_Name}</td>
+                                                            </tr>
                                                             <tr>
                                                                 <td style={cellsStyle}>Booking Date:</td>
                                                                 <td style={cellsStyle}>{docket?.BookDate}</td>
                                                             </tr>
+                                                            
                                                             <tr>
                                                                 <td style={cellsStyle}>Booking Branch:</td>
                                                                 <td style={cellsStyle}>{docket?.Branch_Name}</td>
@@ -773,13 +800,13 @@ function MobileReceipt() {
                                                         </div>
                                                         <div style={{ display: "flex", borderTop: "2px solid black", height: "11%" }}>
                                                             <span style={{ borderRight: "2px solid black", width: "70%", paddingLeft: "5px" }}>  GRAND TOTAL</span>
-                                                            <span style={{ width: "40%", textAlign: "center" }}>{total+docket?.CGSTAMT}</span>
+                                                            <span style={{ width: "40%", textAlign: "center" }}>{total + docket?.CGSTAMT}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className='payment' style={{ width: "30%" }}>
-                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                                        <div style={{ fontWeight: "bold", }}>  DOCKET No : </div>
+                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center"}}>
+                                                        <div style={{ fontWeight: "bold", }}>  DOCKET NO : </div>
                                                         <div style={{}}>
                                                             <BarCode
                                                                 value={docket?.DocketNo}
@@ -822,9 +849,11 @@ function MobileReceipt() {
                                                     </div>
                                                     <div style={{ fontWeight: "bold", textAlign: "center", fontSize: "9px" }} className='p-3'> Signature Receiver with Rubber Stamp & Date</div>
                                                 </div >
-                                                <div style={{ fontWeight: "bold", width: "44%" }}>
-                                                    <div style={{ borderBottom: "2px solid black", paddingLeft: "5px",minHeight:"34px" }}>Rs.......
-                                                        <div style={{marginLeft:"10px"}}>{toTitleCase(toWords(Number(docket?.CGSTAMT+total)))}</div>
+                                                <div style={{ fontWeight: "bold", width: "44%", }}>
+                                                    <div style={{ borderBottom: "2px solid black", paddingLeft: "5px", display: "flex", gap: "5px" }}>
+                                                        <span>Rs</span><div>
+                                                            {numberToIndianCurrency(Number(docket?.CGSTAMT + total))}
+                                                        </div>
 
                                                     </div>
                                                     <div style={{ display: "flex", flexDirection: "column", gap: "10px", borderBottom: "2px solid black", paddingLeft: "5px" }}>

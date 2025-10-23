@@ -864,6 +864,7 @@ function Booking() {
 
 
     useEffect(() => {
+         if (!vendorsubmittedData || vendorsubmittedData.length === 0) return;
         const totalVol = vendorsubmittedData.reduce((acc, data) => acc + parseFloat(data.VolmetricWt || 0), 0);
         const totalAct = vendorsubmittedData.reduce((acc, data) => acc + parseFloat(data.ActualWt || 0), 0);
         const totalCharge = vendorsubmittedData.reduce((acc, data) => acc + parseFloat(data.ChargeWt || 0), 0);
@@ -871,6 +872,10 @@ function Booking() {
         setTotalVolWt(totalVol);
         setTotalActWt(totalAct);
         setTotalChargeWt(totalCharge);
+        setFormData((prev) => ({
+            ...prev,
+            VendorAmt: totalAct,
+        }));
     }, [vendorsubmittedData]);
 
 
