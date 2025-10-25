@@ -31,6 +31,7 @@ function CustomerRate() {
     const [getState, setGetState] = useState([]);             // To Get State Data
     const [getVendor, setGetVendor] = useState([]);
     const [error, setError] = useState(null);
+    const [filteredCity, setFilteredCity] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +39,7 @@ function CustomerRate() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [formdata, setFormdata] = useState({
         Client_Code: "",
-        Club_No:"",
+        Club_No: "",
         Mode_Code: [],
         Zone_Code: [],
         State_Code: [],
@@ -138,6 +139,73 @@ function CustomerRate() {
             setLoading(false);
         }
     };
+ const filterCities = (zoneCodes = [], stateCodes = []) => {
+  return getCity.filter(city => {
+    const hasZone = zoneCodes.length > 0;
+    const hasState = stateCodes.length > 0;
+
+    if (hasZone && hasState) {
+      // 🔹 both zone and state filters applied
+      return zoneCodes.includes(city.Zone_Code) && stateCodes.includes(city.State_Code);
+    } else if (hasZone) {
+      // 🔹 only zone filter
+      return zoneCodes.includes(city.Zone_Code);
+    } else if (hasState) {
+      // 🔹 only state filter
+      return stateCodes.includes(city.State_Code);
+    } else {
+      // 🔹 no filters → return all cities
+      return true;
+    }
+  });
+};
+
+  useEffect(() => {
+  const cities = filterCities(formdata.Zone_Code, formdata.State_Code);
+  setFilteredCity(cities);
+}, [formdata.Zone_Code, formdata.State_Code]);
+    const parseDate = (date) => {
+        if (!date) return null;
+        // handles both ISO & dd/MM/yyyy
+        if (typeof date === "string" && date.includes("/")) {
+            const [day, month, year] = date.split("/");
+            return new Date(`${year}-${month}-${day}`);
+        }
+        return new Date(date);
+    };
+    const handleGet = async (Club_No) => {
+        try {
+            const res = await getApi(`/Master/GetRateMasterByClubNo?Club_No=${Club_No}`);
+
+            if (res.status === 1 && res.data) {
+                const d = res.data;
+
+                // 🧠 set formdata using API response
+                setFormdata({
+                    Client_Code: Number(d.Client_Code) || "",
+                    Club_No: d.Club_No || "",
+                    Mode_Code: d.Mode_Codes || [],
+                    Zone_Code: d.Zone_Codes || [],
+                    State_Code: d.State_Codes || [],
+                    Destination_Code: d.Destination_Codes || [],
+                    Origin_Code: d.Origin_Code || "",
+                    Active_Date: parseDate(d.Active_Date) || "",
+                    Closing_Date: parseDate(d.Closing_Date) || "",
+                    Dox_Box: d.Dox_Spx || "",
+                    Amount: d.Amount || "",
+                    Weight: d.Weight || "",
+                });
+                setSubmittedData(d.RateDetails || []);
+
+                // 🧠 if you also have a separate state for RateDetails
+                // setRateDetails(d.RateDetails || []);
+            } else {
+                console.warn("No data found for this Club_No");
+            }
+        } catch (error) {
+            console.error("Error fetching rate master:", error);
+        }
+    };
 
     const fetchStateData = async () => {
         try {
@@ -184,54 +252,45 @@ function CustomerRate() {
             [name]: value,
         }));
     };
-    useEffect(()=>
-    {
-        const fetchCityState=async()=>
-        {
-            try
-        {
-            const res= await getApi("/Master/GetFilterZonewise",{Zone_Code:formdata.Zone_Code});
-            if(res.status===1)
-            {
-                console.log(res?.data);
-                setGetCity(res.data);
-                setGetState(res.data);
-            }
-           
-        }
-        catch(error)
-        {
-            console.log(error);
-        }
-        
-        }
-        if(formdata.Zone_Code.length>0)
-        fetchCityState();
-        
-    },[formdata.Zone_Code])
-    useEffect(()=>
-    {
-        const fetchCity=async()=>
-        {
-            try
-        {
-            const res= await getApi("/Master/GetFilterZoneStatewise",{Zone_Code:formdata.Zone_Code,State_Code:formdata.State_Code});
-            if(res.status===1)
-            {
-                console.log(res?.data);
-                setGetCity(res.data);}
-           
-        }
-        catch(error)
-        {
-            console.log(error);
-        }
-        
-        }
-        if(formdata.State_Code.length>0 && formdata.Zone_Code.length>0)
-        fetchCity();
-        
-    },[formdata.Zone_Code,formdata.State_Code])
+    // useEffect(() => {
+    //     const fetchCityState = async () => {
+    //         try {
+    //             const res = await getApi("/Master/GetFilterZonewise", { Zone_Code: formdata.Zone_Code });
+    //             if (res.status === 1) {
+    //                 console.log(res?.data);
+    //                 setGetCity(res.data);
+    //                 setGetState(res.data);
+    //             }
+
+    //         }
+    //         catch (error) {
+    //             console.log(error);
+    //         }
+
+    //     }
+    //     if (formdata.Zone_Code.length > 0)
+    //         fetchCityState();
+
+    // }, [formdata.Zone_Code])
+    // useEffect(() => {
+    //     const fetchCity = async () => {
+    //         try {
+    //             const res = await getApi("/Master/GetFilterZoneStatewise", { Zone_Code: formdata.Zone_Code, State_Code: formdata.State_Code });
+    //             if (res.status === 1) {
+    //                 console.log(res?.data);
+    //                 setGetCity(res.data);
+    //             }
+
+    //         }
+    //         catch (error) {
+    //             console.log(error);
+    //         }
+
+    //     }
+    //     if (formdata.State_Code.length > 0 && formdata.Zone_Code.length > 0)
+    //         fetchCity();
+
+    // }, [formdata.Zone_Code, formdata.State_Code])
     const handleAddRow = (e) => {
         e.preventDefault();
 
@@ -260,14 +319,14 @@ function CustomerRate() {
             Rate: ""
         });
     };
-const formatDate = (date) => {
-  if (!date) return null;
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${year}-${month}-${day}`; // ✅ consistent format
-};
+    const formatDate = (date) => {
+        if (!date) return null;
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${year}-${month}-${day}`; // ✅ consistent format
+    };
     const handlesave = async (e) => {
         e.preventDefault();
         if (!formdata.Client_Code || !formdata.Mode_Code) {
@@ -309,7 +368,7 @@ const formatDate = (date) => {
             if (response.status === 1) {
                 setFormdata({
                     Client_Code: "",
-                    Club_No:"",
+                    Club_No: "",
                     Mode_Code: [],
                     Zone_Code: [],
                     State_Code: [],
@@ -337,86 +396,86 @@ const formatDate = (date) => {
             console.error('Unable to save Customer Rate:', error);
         }
     };
-const handleUpdate = async (e) => {
-  e.preventDefault();
+   const handleUpdate = async (e) => {
+    e.preventDefault();
 
-  if (!formdata.Client_Code || !formdata.Mode_Code) {
-    return Swal.fire({
-      icon: 'warning',
-      title: 'Missing Information',
-      text: 'Please fill in the empty fields.',
-      confirmButtonText: 'OK',
-    });
-  }
-
-  // ✅ Match backend key names exactly
-  const requestBody = {
-    Club_No: formdata.Club_No, // 🔑 REQUIRED for update
-    Client_Code: formdata.Client_Code?.toString(),
-    Vendor_Code: formdata.Vendor_Code || null,
-    Flag: "Active",
-    Mode_Code: formdata.Mode_Code || [],          // ✅ singular (array OK)
-    Zone_Code: formdata.Zone_Code || [],          // ✅ singular
-    State_Code: formdata.State_Code || [],        // ✅ singular
-    Destination_Code: formdata.Destination_Code || [], // ✅ singular
-    Origin_Code: formdata.Origin_Code,
-    Method: "Credit",
-    Dox_Box: formdata.Dox_Box || "Box",           // ✅ backend ignores but safe
-    Active_Date: formatDate(formdata.Active_Date),
-    Closing_Date: formatDate(formdata.Closing_Date),
-    Amount: formdata.Amount || 0,
-    Weight: formdata.Weight || 0,
-    ConnectingHub: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || null,
-    RatePer: 100, // or your own logic
-    RateDetails: submittedData.map((data) => ({
-      On_Addition: data.On_Addition,
-      Lower_Wt: data.Lower_Wt,
-      Upper_Wt: data.Upper_Wt,
-      Rate: data.Rate,
-      Rate_Flag: data.Rate_Flag,
-    })),
-  };
-
-  try {
-    const response = await putApi('Master/updateRateMaster', requestBody, 'PUT');
-
-    if (response.status === 1) {
-      // ✅ Reset state after success
-      setFormdata({
-        Client_Code: "",
-        Club_No:"",
-        Mode_Code: [],
-        Zone_Code: [],
-        State_Code: [],
-        Destination_Code: [],
-        Origin_Code: "",
-        Active_Date: firstDayOfMonth,
-        Closing_Date: today,
-        Dox_Box: "Box",
-        Amount: "",
-        Weight: "",
-      });
-
-      setTableRowData({
-        On_Addition: "",
-        Lower_Wt: "",
-        Upper_Wt: "",
-        Rate: "",
-        Rate_Flag: ""
-      });
-
-      setSubmittedData([]);
-
-      Swal.fire('Updated!', response.message || 'Rate master updated successfully.', 'success');
-      setModalIsOpen(false);
-      await fetchCustomerRateData();
-    } else {
-      Swal.fire('Error', response.message || 'Failed to update rate master.', 'error');
+    if (!formdata.Client_Code || !formdata.Mode_Code) {
+        return Swal.fire({
+            icon: 'warning',
+            title: 'Missing Information',
+            text: 'Please fill in the empty fields.',
+            confirmButtonText: 'OK',
+        });
     }
-  } catch (error) {
-    console.error('Unable to update Customer Rate:', error);
-  }
+
+    // ✅ Match backend key names exactly
+    const requestBody = {
+        Club_No: formdata.Club_No, // required for update
+        Client_Code: formdata.Client_Code?.toString(),
+        Vendor_Code: formdata.Vendor_Code || null,
+        Flag: "Active",
+        Mode_Codes: formdata.Mode_Code || [],          // ✅ plural
+        Zone_Codes: formdata.Zone_Code || [],          // ✅ plural
+        State_Codes: formdata.State_Code || [],        // ✅ plural
+        Destination_Codes: formdata.Destination_Code || [], // ✅ plural
+        Origin_Code: formdata.Origin_Code,
+        Method: "Credit",
+        Dox_Spx: formdata.Dox_Box || "Dox",           // ✅ backend key
+        Active_Date: formatDate(formdata.Active_Date),
+        Closing_Date: formatDate(formdata.Closing_Date),
+        Amount: formdata.Amount || 0,
+        Weight: formdata.Weight || 0,
+        ConnectingHub: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || null,
+        RatePer: 100,
+        RateDetails: submittedData.map((data) => ({
+            On_Addition: data.On_Addition,
+            Lower_Wt: data.Lower_Wt,
+            Upper_Wt: data.Upper_Wt,
+            Rate: data.Rate,
+            Rate_Flag: data.Rate_Flag,
+        })),
+    };
+
+    try {
+        const response = await putApi('Master/updateRateMasterMultiple', requestBody, 'PUT');
+
+        if (response.status === 1) {
+            setFormdata({
+                Client_Code: "",
+                Club_No: "",
+                Mode_Code: [],
+                Zone_Code: [],
+                State_Code: [],
+                Destination_Code: [],
+                Origin_Code: "",
+                Active_Date: firstDayOfMonth,
+                Closing_Date: today,
+                Dox_Box: "Box",
+                Amount: "",
+                Weight: "",
+            });
+
+            setTableRowData({
+                On_Addition: "",
+                Lower_Wt: "",
+                Upper_Wt: "",
+                Rate: "",
+                Rate_Flag: ""
+            });
+
+            setSubmittedData([]);
+
+            Swal.fire('Updated!', response.message || 'Rate master updated successfully.', 'success');
+            setModalIsOpen(false);
+            await fetchCustomerRateData();
+        } else {
+            Swal.fire('Error', response.message || 'Failed to update rate master.', 'error');
+        }
+    } catch (error) {
+        console.error('Unable to update Customer Rate:', error);
+    }
 };
+
 
 
 
@@ -513,28 +572,28 @@ const handleUpdate = async (e) => {
                         <div>
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
-                               setFormdata({
-                    Client_Code: "",
-                    Club_No:"",
-                    Mode_Code: [],
-                    Zone_Code: [],
-                    State_Code: [],
-                    Destination_Code: [],
-                    Origin_Code: "",
-                    Active_Date: firstDayOfMonth,
-                    Closing_Date: today,
-                    Dox_Box: "Box",
-                    Amount: "",
-                    Weight: "",
-                });
-                setTableRowData({
-                    On_Addition: "",
-                    Lower_Wt: "",
-                    Upper_Wt: "",
-                    Rate: "",
-                    Rate_Flag: ""
-                });
-                setSubmittedData([]);
+                                setFormdata({
+                                    Client_Code: "",
+                                    Club_No: "",
+                                    Mode_Code: [],
+                                    Zone_Code: [],
+                                    State_Code: [],
+                                    Destination_Code: [],
+                                    Origin_Code: "",
+                                    Active_Date: firstDayOfMonth,
+                                    Closing_Date: today,
+                                    Dox_Box: "Box",
+                                    Amount: "",
+                                    Weight: "",
+                                });
+                                setTableRowData({
+                                    On_Addition: "",
+                                    Lower_Wt: "",
+                                    Upper_Wt: "",
+                                    Rate: "",
+                                    Rate_Flag: ""
+                                });
+                                setSubmittedData([]);
                             }}>
                                 <i className="bi bi-plus-lg"></i>
                                 <span>ADD NEW</span>
@@ -608,33 +667,8 @@ const handleUpdate = async (e) => {
                                                         onClick={() => {
                                                             setIsEditMode(true);
                                                             setOpenRow(null);
+                                                            handleGet(rate?.Club_No);
 
-                                                            const parseDate = (date) => {
-                                                                if (!date) return null;
-                                                                // handles both ISO & dd/MM/yyyy
-                                                                if (typeof date === "string" && date.includes("/")) {
-                                                                    const [day, month, year] = date.split("/");
-                                                                    return new Date(`${year}-${month}-${day}`);
-                                                                }
-                                                                return new Date(date);
-                                                            };
-                                                            console.log(rate?.Client_Code);
-                                                            setFormdata({
-                                                                Club_No:rate?.Club_No,
-                                                                Client_Code:Number( rate?.Client_Code) || "",
-                                                                Mode_Code: rate.Mode_Code ? [rate.Mode_Code] : [],
-                                                                Zone_Code: rate.Zone_Code ? [rate.Zone_Code] : [],
-                                                                State_Code: rate.State_Code ? [rate.State_Code] : [],
-                                                                Destination_Code: rate.Destination_Code ? [rate.Destination_Code] : [],
-                                                                Origin_Code: rate?.Origin_Code || "",
-                                                                Active_Date: parseDate(rate.Active_Date) || firstDayOfMonth,
-                                                                Closing_Date: parseDate(rate.Closing_Date) || today,
-                                                                Dox_Box: rate.Dox_Spx || "Box",
-                                                                Amount: rate.Amount || "",
-                                                                Weight: rate.Weight || "",
-                                                            });
-
-                                                            setSubmittedData(rate.RateDetails || []);
                                                             setModalIsOpen(true);
                                                         }}
                                                     >
@@ -1030,7 +1064,7 @@ const handleUpdate = async (e) => {
                                         <div className="input-field1">
                                             <label htmlFor="">Destination</label>
                                             <Select
-                                                options={getCity.map(city => ({
+                                                options={filteredCity.map(city => ({
                                                     value: city.City_Code,
                                                     label: city.City_Name
                                                 }))}
@@ -1038,7 +1072,7 @@ const handleUpdate = async (e) => {
                                                     formdata.Destination_Code && Array.isArray(formdata.Destination_Code)
                                                         ? formdata.Destination_Code.map(code => ({
                                                             value: code,
-                                                            label: getCity.find(c => c.City_Code === code)?.City_Name || ""
+                                                            label: filteredCity.find(c => c.City_Code === code)?.City_Name || ""
                                                         }))
                                                         : []
                                                 }
@@ -1172,7 +1206,7 @@ const handleUpdate = async (e) => {
                                         </div>
                                         <div className='bottom-buttons' style={{ marginTop: "22px", marginLeft: "10px" }}>
                                             {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
-                                            {isEditMode && (<button type='button' onClick={ handleUpdate} className='ok-btn'>Update</button>)}
+                                            {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
                                             <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                         </div>
 

@@ -656,7 +656,7 @@ function CustomerName() {
                                                     }}>
                                                         <i className='bi bi-pen'></i>
                                                     </button>
-                                                    <button onClick={() =>{
+                                                    <button onClick={() => {
                                                         handleDeleteCustName(cust.Customer_Code);
                                                         setOpenRow(null);
                                                     }} className='edit-btn'>
@@ -798,14 +798,19 @@ function CustomerName() {
                                                 </div>
 
                                                 <div className="input-field3">
-                                                    <label htmlFor="">Cash / Credit</label>
+                                                    <label htmlFor="">Booking Mode</label>
                                                     <Select
                                                         className="blue-selectbooking"
                                                         classNamePrefix="blue-selectbooking"
                                                         options={[
                                                             { value: "Cash", label: "Cash" },
                                                             { value: "Credit", label: "Credit" },
+                                                            { value: "To-pay", label: "To-pay" },
+                                                            { value: "Google Pay", label: "Google Pay" },
+                                                            { value: "RTGS", label: "RTGS" },
+                                                            { value: "NEFT", label: "NEFT" }
                                                         ]}
+
                                                         value={
                                                             addCustData.bookingType
                                                                 ? { value: addCustData.bookingType, label: addCustData.bookingType }
@@ -817,7 +822,7 @@ function CustomerName() {
                                                                 bookingType: selected ? selected.value : "",
                                                             })
                                                         }
-                                                        placeholder="Cash / Credit"
+                                                        placeholder="Select Booking Mode"
                                                         isSearchable={false}
                                                         isClearable={false}
                                                         menuPortalTarget={document.body}

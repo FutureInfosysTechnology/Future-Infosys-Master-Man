@@ -8,7 +8,7 @@ import 'jspdf-autotable';
 import Select from 'react-select'; // 🔹 You forgot this
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { getApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 // import './EmailBooking.css'; // Optional: for your custom styles
 import { FaPaperPlane, FaFileExcel, FaFilePdf } from "react-icons/fa";
 
@@ -146,67 +146,52 @@ function EmailBooking() {
     doc.save("SelectedDockets.pdf");
   };
 
- const exportSelectedToExcel = () => {
-  if (selectedDockets.length === 0) {
+  const exportSelectedToExcel = () => {
+    if (selectedDockets.length === 0) {
+      Swal.fire("Error", "Please select at least one docket to export", "error");
+      return;
+    }
+
+    // Filter only selected rows
+    const selectedData = EmailData.filter((row) =>
+      selectedDockets.includes(row.DocketNo)
+    );
+
+    // Format the BookDate properly
+    const formattedData = selectedData.map((row) => ({
+      ...row,
+      BookDate: row.BookDate ? new Date(row.BookDate).toLocaleDateString("en-GB") : "",
+    }));
+
+    // Create Excel workbook
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Data");
+
+    // Write to file
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, `SelectedDockets_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+  };
+  const sendMail = async () => {
+  // 1️⃣ Check if any docket is selected
+  if (!selectedDockets?.length) {
     Swal.fire("Error", "Please select at least one docket to export", "error");
     return;
   }
 
-  // Filter only selected rows
+  // 2️⃣ Filter only selected rows
   const selectedData = EmailData.filter((row) =>
     selectedDockets.includes(row.DocketNo)
   );
 
-  // Format the BookDate properly
-  const formattedData = selectedData.map((row) => ({
-    ...row,
-    BookDate: row.BookDate ? new Date(row.BookDate).toLocaleDateString("en-GB") : "",
-  }));
-
-  // Create Excel workbook
-  const worksheet = XLSX.utils.json_to_sheet(formattedData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Data");
-
-  // Write to file
-  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-  saveAs(data, `SelectedDockets_${new Date().toISOString().slice(0,10)}.xlsx`);
-
-};
-const sendMail = async () => {
-  if (selectedDockets.length === 0) {
-    Swal.fire("Error", "Please select at least one docket to export", "error");
-    return;
-  }
-
-  // Filter only selected rows
-  const selectedData = EmailData.filter((row) =>
-    selectedDockets.includes(row.DocketNo)
-  );
-
-  if (selectedData.length === 0) {
+  if (!selectedData.length) {
     Swal.fire("Error", "No matching data found for selected dockets", "error");
     return;
   }
 
-  // ✅ Get the first customer's name (assuming all selected rows belong to same customer)
-  const customerName = selectedData[0].Customer_Name;
-  const customerInfo = getCustomer.find(
-    (cust) => cust.Customer_Name === customerName
-  );
-
-  // ✅ Check if email exists and is enabled
-  if (!customerInfo || !customerInfo.Email_Id || !customerInfo.Email) {
-    Swal.fire(
-      "Email Not Found",
-      `Customer "${customerName}" does not have a valid email or email option is disabled.`,
-      "warning"
-    );
-    return;
-  }
-
-  // Prepare Excel data
+  // 3️⃣ Format data for Excel
   const formattedData = selectedData.map((row) => ({
     ...row,
     BookDate: row.BookDate
@@ -214,47 +199,68 @@ const sendMail = async () => {
       : "",
   }));
 
-  // Create workbook
+  // 4️⃣ Create Excel workbook
   const worksheet = XLSX.utils.json_to_sheet(formattedData);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Data");
 
   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
   const fileName = `SelectedDockets_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
-  // Save locally (optional)
-  saveAs(data, fileName);
+  // ✅ Convert to File (not Blob)
+  const file = new File(
+    [excelBuffer],
+    fileName,
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+  );
 
-  // ✅ Auto-send email if valid
+  // 5️⃣ Send email
   try {
     const fromDate = formatDate(formData.fromdt);
     const toDate = formatDate(formData.todt);
 
-    const response = await fetch(
-      `http://localhost:3200/Master/sendBookingExcelEmail?CustomerName=${encodeURIComponent(
-        customerName
-      )}&fromdt=${fromDate}&todt=${toDate}&recipientEmail=${
-        customerInfo.Email_Id
-      }&fileType=excel`
+    Swal.fire({
+      title: "Sending Email...",
+      text: "Please wait while we send your Excel report...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("file", file);
+    formDataToSend.append("recipientEmail", "shaikharbazazaz@gmail.com");
+    formDataToSend.append("CustomerName", "Arbaz");
+    formDataToSend.append("fromdt", fromDate);
+    formDataToSend.append("todt", toDate);
+
+    const result = await postApi(
+      "Booking/sendRegistrationEmail",
+      "POST",
+      formDataToSend
     );
 
-    const result = await response.json();
+    Swal.close();
 
     if (result.status === 1) {
       Swal.fire(
-        "Success",
-        `Excel file sent successfully to ${customerInfo.Email_Id}`,
+        "✅ Success",
+        `Excel file sent successfully to shaikharbazazaz@gmail.com`,
         "success"
       );
     } else {
-      Swal.fire("Error", result.message || "Email sending failed", "error");
+      Swal.fire("❌ Error", result.message || "Email sending failed", "error");
     }
   } catch (error) {
     console.error("Email send failed:", error);
-    Swal.fire("Error", "Failed to send email. Please check the server.", "error");
+    Swal.fire(
+      "Error",
+      "Failed to send email. Please check your network or server.",
+      "error"
+    );
   }
 };
+
+
 
   const handleSelectAll = () => {
     setSelectedDockets(
@@ -342,40 +348,40 @@ const sendMail = async () => {
             />
           </div>
           <div className="col-12 col-md-5 mt-4 pt-1 gap-2 d-flex align-items-center justify-content-center justify-content-md-end flex-wrap">
-              <button
-                type="submit"
-                className="btn btn-primary btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
-              >
-                <FaPaperPlane size={10} /><span style={{ marginRight: "2px" }}>Submit</span>
-              </button>
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
+            >
+              <FaPaperPlane size={10} /><span style={{ marginRight: "2px" }}>Submit</span>
+            </button>
 
-              {/* Email Button */}
-              <button
-                type="button"
-                className="btn btn-info btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
+            {/* Email Button */}
+            <button
+              type="button"
+              className="btn btn-info btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
               // 🔹 send excel by default
               onClick={sendMail}
-              >
-                <MdEmail size={10} /><span style={{ marginRight: "2px" }}>Mail</span>
-              </button>
+            >
+              <MdEmail size={10} /><span style={{ marginRight: "2px" }}>Mail</span>
+            </button>
 
-              {/* Excel Button */}
-              <button
-                type="button"
-                className="btn btn-success btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
-                onClick={exportSelectedToExcel}
-              >
-                <FaFileExcel size={10} /><span style={{ marginRight: "2px" }}>Excel</span>
-              </button>
+            {/* Excel Button */}
+            <button
+              type="button"
+              className="btn btn-success btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
+              onClick={exportSelectedToExcel}
+            >
+              <FaFileExcel size={10} /><span style={{ marginRight: "2px" }}>Excel</span>
+            </button>
 
-              {/* PDF Button */}
-              <button
-                type="button"
-                className="btn btn-danger btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
-                onClick={exportSelectedToPDF}
-              >
-                <FaFilePdf size={10} /><span style={{ marginRight: "2px" }}>PDF</span>
-              </button>
+            {/* PDF Button */}
+            <button
+              type="button"
+              className="btn btn-danger btn-sm d-flex align-items-center gap-1 rounded-pill shadow-sm"
+              onClick={exportSelectedToPDF}
+            >
+              <FaFilePdf size={10} /><span style={{ marginRight: "2px" }}>PDF</span>
+            </button>
           </div>
 
 

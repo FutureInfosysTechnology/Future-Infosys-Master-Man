@@ -381,7 +381,7 @@ function FirstInvoice() {
                                                             <td style={cellStyle}>{index + 1}</td>
                                                             <td style={cellStyle}>{invoice?.DocketNo}</td>
                                                             <td style={cellStyle}>{invoice?.BillDate[0]}</td>
-                                                            {isConsigChecked && <td  style={cellStyle}>{invoice?.consigneeName}</td>}
+                                                            {isConsigChecked && <td style={cellStyle}>{invoice?.consigneeName}</td>}
                                                             <td style={cellStyle}>{invoice?.fromDest}</td>
                                                             <td style={cellStyle}>{invoice?.toDest}</td>
                                                             <td style={cellStyle}>{invoice?.ModeName}</td>
@@ -523,7 +523,7 @@ function FirstInvoice() {
                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>A/C No :</div> <div style={{ textAlign: "start" }}>{invoiceData[0]?.AccountNo}</div></div>
                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>IFSC Code :</div> <div style={{ textAlign: "start" }}>{invoiceData[0]?.IFSC_Code}</div></div>
                                 </div>
-                                <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", padding: "5px", fontSize: "10px", paddingRight: "80px" }}>
+                                <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", padding: "5px", fontSize: "10px" }}>
                                     <div style={{ display: "flex", width: "60%", gap: "2px", flexDirection: "column" }}>
                                         <div style={{ fontWeight: "bold", fontSize: "11px" }}> TERMS :</div>
                                         {
@@ -535,7 +535,13 @@ function FirstInvoice() {
                                         <div style={{ fontWeight: "bold", fontSize: "11px", marginLeft: "10px", marginTop: "20px", marginBottom: "20px" }}> This is Computerised Generated Bill hence does not require any  signature & Stam</div>
                                     </div>
                                     <div style={{ display: "flex", width: "40%", justifyContent: "center", alignItems: "center" }}>
-                                        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "100%", gap: "30px", fontWeight: "bold", fontSize: "13px" }}>
+                                        <div style={{
+                                            display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "30%",
+                                            gap: "30px", fontWeight: "bold", fontSize: "13px", height: "100px", backgroundImage: `url(${getBranch?.Company_Stamp})`, // 👈 use your stored image
+                                            backgroundSize: "contain",
+                                            backgroundPosition: "center",
+                                            backgroundRepeat: "no-repeat",
+                                        }}>
                                             <div style={{}}>For <b style={{ marginLeft: "5px", fontWeight: "bold", fontSize: "11px" }}>{invoiceData[0]?.Company_Name}</b></div>
                                             <div style={{ display: "flex", width: "30%", justifyContent: "center", alignItems: "center" }}> Auth. Signatory</div>
                                         </div>

@@ -18,7 +18,7 @@ function VendorWiseReport() {
     const [loading, setLoading] = useState(true);
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const getStatus = [{ value: "ALL STATUS DATA", label: "ALL STATUS DATA" },
+    const getStatus = [{ value: "ALL STATUS", label: "ALL STATUS" },
     { value: "Intransit", label: "Intransit" },
     { value: "OutForDelivery", label: "OutForDelivery" },
     { value: "Delivered", label: "Delivered" },
@@ -26,7 +26,7 @@ function VendorWiseReport() {
     { value: "Shipment Booked", label: "Shipment Booked" },
     ];
     const branchOptions = [
-        { value: "ALL BRANCH DATA", label: "ALL BRANCH DATA" }, // default option
+        { value: "ALL BRANCH", label: "ALL BRANCH" }, // default option
         ...getBranch.map(city => ({
             value: city.Branch_Code,   // adjust keys from your API
             label: city.Branch_Name,
@@ -34,18 +34,18 @@ function VendorWiseReport() {
     ];
 
     const allOptions = [
-        { label: "ALL VENDOR TYPE", value: "ALL VENDOR TYPE" },
+        { label: "ALL VENDOR", value: "ALL VENDOR" },
         ...getVendor.map(vendor => ({
-            value: vendor.Vendor_Code,   // adjust keys from your API
+            value: vendor.Vendor_Name,   // adjust keys from your API
             label: vendor.Vendor_Name
         }))
     ];
     const [formData, setFormData] = useState({
         fromdt: firstDayOfMonth,
         todt: today,
-        vendorCode: "ALL VENDOR TYPE",
-        status: "ALL STATUS DATA",
-        branch: "ALL BRANCH DATA",
+        vendorCode: "ALL VENDOR",
+        status: "ALL STATUS",
+        branch: "ALL BRANCH",
     });
 
     const [EmailData, setEmailData] = useState([]);
@@ -84,31 +84,40 @@ function VendorWiseReport() {
     };
 
     const handlesave = async (e) => {
-        e.preventDefault();
-        const fromdt = formatDate(formData.fromdt);
-        const todt = formatDate(formData.todt);
-        const vendorCode = formData.vendorCode || "ALL VENDOR TYPE";
-        const status = formData.status || "ALL STATUS DATA";
-        const branch = formData.branch || "ALL BRANCH DATA";
+  e.preventDefault();
 
-        if (!fromdt || !todt) {
-            Swal.fire('Error', 'Both From Date and To Date are required.', 'error');
-            return;
-        }
-        try {
-            const response = await getApi(`Booking/VendorDeliveryReport?Vendor_Name=${encodeURIComponent(vendorCode)}&Status=${encodeURIComponent(status)}&fromdt=${encodeURIComponent(fromdt)}&todt=${encodeURIComponent(todt)}&branchCode=${encodeURIComponent(branch)}&pageNumber=${encodeURIComponent(currentPage)}&pageSize=${encodeURIComponent(rowsPerPage)}&BookingType=ALL BOOKING TYPE`);
-            if (response.status === 1) {
-                setEmailData(response.Data);
-                setSelectedDockets([]);
-                Swal.fire('Saved!', 'Data has been fetched.', 'success');
-                setCurrentPage(1);
-            }
-        } catch (error) {
-            console.error("API Error:", error);
-            setEmailData([]);
-            Swal.fire('No Data', 'No records found.', 'info');
-        }
-    };
+  const fromdt = formatDate(formData.fromdt);
+  const todt = formatDate(formData.todt);
+  const Vendor_Name = formData.vendorCode || "ALL VENDOR";
+  const Status = formData.status || "ALL STATUS";
+  const Branch_Name = formData.branch || "ALL BRANCH";
+
+  if (!fromdt || !todt) {
+    Swal.fire('Error', 'Both From Date and To Date are required.', 'error');
+    return;
+  }
+
+  try {
+    const response = await getApi(
+      `Booking/VendorDeliveryReport?Vendor_Name=${encodeURIComponent(Vendor_Name)}&Status=${encodeURIComponent(Status)}&fromdt=${encodeURIComponent(fromdt)}&todt=${encodeURIComponent(todt)}&Branch_Name=${encodeURIComponent(Branch_Name)}&pageNumber=${encodeURIComponent(currentPage)}&pageSize=${encodeURIComponent(rowsPerPage)}`
+    );
+
+    if (response.status === 1) {
+      setEmailData(response.Data);
+      setSelectedDockets([]);
+      setCurrentPage(1);
+      Swal.fire('Saved!', 'Data has been fetched.', 'success');
+    } else {
+      Swal.fire('No Data', response.message || 'No records found.', 'info');
+      setEmailData([]);
+    }
+  } catch (error) {
+    console.error("API Error:", error);
+    Swal.fire('Error', 'Something went wrong while fetching data.', 'error');
+    setEmailData([]);
+  }
+};
+
 
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -251,7 +260,7 @@ function VendorWiseReport() {
                             options={allOptions}
                             value={
                                 formData.vendorCode
-                                    ? allOptions.find(c => c.value === formData.vendorCode)
+                                    ? {value:formData.vendorCode,label:formData.vendorCode}
                                     : null
                             }
                             onChange={(selectedOption) =>

@@ -178,7 +178,7 @@ function ModeWiseReport() {
         <>
 
             <div className="card shadow-sm p-3 mb-4 bg-white rounded">
-                <form>
+                <form onSubmit={handlesave}>
                     <div className="row g-3 mb-3">
                         <div className="col-12 col-md-4">
                             <h6 className="form-label mb-0" style={{ fontSize: "0.85rem", color: "#212529" }}>Type Of Report</h6>

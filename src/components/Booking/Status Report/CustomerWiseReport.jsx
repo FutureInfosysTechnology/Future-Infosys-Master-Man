@@ -19,11 +19,11 @@ function CustomerWiseReport() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(15);
   const [selectedDockets, setSelectedDockets] = useState([]);
-    const [error, setError] = useState(null);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [getBranch, setGetBranch] = useState([]);
 
-  const getStatus = [{ value: "ALL STATUS DATA", label: "ALL STATUS DATA" },
+  const getStatus = [{ value: "ALL Status", label: "ALL Status" },
   { value: "Intransit", label: "Intransit" },
   { value: "OutForDelivery", label: "OutForDelivery" },
   { value: "Delivered", label: "Delivered" },
@@ -31,14 +31,14 @@ function CustomerWiseReport() {
   { value: "Shipment Booked", label: "Shipment Booked" },
   ];
   const allOptions = [
-    { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
+    { label: "ALL Customer", value: "ALL Customer" },
     ...getCustomer.map((cust) => ({
       label: cust.Customer_Name,
       value: cust.Customer_Name,
     })),
   ];
   const branchOptions = [
-    { value: "All BRANCH DATA", label: "All BRANCH DATA" }, // default option
+    { value: "All Branch", label: "All Branch" }, // default option
     ...getBranch.map(city => ({
       value: city.Branch_Code,   // adjust keys from your API
       label: city.Branch_Name,
@@ -48,9 +48,9 @@ function CustomerWiseReport() {
   const [formData, setFormData] = useState({
     fromdt: firstDayOfMonth,
     todt: today,
-    CustomerName: "ALL CLIENT DATA",
-    status: "ALL STATUS DATA",
-    branch: "All BRANCH DATA",
+    CustomerName: "ALL Customer",
+    status: "ALL Status",
+    branch: "All Branch",
   });
 
 
@@ -89,9 +89,9 @@ function CustomerWiseReport() {
     e.preventDefault();
     const fromdt = formatDate(formData.fromdt);
     const todt = formatDate(formData.todt);
-    const CustomerName = formData.CustomerName || "ALL CLIENT DATA";
-    const status = formData.status || "ALL STATUS DATA";
-    const branch = formData.branch || "All BRANCH DATA";
+    const CustomerName = formData.CustomerName || "ALL Customer";
+    const status = formData.status || "ALL Status ";
+    const branch = formData.branch || "All Branch ";
 
     if (!fromdt || !todt) {
       Swal.fire('Error', 'Both From Date and To Date are required.', 'error');
@@ -99,7 +99,10 @@ function CustomerWiseReport() {
     }
 
     try {
-      const response = await getApi(`Booking/StatusReport?CustomerName=${encodeURIComponent(CustomerName)}&Status=${encodeURIComponent(status)}&fromdt=${encodeURIComponent(fromdt)}&todt=${encodeURIComponent(todt)}&branchCode=${encodeURIComponent(branch)}&pageNumber=${encodeURIComponent(currentPage)}&pageSize=${encodeURIComponent(rowsPerPage)}&BookingType=ALL BOOKING TYPE`);
+      const response = await getApi(
+        `Booking/StatusReport?CustomerName=${encodeURIComponent(CustomerName)}&Status=${encodeURIComponent(status)}&fromdt=${encodeURIComponent(fromdt)}&todt=${encodeURIComponent(todt)}&Branch_Name=${encodeURIComponent(branch)}&pageNumber=${encodeURIComponent(currentPage)}&pageSize=${encodeURIComponent(rowsPerPage)}`
+      );
+
       if (response.status === 1) {
         setEmailData(response.Data);
         setSelectedDockets([]);
@@ -109,7 +112,7 @@ function CustomerWiseReport() {
     } catch (error) {
       console.error("API Error:", error);
       setEmailData([]);
-      Swal.fire('No Data','No records found.', 'info');
+      Swal.fire('No Data', 'No records found.', 'info');
     }
   };
 
@@ -173,10 +176,10 @@ function CustomerWiseReport() {
     }
 
     const formattedData = currentRows.map(row => ({
-        ...row,
-        BookDate: row.BookDate ? new Date(row.BookDate).toLocaleDateString("en-GB") : "",
-      }));
-            const worksheet = XLSX.utils.json_to_sheet(formattedData);
+      ...row,
+      BookDate: row.BookDate ? new Date(row.BookDate).toLocaleDateString("en-GB") : "",
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "CurrentPageData");
 
@@ -325,49 +328,49 @@ function CustomerWiseReport() {
 
           {/* Buttons */}
           <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end flex-wrap">
-          
-                                  {/* Submit Button */}
-                                  <button
-                                      type="submit"
-                                      className="btn btn-primary btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
-                                  >
-                                      <FaPaperPlane size={16} /><span style={{marginRight:"2px"}}>Submit</span>
-                                  </button>
-          
-                                  {/* Email Button */}
-                                  <button
-                                      type="button"
-                                      className="btn btn-info btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
-                                      onClick={() => handleSendEmailWithAttachment("excel")} // 🔹 send excel by default
-                                  >
-                                      <MdEmail size={16} /><span style={{marginRight:"2px"}}>Mail</span>
-                                  </button>
-          
-                                  {/* Excel Button */}
-                                  <button
-                                      type="button"
-                                      className="btn btn-success btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
-                                      onClick={exportSelectedToExcel}
-                                  >
-                                      <FaFileExcel size={16} /><span style={{marginRight:"2px"}}>Excel</span>
-                                  </button>
-          
-                                  {/* PDF Button */}
-                                  <button
-                                      type="button"
-                                      className="btn btn-danger btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
-                                      onClick={exportSelectedToPDF}
-                                  >
-                                      <FaFilePdf size={16} /><span style={{marginRight:"2px"}}>PDF</span>
-                                  </button>
-                              </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
+            >
+              <FaPaperPlane size={16} /><span style={{ marginRight: "2px" }}>Submit</span>
+            </button>
+
+            {/* Email Button */}
+            <button
+              type="button"
+              className="btn btn-info btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
+              onClick={() => handleSendEmailWithAttachment("excel")} // 🔹 send excel by default
+            >
+              <MdEmail size={16} /><span style={{ marginRight: "2px" }}>Mail</span>
+            </button>
+
+            {/* Excel Button */}
+            <button
+              type="button"
+              className="btn btn-success btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
+              onClick={exportSelectedToExcel}
+            >
+              <FaFileExcel size={16} /><span style={{ marginRight: "2px" }}>Excel</span>
+            </button>
+
+            {/* PDF Button */}
+            <button
+              type="button"
+              className="btn btn-danger btn-sm d-flex align-items-center gap-2 rounded-pill shadow-sm"
+              onClick={exportSelectedToPDF}
+            >
+              <FaFilePdf size={16} /><span style={{ marginRight: "2px" }}>PDF</span>
+            </button>
+          </div>
         </div>
       </form>
 
       {/* 📋 Table */}
       <div className='table-responsive' style={{ maxHeight: "400px", overflowY: "auto" }}>
         <table className='table table-bordered table-sm text-nowrap'>
-          <thead className='green-header' style={{ position: "sticky", top: 0, zIndex: 2}}>
+          <thead className='green-header' style={{ position: "sticky", top: 0, zIndex: 2 }}>
             <tr>
               <th>Sr.No</th>
               <th>DocketNo</th>
@@ -421,50 +424,50 @@ function CustomerWiseReport() {
       </div>
 
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-2">
-                    {/* Rows per page dropdown */}
-                    <div className="d-flex align-items-center gap-2">
-                        <label className="mb-0">Rows per page:</label>
-                        <select
-                            className="form-select form-select-sm"
-                            style={{ width: "80px" }}
-                            value={rowsPerPage}
-                            onChange={(e) => {
-                                setRowsPerPage(Number(e.target.value));
-                                setCurrentPage(1); // reset to first page
-                            }}
-                        >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={15}>15</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                            <option value={EmailData.length}>All</option>
-                        </select>
-                    </div>
+        {/* Rows per page dropdown */}
+        <div className="d-flex align-items-center gap-2">
+          <label className="mb-0">Rows per page:</label>
+          <select
+            className="form-select form-select-sm"
+            style={{ width: "80px" }}
+            value={rowsPerPage}
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setCurrentPage(1); // reset to first page
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={EmailData.length}>All</option>
+          </select>
+        </div>
 
-                    {/* Pagination */}
-                    <div className="d-flex align-items-center gap-2">
-                        <button
-                            className="ok-btn"
-                            style={{width:"30px"}}
-                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                        >
-                            {"<"}
-                        </button>
-                        <span style={{ color: "#333", padding: "5px" }}>
-                            Page {currentPage} of {totalPages}
-                        </span>
-                        <button
-                            className="ok-btn"
-                            style={{width:"30px"}}
-                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                        >
-                            {">"}
-                        </button>
-                    </div>
-                </div>
+        {/* Pagination */}
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="ok-btn"
+            style={{ width: "30px" }}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            {"<"}
+          </button>
+          <span style={{ color: "#333", padding: "5px" }}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="ok-btn"
+            style={{ width: "30px" }}
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            {">"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
