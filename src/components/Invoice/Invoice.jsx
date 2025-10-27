@@ -10,6 +10,7 @@ import "./permonce.css"
 import ViewPerforma from './ViewPerforma';
 import { useLocation } from 'react-router-dom';
 import InvoiceSum from './InvoiceSum';
+import DocketInvoicePrint from './DocketInvoicePrint';
 
 function Invoice() {
     const location = useLocation();
@@ -32,12 +33,13 @@ function Invoice() {
                         <label onClick={() => setActiveTab("zone")}>Generate Invoice</label>
                         <label onClick={() => setActiveTab("multiple")}>View Invoice</label>
                         <label onClick={() => setActiveTab("Sum")}>Invoice Summary</label>
+                        <label onClick={() => setActiveTab("print")}>Docket Print</label>
                         <label onClick={() => setActiveTab("country")}>Performance Invoice</label>
                         <label onClick={() => setActiveTab("view")}>View Performance Invoice</label>
 
                         <div
                             className="slider"
-                            style={{ left: `${["state", "zone", "multiple", "Sum", "country", "view",].indexOf(activeTab) * 16.80}%`, width: "16%", }}
+                            style={{ left: `${["state", "zone", "multiple", "Sum","print", "country", "view",].indexOf(activeTab) * 14.28}%`, width: "14.28%", }}
                         />
                     </nav>
                     <section>
@@ -45,6 +47,7 @@ function Invoice() {
                         {activeTab === 'zone' && <GenerateInvoice />}
                         {activeTab === 'multiple' && <ViewInvoice />}
                         {activeTab === 'Sum' && <InvoiceSum />}
+                        {activeTab === 'print' && <DocketInvoicePrint />}
                         {activeTab === 'country' && <PerformanceBill />}
                         {activeTab === 'view' && <ViewPerforma />}
                         

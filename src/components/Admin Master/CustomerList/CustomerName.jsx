@@ -1011,7 +1011,7 @@ function CustomerName() {
                                                 </div>
 
                                                 <div className="input-field3">
-                                                    <label htmlFor="">Fuel</label>
+                                                    <label htmlFor="">Fuel %</label>
                                                     <div style={{ display: "flex", flexDirection: "row" }}>
                                                         <input style={{
                                                             width: "70%", borderRight: "transparent",
@@ -1032,7 +1032,7 @@ function CustomerName() {
                                                 </div>
 
                                                 <div className="input-field3">
-                                                    <label htmlFor="">Discount</label>
+                                                    <label htmlFor="">Discount %</label>
                                                     <div style={{ display: "flex", flexDirection: "row" }}>
                                                         <input style={{
                                                             width: "70%", borderRight: "transparent",

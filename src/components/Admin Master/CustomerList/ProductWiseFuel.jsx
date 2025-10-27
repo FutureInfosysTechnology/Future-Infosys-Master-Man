@@ -40,16 +40,17 @@ function ProductWiseFuel() {
     const [addCust, setAddCust] = useState({
         custCode: '',
         modeCode: '',
-        fuelCharge: '',
-        fovper:0,
-        fovCharge: '',
-        docketCharge: '',
-        deliveryCharge: '',
-        packingCharge: '',
-        greenCharge: '',
-        hamaliCharge: '',
-        otherCharge: '',
-        insuranceCharge: '',
+        fuelCharge: 0,
+        FuelPer: 0,
+        fovper: 0,
+        fovCharge: 0,
+        docketCharge: 0,
+        deliveryCharge: 0,
+        packingCharge: 0,
+        greenCharge: 0,
+        hamaliCharge: 0,
+        otherCharge: 0,
+        insuranceCharge: 0,
         fromDate: firstDayOfMonth,
         toDate: today,
     })
@@ -179,7 +180,6 @@ function ProductWiseFuel() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-
         const requestBody = {
             CustomerCode: addCust.custCode,
             ModeCode: addCust.modeCode,
@@ -203,18 +203,19 @@ function ProductWiseFuel() {
                 setAddCust({
                     custCode: '',
                     modeCode: '',
-                    fuelCharge: '',
-                    fovper:0,
-                    fovCharge: '',
-                    docketCharge: '',
-                    deliveryCharge: '',
-                    packingCharge: '',
-                    greenCharge: '',
-                    hamaliCharge: '',
-                    otherCharge: '',
-                    insuranceCharge: '',
+                    fuelCharge: 0,
+                    FuelPer: 0,
+                    fovper: 0,
+                    fovCharge: 0,
+                    docketCharge: 0,
+                    deliveryCharge: 0,
+                    packingCharge: 0,
+                    greenCharge: 0,
+                    hamaliCharge: 0,
+                    otherCharge: 0,
+                    insuranceCharge: 0,
                     fromDate: firstDayOfMonth,
-                    toDate: today
+                    toDate: today,
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -268,18 +269,19 @@ function ProductWiseFuel() {
                 setAddCust({
                     custCode: '',
                     modeCode: '',
-                    fuelCharge: '',
-                     fovper:0,
-                    fovCharge: '',
-                    docketCharge: '',
-                    deliveryCharge: '',
-                    packingCharge: '',
-                    greenCharge: '',
-                    hamaliCharge: '',
-                    otherCharge: '',
-                    insuranceCharge: '',
+                    fuelCharge: 0,
+                    FuelPer: 0,
+                    fovper: 0,
+                    fovCharge: 0,
+                    docketCharge: 0,
+                    deliveryCharge: 0,
+                    packingCharge: 0,
+                    greenCharge: 0,
+                    hamaliCharge: 0,
+                    otherCharge: 0,
+                    insuranceCharge: 0,
                     fromDate: firstDayOfMonth,
-                    toDate: today
+                    toDate: today,
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -395,9 +397,21 @@ function ProductWiseFuel() {
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
                                 setAddCust({
-                                    custCode: '', modeCode: '', fuelCharge: '', fovCharge: '', fovper:0, docketCharge: '',
-                                    deliveryCharge: '', packingCharge: '', greenCharge: '', hamaliCharge: '',
-                                    otherCharge: '', insuranceCharge: '', fromDate: firstDayOfMonth, toDate: today
+                                    custCode: '',
+                                    modeCode: '',
+                                    fuelCharge: 0,
+                                    FuelPer: 0,
+                                    fovper: 0,
+                                    fovCharge: 0,
+                                    docketCharge: 0,
+                                    deliveryCharge: 0,
+                                    packingCharge: 0,
+                                    greenCharge: 0,
+                                    hamaliCharge: 0,
+                                    otherCharge: 0,
+                                    insuranceCharge: 0,
+                                    fromDate: firstDayOfMonth,
+                                    toDate: today,
                                 })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -635,50 +649,70 @@ function ProductWiseFuel() {
                                                             menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
                                                         }} />
                                                 </div>
-
+                                                
                                                 <div className="input-field1">
-                                                    <label htmlFor="">Fuel Charges</label>
-                                                    <div style={{ display: "flex", flexDirection: "row" }}>
+                                                    <label>Fuel Charges</label>
+                                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                                                         <input style={{
-                                                            width: "80%",
+                                                            width: "70%",
                                                             borderBottomRightRadius: "0px",
                                                             borderTopRightRadius: "0px",
                                                             borderRightColor: "transparent"
                                                         }} value={addCust.fuelCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, fuelCharge: e.target.value })}
                                                             type="text" placeholder="Enter Fuel Charges" />
-                                                        <button className="ok-btn"
+                                                        <input
+                                                            type="tel"
+                                                            placeholder="%"
                                                             style={{
-                                                                height: "35px",
                                                                 width: "30%",
-                                                                fontSize: "20px", padding: "5px",
-                                                                borderTopLeftRadius: "0px",
-                                                                borderBottomLeftRadius: "0px"
-                                                            }} onClick={(e) => { e.preventDefault(); setModalIsOpen1(true); }}><i className="bi bi-cash-coin"></i></button>
+                                                                borderLeft: "none",
+                                                                borderRadius: "0 4px 4px 0",
+                                                                padding: "5px",
+                                                                textAlign: "center",
+                                                            }}
+                                                            value={addCust.FuelPer !== "" ? `${addCust.FuelPer}%` : ""}
+                                                            onChange={(e) => {
+                                                                // ✅ Strip non-numeric chars before saving
+                                                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                                setAddCust({ ...addCust, FuelPer: val });
+                                                            }}
+                                                        />
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            <div className="fields2">
+                                                
                                                 {isFovChecked && (
-                                                    <div className="input-field3">
-                                                        <label htmlFor="">FOV </label>
-                                                        <div style={{ display: "flex", flexDirection: "row" }}>
-                                                            <input type="text" value={addCust.fovCharge}
-                                                            onChange={(e) => setAddCust({ ...addCust, fovCharge: e.target.value })}
-                                                            placeholder="Enter FOV " style={{
-                                                            width: "80%",
-                                                            borderBottomRightRadius: "0px",
-                                                            borderTopRightRadius: "0px",
-                                                            borderRightColor: "transparent"
-                                                        }}/>
-                                                         <input type="text" value={addCust.fovper}
-                                                            onChange={(e) => setAddCust({ ...addCust, fovper: e.target.value })}
-                                                            placeholder="% " style={{
-                                                            width: "20%",
-                                                        }}/>
-                                                        </div>
+                                                     <div className="input-field3">
+                                                    <label>Fov Charges</label>
+                                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                        <input type="text" value={addCust.fovCharge}
+                                                                onChange={(e) => setAddCust({ ...addCust, fovCharge: e.target.value })}
+                                                                placeholder="Enter FOV " style={{
+                                                                    width: "80%",
+                                                                    borderBottomRightRadius: "0px",
+                                                                    borderTopRightRadius: "0px",
+                                                                    borderRightColor: "transparent"
+                                                                }} />
+                                                        <input
+                                                            type="tel"
+                                                            placeholder="%"
+                                                            style={{
+                                                                width: "30%",
+                                                                borderLeft: "none",
+                                                                borderRadius: "0 4px 4px 0",
+                                                                padding: "5px",
+                                                                textAlign: "center",
+                                                            }}
+                                                            value={addCust.fovper !== "" ? `${addCust.fovper}%` : ""}
+                                                            onChange={(e) => {
+                                                                // ✅ Strip non-numeric chars before saving
+                                                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                                setAddCust({ ...addCust, fovper: val });
+                                                            }}
+                                                        />
                                                     </div>
+                                                </div>
+                                                   
                                                 )}
 
                                                 {isDocketChecked && (
@@ -736,7 +770,7 @@ function ProductWiseFuel() {
                                                 )}
 
                                                 {isInsuranceChecked && (
-                                                    <div className="input-field2">
+                                                    <div className="input-field3">
                                                         <label htmlFor="">Insurance Charges</label>
                                                         <input type="text" value={addCust.insuranceCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, insuranceCharge: e.target.value })}
@@ -767,15 +801,27 @@ function ProductWiseFuel() {
                                                         className="form-control form-control-sm"
                                                     />
                                                 </div>
+                                                <div className="input-field3">
+                                                    <button className="ok-btn"
+                                                        style={{
+                                                            height: "35px",
+                                                            width:"100px",
+                                                            marginTop:"15px",
+                                                            fontSize: "20px", padding: "5px",
+                                                            borderTopLeftRadius: "0px",
+                                                            borderBottomLeftRadius: "0px"
+                                                        }} onClick={(e) => { e.preventDefault(); setModalIsOpen1(true); }}><i className="bi bi-cash-coin"></i>
+                                                    </button>
+                                                </div>
 
-                                                
+
 
                                             </div>
                                             <div className='bottom-buttons' style={{ marginTop: "18px", marginLeft: "25px" }}>
-                                                    {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
-                                                    {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
-                                                    <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
-                                                </div>
+                                                {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
+                                                {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
+                                                <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </form>

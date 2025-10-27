@@ -113,9 +113,6 @@ function Booking() {
     }
         , [selectedDestPinCode])
     const [formData, setFormData] = useState({
-        custName: "",
-        shipper: "",
-        receiver: "",
         Location_Code: "",
         Customer_Code: "",
         DocketNo: "",
@@ -149,6 +146,7 @@ function Booking() {
         FuelCharges: 0,
         TotalGST: 0,
         totalgstPer: 0,
+        FovPer:0,
         FovChrgs: 0,
         DocketChrgs: 0,
         ODAChrgs: 0,
@@ -181,10 +179,11 @@ function Booking() {
         EwayBill: "",
         InvDate: getTodayDate(),
         BillParty: "Client-wise Bill",
-        DestName: "",
         Mode_Code: "",
-        Origin_zone: "",
+        Origin_Zone: "",
+        orgZoneName: "",
         Dest_Zone: "",
+        destZoneName: "",
     });
     const [addShipper, setAddShipper] = useState({
         shipperCode: '',
@@ -225,14 +224,14 @@ function Booking() {
     });
 
     const [gstData, setGstData] = useState({
-        CGSTPer: '',
-        CGSTAMT: '',
-        SGSTPer: '',
-        SGSTAMT: '',
-        IGSTPer: '',
-        IGSTAMT: '',
-        GSTPer: '',
-        TotalGST: ''
+        CGSTPer: 0,
+        CGSTAMT: 0,
+        SGSTPer: 0,
+        SGSTAMT: 0,
+        IGSTPer: 0,
+        IGSTAMT: 0,
+        GSTPer: 0,
+        TotalGST: 0
     });
 
     const [remarkData, setRemarkData] = useState({
@@ -504,14 +503,19 @@ function Booking() {
             insurance +
             oda +
             fuel;
-
+        if (total > 0) {
+            setFormData((prev) => ({
+                ...prev,
+                TotalAmt: total.toFixed(2), // two decimal points
+            }));
+        }
         if (total > 0 && formData.totalgstPer > 0) {
             const gstAmount = (total * parseFloat(formData.totalgstPer)) / 100;
             total = total + gstAmount;
             setGstData((prev) => ({
                 ...prev,
-                TotalGST:gstAmount.toFixed(2),
-                GSTPer:total.toFixed(2), 
+                TotalGST: gstAmount.toFixed(2),
+                GSTPer: total.toFixed(2),
             }));
             setFormData((prev) => ({
                 ...prev,
@@ -864,7 +868,7 @@ function Booking() {
 
 
     useEffect(() => {
-         if (!vendorsubmittedData || vendorsubmittedData.length === 0) return;
+        if (!vendorsubmittedData || vendorsubmittedData.length === 0) return;
         const totalVol = vendorsubmittedData.reduce((acc, data) => acc + parseFloat(data.VolmetricWt || 0), 0);
         const totalAct = vendorsubmittedData.reduce((acc, data) => acc + parseFloat(data.ActualWt || 0), 0);
         const totalCharge = vendorsubmittedData.reduce((acc, data) => acc + parseFloat(data.ChargeWt || 0), 0);
@@ -874,7 +878,7 @@ function Booking() {
         setTotalChargeWt(totalCharge);
         setFormData((prev) => ({
             ...prev,
-            VendorAmt: totalAct,
+            VendorWt: totalAct,
         }));
     }, [vendorsubmittedData]);
 
@@ -1111,9 +1115,9 @@ function Booking() {
                 if (response?.status === 1) {
                     const gst = response.Data;
                     console.log('✅ GST API Response:', gst);
-
-                    if (!skipGstCalc) {
-                        setFormData((prev) => ({
+                    if(formData.BookMode==="Credit")
+                    {
+                         setFormData((prev) => ({
                             ...prev,
                             FovChrgs: gst.Fov_Charges,
                             DocketChrgs: gst.Docket_Charges,
@@ -1129,20 +1133,22 @@ function Booking() {
                             SGST: gst.SGSTAMT,
                             IGST: gst.IGSTAMT,
                             TotalGST: gst.TotalGST,
+                            totalgstPer:gst.GSTPer,
                             TotalAmt: gst.TotalAmt
                         }));
+                  
+                    setGstData({
+                            CGSTAMT: gst.CGSTAMT,
+                            SGSTAMT: gst.SGSTAMT,
+                            IGSTAMT: gst.IGSTAMT,
+                            TotalGST: gst.TotalGST,
+                            CGSTPer: gst.CGSTPer,
+                            SGSTPer: gst.SGSTPer,
+                            IGSTPer: gst.IGSTPer,
+                            GSTPer: gst.GSTPer
+                        });
                     }
 
-                    setGstData({
-                        CGSTAMT: gst.CGSTAMT,
-                        SGSTAMT: gst.SGSTAMT,
-                        IGSTAMT: gst.IGSTAMT,
-                        TotalGST: gst.TotalGSwT,
-                        CGSTPer: gst.CGSTPer,
-                        SGSTPer: gst.SGSTPer,
-                        IGSTPer: gst.IGSTPer,
-                        GSTPer: gst.GSTPer
-                    });
                 }
             } catch (error) {
                 console.error("❌ Error in GST API:", error);
@@ -1169,7 +1175,6 @@ function Booking() {
         formData.ODAChrgs,
         formData.BookMode
     ]);
-
     useEffect(() => {
         const getVolum = async (Customer_Code, Mode_Code) => {
             try {
@@ -1285,7 +1290,8 @@ function Booking() {
             }
             setFormData((prev) => ({
                 ...prev,
-                Rate: freightAmount.toFixed(2)
+                Rate: freightAmount.toFixed(2),
+
             }));
         }
     }, [formData.ActualWt, formData.VolumetricWt, formData.ChargedWt, formData.RatePerkg]);
@@ -1302,9 +1308,6 @@ function Booking() {
     const resetAllForms = () => {
         console.log("reset");
         setFormData({
-            custName: "",
-            shipper: "",
-            receiver: "",
             Location_Code: "",
             Customer_Code: "",
             DocketNo: "",
@@ -1323,8 +1326,6 @@ function Booking() {
             Mode_Code: "",
             OriginCode: "",
             DestinationCode: "",
-            Origin_zone: "",
-            Zone_Name: "",
             DispatchDate: getTodayDate(),
             DoxSpx: "Box",
             RateType: "Weight",
@@ -1338,6 +1339,9 @@ function Booking() {
             Rate: 0,
             FuelPer: 0,
             FuelCharges: 0,
+            TotalGST: 0,
+            totalgstPer: 0,
+            FovPer:0,
             FovChrgs: 0,
             DocketChrgs: 0,
             ODAChrgs: 0,
@@ -1368,9 +1372,13 @@ function Booking() {
             InvoiceNo: "",
             InvValue: 0,
             EwayBill: "",
-            InvDate: "",
+            InvDate: getTodayDate(),
             BillParty: "Client-wise Bill",
-            DestName: "",
+            Mode_Code: "",
+            Origin_zone: "",
+            orgZoneName: "",
+            Dest_Zone: "",
+            destZoneName: "",
         });
 
         setSelectedOriginPinCode('');
@@ -1390,7 +1398,9 @@ function Booking() {
             CGSTPer: 0,
             CGSTAMT: 0,
             SGSTPer: 0,
-            SGSTAMT: 0
+            SGSTAMT: 0,
+            TotalGST:0,
+            GSTPer:0,
         });
 
         setRemarkData({
@@ -1471,10 +1481,11 @@ function Booking() {
             DocketNo: formData.DocketNo,
             BookDate: formatDate(formData.BookDate),
             Customer_Code: formData.Customer_Code,
-            Receiver_Code: formData.ConsigneeName,
-            Consignee_Name: formData.ConsigneeName ? allReceiverOption.find(
-                (opt) => opt.value === formData.ConsigneeName
-            )?.label : formData.ConsigneeName,
+            // ✅ Consignee
+            Receiver_Code: formData.ConsigneeName, // Code or Value from select
+            Consignee_Name:
+                allReceiverOption.find(opt => opt.value === formData.ConsigneeName)?.label ||
+                formData.ConsigneeName, // Label or text entered
             Consignee_Add1: formData.ConsigneeAdd1,
             Consignee_Add2: formData.ConsigneeAdd2,
             Consignee_State: formData.ConsigneeState,
@@ -1484,12 +1495,29 @@ function Booking() {
             Consignee_Email: formData.ConsigneeEmail,
             Consignee_GST: formData.ConsigneeGST,
             Consignee_Country: formData.ConsigneeCountry,
+
+            // ✅ Shipper
+            Shipper_Code: formData.Shipper_Name, // value from dropdown
+            Shipper_Name:
+                allShipperOption.find(opt => opt.value === formData.Shipper_Name)?.label ||
+                formData.Shipper_Name, // label or text entered
+            ActualShipper: formData.ActualShipper,
+            ShipperAdd: formData.ShipperAdd,
+            ShipperAdd2: formData.ShipperAdd2,
+            ShipperAdd3: formData.ShipperAdd3,
+            ShipperCity: formData.ShipperCity,
+            Shipper_StateCode: formData.Shipper_StateCode,
+            Shipper_GstNo: formData.Shipper_GstNo,
+            ShipperPin: formData.ShipperPin,
+            ShipperPhone: formData.ShipperPhone,
+            ShipperEmail: formData.ShipperEmail,
+
             Mode_Code: formData.Mode_Code,
             Origin_code: formData.OriginCode,
-            Origin_Zone: formData.Origin_zone,
+            Origin_Zone: formData.Origin_Zone,
             Origin_Pincode: selectedOriginPinCode,
             Destination_Code: formData.DestinationCode,
-            Dest_Zone: formData.Zone_Name,
+            Dest_Zone: formData.Dest_Zone,
             Dest_PinCode: selectedDestPinCode,
             BillParty: formData.BillParty,
             DispatchDate: formatDate(formData.DispatchDate),
@@ -1529,17 +1557,7 @@ function Booking() {
             VendorAwbNo1: vendorData.VendorAwbNo1,
             VendorAwbNo2: vendorData.VendorAwbNo2,
             ActualShipper: formData.ActualShipper,
-            Shipper_Code: formData.Shipper_Name,
-            Shipper_Name: formData.Shipper_Name ? allShipperOption.find(opt => opt.value === formData.Shipper_Name)?.label : formData.Shipper_Name,
-            ShipperAdd: formData.ShipperAdd,
-            ShipperAdd2: formData.ShipperAdd2,
-            ShipperAdd3: formData.ShipperAdd3,
-            ShipperCity: formData.ShipperCity,
-            Shipper_StateCode: formData.Shipper_StateCode,
-            Shipper_GstNo: formData.Shipper_GstNo,
-            ShipperPin: formData.ShipperPin,
-            ShipperPhone: formData.ShipperPhone,
-            ShipperEmail: formData.ShipperEmail,
+
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
             EwayBill: formData.EwayBill,
@@ -1615,7 +1633,8 @@ function Booking() {
                 const Customer_Code = formData.Customer_Code;
                 const Origin_code = formData.OriginCode;
                 const Pincode = selectedOriginPinCode;
-                const zone = formData.Origin_zone;
+                const zoneCode = formData.Origin_Zone;
+                const zoneName = formData.orgZoneName;
                 const bill = formData.BillParty;
                 const book = formData.BookMode;
                 const mode = formData.Mode_Code;
@@ -1625,7 +1644,8 @@ function Booking() {
                     ...prev,
                     Customer_Code: Customer_Code,
                     OriginCode: Origin_code,
-                    Origin_zone: zone,
+                    Origin_Zone: zoneCode,
+                    orgZoneName: zoneName,
                     BillParty: bill,
                     BookMode: book,
                     Mode_Code: mode,
@@ -1648,10 +1668,11 @@ function Booking() {
             DocketNo: formData.DocketNo,
             BookDate: formatDate(formData.BookDate),
             Customer_Code: formData.Customer_Code,
-            Receiver_Code: formData.ConsigneeName,
-            Consignee_Name: formData.ConsigneeName ? allReceiverOption.find(
-                (opt) => opt.value === formData.ConsigneeName
-            )?.label : formData.ConsigneeName,
+            // ✅ Consignee
+            Receiver_Code: formData.ConsigneeName, // Code or Value from select
+            Consignee_Name:
+                allReceiverOption.find(opt => opt.value === formData.ConsigneeName)?.label ||
+                formData.ConsigneeName, // Label or text entered
             Consignee_Add1: formData.ConsigneeAdd1,
             Consignee_Add2: formData.ConsigneeAdd2,
             Consignee_State: formData.ConsigneeState,
@@ -1661,12 +1682,29 @@ function Booking() {
             Consignee_Email: formData.ConsigneeEmail,
             Consignee_GST: formData.ConsigneeGST,
             Consignee_Country: formData.ConsigneeCountry,
+
+            // ✅ Shipper
+            Shipper_Code: formData.Shipper_Name, // value from dropdown
+            Shipper_Name:
+                allShipperOption.find(opt => opt.value === formData.Shipper_Name)?.label ||
+                formData.Shipper_Name, // label or text entered
+            ActualShipper: formData.ActualShipper,
+            ShipperAdd: formData.ShipperAdd,
+            ShipperAdd2: formData.ShipperAdd2,
+            ShipperAdd3: formData.ShipperAdd3,
+            ShipperCity: formData.ShipperCity,
+            Shipper_StateCode: formData.Shipper_StateCode,
+            Shipper_GstNo: formData.Shipper_GstNo,
+            ShipperPin: formData.ShipperPin,
+            ShipperPhone: formData.ShipperPhone,
+            ShipperEmail: formData.ShipperEmail,
+
             Mode_Code: formData.Mode_Code,
             Origin_code: formData.OriginCode,
-            Origin_Zone: formData.Origin_zone,
+            Origin_Zone: formData.Origin_Zone,
             Origin_Pincode: selectedOriginPinCode,
             Destination_Code: formData.DestinationCode,
-            Dest_Zone: formData.Zone_Name,
+            Dest_Zone: formData.Dest_Zone,
             Dest_PinCode: selectedDestPinCode,
             BillParty: formData.BillParty,
             DispatchDate: formatDate(formData.DispatchDate),
@@ -1705,20 +1743,8 @@ function Booking() {
             VendorAwbNo: formData.VendorAwbNo,
             VendorAwbNo1: vendorData.VendorAwbNo1,
             VendorAwbNo2: vendorData.VendorAwbNo2,
-            Shipper_Code: formData.shipper,
-            Shipper_Name: formData.Shipper_Name,
-            ActualShipper: formData.ActualShipper,
-            Shipper_Code: formData.Shipper_Name,
-            Shipper_Name: formData.Shipper_Name ? allShipperOption.find(opt => opt.value === formData.Shipper_Name)?.label : formData.Shipper_Name,
-            ShipperAdd: formData.ShipperAdd,
-            ShipperAdd2: formData.ShipperAdd2,
-            ShipperAdd3: formData.ShipperAdd3,
-            ShipperCity: formData.ShipperCity,
-            Shipper_StateCode: formData.Shipper_StateCode,
-            Shipper_GstNo: formData.Shipper_GstNo,
-            ShipperPin: formData.ShipperPin,
-            ShipperPhone: formData.ShipperPhone,
-            ShipperEmail: formData.ShipperEmail,
+
+
             UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
@@ -1768,7 +1794,8 @@ function Booking() {
                 const Customer_Code = formData.Customer_Code;
                 const Origin_code = formData.OriginCode;
                 const Pincode = selectedOriginPinCode;
-                const zone = formData.Origin_zone;
+                const zoneCode = formData.Origin_Zone;
+                const zoneName = formData.orgZoneName;
                 const bill = formData.BillParty;
                 const book = formData.BookMode;
                 const mode = formData.Mode_Code;
@@ -1778,7 +1805,8 @@ function Booking() {
                     ...prev,
                     Customer_Code: Customer_Code,
                     OriginCode: Origin_code,
-                    Origin_zone: zone,
+                    Origin_Zone: zoneCode,
+                    orgZoneName: zoneName,
                     BillParty: bill,
                     BookMode: book,
                     Mode_Code: mode,
@@ -1831,8 +1859,16 @@ function Booking() {
                         Mode_Code: data.Mode_Code,
                         OriginCode: data.Origin_code,
                         DestinationCode: data.Destination_Code,
-                        Origin_zone: data.Origin_Zone,
-                        Zone_Name: data.Dest_Zone,
+                        Origin_Zone: data.Origin_Zone,
+                        Dest_Zone: data.Dest_Zone,
+                        orgZoneName: data.Origin_Zone
+                            ? getCity.find(c => c.Zone_Code === data.Origin_Zone)?.Zone_Name || ""
+                            : "",
+
+                        destZoneName: data.Dest_Zone
+                            ? getCity.find(c => c.Zone_Code === data.Dest_Zone)?.Zone_Name || ""
+                            : "",
+
                         DispatchDate: data.DispatchDate,
                         DoxSpx: data.DoxSpx,
                         RateType: data.RateType,
@@ -1877,7 +1913,6 @@ function Booking() {
                         EwayBill: data.EwayBill,
                         InvDate: data.InvDate,
                         BillParty: data.BillParty,
-                        DestName: "",
                         BookMode: data.T_Flag,
 
                     }));
@@ -1980,7 +2015,8 @@ function Booking() {
         label: dest.City_Name,         // Display name in dropdown
         value: dest.City_Code,         // City code for backen// Origin code
         pincode: dest.Pincode,         // Pincode
-        zone: dest.Zone_Name           // Zone
+        zoneName: dest.Zone_Name,
+        zoneCode: dest.Zone_Code,
     })) : null;
     const allVendorOption = getMode?.length > 0 ? getVendor.map(Vendr => ({ label: Vendr.Vendor_Name, value: Vendr.Vendor_Code })) : null;
     // const allReceiverOption = getReceiver.map(receiver => ({
@@ -2167,35 +2203,53 @@ function Booking() {
                                     </div>
                                 </div>
 
-
-
-                                <div className="container-fluid" style={{ paddingLeft: "1rem" }}>
-                                    <div className="row g-2">
-                                        <div className="col-12">
-                                            <div className="input-field">
-                                                <label htmlFor="shipper-address">Shipper Address</label>
-                                                <input
-                                                    type="text"
-                                                    id="shipper-address"
-                                                    placeholder="Shipper Address"
-                                                    value={formData.ShipperAdd}
-                                                    onChange={(e) => setFormData({ ...formData, ShipperAdd: e.target.value })}
-                                                    className="form-control custom-input"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-
-
-
-
                                 <div className="fields2">
+                                    <div className="input-field">
+                                        <label htmlFor="shipper-address">Shipper Address</label>
+                                        <input
+                                            type="text"
+                                            id="shipper-address"
+                                            placeholder="Shipper Address"
+                                            value={formData.ShipperAdd}
+                                            onChange={(e) => setFormData({ ...formData, ShipperAdd: e.target.value })}
+                                            className="form-control custom-input"
+                                        />
+                                    </div>
+                                    <div className="input-field">
+                                        <label htmlFor="">State Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getState.map((st) => ({
+                                                value: st.State_Code,
+                                                label: st.State_Name,
+                                            }))}
+                                            value={
+                                                formData.Shipper_StateCode
+                                                    ? {
+                                                        value: formData.Shipper_StateCode,
+                                                        label:
+                                                            getState.find((s) => s.State_Code === formData.Shipper_StateCode)
+                                                                ?.State_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    Shipper_StateCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select State"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
 
-
-
+                                    </div>
 
                                     <div className="input-field1">
                                         <label htmlFor="">Shipper Mobile No</label>
@@ -2257,7 +2311,8 @@ function Booking() {
                                                         ...prev,
                                                         OriginCode: selected.value,
                                                         Origin_code: selected.label,
-                                                        Origin_zone: selected.zone
+                                                        Origin_Zone: selected.zoneCode,
+                                                        orgZoneName: selected.zoneName
 
                                                     }));
                                                     setSelectedOriginPinCode(selected?.pincode);
@@ -2273,7 +2328,7 @@ function Booking() {
 
                                         <div className="input-field1" style={{ width: "25%" }}>
                                             <label style={{}}>Origin Zone</label>
-                                            <input type="text" placeholder="Zone_Name" value={formData.Origin_zone} readOnly />
+                                            <input type="text" placeholder="Zone_Name" value={formData.orgZoneName} readOnly />
                                         </div>
                                     </div>
 
@@ -2308,7 +2363,8 @@ function Booking() {
                                                         ...prev,
                                                         DestinationCode: selected.value,
                                                         City_Name: selected.label,
-                                                        Zone_Name: selected.zone
+                                                        Dest_Zone: selected.zoneCode,
+                                                        destZoneName: selected.zoneName
                                                     }));
                                                     setSelectedDestPinCode(selected?.pincode);
                                                 }}
@@ -2326,7 +2382,7 @@ function Booking() {
                                             <input
                                                 type="text"
                                                 placeholder="Zone_Name"
-                                                value={formData.Zone_Name}
+                                                value={formData.destZoneName}
                                                 readOnly
                                             />
                                         </div>
@@ -2511,6 +2567,7 @@ function Booking() {
                                                                 ConsigneeName: selectedOption.value,
                                                                 Consignee_City: selectedOption.City_Code,
                                                                 ConsigneeState: selectedOption.State_Code,
+                                                                ConsigneeCountry: "INDIA",
                                                                 ConsigneePin: selectedOption.Receiver_Pin,
                                                                 ConsigneeMob: selectedOption.Receiver_Mob,
                                                                 ConsigneeEmail: selectedOption.Receiver_Email,
@@ -2629,6 +2686,41 @@ function Booking() {
                                         />
                                     </div>
 
+                                    <div className="input-field">
+                                        <label htmlFor="">State Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getState.map((st) => ({
+                                                value: st.State_Code,
+                                                label: st.State_Name,
+                                            }))}
+                                            value={
+                                                formData.ConsigneeState
+                                                    ? {
+                                                        value: formData.ConsigneeState,
+                                                        label:
+                                                            getState.find((s) => s.State_Code === formData.ConsigneeState)
+                                                                ?.State_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    ConsigneeState: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select State"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
+
+                                    </div>
                                     <div className="input-field">
                                         <label>Country</label>
                                         <input
@@ -2869,13 +2961,37 @@ function Booking() {
 
                                         {isFovChecked && (
                                             <div className="input-field1">
-                                                <label>FOV Charges</label>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="FOV Charges"
-                                                    value={formData.FovChrgs}
-                                                    onChange={(e) => setFormData({ ...formData, FovChrgs: e.target.value })}
-                                                />
+                                                <label htmlFor="">FOV Charges</label>
+                                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                    <input
+                                                        type="tel"
+                                                        style={{
+                                                            width: "70%",
+                                                            borderRight: "1px solid #ccc",
+                                                            borderRadius: "4px 0 0 4px",
+                                                        }}
+                                                        placeholder="FOV Charges"
+                                                        value={formData.FovChrgs}
+                                                        onChange={(e) => setFormData({ ...formData, FovChrgs: e.target.value })}
+                                                    />
+                                                    <input
+                                                        type="tel"
+                                                        placeholder="%"
+                                                        style={{
+                                                            width: "30%",
+                                                            borderLeft: "none",
+                                                            borderRadius: "0 4px 4px 0",
+                                                            padding: "5px",
+                                                            textAlign: "center",
+                                                        }}
+                                                        value={formData.FovPer !== "" ? `${formData.FovPer}%` : ""}
+                                                        onChange={(e) => {
+                                                            // ✅ Strip non-numeric chars before saving
+                                                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                            setFormData({ ...formData, FovPer: val });
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                         )}
 
@@ -3572,44 +3688,44 @@ function Booking() {
                                     <div className="fields2">
                                         <div className="input-field1" style={{ width: "60%" }}>
                                             <label htmlFor="">CGST Amount</label>
-                                            <input type="text" placeholder="CGST Charges" value={gstData.CGSTAMT || ""} readOnly />
+                                            <input type="text" placeholder="CGST Charges" value={gstData.CGSTAMT || 0} readOnly />
                                         </div>
                                         <div className="input-field1" style={{ width: "30%" }}>
                                             <label htmlFor="">CGST %</label>
-                                            <input type="text" placeholder="%" value={gstData.CGSTPer || ""} readOnly />
+                                            <input type="text" placeholder="%" value={gstData.CGSTPer || 0} readOnly />
                                         </div>
                                     </div>
 
                                     <div className="fields2">
                                         <div className="input-field1" style={{ width: "60%" }}>
                                             <label htmlFor="">SGST Amount</label>
-                                            <input type="text" placeholder="SGST Charges" value={gstData.SGSTAMT || ""} readOnly />
+                                            <input type="text" placeholder="SGST Charges" value={gstData.SGSTAMT || 0} readOnly />
                                         </div>
                                         <div className="input-field1" style={{ width: "30%" }}>
                                             <label htmlFor="">SGST %</label>
-                                            <input type="text" placeholder="%" value={gstData.SGSTPer || ""} readOnly />
+                                            <input type="text" placeholder="%" value={gstData.SGSTPer || 0} readOnly />
                                         </div>
                                     </div>
 
                                     <div className="fields2">
                                         <div className="input-field1" style={{ width: "60%" }}>
                                             <label htmlFor="">IGST Amount</label>
-                                            <input type="text" placeholder="IGST Charges" value={gstData.IGSTAMT || ""} readOnly />
+                                            <input type="text" placeholder="IGST Charges" value={gstData.IGSTAMT || 0} readOnly />
                                         </div>
                                         <div className="input-field1" style={{ width: "30%" }}>
                                             <label htmlFor="">IGST %</label>
-                                            <input type="text" placeholder="%" value={gstData.IGSTPer || ""} readOnly />
+                                            <input type="text" placeholder="%" value={gstData.IGSTPer || 0} readOnly />
                                         </div>
                                     </div>
 
                                     <div className="fields2">
                                         <div className="input-field1" style={{ width: "60%" }}>
                                             <label htmlFor="">Total GST</label>
-                                            <input type="text" placeholder="Total GST" value={gstData.TotalGST || ""} readOnly />
+                                            <input type="text" placeholder="Total GST" value={gstData.TotalGST || 0} readOnly />
                                         </div>
                                         <div className="input-field1" style={{ width: "30%" }}>
                                             <label htmlFor="">Total %</label>
-                                            <input type="text" placeholder="%" value={gstData.GSTPer || ""} readOnly />
+                                            <input type="text" placeholder="%" value={gstData.GSTPer || 0} readOnly />
                                         </div>
                                     </div>
 

@@ -1,24 +1,63 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
-import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
-
+import Swal from "sweetalert2";
+import Select from 'react-select';
+import CreatableSelect from "react-select/creatable";
+import DatePicker from 'react-datepicker';
+import { getApi, postApi, putApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 function VendorBill() {
-
-
+    const getTodayDate = () => {
+        const today = new Date();
+        return today;
+    };
+    const handleDateChange = (date, field) => {
+        setFormData({ ...formData, [field]: date });
+    };
     const [zones, setZones] = useState([]);
-
+    const [getVendor, setGetVendor] = useState([]);
     const [editIndex, setEditIndex] = useState(null);
     const [modalData, setModalData] = useState({ code: '', name: '' });
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [formData, setFormData] = useState({
+        vendorCode: "",
+        vendorAwbNo: "",
+        billNo: "",
+        billDate: getTodayDate(),
+        billFrom: getTodayDate(),
+        billTo: getTodayDate(),
+        amount: 0,
+        fuelChrgs: 0,
+        otherChrgs: 0,
+        gst: 0,
+        totalAmt: 0,
+    });
+    const fetchData = async (endpoint, setData) => {
 
 
+        try {
+            const response = await getApi(endpoint);
+            // Check if the response contains data, then update the corresponding state
+            if (response && response.Data) {
+                setData(Array.isArray(response.Data) ? response.Data : []);
+            } else {
+                setData([]);
+            }
+        } catch (err) {
+            console.error(`Error fetching data from ${endpoint}:`, err);
+        }
+    };
+    useEffect(() => {
+
+        fetchData('/Master/getVendor', setGetVendor);
+
+
+    }, []);
     const rowsPerPage = 10;
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -200,66 +239,142 @@ function VendorBill() {
                                     <div className="fields2">
                                         <div className="input-field1">
                                             <label htmlFor="">Vendor Name</label>
-                                            <select>
-                                                <option disabled value="">Select Vendor Name</option>
-                                                <option value="">1</option>
-                                                <option value="">2</option>
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getVendor.map(v => ({ value: v.Vendor_Code, label: v.Vendor_Name }))}
+                                                value={
+                                                    formData.vendorCode
+                                                        ? { value: formData.vendorCode, label: getVendor.find(opt => opt.Vendor_Code === formData.vendorCode)?.Vendor_Name || "" }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        vendorCode: selectedOption.value,
+                                                    }));
+                                                }}
+                                                placeholder="Select Vendor Name"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
+                                            />
                                         </div>
 
+                                        {/* 🟩 Bill No */}
                                         <div className="input-field1">
-                                            <label htmlFor="">Bill No</label>
-                                            <input type="text" placeholder='Enter Bill No' />
+                                            <label>Bill No</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter Bill No"
+                                                value={formData.billNo}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, billNo: e.target.value }))}
+                                            />
                                         </div>
 
+                                        {/* 🟩 Bill Date */}
                                         <div className="input-field1">
-                                            <label htmlFor="">Bill Date</label>
-                                            <input type="date" />
+                                            <label>Bill Date</label>
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={formData.billDate}
+                                                onChange={(date) => handleDateChange(date, "billDate")}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
                                         </div>
 
+                                        {/* 🟩 Bill From */}
                                         <div className="input-field1">
-                                            <label htmlFor="">Bill From</label>
-                                            <input type="date" />
+                                            <label>Bill From</label>
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={formData.billFrom}
+                                                onChange={(date) => handleDateChange(date, "billFrom")}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
                                         </div>
 
+                                        {/* 🟩 Bill To */}
                                         <div className="input-field1">
-                                            <label htmlFor="">Bill To</label>
-                                            <input type="date" />
+                                            <label>Bill To</label>
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={formData.billTo}
+                                                onChange={(date) => handleDateChange(date, "billTo")}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
                                         </div>
 
+
+                                        {/* 🟩 Vendor AWB No */}
                                         <div className="input-field1">
-                                            <label htmlFor="">Vendor AWB No</label>
-                                            <input type="text" placeholder='Enter Vendor AWB No' />
+                                            <label>Vendor AWB No</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter Vendor AWB No"
+                                                value={formData.vendorAwbNo}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, vendorAwbNo: e.target.value }))}
+                                            />
                                         </div>
 
+                                        {/* 🟩 Amount */}
                                         <div className="input-field1">
-                                            <label htmlFor="">AWB No</label>
-                                            <input type="text" placeholder='Enter AWB No' />
+                                            <label>Amount</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="Enter Amount"
+                                                value={formData.amount}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                                            />
                                         </div>
 
+                                        {/* 🟩 Fuel Charges */}
                                         <div className="input-field1">
-                                            <label htmlFor="">Amount</label>
-                                            <input type="tel" placeholder='Enter Amount' />
+                                            <label>Fuel Charges</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="Enter Fuel Charges"
+                                                value={formData.fuelChrgs}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, fuelChrgs: e.target.value }))}
+                                            />
                                         </div>
 
+                                        {/* 🟩 Other Charges */}
                                         <div className="input-field1">
-                                            <label htmlFor="">Fuel Charges</label>
-                                            <input type="tel" placeholder='Enter Fuel Charges' />
+                                            <label>Other Charges</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="Enter Other Charges"
+                                                value={formData.otherChrgs}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, otherChrgs: e.target.value }))}
+                                            />
                                         </div>
 
+                                        {/* 🟩 GST */}
                                         <div className="input-field1">
-                                            <label htmlFor="">Other Charges</label>
-                                            <input type="tel" placeholder='Enter Other Charges' />
+                                            <label>GST</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="Enter GST"
+                                                value={formData.gst}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, gst: e.target.value }))}
+                                            />
                                         </div>
 
+                                        {/* 🟩 Total Amount */}
                                         <div className="input-field1">
-                                            <label htmlFor="">GST</label>
-                                            <input type="text" placeholder='Enter GST' />
-                                        </div>
-
-                                        <div className="input-field1">
-                                            <label htmlFor="">Total Amount</label>
-                                            <input type="tel" placeholder='Enter Total Amount' />
+                                            <label>Total Amount</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="Enter Total Amount"
+                                                value={formData.totalAmt}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, totalAmt: e.target.value }))}
+                                            />
                                         </div>
                                     </div>
                                     <div className='bottom-buttons'>

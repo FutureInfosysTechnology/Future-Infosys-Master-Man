@@ -291,27 +291,27 @@ function MobileReceipt() {
                                                 </div>
                                             </div>
                                             <div className='div2' style={{ width: "100%", fontSize: "10px", height: "20px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
-                                                <div style={{ width: "50%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CLIENT NAME :</div>
-                                                <div style={{ width: "50%", fontWeight: "bold", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNEE NAME:</div>
+                                                <div style={{ width: "50%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CLIENT NAME : <span>{docket?.Customer_Name}</span></div>
+                                                <div style={{ width: "50%", fontWeight: "bold", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNEE NAME: <span>{docket?.Consignee_Name}</span></div>
                                             </div>
                                             <div className='div3' style={{ width: "100%", fontSize: "10px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
                                                 <div className='consignor px-2' style={{ width: "50%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
-                                                    <div style={{ fontWeight: "bold" }}>{docket?.Customer_Name}</div>
+                                                    { docket?.Shipper_Name && <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Shipper Name : </div> <span>{docket?.Shipper_Name}</span></div>}
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Address : </div><span>{docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3},{docket?.Pin_Code}</span></div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Customer_Mob}</span></div>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Email_Id}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Shipper_Name ? docket?.ShipperPhone : docket?.Customer_Mob}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Shipper_Name ? docket?.ShipperEmail : docket?.Email_Id}</span></div>
                                                     </div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.City}</span></div>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>State : </div><span>{docket?.State}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.Shipper_Name ? docket?.ShipperCity  :docket?.City}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>State : </div><span>{docket?.Shipper_Name ? docket?.Shipper_State_Name :docket?.Customer_State_Name}</span></div>
                                                     </div>
 
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Gst_No}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Shipper_Name ? docket?.ShipperGST  :docket?.Gst_No}</span></div>
 
                                                 </div>
                                                 <div className='consignee px-2' style={{ width: "50%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
-                                                    <div style={{ fontWeight: "bold" }}> {docket?.Consignee_Name}</div>
+
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Address : </div><span>{docket?.Consignee_Add1},{docket?.Consignee_Add2},{docket?.Consignee_Pin}</span></div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
                                                         <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Consignee_Mob}</span></div>
@@ -611,27 +611,27 @@ function MobileReceipt() {
                                                 </div>
                                             </div>
                                             <div className='div2' style={{ width: "100%", fontSize: "10px", height: "20px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
-                                                <div style={{ width: "50%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CLIENT NAME :</div>
-                                                <div style={{ width: "50%", fontWeight: "bold", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNEE NAME:</div>
+                                                <div style={{ width: "50%", fontWeight: "bold", borderRight: "2px solid black", paddingLeft: "5px", paddingTop: "2px" }}>CLIENT NAME : <span>{docket?.Customer_Name}</span></div>
+                                                <div style={{ width: "50%", fontWeight: "bold", paddingLeft: "5px", paddingTop: "2px" }}>CONSIGNEE NAME: <span>{docket?.Consignee_Name}</span></div>
                                             </div>
                                             <div className='div3' style={{ width: "100%", fontSize: "10px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
                                                 <div className='consignor px-2' style={{ width: "50%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
-                                                    <div style={{ fontWeight: "bold" }}>{docket?.Customer_Name}</div>
+                                                    { docket?.Shipper_Name && <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Shipper Name : </div> <span>{docket?.Shipper_Name}</span></div>}
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Address : </div><span>{docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3},{docket?.Pin_Code}</span></div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Customer_Mob}</span></div>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Email_Id}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Shipper_Name ? docket?.ShipperPhone : docket?.Customer_Mob}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Shipper_Name ? docket?.ShipperEmail : docket?.Email_Id}</span></div>
                                                     </div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.City}</span></div>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>State : </div><span>{docket?.State}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.Shipper_Name ? docket?.ShipperCity  :docket?.City}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>State : </div><span>{docket?.Shipper_Name ? docket?.Shipper_State_Name :docket?.Customer_State_Name}</span></div>
                                                     </div>
 
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Gst_No}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Shipper_Name ? docket?.ShipperGST  :docket?.Gst_No}</span></div>
 
                                                 </div>
                                                 <div className='consignee px-2' style={{ width: "50%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
-                                                    <div style={{ fontWeight: "bold" }}> {docket?.Consignee_Name}</div>
+
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Address : </div><span>{docket?.Consignee_Add1},{docket?.Consignee_Add2},{docket?.Consignee_Pin}</span></div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
                                                         <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Consignee_Mob}</span></div>
