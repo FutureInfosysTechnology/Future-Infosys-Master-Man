@@ -175,90 +175,74 @@ function EmailBooking() {
 
   };
   const sendMail = async () => {
-  // 1️⃣ Check if any docket is selected
-  if (!selectedDockets?.length) {
-    Swal.fire("Error", "Please select at least one docket to export", "error");
-    return;
-  }
-
-  // 2️⃣ Filter only selected rows
-  const selectedData = EmailData.filter((row) =>
-    selectedDockets.includes(row.DocketNo)
-  );
-
-  if (!selectedData.length) {
-    Swal.fire("Error", "No matching data found for selected dockets", "error");
-    return;
-  }
-
-  // 3️⃣ Format data for Excel
-  const formattedData = selectedData.map((row) => ({
-    ...row,
-    BookDate: row.BookDate
-      ? new Date(row.BookDate).toLocaleDateString("en-GB")
-      : "",
-  }));
-
-  // 4️⃣ Create Excel workbook
-  const worksheet = XLSX.utils.json_to_sheet(formattedData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Data");
-
-  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  const fileName = `SelectedDockets_${new Date().toISOString().slice(0, 10)}.xlsx`;
-
-  // ✅ Convert to File (not Blob)
-  const file = new File(
-    [excelBuffer],
-    fileName,
-    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
-  );
-
-  // 5️⃣ Send email
-  try {
-    const fromDate = formatDate(formData.fromdt);
-    const toDate = formatDate(formData.todt);
-
-    Swal.fire({
-      title: "Sending Email...",
-      text: "Please wait while we send your Excel report...",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-    });
-
-    const formDataToSend = new FormData();
-    formDataToSend.append("file", file);
-    formDataToSend.append("recipientEmail", "shaikharbazazaz@gmail.com");
-    formDataToSend.append("CustomerName", "Arbaz");
-    formDataToSend.append("fromdt", fromDate);
-    formDataToSend.append("todt", toDate);
-
-    const result = await postApi(
-      "Booking/sendRegistrationEmail",
-      "POST",
-      formDataToSend
-    );
-
-    Swal.close();
-
-    if (result.status === 1) {
-      Swal.fire(
-        "✅ Success",
-        `Excel file sent successfully to shaikharbazazaz@gmail.com`,
-        "success"
-      );
-    } else {
-      Swal.fire("❌ Error", result.message || "Email sending failed", "error");
+    // 1️⃣ Check if any docket is selected
+    if (!selectedDockets?.length) {
+      Swal.fire("Error", "Please select at least one docket to export", "error");
+      return;
     }
-  } catch (error) {
-    console.error("Email send failed:", error);
-    Swal.fire(
-      "Error",
-      "Failed to send email. Please check your network or server.",
-      "error"
+
+    // 2️⃣ Filter only selected rows
+    const selectedData = EmailData.filter((row) =>
+      selectedDockets.includes(row.DocketNo)
     );
-  }
-};
+
+    if (!selectedData.length) {
+      Swal.fire("Error", "No matching data found for selected dockets", "error");
+      return;
+    }
+
+    // 3️⃣ Format data for Excel
+    const formattedData = selectedData.map((row) => ({
+      ...row,
+      BookDate: row.BookDate
+        ? new Date(row.BookDate).toLocaleDateString("en-GB")
+        : "",
+    }));
+
+    // 4️⃣ Create Excel workbook
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Data");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const fileName = `Booking_${new Date().toISOString().slice(0, 10)}.xlsx`;
+     // 4️⃣ Convert Excel file to Base64
+   const fileBase64 = await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result.split(",")[1]); // remove `data:application/...`
+    reader.readAsDataURL(new Blob([excelBuffer], { type: "application/octet-stream" }));
+  });
+
+    // 5️⃣ Send email
+    try {
+
+      const formDataToSend = {
+        
+        recipientEmail: "shaikharbazazaz@gmail.com",
+        CustomerName: "Arbaz",
+         fileName : fileName,
+         fileBase64 :fileBase64,
+        }
+       const result = await postApi("/Booking/sendRegistrationEmail",formDataToSend);
+       console.log(result);
+      if (result.status === 1) {
+        Swal.fire(
+          "✅ Success",
+          `Excel file sent successfully to shaikharbazazaz@gmail.com`,
+          "success"
+        );
+      } else {
+        Swal.fire("❌ Error", result.message || "Email sending failed", "error");
+      }
+    } catch (error) {
+      console.error("Email send failed:", error);
+      Swal.fire(
+        "Error",
+        "Failed to send email. Please check your network or server.",
+        "error"
+      );
+    }
+  };
 
 
 

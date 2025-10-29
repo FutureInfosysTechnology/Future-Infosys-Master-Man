@@ -24,7 +24,7 @@ function BranchAdmin() {
 
     const fetchBranchData = async () => {
         try {
-            const response = await getApi('/Master/getBranch');
+            const response = await getApi('/Master/getAllBranchData');
             setGetBranch(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             console.error('Fetch Error:', err);
@@ -69,6 +69,13 @@ function BranchAdmin() {
                         <div className='production-header'>
                             <div className="production-radio">
                                 <div style={{ display: "flex", flexDirection: "row" }}>
+                                    <input type="radio" id='master' name='section' value="Master"
+                                        checked={selectedOption === "Master"}
+                                        onChange={() => handleRadioChange("Master")} />
+                                    <label htmlFor="master">Master</label>
+                                </div>
+
+                                <div style={{ display: "flex", flexDirection: "row" }}>
                                     <input type="radio" id='operation' name='section' value="Operation"
                                         checked={selectedOption === "Operation"}
                                         onChange={() => handleRadioChange("Operation")} />
@@ -104,7 +111,325 @@ function BranchAdmin() {
                                 </div>
                             </div>
                         </div>
+                        {selectedOption === "Master" && (
+                            <div style={{ display: "flex", flexDirection: "row", paddingTop: "20px", flexWrap:"wrap" }}>
+                                <div style={{ width: "200px", border: "1px solid silver", borderRadius: "5px", marginBottom:"10px" }}>
+                                    <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                        <label htmlFor="master">Master</label>
+                                    </div>
+                                    <div style={{ display: "flex", flexDirection: "column" }}>
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="Branch Master" checked={selectedOperation.includes("Branch Master")}
+                                                onChange={() => handleCheckboxChange("Branch Master")} />
+                                            <label htmlFor="branch-master" style={{ marginLeft: "10px" }}>Branch Master</label>
+                                        </div>
 
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="Customer List" checked={selectedOperation.includes("Customer List")}
+                                                onChange={() => handleCheckboxChange("Customer List")} />
+                                            <label htmlFor="customer-list" style={{ marginLeft: "10px" }}>Customer List</label>
+                                        </div>
+
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="City Master" checked={selectedOperation.includes("City Master")}
+                                                onChange={() => handleCheckboxChange("City Master")} />
+                                            <label htmlFor="city-master" style={{ marginLeft: "10px" }}>City Master</label>
+                                        </div>
+
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="Area Control" checked={selectedOperation.includes("Area Control")}
+                                                onChange={() => handleCheckboxChange("Area Control")} />
+                                            <label htmlFor="area-control" style={{ marginLeft: "10px" }}>Area Control</label>
+                                        </div>
+
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="Customer Charges" checked={selectedOperation.includes("Customer Charges")}
+                                                onChange={() => handleCheckboxChange("Customer Charges")} />
+                                            <label htmlFor="customer-charges" style={{ marginLeft: "10px" }}>Customer Charges</label>
+                                        </div>
+
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="Vendor Master" checked={selectedOperation.includes("Vendor Master")}
+                                                onChange={() => handleCheckboxChange("Vendor Master")} />
+                                            <label htmlFor="vendor-master" style={{ marginLeft: "10px" }}>Vendor Master</label>
+                                        </div>
+
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="Transport Master" checked={selectedOperation.includes("Transport Master")}
+                                                onChange={() => handleCheckboxChange("Transport Master")} />
+                                            <label htmlFor="transport-master" style={{ marginLeft: "10px" }}>Transport Master</label>
+                                        </div>
+
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="Inventory" checked={selectedOperation.includes("Inventory")}
+                                                onChange={() => handleCheckboxChange("Inventory")} />
+                                            <label htmlFor="inventory" style={{ marginLeft: "10px" }}>Inventory</label>
+                                        </div>
+
+                                        <div style={{ margin: "5px" }}>
+                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
+                                                value="Region Master" checked={selectedOperation.includes("Region Master")}
+                                                onChange={() => handleCheckboxChange("Region Master")} />
+                                            <label htmlFor="region-master" style={{ marginLeft: "10px" }}>Region Master</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                {selectedOperation.includes("Branch Master") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "180px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">Branch Master</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Branch Name</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Mode Master</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Bank Name</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Delivery Boy's Name</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedOperation.includes("Customer List") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "180px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">Customer List</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Customer Name</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Receiver Name</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Customer Rate</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Customer Volumetric</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedOperation.includes("City Master") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "140px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">City Master</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>International City</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Domestic City</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Pin Code</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedOperation.includes("Area Control") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "180px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">Area Control</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>City Control</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Multiple City</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>State Master</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Country Master</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedOperation.includes("Customer Charges") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "180px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">Customer Charges</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Customer Charges</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Customer ODA</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Update Customer Rate</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>GST Charges</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedOperation.includes("Vendor Master") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "180px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">Vendor Master</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Vendor Name</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Vendor Rate</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Vendor Charges</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Vendor GST Master</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedOperation.includes("Transport Master") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "150px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">Transport Master</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Vehicle Master</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Transport Master</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Driver Master</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedOperation.includes("Inventory") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "180px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">Inventory</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Stock Entry</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Branch Stock</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Customer Stock</label>
+                                            </div>
+
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Employee Stock</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedOperation.includes("Region Master") && (
+                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "80px" }}>
+                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
+                                            <label htmlFor="">Region Master</label>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                            <div style={{ margin: "5px" }}>
+                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
+                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Region Master</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         {selectedOption === "Operation" && (
                             <div style={{ display: "flex", flexDirection: "row", paddingTop: "20px" }}>
                                 <div style={{ width: "200px", border: "1px solid silver", borderRadius: "5px" }}>
