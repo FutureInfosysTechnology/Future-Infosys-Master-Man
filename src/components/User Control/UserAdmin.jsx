@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react'
 import Footer from '../../Components-2/Footer';
 import Sidebar1 from '../../Components-2/Sidebar1';
 import Header from '../../Components-2/Header/Header';
-import { postApi, getApi, putApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+import { postApi, getApi, putApi, deleteApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
 import Swal from 'sweetalert2';
-
+import Select from 'react-select';
+import { ImEye } from "react-icons/im";
+import { ImEyeBlocked } from "react-icons/im";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 function UserAdmin() {
-
+    const [openRow, setOpenRow] = useState(null);
+    const [eye, setEye] = useState(true);
+    const [eyeDis, setEyeDis] = useState(false);
+    const [getData, setGetData] = useState([]);
     const [getEmployee, setGetEmployee] = useState([]);
     const [selectedOption, setSelectedOption] = useState("");
     const [selectedOperation, setSelectedOperation] = useState("");
@@ -47,9 +53,20 @@ function UserAdmin() {
         ModeWise: false,
         SalesRegister: false,
     });
+    const togglePass = () => {
+        setEye((eye) => !eye);
+    }
     useEffect(() => {
         console.log(formData);
     }, [formData])
+    useEffect(() => {
+        if (!formData.Password) {
+            setEyeDis(true);
+        }
+        else {
+            setEyeDis(false);
+        }
+    }, [formData.Password])
     const fetchEmpData = async () => {
         try {
             const response = await getApi('/Master/GetEmployee');
@@ -58,10 +75,42 @@ function UserAdmin() {
             console.error('Fetch Error:', err);
         }
     };
+    const fechUserData = async () => {
+        try {
+            const response = await getApi('/Master/GetOperationManagement');
+            setGetData(Array.isArray(response.data) ? response.data : []);
+        } catch (err) {
+            console.error('Fetch Error:', err);
+        }
+    };
+
     useEffect(() => {
         fetchEmpData();
+        fechUserData();
     }, []);
 
+    const handleDelete = async (ID) => {
+        const confirmDelete = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete this zone?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (confirmDelete.isConfirmed) {
+            try {
+                await deleteApi(`/Master/DeleteOperationManagement?ID=${ID}`);
+                setGetData(getData.filter((data) => data.ID !== ID));
+                Swal.fire('Deleted!', 'The User has been deleted.', 'success');
+                await fechUserData();
+            } catch (err) {
+                console.error('Delete Error:', err);
+                Swal.fire('Error', 'Failed to delete Bank', 'error');
+            }
+        }
+    };
 
     const handleRadioChange = (value) => {
         setSelectedOption((prev) => (prev === value ? "" : value));
@@ -82,47 +131,46 @@ function UserAdmin() {
             [name]: checked,
         }));
     };
-    const ResetAll=(e)=>
-    {
+    const ResetAll = (e) => {
         e.preventDefault();
-         setFormData({
-                    UserName: "",
-                    Employee_Code: "",
-                    Password: "",
-                    DailyBooking: false,
-                    DailyExpenses: false,
-                    automail: false,
-                    ShortEntry: false,
-                    BulkImportData: false,
-                    VendorBillEntry: false,
-                    BuildManifest: false,
-                    ForwardingManifest: false,
-                    BuilkimportManifest: false,
-                    Inscan: false,
-                    Runsheet: false,
-                    DrsImport: false,
-                    Statusactivity: false,
-                    BulkuplaodStatus: false,
-                    Podentry: false,
-                    BuilkdataDelivered: false,
-                    Custquery: false,
-                    Docketprint: false,
-                    Docketprint2: false,
-                    Docketprint3: false,
-                    LebelPrintin: false,
-                    StickerPrinting: false,
-                    Invoice: false,
-                    ParfarmaInvoice: false,
-                    Laiser: false,
-                    CreditNote: false,
-                    StatusReport: false,
-                    Statement: false,
-                    Checklist: false,
-                    ModeWise: false,
-                    SalesRegister: false,
-                });
-                setSelectedOperation('');
-                setSelectedOption('');
+        setFormData({
+            UserName: "",
+            Employee_Code: "",
+            Password: "",
+            DailyBooking: false,
+            DailyExpenses: false,
+            automail: false,
+            ShortEntry: false,
+            BulkImportData: false,
+            VendorBillEntry: false,
+            BuildManifest: false,
+            ForwardingManifest: false,
+            BuilkimportManifest: false,
+            Inscan: false,
+            Runsheet: false,
+            DrsImport: false,
+            Statusactivity: false,
+            BulkuplaodStatus: false,
+            Podentry: false,
+            BuilkdataDelivered: false,
+            Custquery: false,
+            Docketprint: false,
+            Docketprint2: false,
+            Docketprint3: false,
+            LebelPrintin: false,
+            StickerPrinting: false,
+            Invoice: false,
+            ParfarmaInvoice: false,
+            Laiser: false,
+            CreditNote: false,
+            StatusReport: false,
+            Statement: false,
+            Checklist: false,
+            ModeWise: false,
+            SalesRegister: false,
+        });
+        setSelectedOperation('');
+        setSelectedOption('');
     }
     const handlesave = async (e) => {
         e.preventDefault();
@@ -173,8 +221,10 @@ function UserAdmin() {
         try {
             const response = await postApi('/Master/addOperationManagement', requestBody, 'POST');
             if (response.status === 1) {
-                ResetAll();
+                setGetData([...getData, response?.data]);
+                ResetAll(e);
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
+                await fechUserData();
             }
         } catch (error) {
             console.error('Unable to add Admin:', error);
@@ -189,7 +239,6 @@ function UserAdmin() {
             Password: formData.Password,
             City_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             UserType: "User",
-
             DailyBooking: formData.DailyBooking ? 1 : 0,
             DailyExpenses: formData.DailyExpenses ? 1 : 0,
             ShortEntry: formData.ShortEntry ? 1 : 0,
@@ -227,9 +276,9 @@ function UserAdmin() {
 
 
         try {
-            const response = await putApi('UpdateOperationManagement', requestBody, 'PUT');
+            const response = await putApi('/Master/UpdateOperationManagement', requestBody, 'PUT');
             if (response.status === 1) {
-                ResetAll();
+                ResetAll(e);
                 Swal.fire('Saved!', response.message || 'Your changes have been Updated.', 'success');
             }
         } catch (error) {
@@ -242,659 +291,957 @@ function UserAdmin() {
             <Sidebar1 />
 
             <div className="main-body" id="main-body">
-                <div className="container">
-                    <form action="" className="order-form" onSubmit={handlesave}>
-                        <div className="order-fields">
-                            <div className="order-input">
+                <div className="container1">
+                    <form action="" onSubmit={handlesave} style={{ background: "white" }}>
+                        <div className="fields2">
+                            <div className="input-field1">
                                 <label htmlFor="">User Name</label>
                                 <input type="text" placeholder='UserName' value={formData.UserName}
                                     onChange={(e) => setFormData({ ...formData, UserName: e.target.value })} />
                             </div>
 
-                            <div className="order-input">
+                            <div className="input-field1">
                                 <label htmlFor="">Password</label>
-                                <input type="password" placeholder='Password' value={formData.Password}
-                                    onChange={(e) => setFormData({ ...formData, Password: e.target.value })} />
+                                <div style={{ position: "relative" }}>
+                                    <input type={eye ? "password" : "text"} placeholder='Password' value={formData.Password}
+                                        onChange={(e) => setFormData({ ...formData, Password: e.target.value })} />
+                                    <div style={{
+                                        opacity: eyeDis ? 0 : 1, // fade instead of display: none
+                                        visibility: eyeDis ? "hidden" : "visible", //
+                                        position: "absolute",
+                                        right: "10px",
+                                        bottom: "5px",
+                                        fontSize: "20px",
+                                        cursor: "pointer",
+                                        transition: "opacity 0.3s ease, visibility 0.3s ease"
+                                    }} onClick={togglePass}>
+
+                                        {eye ? <ImEye /> : <ImEyeBlocked />}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="order-input">
+                            <div className="input-field1">
                                 <label htmlFor="">Employee Name</label>
-                                <select value={formData.Employee_Code}
-                                    onChange={(e) => setFormData({ ...formData, Employee_Code: e.target.value })}>
-                                    <option value="" disabled>Select Employee</option>
-                                    {getEmployee.map((emp, index) => (
-                                        <option value={emp.Employee_Code} key={index}>{emp.Employee_Name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={getEmployee.map(emp => ({
+                                        value: emp.Employee_Code,   // adjust keys from your API
+                                        label: emp.Employee_Name
+                                    }))}
+                                    value={
+                                        formData.Employee_Code
+                                            ? { value: formData.Employee_Code, label: getEmployee.find(c => c.Employee_Code === formData.Employee_Code)?.Employee_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            Employee_Code: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Employee"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
+
                             </div>
-                        </div>
 
-                        <div className='production-header'>
-                            <div className="production-radio">
+                            <div className="production-header container-fluid py-2 mx-3 my-3">
+                                <div className="production-radio row g-2">
+                                    {/* Operation */}
+                                    <div className="col-6 col-sm-4 col-md-3 col-lg-2 d-flex align-items-center">
+                                        <input
+                                            type="radio"
+                                            id="operation"
+                                            name="section"
+                                            value="Operation"
+                                            checked={selectedOption === "Operation"}
+                                            onChange={() => handleRadioChange("Operation")}
+                                            className="me-2"
+                                        />
+                                        <label htmlFor="operation" className="mb-0">Operation</label>
+                                    </div>
 
-                                <div style={{ display: "flex", flexDirection: "row" }}>
-                                    <input type="radio" id='operation' name='section' value="Operation"
-                                        checked={selectedOption === "Operation"}
-                                        onChange={() => handleRadioChange("Operation")} />
-                                    <label htmlFor="operation">Operation</label>
-                                </div>
+                                    {/* Customer Complaint */}
+                                    <div className="col-6 col-sm-4 col-md-3 col-lg-2 d-flex align-items-center">
+                                        <input
+                                            type="radio"
+                                            id="crm"
+                                            name="section"
+                                            value="CRM"
+                                            checked={selectedOption === "CRM"}
+                                            onChange={() => handleRadioChange("CRM")}
+                                            className="me-2"
+                                        />
+                                        <label htmlFor="crm" className="mb-0">Complaint</label>
+                                    </div>
 
-                                <div style={{ display: "flex", flexDirection: "row" }}>
-                                    <input type="radio" id="crm" name="section" value="CRM"
-                                        checked={selectedOption === "CRM"}
-                                        onChange={() => handleRadioChange("CRM")} />
-                                    <label htmlFor="crm">Customer Complaint</label>
-                                </div>
+                                    {/* Billings */}
+                                    <div className="col-6 col-sm-4 col-md-3 col-lg-2 d-flex align-items-center">
+                                        <input
+                                            type="radio"
+                                            id="billings"
+                                            name="section"
+                                            value="Billings"
+                                            checked={selectedOption === "Billings"}
+                                            onChange={() => handleRadioChange("Billings")}
+                                            className="me-2"
+                                        />
+                                        <label htmlFor="billings" className="mb-0">Billings</label>
+                                    </div>
 
-                                <div style={{ display: "flex", flexDirection: "row" }}>
-                                    <input type="radio" id="billings" name="section" value="Billings"
-                                        checked={selectedOption === "Billings"}
-                                        onChange={() => handleRadioChange("Billings")} />
-                                    <label htmlFor="billings">Billings</label>
-                                </div>
+                                    {/* Payments */}
+                                    <div className="col-6 col-sm-4 col-md-3 col-lg-2 d-flex align-items-center">
+                                        <input
+                                            type="radio"
+                                            id="payments"
+                                            name="section"
+                                            value="Payments"
+                                            checked={selectedOption === "Payments"}
+                                            onChange={() => handleRadioChange("Payments")}
+                                            className="me-2"
+                                        />
+                                        <label htmlFor="payments" className="mb-0">Payments</label>
+                                    </div>
 
-                                <div style={{ display: "flex", flexDirection: "row" }}>
-                                    <input type="radio" id="payments" name="section" value="Payments"
-                                        checked={selectedOption === "Payments"}
-                                        onChange={() => handleRadioChange("Payments")} />
-                                    <label htmlFor="payments">Payments</label>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", marginRight: "20px" }}>
-                                    <input type="radio" id="reports" name="section" value="Reports"
-                                        checked={selectedOption === "Reports"}
-                                        onChange={() => handleRadioChange("Reports")} />
-                                    <label htmlFor="reports">Reports</label>
+                                    {/* Reports */}
+                                    <div className="col-6 col-sm-4 col-md-3 col-lg-2 d-flex align-items-center">
+                                        <input
+                                            type="radio"
+                                            id="reports"
+                                            name="section"
+                                            value="Reports"
+                                            checked={selectedOption === "Reports"}
+                                            onChange={() => handleRadioChange("Reports")}
+                                            className="me-2"
+                                        />
+                                        <label htmlFor="reports" className="mb-0">Reports</label>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
+                            {selectedOption === "Operation" && (
+                                <div className="container-fluid mt-3">
+                                    <div className="row g-3">
+                                        {/* Operation Panel */}
+                                        <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                            <div className="card border-secondary h-100">
+                                                <div className="card-header fw-bold" style={{
+                                                    backgroundColor: "#13bfaeff",
+                                                }}>Operation</div>
+                                                <div className="card-body">
+                                                    {[
+                                                        { label: "Docket Booking", value: "Booking" },
+                                                        { label: "Manifest", value: "Manifest" },
+                                                        { label: "Scan Process Hub", value: "Parcel Scan Data" },
+                                                        { label: "Run Sheet Entry", value: "Run Sheet Entry" },
+                                                        { label: "Status Activity Entry", value: "Status Activity Entry" },
+                                                        { label: "POD Record Update", value: "POD Record Update" },
+                                                        { label: "Docket Print", value: "Docket Print" },
+                                                    ].map((item, index) => (
+                                                        <div className="form-check mb-2" key={index}>
+                                                            <input
+                                                                className="form-check-input"
+                                                                style={{ border: "1px solid black" }}
+                                                                type="checkbox"
+                                                                id={`op-${item.value}`}
+                                                                checked={selectedOperation.includes(item.value)}
+                                                                onChange={() => handleCheckboxChange(item.value)}
+                                                            />
+                                                            <label className="form-check-label" htmlFor={`op-${item.value}`}>
+                                                                {item.label}
+                                                            </label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
 
+                                        {/* Booking */}
+                                        {selectedOperation.includes("Booking") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div className="card-header fw-bold" style={{ backgroundColor: "#13bfaeff" }}>Docket Booking</div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            { name: "DailyBooking", label: "Docket Booking" },
+                                                            { name: "DocketPrint", label: "Docket Print" },
+                                                            { name: "DailyExpenses", label: "Docket Expenses" },
+                                                            { name: "automail", label: "Auto Mail" },
+                                                            { name: "ShortEntry", label: "Smart Booking" },
+                                                            { name: "BulkImportData", label: "Bulk Booking" },
+                                                            { name: "VendorBillEntry", label: "Vendor Bill Entry" },
+                                                        ].map((item, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    name={item.name}
+                                                                    checked={formData[item.name]}
+                                                                    onChange={handleCheckboxselected}
+                                                                    id={`booking-${i}`}
+                                                                />
+                                                                <label className="form-check-label" htmlFor={`booking-${i}`}>
+                                                                    {item.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
 
-                        {selectedOption === "Operation" && (
-                            <div style={{ display: "flex", flexDirection: "row", paddingTop: "20px", flexWrap: "wrap" }}>
-                                <div style={{ width: "200px", border: "1px solid silver", borderRadius: "5px", marginBottom: "10px" }}>
-                                    <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                        <label htmlFor="">Operation</label>
+                                        {/* Manifest */}
+                                        {selectedOperation.includes("Manifest") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div className="card-header fw-bold" style={{ backgroundColor: "#13bfaeff" }}>Manifest</div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            "Pending Manifest",
+                                                            "Outgoing Manifest",
+                                                            "View Manifest",
+                                                            "Forwarding Manifest",
+                                                            "Bulk Import Manifest",
+                                                        ].map((label, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    name={label.replace(/\s+/g, "")}
+                                                                    checked={formData[label.replace(/\s+/g, "")]}
+                                                                    onChange={handleCheckboxselected}
+                                                                    id={`manifest-${i}`}
+                                                                />
+                                                                <label className="form-check-label" htmlFor={`manifest-${i}`}>
+                                                                    {label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Parcel Scan Data */}
+                                        {selectedOperation.includes("Parcel Scan Data") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div className="card-header fw-bold" style={{ backgroundColor: "#13bfaeff" }}>Scan Process Hub</div>
+                                                    <div className="card-body">
+                                                        {["Scan By Docket No", "Inscan Process View"].map((label, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input className="form-check-input" style={{ border: "1px solid black" }} type="checkbox" id={`scan-${i}`} />
+                                                                <label className="form-check-label" htmlFor={`scan-${i}`}>
+                                                                    {label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Run Sheet Entry */}
+                                        {selectedOperation.includes("Run Sheet Entry") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div className="card-header fw-bold" style={{ backgroundColor: "#13bfaeff" }}>Run Sheet Entry</div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            "Delivery Pending",
+                                                            "Delivery Entry",
+                                                            "View DRS",
+                                                            "Import DRS",
+                                                        ].map((label, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    name={label.replace(/\s+/g, "")}
+                                                                    checked={formData[label.replace(/\s+/g, "")]}
+                                                                    onChange={handleCheckboxselected}
+                                                                    id={`run-${i}`}
+                                                                />
+                                                                <label className="form-check-label" htmlFor={`run-${i}`}>
+                                                                    {label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Status Activity Entry */}
+                                        {selectedOperation.includes("Status Activity Entry") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div className="card-header fw-bold" style={{ backgroundColor: "#13bfaeff" }}>Status Activity Entry</div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            "Activity Entry",
+                                                            "Activity Import Bulk",
+                                                            "Activity Tracking",
+                                                        ].map((label, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input className="form-check-input" style={{ border: "1px solid black" }} type="checkbox" id={`status-${i}`} />
+                                                                <label className="form-check-label" htmlFor={`status-${i}`}>
+                                                                    {label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* POD Record Update */}
+                                        {selectedOperation.includes("POD Record Update") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div className="card-header fw-bold" style={{ backgroundColor: "#13bfaeff" }}>POD Record Update</div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            { name: "BuilkdataDelivered", label: "Delivered" },
+                                                            { name: "Podentry", label: "Return Booking" },
+                                                            { name: "BulkuplaodStatus", label: "Bulk Upload (Excel)" },
+                                                        ].map((item, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    name={item.name}
+                                                                    checked={formData[item.name]}
+                                                                    onChange={handleCheckboxselected}
+                                                                    id={`pod-${i}`}
+                                                                />
+                                                                <label className="form-check-label" htmlFor={`pod-${i}`}>
+                                                                    {item.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Docket Print */}
+                                        {selectedOperation.includes("Docket Print") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div className="card-header fw-bold" style={{ backgroundColor: "#13bfaeff" }}>Docket Print</div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            { name: "Docketprint", label: "Docket Print" },
+                                                            { name: "Docketprint2", label: "Docket Print2" },
+                                                            { name: "Docketprint3", label: "Docket Print3" },
+                                                            { name: "Docketprint4", label: "Docket Print4" },
+                                                            { name: "LebelPrintin", label: "Label Printing" },
+                                                            { name: "StickerPrinting", label: "Sticker Printing" },
+                                                        ].map((item, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    name={item.name}
+                                                                    checked={formData[item.name]}
+                                                                    onChange={handleCheckboxselected}
+                                                                    id={`docket-${i}`}
+                                                                />
+                                                                <label className="form-check-label" htmlFor={`docket-${i}`}>
+                                                                    {item.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div style={{ display: "flex", flexDirection: "column" }}>
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Booking" checked={selectedOperation.includes("Booking")}
-                                                onChange={() => handleCheckboxChange("Booking")} />
-                                            <label htmlFor="booking" style={{ marginLeft: "10px" }}>Booking</label>
-                                        </div>
-
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Manifest" checked={selectedOperation.includes("Manifest")}
-                                                onChange={() => handleCheckboxChange("Manifest")} />
-                                            <label htmlFor="manifest" style={{ marginLeft: "10px" }}>Manifest</label>
-                                        </div>
-
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Parcel Scan Data" checked={selectedOperation.includes("Parcel Scan Data")}
-                                                onChange={() => handleCheckboxChange("Parcel Scan Data")} />
-                                            <label htmlFor="dispatch" style={{ marginLeft: "10px" }}>Parcel Scan Data</label>
-                                        </div>
-
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Run Sheet Entry" checked={selectedOperation.includes("Run Sheet Entry")}
-                                                onChange={() => handleCheckboxChange("Run Sheet Entry")} />
-                                            <label htmlFor="trip-sheet" style={{ marginLeft: "10px" }}>Run Sheet Entry</label>
-                                        </div>
-
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Status Activity Entry" checked={selectedOperation.includes("Status Activity Entry")}
-                                                onChange={() => handleCheckboxChange("Status Activity Entry")} />
-                                            <label htmlFor="inscan" style={{ marginLeft: "10px" }}>Status Activity Entry</label>
-                                        </div>
-
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="POD Record Update" checked={selectedOperation.includes("POD Record Update")}
-                                                onChange={() => handleCheckboxChange("POD Record Update")} />
-                                            <label htmlFor="pod-update" style={{ marginLeft: "10px" }}>POD Record Update</label>
-                                        </div>
-
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Docket Print" checked={selectedOperation.includes("Docket Print")}
-                                                onChange={() => handleCheckboxChange("Docket Print")} />
-                                            <label htmlFor="pod" style={{ marginLeft: "10px" }}>Docket Print</label>
-                                        </div>
-                                    </div>
-
                                 </div>
+                            )}
 
-                                {selectedOperation.includes("Booking") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "260px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Booking</label>
-                                        </div>
 
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.DailyBooking} name='DailyBooking'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Daily Booking</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.DailyExpenses} name='DailyExpenses'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Daily Expenses</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.automail} name='automail'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Auto Mail</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.ShortEntry} name='ShortEntry'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Short Entry</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.BulkImportData} name='BulkImportData'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Bulk Import Data</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.VendorBillEntry} name='VendorBillEntry'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Vendor Bill Entry</label>
+                            {selectedOption === "CRM" && (
+                                <div className="container-fluid mt-3">
+                                    <div className="row g-3">
+                                        {/* Customer Complaint Main Panel */}
+                                        <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                            <div className="card border-secondary h-100">
+                                                <div
+                                                    className="card-header fw-bold"
+                                                    style={{ backgroundColor: "#13bfaeff" }}
+                                                >
+                                                    Customer Complaint
+                                                </div>
+                                                <div className="card-body">
+                                                    {[
+                                                        { label: "Customer Queries", value: "Customer Queries" },
+                                                    ].map((item, index) => (
+                                                        <div className="form-check mb-2" key={index}>
+                                                            <input
+                                                                className="form-check-input"
+                                                                style={{ border: "1px solid black" }}
+                                                                type="checkbox"
+                                                                id={`crm-${item.value}`}
+                                                                checked={selectedOperation.includes(item.value)}
+                                                                onChange={() => handleCheckboxChange(item.value)}
+                                                            />
+                                                            <label
+                                                                className="form-check-label"
+                                                                htmlFor={`crm-${item.value}`}
+                                                            >
+                                                                {item.label}
+                                                            </label>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {/* Customer Queries Section */}
+                                        {selectedOperation.includes("Customer Queries") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div className="card-header fw-bold"
+                                                        style={{ backgroundColor: "#13bfaeff" }}>
+                                                        Customer Queries
+                                                    </div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            { name: "Complaint", label: "Complaint" },
+                                                            { name: "ViewComplaintStatus", label: "View Complaint Status" },
+                                                            { name: "Query", label: "Query" },
+                                                        ].map((item, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    name={item.name}
+                                                                    checked={formData[item.name]}
+                                                                    onChange={handleCheckboxselected}
+                                                                    id={`customer-${i}`}
+                                                                />
+                                                                <label
+                                                                    className="form-check-label"
+                                                                    htmlFor={`customer-${i}`}
+                                                                >
+                                                                    {item.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-
-                                {selectedOperation.includes("Manifest") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "230px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Manifest</label>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Pending Manifest</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.BuildManifest} name='BuildManifest'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Create Manifest</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>View Manifest</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.ForwardingManifest} name='ForwardingManifest'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Forwarding Manifest</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.BuilkimportManifest} name='BuilkimportManifest'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Bulk Import Manifest</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedOperation.includes("Parcel Scan Data") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "120px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Parcel Scan Data</label>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Scan By AirwayBill No</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Scan By Manifest No</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedOperation.includes("Run Sheet Entry") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "180px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Run Sheet Entry</label>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Pending DRS</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Runsheet} name='Runsheet'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Create DRS</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>View DRS</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.DrsImport} name='DrsImport'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Import DRS</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedOperation.includes("Status Activity Entry") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "150px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Status Activity Entry</label>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Activity Entry</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Excel Import</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Activity Tracking</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedOperation.includes("POD Record Update") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "150px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">POD Record Update</label>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.BuilkdataDelivered} name='BuilkdataDelivered'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Delivered</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Podentry} name='Podentry'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>UnDelivered</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.BulkuplaodStatus} name='BulkuplaodStatus'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Bulk Upload(Excel)</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedOperation.includes("Docket Print") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "200px", height: "215px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Docket Print</label>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Docketprint} name='Docketprint'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Docket Print</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Docketprint2} name='Docketprint2'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Docket Print2</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Docketprint3} name='Docketprint3'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Docket Print3</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.LebelPrintin} name='LebelPrintin'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Lebel Printing</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.StickerPrinting} name='StickerPrinting'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Sticker Printing</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {selectedOption === "CRM" && (
-                            <div style={{ display: "flex", flexDirection: "row", paddingTop: "20px" }}>
-                                <div style={{ width: "220px", border: "1px solid silver", borderRadius: "5px" }}>
-                                    <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                        <label htmlFor="">Customer Complaint</label>
-                                    </div>
-                                    <div style={{ display: "flex", flexDirection: "column" }}>
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Customer Queries" checked={selectedOperation.includes("Customer Queries")}
-                                                onChange={() => handleCheckboxChange("Customer Queries")} />
-                                            <label htmlFor="booking" style={{ marginLeft: "10px" }}>Customer Queries</label>
-                                        </div>
-                                    </div>
-
                                 </div>
+                            )}
 
-                                {selectedOperation.includes("Customer Queries") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "160px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Customer Queries</label>
-                                        </div>
 
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Complaint</label>
+
+                            {selectedOption === "Reports" && (
+                                <div className="container-fluid mt-3">
+                                    <div className="row g-3">
+                                        {/* Reports Main Panel */}
+                                        <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                            <div className="card border-secondary h-100">
+                                                <div
+                                                    className="card-header fw-bold"
+                                                    style={{ backgroundColor: "#13bfaeff" }}
+                                                >
+                                                    Reports
+                                                </div>
+                                                <div className="card-body">
+                                                    {[
+                                                        { label: "Booking MIS Report", value: "Status Report" },
+                                                        { label: "Booking Detail Report", value: "Statement Wise Report" },
+                                                        { label: "Invoice Ledger Report", value: "Sales Register Report" },
+                                                    ].map((item, index) => (
+                                                        <div className="form-check mb-2" key={index}>
+                                                            <input
+                                                                className="form-check-input"
+                                                                style={{ border: "1px solid black" }}
+                                                                type="checkbox"
+                                                                id={`report-${item.value}`}
+                                                                checked={selectedOperation.includes(item.value)}
+                                                                onChange={() => handleCheckboxChange(item.value)}
+                                                            />
+                                                            <label
+                                                                className="form-check-label"
+                                                                htmlFor={`report-${item.value}`}
+                                                            >
+                                                                {item.label}
+                                                            </label>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
+                                        </div>
 
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>View Complaint Status</label>
+                                        {/* Booking MIS Report */}
+                                        {selectedOperation.includes("Status Report") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div
+                                                        className="card-header fw-bold"
+                                                        style={{ backgroundColor: "#13bfaeff" }}
+                                                    >
+                                                        Booking MIS Report
+                                                    </div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            { label: "MIS Report" },
+                                                            { label: "Vendor MIS Report" },
+                                                            { label: "Booking Mode Report" },
+                                                        ].map((item, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    id={`mis-${i}`}
+                                                                />
+                                                                <label
+                                                                    className="form-check-label"
+                                                                    htmlFor={`mis-${i}`}
+                                                                >
+                                                                    {item.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
+                                        )}
 
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Querry</label>
+                                        {/* Booking Detail Report */}
+                                        {selectedOperation.includes("Statement Wise Report") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div
+                                                        className="card-header fw-bold"
+                                                        style={{ backgroundColor: "#13bfaeff" }}
+                                                    >
+                                                        Booking Detail Report
+                                                    </div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            { name: "Statement", label: "Booking Detail" },
+                                                            { name: "Checklist", label: "Total Charges Report" },
+                                                            { name: "ModeWise", label: "Mode Wise Report" },
+                                                        ].map((item, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    name={item.name}
+                                                                    checked={formData[item.name]}
+                                                                    onChange={handleCheckboxselected}
+                                                                    id={`detail-${i}`}
+                                                                />
+                                                                <label
+                                                                    className="form-check-label"
+                                                                    htmlFor={`detail-${i}`}
+                                                                >
+                                                                    {item.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
+
+                                        {/* Invoice Ledger Report */}
+                                        {selectedOperation.includes("Sales Register Report") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div
+                                                        className="card-header fw-bold"
+                                                        style={{ backgroundColor: "#13bfaeff" }}
+                                                    >
+                                                        Invoice Ledger Report
+                                                    </div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            "Invoice Ledger Report",
+                                                            "Checklist Report",
+                                                            "Unbuild Report",
+                                                            "Bill View Report",
+                                                        ].map((label, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    id={`invoice-${i}`}
+                                                                />
+                                                                <label
+                                                                    className="form-check-label"
+                                                                    htmlFor={`invoice-${i}`}
+                                                                >
+                                                                    {label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        )}
-
-                        {selectedOption === "Reports" && (
-                            <div style={{ display: "flex", flexDirection: "row", paddingTop: "20px" }}>
-                                <div style={{ width: "220px", border: "1px solid silver", borderRadius: "5px" }}>
-                                    <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                        <label htmlFor="">Reports</label>
-                                    </div>
-                                    <div style={{ display: "flex", flexDirection: "column" }}>
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Status Report" checked={selectedOperation.includes("Status Report")}
-                                                onChange={() => handleCheckboxChange("Status Report")} />
-                                            <label htmlFor="booking" style={{ marginLeft: "10px" }}>Status Report</label>
-                                        </div>
-
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Statement Wise Report" checked={selectedOperation.includes("Statement Wise Report")}
-                                                onChange={() => handleCheckboxChange("Statement Wise Report")} />
-                                            <label htmlFor="manifest" style={{ marginLeft: "10px" }}>Statement Wise Report</label>
-                                        </div>
-
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Sales Register Report" checked={selectedOperation.includes("Sales Register Report")}
-                                                onChange={() => handleCheckboxChange("Sales Register Report")} />
-                                            <label htmlFor="dispatch" style={{ marginLeft: "10px" }}>Sales Register Report</label>
-                                        </div>
-                                    </div>
-
                                 </div>
+                            )}
 
-                                {selectedOperation.includes("Status Report") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "160px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Status Report</label>
+
+                            {/* Billings Section */}
+                            {selectedOption === "Billings" && (
+                                <div className="container-fluid mt-3">
+                                    <div className="row g-3">
+                                        {/* Billings Main Panel */}
+                                        <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                            <div className="card border-secondary h-100">
+                                                <div
+                                                    className="card-header fw-bold"
+                                                    style={{ backgroundColor: "#13bfaeff" }}
+                                                >
+                                                    Billings
+                                                </div>
+                                                <div className="card-body">
+                                                    <div className="form-check mb-2">
+                                                        <input
+                                                            className="form-check-input"
+                                                            style={{ border: "1px solid black" }}
+                                                            type="checkbox"
+                                                            id="billing-invoice"
+                                                            value="Invoice Generate"
+                                                            checked={selectedOperation.includes("Invoice Generate")}
+                                                            onChange={() => handleCheckboxChange("Invoice Generate")}
+                                                        />
+                                                        <label
+                                                            className="form-check-label"
+                                                            htmlFor="billing-invoice"
+                                                        >
+                                                            Invoice Generate
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Customer Wise Report</label>
+                                        {/* Invoice Generate Section */}
+                                        {selectedOperation.includes("Invoice Generate") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div
+                                                        className="card-header fw-bold"
+                                                        style={{ backgroundColor: "#13bfaeff" }}
+                                                    >
+                                                        Invoice Generate
+                                                    </div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            { label: "Pending Invoice" },
+                                                            { label: "Generate Invoice" },
+                                                            { label: "View Invoice", name: "Invoice", bind: true },
+                                                            { label: "Invoice Summary" },
+                                                            { label: "Docket Print" },
+                                                            { label: "Performance Invoice", name: "ParfarmaInvoice", bind: true },
+                                                            { label: "View Performance Invoice" },
+                                                        ].map((item, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    id={`invoice-${i}`}
+                                                                    name={item.name}
+                                                                    checked={item.bind ? formData[item.name] : undefined}
+                                                                    onChange={
+                                                                        item.bind
+                                                                            ? handleCheckboxselected
+                                                                            : undefined
+                                                                    }
+                                                                />
+                                                                <label
+                                                                    className="form-check-label"
+                                                                    htmlFor={`invoice-${i}`}
+                                                                >
+                                                                    {item.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Vendor Wise Report</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Vehicle Wise Report</label>
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
-                                )}
-
-                                {selectedOperation.includes("Statement Wise Report") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "160px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Statement Wise Report</label>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Statement} name='Statement'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Statement Wise Report</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Checklist} name='Checklist'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Checklist Wise Report</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.ModeWise} name='ModeWise'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Mode Wise Report</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedOperation.includes("Sales Register Report") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "180px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Sales Register Report</label>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Sales Register Report</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Checklist Report</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Unbuild Report</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Bill View Report</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {selectedOption === "Billings" && (
-                            <div style={{ display: "flex", flexDirection: "row", paddingTop: "20px" }}>
-                                <div style={{ width: "220px", border: "1px solid silver", borderRadius: "5px" }}>
-                                    <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                        <label htmlFor="">Billings</label>
-                                    </div>
-                                    <div style={{ display: "flex", flexDirection: "column" }}>
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Invoice Generate" checked={selectedOperation.includes("Invoice Generate")}
-                                                onChange={() => handleCheckboxChange("Invoice Generate")} />
-                                            <label htmlFor="booking" style={{ marginLeft: "10px" }}>Invoice Generate</label>
-                                        </div>
-                                    </div>
-
                                 </div>
+                            )}
 
-                                {selectedOperation.includes("Invoice Generate") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "180px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Invoice Generate</label>
+                            {/* Payments Section */}
+                            {selectedOption === "Payments" && (
+                                <div className="container-fluid mt-3">
+                                    <div className="row g-3">
+                                        {/* Payments Main Panel */}
+                                        <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                            <div className="card border-secondary h-100">
+                                                <div
+                                                    className="card-header fw-bold"
+                                                    style={{ backgroundColor: "#13bfaeff" }}
+                                                >
+                                                    Payments
+                                                </div>
+                                                <div className="card-body">
+                                                    <div className="form-check mb-2">
+                                                        <input
+                                                            className="form-check-input"
+                                                            style={{ border: "1px solid black" }}
+                                                            type="checkbox"
+                                                            id="payments-laiser"
+                                                            value="Laiser"
+                                                            checked={selectedOperation.includes("Laiser")}
+                                                            onChange={() => handleCheckboxChange("Laiser")}
+                                                        />
+                                                        <label
+                                                            className="form-check-label"
+                                                            htmlFor="payments-laiser"
+                                                        >
+                                                            Laiser
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Generate Invoice</label>
+                                        {/* Laiser Section */}
+                                        {selectedOperation.includes("Laiser") && (
+                                            <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+                                                <div className="card border-secondary h-100">
+                                                    <div
+                                                        className="card-header fw-bold"
+                                                        style={{ backgroundColor: "#13bfaeff" }}
+                                                    >
+                                                        Laiser
+                                                    </div>
+                                                    <div className="card-body">
+                                                        {[
+                                                            {
+                                                                label: "Payment Received Entry",
+                                                                name: "Laiser",
+                                                                bind: true,
+                                                            },
+                                                            { label: "Pay Out Standing" },
+                                                            { label: "Credit Note", name: "CreditNote", bind: true },
+                                                        ].map((item, i) => (
+                                                            <div className="form-check mb-2" key={i}>
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    style={{ border: "1px solid black" }}
+                                                                    type="checkbox"
+                                                                    id={`laiser-${i}`}
+                                                                    name={item.name}
+                                                                    checked={item.bind ? formData[item.name] : undefined}
+                                                                    onChange={
+                                                                        item.bind
+                                                                            ? handleCheckboxselected
+                                                                            : undefined
+                                                                    }
+                                                                />
+                                                                <label
+                                                                    className="form-check-label"
+                                                                    htmlFor={`laiser-${i}`}
+                                                                >
+                                                                    {item.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Invoice} name='Invoice'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>View Invoice</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Pending Invoice</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.ParfarmaInvoice} name='ParfarmaInvoice'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Performance Invoice</label>
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        )}
-
-                        {selectedOption === "Payments" && (
-                            <div style={{ display: "flex", flexDirection: "row", paddingTop: "20px" }}>
-                                <div style={{ width: "220px", border: "1px solid silver", borderRadius: "5px" }}>
-                                    <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                        <label htmlFor="">Payments</label>
-                                    </div>
-                                    <div style={{ display: "flex", flexDirection: "column" }}>
-                                        <div style={{ margin: "5px" }}>
-                                            <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                value="Laiser" checked={selectedOperation.includes("Laiser")}
-                                                onChange={() => handleCheckboxChange("Laiser")} />
-                                            <label htmlFor="booking" style={{ marginLeft: "10px" }}>Laiser</label>
-                                        </div>
-                                    </div>
-
                                 </div>
+                            )}
 
-                                {selectedOperation.includes("Laiser") && (
-                                    <div style={{ marginLeft: "20px", border: "1px solid silver", borderRadius: "5px", width: "220px", height: "160px" }}>
-                                        <div className='header-tittle' style={{ borderRadius: "5px" }}>
-                                            <label htmlFor="">Laiser</label>
-                                        </div>
 
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.Laiser} name='Laiser'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Payment Received Entry</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Pay Out Standing</label>
-                                            </div>
-
-                                            <div style={{ margin: "5px" }}>
-                                                <input type="checkbox" style={{ marginLeft: "10px", transform: "scale(1.2)" }}
-                                                    checked={formData.CreditNote} name='CreditNote'
-                                                    onChange={handleCheckboxselected} />
-                                                <label htmlFor="" style={{ marginLeft: "10px" }}>Credit Note</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                            <div style={{ width: "100%" }}>
+                                <div className="bottom-buttons">
+                                    <button className='ok-btn' onClick={handlesave}>Submit</button>
+                                    <button className='ok-btn' onClick={handleUpdate}>Update</button>
+                                    <button className='ok-btn' onClick={ResetAll}>Reset</button>
+                                </div>
                             </div>
-                        )}
+                            <div className='table-container'>
+                                <table className='table table-bordered table-sm'>
+                                    <thead className='table-info body-bordered table-sm'>
+                                        <tr>
+                                            <th scope="col">Actions</th>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Branch</th>
+                                            <th scope="col">User Name</th>
+                                            <th scope="col">Password</th>
+                                            <th scope="col">Employee Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className='table-body'>
+                                        {
+                                            getData.map((data, index) => (
+                                                < tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                                    <td>
+                                                        <PiDotsThreeOutlineVerticalFill
+                                                            style={{ fontSize: "20px", cursor: "pointer" }}
+                                                            onClick={() => setOpenRow(openRow === index ? null : index)}
+                                                        />
+                                                        {openRow === index && (
+                                                            <div
+                                                                style={{
+                                                                    display: "flex",
+                                                                    justifyContent: "center",
+                                                                    flexDirection: "row",
+                                                                    position: "absolute",
+                                                                    alignItems: "center",
+                                                                    left: "120px",
+                                                                    top: "0px",
+                                                                    borderRadius: "10px",
+                                                                    backgroundColor: "white",
+                                                                    zIndex: "999999",
+                                                                    height: "30px",
+                                                                    width: "50px",
+                                                                    padding: "10px",
+                                                                }}
+                                                            >
+                                                                <button className='edit-btn' onClick={() => {
+                                                                    setOpenRow(null);
+                                                                    const operations = [];
+                                                                    if (
+                                                                        data?.DailyBooking ||
+                                                                        data?.DailyExpenses ||
+                                                                        data?.AutoMail ||
+                                                                        data?.ShortEntry ||
+                                                                        data?.BulkImportData
+                                                                    ) {
+                                                                        operations.push("Booking");
+                                                                    }
 
-                        <div style={{ width: "100%" }}>
-                            <div className="bottom-buttons">
-                                <button className='ok-btn' onClick={handlesave}>Submit</button>
-                                <button className='ok-btn' onClick={handleUpdate}>Update</button>
-                                <button className='ok-btn' onClick={ResetAll}>Reset</button>
+                                                                    if (data?.BuildManifest) operations.push("Manifest");
+                                                                    if (data?.Inscan) operations.push("Parcel Scan Data");
+                                                                    if (data?.Runsheet) operations.push("Run Sheet Entry");
+                                                                    if (data?.Statusactivity) operations.push("Status Activity Entry");
+                                                                    if (
+                                                                        data?.BulkuplaodStatus ||
+                                                                        data?.Podentry ||
+                                                                        data?.BuilkdataDelivered
+                                                                    ) {
+                                                                        operations.push("POD Record Update");
+                                                                        if (
+                                                                            data?.Docketprint ||
+                                                                            data?.Docketprint2 ||
+                                                                            data?.Docketprint3 ||
+                                                                            data?.LebelPrintin ||
+                                                                            data?.StickerPrinting
+                                                                        ) {
+                                                                            operations.push("Docket Print");
+                                                                        }
+                                                                    }
+                                                                    if (data?.Custquery) operations.push("Customer Queries");
+                                                                    if (data?.Invoice) operations.push("Invoice Generate");
+                                                                    if (data?.Laiser) operations.push("Laiser");
+                                                                    if (data?.StatusReport) operations.push("Status Report");
+                                                                    if (
+                                                                        data?.Statement ||
+                                                                        data?.Checklist ||
+                                                                        data?.ModeWise
+                                                                    ) {
+                                                                        operations.push("Statement Wise Report");
+                                                                    }
+                                                                        if (data?.SalesRegister) operations.push("Sales Register Report");
+
+                                                                        setFormData({
+                                                                            UserName: data?.UserName || "",
+                                                                            Employee_Code: data?.Employee_Code || "",
+                                                                            Password: data?.Password || "",
+                                                                            DailyBooking: !!data?.DailyBooking,
+                                                                            DailyExpenses: !!data?.DailyExpenses,
+                                                                            automail: !!data?.AutoMail,
+                                                                            ShortEntry: !!data?.ShortEntry,
+                                                                            BulkImportData: !!data?.BulkImportData,
+                                                                            VendorBillEntry: !!data?.VendorBillEntry,
+                                                                            BuildManifest: !!data?.BuildManifest,
+                                                                            ForwardingManifest: !!data?.ForwardingManifest,
+                                                                            BuilkimportManifest: !!data?.BuilkimportManifest,
+                                                                            Inscan: !!data?.Inscan,
+                                                                            Runsheet: !!data?.Runsheet,
+                                                                            DrsImport: !!data?.DrsImport,
+                                                                            Statusactivity: !!data?.Statusactivity,
+                                                                            BulkuplaodStatus: !!data?.BulkuplaodStatus,
+                                                                            Podentry: !!data?.Podentry,
+                                                                            BuilkdataDelivered: !!data?.BuilkdataDelivered,
+                                                                            Custquery: !!data?.Custquery,
+                                                                            Docketprint: !!data?.Docketprint,
+                                                                            Docketprint2: !!data?.Docketprint2,
+                                                                            Docketprint3: !!data?.Docketprint3,
+                                                                            LebelPrintin: !!data?.LebelPrintin,
+                                                                            StickerPrinting: !!data?.StickerPrinting,
+                                                                            Invoice: !!data?.Invoice,
+                                                                            ParfarmaInvoice: !!data?.ParfarmaInvoice,
+                                                                            Laiser: !!data?.Laiser,
+                                                                            CreditNote: !!data?.CreditNote,
+                                                                            StatusReport: !!data?.StatusReport,
+                                                                            Statement: !!data?.Statement,
+                                                                            Checklist: !!data?.Checklist,
+                                                                            ModeWise: !!data?.ModeWise,
+                                                                            SalesRegister: !!data?.SalesRegister
+                                                                        });
+                                                                        setSelectedOperation(operations);
+                                                                        setSelectedOption("Operation");
+
+                                                                    }
+                                                                }>
+                                                                    <i className='bi bi-pen'></i>
+                                                                </button>
+                                                                <button onClick={() => {
+                                                                    setOpenRow(null);
+                                                                    handleDelete(data?.ID);
+                                                                }} className='edit-btn'><i className='bi bi-trash'></i></button>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td>{data?.ID}</td>
+                                                    <td>{data?.City_Name}</td>
+                                                    <td>{data?.UserName}</td>
+                                                    <td>{data?.Password}</td>
+                                                    <td>{data?.Employee_Name}</td>
+
+                                                </tr>))}
+                                    </tbody>
+                                </table>
                             </div>
+
                         </div>
                     </form>
-                </div>
+                </div >
                 <Footer />
-            </div>
+            </div >
 
         </>
     )

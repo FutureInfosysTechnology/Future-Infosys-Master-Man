@@ -146,7 +146,7 @@ function Booking() {
         FuelCharges: 0,
         TotalGST: 0,
         totalgstPer: 0,
-        FovPer:0,
+        FovPer: 0,
         FovChrgs: 0,
         DocketChrgs: 0,
         ODAChrgs: 0,
@@ -915,16 +915,16 @@ function Booking() {
             // add new row
             setSubmittedData((prev) => [...prev, volumetricData]);
         }
-        setVolumetricData({
-            Length: "",
-            Width: "",
-            Height: "",
-            Qty: "",
-            DivideBy: "",
-            VolmetricWt: "",
+        setVolumetricData(pre=>({
+            ...pre,
+            Length: 0,
+            Width: 0,
+            Height: 0,
+            Qty: 0,
+            VolmetricWt: 0,
             ActualWt: 0,
-            ChargeWt: ""
-        });
+            ChargeWt: 0,
+        }));
     };
 
     const handleVendorAddRow = (e) => {
@@ -949,16 +949,16 @@ function Booking() {
             // add new row
             setVendorSubmittedData((prev) => [...prev, vendorVolumetric]);
         }
-        setVendorvolumetric({
+        setVendorvolumetric(pre=>({
+            ...pre,
             Length: 0,
             Width: 0,
             Height: 0,
             Qty: 0,
-            DivideBy: 0,
             VolmetricWt: 0,
             ActualWt: 0,
-            ChargeWt: 0
-        });
+            ChargeWt: 0,
+        }));
     };
 
     const handleInvoiceAddRow = (e) => {
@@ -1115,9 +1115,8 @@ function Booking() {
                 if (response?.status === 1) {
                     const gst = response.Data;
                     console.log('✅ GST API Response:', gst);
-                    if(formData.BookMode==="Credit")
-                    {
-                         setFormData((prev) => ({
+                    if (formData.BookMode === "Credit") {
+                        setFormData((prev) => ({
                             ...prev,
                             FovChrgs: gst.Fov_Charges,
                             DocketChrgs: gst.Docket_Charges,
@@ -1133,11 +1132,11 @@ function Booking() {
                             SGST: gst.SGSTAMT,
                             IGST: gst.IGSTAMT,
                             TotalGST: gst.TotalGST,
-                            totalgstPer:gst.GSTPer,
+                            totalgstPer: gst.GSTPer,
                             TotalAmt: gst.TotalAmt
                         }));
-                  
-                    setGstData({
+
+                        setGstData({
                             CGSTAMT: gst.CGSTAMT,
                             SGSTAMT: gst.SGSTAMT,
                             IGSTAMT: gst.IGSTAMT,
@@ -1159,7 +1158,7 @@ function Booking() {
             formData.Rate,
             formData.ODAChrgs,
             formData.BookMode)
-        if (formData.Customer_Code && formData.Mode_Code && formData.Rate && formData.BookMode) {
+        if (!skipGstCalc && formData.Customer_Code && formData.Mode_Code && formData.Rate && formData.BookMode) {
             calculateGstDetails(
                 formData.Customer_Code,
                 formData.Mode_Code,
@@ -1341,7 +1340,7 @@ function Booking() {
             FuelCharges: 0,
             TotalGST: 0,
             totalgstPer: 0,
-            FovPer:0,
+            FovPer: 0,
             FovChrgs: 0,
             DocketChrgs: 0,
             ODAChrgs: 0,
@@ -1399,8 +1398,8 @@ function Booking() {
             CGSTAMT: 0,
             SGSTPer: 0,
             SGSTAMT: 0,
-            TotalGST:0,
-            GSTPer:0,
+            TotalGST: 0,
+            GSTPer: 0,
         });
 
         setRemarkData({

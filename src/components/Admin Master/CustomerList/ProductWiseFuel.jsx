@@ -489,17 +489,19 @@ function ProductWiseFuel() {
                                                         setIsEditMode(true);
                                                         setOpenRow(null);
                                                         setAddCust({
+                                                            FuelPer: 0,
+                                                            fovper: 0,
                                                             custCode: cust.Customer_Code,
                                                             modeCode: cust.Mode_Code,
-                                                            fuelCharge: cust.Fuel_Charges,
-                                                            fovCharge: cust.Fov_Charges,
-                                                            docketCharge: cust.Docket_Charges,
-                                                            deliveryCharge: cust.Dilivery_Charges,
-                                                            packingCharge: cust.Packing_Charges,
-                                                            greenCharge: cust.Green_Charges,
-                                                            hamaliCharge: cust.Hamali_Charges,
-                                                            otherCharge: cust.Other_Charges,
-                                                            insuranceCharge: cust.Insurance_Charges,
+                                                            fuelCharge: cust.Fuel_Charges?.trim(),
+                                                            fovCharge: cust.Fov_Charges?.trim(),
+                                                            docketCharge: cust.Docket_Charges?.trim(),
+                                                            deliveryCharge: cust.Dilivery_Charges?.trim(),
+                                                            packingCharge: cust.Packing_Charges?.trim(),
+                                                            greenCharge: cust.Green_Charges?.trim(),
+                                                            hamaliCharge: cust.Hamali_Charges?.trim(),
+                                                            otherCharge: cust.Other_Charges?.trim(),
+                                                            insuranceCharge: cust.Insurance_Charges?.trim(),
                                                             fromDate: cust.From_Date,
                                                             toDate: cust.To_Date
                                                         });
@@ -649,7 +651,7 @@ function ProductWiseFuel() {
                                                             menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
                                                         }} />
                                                 </div>
-                                                
+
                                                 <div className="input-field1">
                                                     <label>Fuel Charges</label>
                                                     <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
@@ -680,12 +682,12 @@ function ProductWiseFuel() {
                                                         />
                                                     </div>
                                                 </div>
-                                                
+
                                                 {isFovChecked && (
-                                                     <div className="input-field3">
-                                                    <label>Fov Charges</label>
-                                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                                                        <input type="text" value={addCust.fovCharge}
+                                                    <div className="input-field3">
+                                                        <label>Fov Charges</label>
+                                                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                            <input type="text" value={addCust.fovCharge}
                                                                 onChange={(e) => setAddCust({ ...addCust, fovCharge: e.target.value })}
                                                                 placeholder="Enter FOV " style={{
                                                                     width: "80%",
@@ -693,26 +695,26 @@ function ProductWiseFuel() {
                                                                     borderTopRightRadius: "0px",
                                                                     borderRightColor: "transparent"
                                                                 }} />
-                                                        <input
-                                                            type="tel"
-                                                            placeholder="%"
-                                                            style={{
-                                                                width: "30%",
-                                                                borderLeft: "none",
-                                                                borderRadius: "0 4px 4px 0",
-                                                                padding: "5px",
-                                                                textAlign: "center",
-                                                            }}
-                                                            value={addCust.fovper !== "" ? `${addCust.fovper}%` : ""}
-                                                            onChange={(e) => {
-                                                                // ✅ Strip non-numeric chars before saving
-                                                                const val = e.target.value.replace(/[^0-9.]/g, "");
-                                                                setAddCust({ ...addCust, fovper: val });
-                                                            }}
-                                                        />
+                                                            <input
+                                                                type="tel"
+                                                                placeholder="%"
+                                                                style={{
+                                                                    width: "30%",
+                                                                    borderLeft: "none",
+                                                                    borderRadius: "0 4px 4px 0",
+                                                                    padding: "5px",
+                                                                    textAlign: "center",
+                                                                }}
+                                                                value={addCust.fovper !== "" ? `${addCust.fovper}%` : ""}
+                                                                onChange={(e) => {
+                                                                    // ✅ Strip non-numeric chars before saving
+                                                                    const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                                    setAddCust({ ...addCust, fovper: val });
+                                                                }}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                   
+
                                                 )}
 
                                                 {isDocketChecked && (
@@ -805,8 +807,8 @@ function ProductWiseFuel() {
                                                     <button className="ok-btn"
                                                         style={{
                                                             height: "35px",
-                                                            width:"100px",
-                                                            marginTop:"15px",
+                                                            width: "100px",
+                                                            marginTop: "15px",
                                                             fontSize: "20px", padding: "5px",
                                                             borderTopLeftRadius: "0px",
                                                             borderBottomLeftRadius: "0px"

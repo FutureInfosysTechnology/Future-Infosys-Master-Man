@@ -337,7 +337,7 @@ function Delivered() {
 
                                 <div className="input-field3">
                                     <label >E Way Bill No</label>
-                                    <input type="text" placeholder="E Way Bill No" value={deliveryData[0]?.BillNo || ''} readOnly />
+                                    <input type="text" placeholder="E Way Bill No" value={deliveryData[0]?.EWaybill || ''} readOnly />
                                 </div>
 
                                 <div className="input-field3">

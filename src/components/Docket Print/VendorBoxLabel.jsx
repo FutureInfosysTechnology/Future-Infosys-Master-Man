@@ -1,10 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Footer from '../../Components-2/Footer';
 import Sidebar1 from '../../Components-2/Sidebar1';
 import Header from '../../Components-2/Header/Header';
 import barcode from '../../Assets/Images/barcode-svgrepo-com.png';
-
+import { useLocation, useNavigate } from 'react-router-dom';
+import BarCode from "react-barcode";
 function VendorBoxLabel() {
+        const [data, setData] = useState([]);
+        const navigate = useNavigate();
+        const location = useLocation();
+        console.log(location);
+        console.log(location.state);
+        const fromPath = location?.state?.path || "/";
+        setData(location?.state?.data || []);
     return (
         <>
             <Header />
