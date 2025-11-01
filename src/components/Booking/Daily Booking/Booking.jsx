@@ -915,7 +915,7 @@ function Booking() {
             // add new row
             setSubmittedData((prev) => [...prev, volumetricData]);
         }
-        setVolumetricData(pre=>({
+        setVolumetricData(pre => ({
             ...pre,
             Length: 0,
             Width: 0,
@@ -949,7 +949,7 @@ function Booking() {
             // add new row
             setVendorSubmittedData((prev) => [...prev, vendorVolumetric]);
         }
-        setVendorvolumetric(pre=>({
+        setVendorvolumetric(pre => ({
             ...pre,
             Length: 0,
             Width: 0,
@@ -1913,8 +1913,22 @@ function Booking() {
                         InvDate: data.InvDate,
                         BillParty: data.BillParty,
                         BookMode: data.T_Flag,
+                        TotalGST: data.CGSTAMT + data.SGSTAMT + data.IGSTAMT,
+                        totalgstPer: data.CGSTPer + data.SGSTPer + data.IGSTPer,
 
                     }));
+                setGstData(pre => ({
+                    ...pre,
+                    CGSTPer: data.CGSTPer,
+                    CGSTAMT: data.CGSTAMT,
+                    SGSTPer: data.SGSTPer,
+                    SGSTAMT: data.SGSTAMT,
+                    IGSTPer: data.IGSTPer,
+                    IGSTAMT: data.IGSTAMT,
+                    GSTPer: data.CGSTPer + data.SGSTPer + data.IGSTPer,
+                    TotalGST: data.CGSTAMT + data.SGSTAMT + data.IGSTAMT,
+                })
+                )
                 setRemarkData({
                     Remark: data.Remark,
                     MHWNo: data.MHWNo,
