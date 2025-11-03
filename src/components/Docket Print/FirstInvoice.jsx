@@ -288,14 +288,14 @@ function FirstInvoice() {
                                     </div>
                                 </div>
 
-                                <div style={{ display: "flex", fontSize: "12px", border: "1px solid black", marginBottom: "5px", padding: "10px" }}>
-                                    <div style={{ display: "flex", width: "50%", justifyContent: "start" }}>
+                                <div style={{ display: "flex",justifyContent:"space-between", fontSize: "12px", border: "1px solid black", marginBottom: "5px", padding: "10px" }}>
+                                    <div style={{ display: "flex", justifyContent: "start" }}>
                                         <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <label htmlFor=""><b>CLIENT NAME</b></label>
-                                            <label htmlFor=""><b>ADDRESS</b></label>
-                                            <label htmlFor=""><b>CLIENT MOBILE NO </b></label>
-                                            <label htmlFor=""><b>PIN CODE</b></label>
-                                            <label htmlFor=""><b>GST NO</b></label>
+                                            <label htmlFor=""><b>Client Name</b></label>
+                                            <label htmlFor=""><b>Address</b></label>
+                                            <label htmlFor=""><b>Client Mobile No </b></label>
+                                            <label htmlFor=""><b>Pin Code</b></label>
+                                            <label htmlFor=""><b>GST No</b></label>
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
                                             <label htmlFor=""><b>:</b></label>
@@ -307,18 +307,18 @@ function FirstInvoice() {
                                         <div style={{ display: "flex", flexDirection: "column" }}>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.customerName}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Add1},{invoiceData[0]?.Customer_Add2},{invoiceData[0]?.Customer_Add3}</label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Mob}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>(+91) {invoiceData[0]?.Customer_Mob}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Pin_Code}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Gst_No}</label>
                                         </div>
                                     </div>
 
-                                    <div style={{ display: "flex", width: "50%", justifyContent: "end", alignItems: "center", marginRight: "50px" }}>
+                                    <div style={{ display: "flex", justifyContent: "end", alignItems: "center", marginRight: "50px" }}>
                                         <div style={{ display: "flex", flexDirection: "column", }}>
-                                            <label htmlFor=""><b>INVOICE NO</b></label>
-                                            <label htmlFor=""><b>INVOICE DATE</b></label>
-                                            <label htmlFor=""><b>INVOICE FROM</b></label>
-                                            <label htmlFor=""><b>INVOICE TO</b></label>
+                                            <label htmlFor=""><b>Invoice No</b></label>
+                                            <label htmlFor=""><b>Invoice Date</b></label>
+                                            <label htmlFor=""><b>Invoice From</b></label>
+                                            <label htmlFor=""><b>Invoice To</b></label>
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
                                             <label htmlFor=""><b>:</b></label>
@@ -519,7 +519,7 @@ function FirstInvoice() {
 
                                 <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", justifyContent: "space-around", fontSize: "15px" }}>
                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Bank Name :</div>    <div style={{ textAlign: "start" }}>{invoiceData[0]?.Bank_Name}</div></div>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Branch :</div>  <div style={{ textAlign: "start" }}>{getBranch?.Company_Name}</div></div>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Branch :</div>  <div style={{ textAlign: "start" }}>{invoiceData[0]?.Company_Name}</div></div>
                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>A/C No :</div> <div style={{ textAlign: "start" }}>{invoiceData[0]?.AccountNo}</div></div>
                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>IFSC Code :</div> <div style={{ textAlign: "start" }}>{invoiceData[0]?.IFSC_Code}</div></div>
                                 </div>
@@ -536,14 +536,14 @@ function FirstInvoice() {
                                     </div>
                                     <div style={{ display: "flex", width: "40%", justifyContent: "center", alignItems: "center" }}>
                                         <div style={{
-                                            display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "30%",
-                                            gap: "30px", fontWeight: "bold", fontSize: "13px", height: "100px", backgroundImage: `url(${getBranch?.Company_Stamp})`, // 👈 use your stored image
+                                            display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "40%",
+                                            gap: "100px", fontWeight: "bold", fontSize: "13px", height: "130px", backgroundImage: `url(${invoiceData[0]?.Company_Stamp})`, // 👈 use your stored image
                                             backgroundSize: "contain",
                                             backgroundPosition: "center",
                                             backgroundRepeat: "no-repeat",
                                         }}>
                                             <div style={{}}>For <b style={{ marginLeft: "5px", fontWeight: "bold", fontSize: "11px" }}>{invoiceData[0]?.Company_Name}</b></div>
-                                            <div style={{ display: "flex", width: "30%", justifyContent: "center", alignItems: "center" }}> Auth. Signatory</div>
+                                            <div> Auth. Signatory</div>
                                         </div>
                                     </div>
                                 </div>

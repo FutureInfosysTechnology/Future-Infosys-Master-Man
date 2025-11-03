@@ -230,70 +230,80 @@ function ProductWiseFuel() {
     }
 
 
-    const handleSaveCustomer = async (e) => {
-        e.preventDefault();
-        const errors = [];
-        if (!addCust.custCode) errors.push("Customer is required");
-        if (!addCust.modeCode) errors.push("Mode is required");
-        if (!addCust.fromDate) errors.push("From Date is required");
-        if (!addCust.toDate) errors.push("To Date is required");
-        if (errors.length > 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Error',
-                html: errors.map(err => `<div>${err}</div>`).join(''),
-            });
-            return;
-        }
+  const handleSaveCustomer = async (e) => {
+    e.preventDefault();
 
-        const requestBody = {
+    const errors = [];
+    if (!addCust.custCode) errors.push("Customer is required");
+    if (!addCust.modeCode) errors.push("Mode is required");
+    if (!addCust.fromDate) errors.push("From Date is required");
+    if (!addCust.toDate) errors.push("To Date is required");
+
+    if (errors.length > 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            html: errors.map(err => `<div>${err}</div>`).join(''),
+        });
+        return;
+    }
+
+    try {
+        // 🔹 Prepare query params (backend uses req.query)
+        const queryParams = new URLSearchParams({
             customerCode: addCust.custCode,
             modeCode: addCust.modeCode,
-            fuelCharges: addCust.fuelCharge,
-            fovCharges: addCust.fovCharge,
-            docketCharges: addCust.docketCharge,
-            deliveryCharges: addCust.deliveryCharge,
-            packingCharges: addCust.packingCharge,
-            greenCharges: addCust.greenCharge,
-            hamaliCharges: addCust.hamaliCharge,
-            otherCharges: addCust.otherCharge,
-            insuranceCharges: addCust.insuranceCharge,
+            fuelCharges: addCust.fuelCharge || 0,
+            Fuel_Per: addCust.FuelPer || 0,
+            Fov_Per: addCust.fovper || 0,
+            fovCharges: addCust.fovCharge || 0,
+            docketCharges: addCust.docketCharge || 0,
+            deliveryCharges: addCust.deliveryCharge || 0,
+            packingCharges: addCust.packingCharge || 0,
+            greenCharges: addCust.greenCharge || 0,
+            hamaliCharges: addCust.hamaliCharge || 0,
+            otherCharges: addCust.otherCharge || 0,
+            insuranceCharges: addCust.insuranceCharge || 0,
             fromDate: addCust.fromDate,
             toDate: addCust.toDate
+        });
+
+        // 🔹 Send GET request since backend reads `req.query`
+        const response = await postApi(`/Master/AddCustomerCharges?${queryParams.toString()}`, {}, 'GET');
+
+        if (response.status === 1) {
+            setGetCust([...getCust, response.Data]);
+            setAddCust({
+                custCode: '',
+                modeCode: '',
+                fuelCharge: 0,
+                FuelPer: 0,
+                fovper: 0,
+                fovCharge: 0,
+                docketCharge: 0,
+                deliveryCharge: 0,
+                packingCharge: 0,
+                greenCharge: 0,
+                hamaliCharge: 0,
+                otherCharge: 0,
+                insuranceCharge: 0,
+                fromDate: firstDayOfMonth,
+                toDate: today,
+            });
+
+            Swal.fire('Saved!', response.message || 'Customer Charges added successfully.', 'success');
+            setModalIsOpen(false);
+            await fetchCustChargesData();
+        } else {
+            Swal.fire('Error!', response.message || 'Failed to save customer charges.', 'error');
         }
 
-        try {
-            const response = await postApi('/Master/AddCustomerCharges', requestBody, 'POST')
-            if (response.status === 1) {
-                setGetCust([...getCust, response.Data]);
-                setAddCust({
-                    custCode: '',
-                    modeCode: '',
-                    fuelCharge: 0,
-                    FuelPer: 0,
-                    fovper: 0,
-                    fovCharge: 0,
-                    docketCharge: 0,
-                    deliveryCharge: 0,
-                    packingCharge: 0,
-                    greenCharge: 0,
-                    hamaliCharge: 0,
-                    otherCharge: 0,
-                    insuranceCharge: 0,
-                    fromDate: firstDayOfMonth,
-                    toDate: today,
-                });
-                Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
-                setModalIsOpen(false);
-                await fetchCustChargesData();
-            } else {
-                Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
-            }
-        } catch (err) {
-            console.error('Save Error:', err);
-            Swal.fire('Error', 'Failed to add Customer Charges data', 'error');
-        }
-    };
+    } catch (err) {
+        console.error('Save Error:', err);
+        Swal.fire('Error', 'Failed to add Customer Charges data', 'error');
+    }
+};
+
 
     const handleDeleteCustCharges = async (Customer_Code) => {
         try {
@@ -489,8 +499,8 @@ function ProductWiseFuel() {
                                                         setIsEditMode(true);
                                                         setOpenRow(null);
                                                         setAddCust({
-                                                            FuelPer: 0,
-                                                            fovper: 0,
+                                                            FuelPer: cust.Fuel_Per,
+                                                            fovper: cust.Fov_Per,
                                                             custCode: cust.Customer_Code,
                                                             modeCode: cust.Mode_Code,
                                                             fuelCharge: cust.Fuel_Charges?.trim(),

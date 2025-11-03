@@ -33,9 +33,9 @@ function VehicleMaster() {
                         onChange={() => handleChange('upload')} />
 
                     <nav>
-                        <label htmlFor="delivered" className="delivered">Vehicle Master</label>
-                        <label htmlFor="undelivered" className="undelivered">Transport Master</label>
-                        <label htmlFor="upload" className="upload">Driver Master</label>
+                        <label htmlFor="delivered" className="delivered">Vehicle Details</label>
+                        <label htmlFor="undelivered" className="undelivered">Transport Details</label>
+                        <label htmlFor="upload" className="upload">Driver Details</label>
 
                         <div className="slider"></div>
                     </nav>

@@ -28,7 +28,6 @@ function BranchAdmin() {
         City_Code: "",
         UserType: "Admin",
         DocketBooking: 0,
-        DocketPrint: 0,
         CoshTopayBooking: 0,
         Smartbooking: 0,
         AutoMail: 0,
@@ -171,105 +170,104 @@ function BranchAdmin() {
                 await deleteApi(`/Master/DeleteOperationManagement?ID=${ID}`);
                 setGetData(getData.filter((data) => data.ID !== ID));
                 Swal.fire('Deleted!', 'The User has been deleted.', 'success');
-                 setFormData({
-            ID: "",
-            UserName: "",
-            Employee_Code: "",
-            Password: "",
-            City_Code: "",
-            UserType: "Admin",
-            DocketBooking: 0,
-            DocketPrint: 0,
-            CoshTopayBooking: 0,
-            Smartbooking: 0,
-            AutoMail: 0,
-            BulkImportData: 0,
-            VendorBillEntry: 0,
-            PendingManifest: 0,
-            OutgoingManifest: 0,
-            ViewManifest: 0,
-            BuilkimportManifest: 0,
-            ScanbyDocketNo: 0,
-            InscanProcessView: 0,
-            DeliveryPending: 0,
-            DeliveryBooking: 0,
-            DrsView: 0,
-            Drsimport: 0,
-            Statusactivity: 0,
-            StatusactivityimportBulk: 0,
-            StatusactivityTracking: 0,
-            DeliveryEntry: 0,
-            ReturnEntry: 0,
-            BulkUploadExcel: 0,
-            DocketPrint1: 0,
-            Docketprint2: 0,
-            Docketprint3: 0,
-            Docketprint4: 0,
-            LebelPrintin: 0,
-            StickerPrinting: 0,
-            InternationalBooking: 0,
-            ComplaintRegister: 0,
-            ViewComplaintStatus: 0,
-            ComplaintQuery: 0,
-            PendingInvoice: 0,
-            GenerateInvoice: 0,
-            ViewInvoice: 0,
-            InvoiceSummary: 0,
-            Docket_Print: 0,
-            PerformanceInvoice: 0,
-            ViewPerformanceInvoice: 0,
-            PaymentReceivedEntry: 0,
-            PayOutStanding: 0,
-            CreditBooking: 0,
-            CreditNoteView: 0,
-            MISReport: 0,
-            VendorMISReport: 0,
-            BookingModeReport: 0,
-            BookingDetail: 0,
-            TotalChargesReport: 0,
-            ModeWiseReport: 0,
-            InvoiceLedgerReport: 0,
-            ChecklistReport: 0,
-            UnbuildReport: 0,
-            BillViewReport: 0,
-            BranchName: 0,
-            Mode_Master: 0,
-            BankName: 0,
-            DeliveryMaster: 0,
-            CustomerName: 0,
-            ConsineeName: 0,
-            ShipperName: 0,
-            CustomerRate: 0,
-            CustomerVolumetric: 0,
-            InterNationalCity: 0,
-            DomesticCity: 0,
-            PincodeList: 0,
-            CityControl: 0,
-            MultipleZone: 0,
-            StateMaster: 0,
-            CountryMaster: 0,
-            CustomerCharges: 0,
-            CustomerOda: 0,
-            UpdateCustomerRate: 0,
-            ModeWiseGst: 0,
-            VendorName: 0,
-            VendorRate: 0,
-            VendorCharges: 0,
-            VendorFeul: 0,
-            VendorGstMaster: 0,
-            VehicleDetails: 0,
-            TransportDetails: 0,
-            DriverDetails: 0,
-            StockDetails: 0,
-            StockIssueBranchWise: 0,
-            StockIssueCustomerWise: 0,
-            StockIssueEmployeeWise: 0,
-            StatusMaster: 0
-        });
-        setSelectedOperation('');
-        setSelectedOption('');
+                setFormData({
+                    ID: "",
+                    UserName: "",
+                    Employee_Code: "",
+                    Password: "",
+                    City_Code: "",
+                    UserType: "Admin",
+                    DocketBooking: 0,
+                    CoshTopayBooking: 0,
+                    Smartbooking: 0,
+                    AutoMail: 0,
+                    BulkImportData: 0,
+                    VendorBillEntry: 0,
+                    PendingManifest: 0,
+                    OutgoingManifest: 0,
+                    ViewManifest: 0,
+                    BuilkimportManifest: 0,
+                    ScanbyDocketNo: 0,
+                    InscanProcessView: 0,
+                    DeliveryPending: 0,
+                    DeliveryBooking: 0,
+                    DrsView: 0,
+                    Drsimport: 0,
+                    Statusactivity: 0,
+                    StatusactivityimportBulk: 0,
+                    StatusactivityTracking: 0,
+                    DeliveryEntry: 0,
+                    ReturnEntry: 0,
+                    BulkUploadExcel: 0,
+                    DocketPrint1: 0,
+                    Docketprint2: 0,
+                    Docketprint3: 0,
+                    Docketprint4: 0,
+                    LebelPrintin: 0,
+                    StickerPrinting: 0,
+                    InternationalBooking: 0,
+                    ComplaintRegister: 0,
+                    ViewComplaintStatus: 0,
+                    ComplaintQuery: 0,
+                    PendingInvoice: 0,
+                    GenerateInvoice: 0,
+                    ViewInvoice: 0,
+                    InvoiceSummary: 0,
+                    Docket_Print: 0,
+                    PerformanceInvoice: 0,
+                    ViewPerformanceInvoice: 0,
+                    PaymentReceivedEntry: 0,
+                    PayOutStanding: 0,
+                    CreditBooking: 0,
+                    CreditNoteView: 0,
+                    MISReport: 0,
+                    VendorMISReport: 0,
+                    BookingModeReport: 0,
+                    BookingDetail: 0,
+                    TotalChargesReport: 0,
+                    ModeWiseReport: 0,
+                    InvoiceLedgerReport: 0,
+                    ChecklistReport: 0,
+                    UnbuildReport: 0,
+                    BillViewReport: 0,
+                    BranchName: 0,
+                    Mode_Master: 0,
+                    BankName: 0,
+                    DeliveryMaster: 0,
+                    CustomerName: 0,
+                    ConsineeName: 0,
+                    ShipperName: 0,
+                    CustomerRate: 0,
+                    CustomerVolumetric: 0,
+                    InterNationalCity: 0,
+                    DomesticCity: 0,
+                    PincodeList: 0,
+                    CityControl: 0,
+                    MultipleZone: 0,
+                    StateMaster: 0,
+                    CountryMaster: 0,
+                    CustomerCharges: 0,
+                    CustomerOda: 0,
+                    UpdateCustomerRate: 0,
+                    ModeWiseGst: 0,
+                    VendorName: 0,
+                    VendorRate: 0,
+                    VendorCharges: 0,
+                    VendorFeul: 0,
+                    VendorGstMaster: 0,
+                    VehicleDetails: 0,
+                    TransportDetails: 0,
+                    DriverDetails: 0,
+                    StockDetails: 0,
+                    StockIssueBranchWise: 0,
+                    StockIssueCustomerWise: 0,
+                    StockIssueEmployeeWise: 0,
+                    StatusMaster: 0
+                });
+                setSelectedOperation('');
+                setSelectedOption('');
                 await fechUserData();
-                
+
             } catch (err) {
                 console.error('Delete Error:', err);
                 Swal.fire('Error', 'Failed to delete Branch Admin', 'error');
@@ -306,7 +304,6 @@ function BranchAdmin() {
             City_Code: "",
             UserType: "Admin",
             DocketBooking: 0,
-            DocketPrint: 0,
             CoshTopayBooking: 0,
             Smartbooking: 0,
             AutoMail: 0,
@@ -806,7 +803,7 @@ function BranchAdmin() {
                                                         { label: "Customer Charges", name: "CustomerCharges" },
                                                         { label: "Vendor Master", name: "VendorMaster" },
                                                         { label: "Transport Master", name: "TransportMaster" },
-                                                        { label: "Inventory", name: "Inventory" },
+                                                        { label: "Stock Details", name: "Inventory" },
                                                         { label: "Region Master", name: "RegionMaster" },
                                                     ].map((item, i) => (
                                                         <div className="form-check mb-2" key={i}>
@@ -1122,14 +1119,14 @@ function BranchAdmin() {
                                                         className="card-header fw-bold"
                                                         style={{ backgroundColor: "#13bfaeff" }}
                                                     >
-                                                        Inventory
+                                                       Stock Details
                                                     </div>
                                                     <div className="card-body">
                                                         {[
-                                                            { label: "Stock Entry", name: "StockDetails" },
-                                                            { label: "Branch Stock", name: "StockIssueBranchWise" },
-                                                            { label: "Customer Stock", name: "StockIssueCustomerWise" },
-                                                            { label: "Employee Stock", name: "StockIssueEmployeeWise" },
+                                                            { label: "Stock Details", name: "StockDetails" },
+                                                            { label: "Branch Stock Details", name: "StockIssueBranchWise" },
+                                                            { label: "Customer Stock Details", name: "StockIssueCustomerWise" },
+                                                            { label: "Employee Stock Details", name: "StockIssueEmployeeWise" },
                                                         ].map((item, i) => (
                                                             <div className="form-check mb-2" key={i}>
                                                                 <input
@@ -1241,7 +1238,7 @@ function BranchAdmin() {
                                                     <div className="card-body">
                                                         {[
                                                             { name: "DocketBooking", label: "Docket Booking" },
-                                                            { name: "DocketPrint", label: "Docket Print" },
+                                                            { name: "DocketPrint1", label: "Docket Print" },
                                                             { name: "CoshTopayBooking", label: "Docket Expenses" },
                                                             { name: "AutoMail", label: "Auto Mail" },
                                                             { name: "Smartbooking", label: "Smart Booking" },
@@ -1905,7 +1902,7 @@ function BranchAdmin() {
                                         <tr>
                                             <th scope="col">Actions</th>
                                             <th scope="col">ID</th>
-                                            <th scope="col">Branch</th>
+                                            <th scope="col">Admin</th>
                                             <th scope="col">User Name</th>
                                             <th scope="col">Password</th>
                                             <th scope="col">Branch Name</th>
@@ -1913,7 +1910,7 @@ function BranchAdmin() {
                                     </thead>
                                     <tbody className='table-body'>
                                         {
-                                            getData.map((data, index) => (
+                                            getData.filter(data=>data.UserType==="Admin").map((data, index) => (
                                                 < tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                                     <td>
                                                         <PiDotsThreeOutlineVerticalFill
@@ -1948,7 +1945,6 @@ function BranchAdmin() {
                                                                         City_Code: data?.City_Code || JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
                                                                         UserType: data?.UserType || "User",
                                                                         DocketBooking: !!data?.DocketBooking,
-                                                                        DocketPrint: !!data?.DocketPrint,
                                                                         CoshTopayBooking: !!data?.CoshTopayBooking,
                                                                         Smartbooking: !!data?.Smartbooking,
                                                                         AutoMail: !!data?.AutoMail,
@@ -2050,7 +2046,7 @@ function BranchAdmin() {
 
                                                                     if (
                                                                         data?.DocketBooking === 1 ||
-                                                                        data?.DocketPrint === 1 ||
+                                                                        data?.DocketPrint1 === 1 ||
                                                                         data?.CoshTopayBooking === 1 ||
                                                                         data?.Smartbooking === 1 ||
                                                                         data?.AutoMail === 1 ||
@@ -2251,7 +2247,7 @@ function BranchAdmin() {
                                                                 <button onClick={() => {
                                                                     setOpenRow(null);
                                                                     handleDelete(data?.ID);
-                                                                    
+
                                                                 }} className='edit-btn'><i className='bi bi-trash'></i></button>
                                                             </div>
                                                         )}

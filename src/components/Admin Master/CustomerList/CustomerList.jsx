@@ -13,7 +13,7 @@ const CustomerVolumetric = React.lazy(() => import("./CustomerVolumetric"));
 
 function CustomerList() {
     const [activeTab, setActiveTab] = useState('zone');
-    const tabs = ['zone', 'multiple', 'shipper', 'state', 'country'];
+    const tabs = ['zone', 'state', 'multiple', 'shipper', 'country'];
 
     return (
         <>
@@ -24,15 +24,15 @@ function CustomerList() {
                     {/* Navigation Labels */}
                     <nav className="nav">
                         <label onClick={() => setActiveTab('zone')}>Customer Name</label>
+                        <label onClick={() => setActiveTab('state')}>Customer Rate</label>
                         <label onClick={() => setActiveTab('multiple')}>Receiver Name</label>
                         <label onClick={() => setActiveTab('shipper')}>Shipper Name</label>
-                        <label onClick={() => setActiveTab('state')}>Customer Rate</label>
                         <label onClick={() => setActiveTab('country')}>Customer Volumetric</label>
 
                         {/* Slider */}
                         <div
                             className="slider"
-                            style={{ left: `${tabs.indexOf(activeTab) * 19}%` }}
+                            style={{ left: `${tabs.indexOf(activeTab) * 20}%`,width:"20%" }}
                         ></div>
                     </nav>
 

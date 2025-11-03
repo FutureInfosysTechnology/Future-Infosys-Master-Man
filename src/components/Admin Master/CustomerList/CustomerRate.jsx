@@ -294,7 +294,7 @@ function CustomerRate() {
     const handleAddRow = (e) => {
         e.preventDefault();
 
-        if (!tableRowData.Rate) {
+        if (!tableRowData.Rate || !tableRowData.Rate_Flag || !tableRowData.Lower_Wt || !tableRowData.Upper_Wt) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Missing Information',
@@ -337,6 +337,14 @@ function CustomerRate() {
                 confirmButtonText: 'OK',
             });
         }
+        if (submittedData.length<1) {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Empty Rate Detail',
+                text: 'Please take atleast one Ratedetails.',
+                confirmButtonText: 'OK',
+            });
+        }
         const requestBody = {
             Client_Code: formdata.Client_Code?.toString(),
             Vendor_Code: formdata.Vendor_Code || null,
@@ -366,6 +374,7 @@ function CustomerRate() {
         try {
             const response = await postApi('Master/addRateData', requestBody, 'POST')
             if (response.status === 1) {
+                await fetchCustomerRateData();
                 setFormdata({
                     Client_Code: "",
                     Club_No: "",
@@ -390,7 +399,10 @@ function CustomerRate() {
                 setSubmittedData([]);
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
-                await fetchCustomerRateData();
+            }
+            else
+            {
+                Swal.fire('Error!', response.message, 'error');
             }
         } catch (error) {
             console.error('Unable to save Customer Rate:', error);

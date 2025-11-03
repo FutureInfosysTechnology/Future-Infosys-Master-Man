@@ -476,66 +476,66 @@ function Booking() {
 
 
     const onToggle = () => setToggleActive(!toggleActive);
-    useEffect(() => {
-        // Parse all numeric fields safely
-        const freight = parseFloat(formData.Rate) || 0;
-        const fov = parseFloat(formData.FovChrgs) || 0;
-        const docket = parseFloat(formData.DocketChrgs) || 0;
-        const delivery = parseFloat(formData.DeliveryChrgs) || 0;
-        const packing = parseFloat(formData.PackingChrgs) || 0;
-        const green = parseFloat(formData.GreenChrgs) || 0;
-        const hamali = parseFloat(formData.HamaliChrgs) || 0;
-        const other = parseFloat(formData.OtherCharges) || 0;
-        const insurance = parseFloat(formData.InsuranceChrgs) || 0;
-        const oda = parseFloat(formData.ODAChrgs) || 0;
-        const fuel = parseFloat(formData.FuelCharges) || 0;
+    // useEffect(() => {
+    //     // Parse all numeric fields safely
+    //     const freight = parseFloat(formData.Rate) || 0;
+    //     const fov = parseFloat(formData.FovChrgs) || 0;
+    //     const docket = parseFloat(formData.DocketChrgs) || 0;
+    //     const delivery = parseFloat(formData.DeliveryChrgs) || 0;
+    //     const packing = parseFloat(formData.PackingChrgs) || 0;
+    //     const green = parseFloat(formData.GreenChrgs) || 0;
+    //     const hamali = parseFloat(formData.HamaliChrgs) || 0;
+    //     const other = parseFloat(formData.OtherCharges) || 0;
+    //     const insurance = parseFloat(formData.InsuranceChrgs) || 0;
+    //     const oda = parseFloat(formData.ODAChrgs) || 0;
+    //     const fuel = parseFloat(formData.FuelCharges) || 0;
 
-        // Sum up all charge components + GST
-        let total =
-            freight +
-            fov +
-            docket +
-            delivery +
-            packing +
-            green +
-            hamali +
-            other +
-            insurance +
-            oda +
-            fuel;
-        if (total > 0) {
-            setFormData((prev) => ({
-                ...prev,
-                TotalAmt: total.toFixed(2), // two decimal points
-            }));
-        }
-        if (total > 0 && formData.totalgstPer > 0) {
-            const gstAmount = (total * parseFloat(formData.totalgstPer)) / 100;
-            total = total + gstAmount;
-            setGstData((prev) => ({
-                ...prev,
-                TotalGST: gstAmount.toFixed(2),
-                GSTPer: total.toFixed(2),
-            }));
-            setFormData((prev) => ({
-                ...prev,
-                TotalGST: gstAmount.toFixed(2),
-                TotalAmt: total.toFixed(2), // two decimal points
-            }));
-        }
-    }, [
-        formData.Rate,
-        formData.FovChrgs,
-        formData.DocketChrgs,
-        formData.DeliveryChrgs,
-        formData.PackingChrgs,
-        formData.GreenChrgs,
-        formData.HamaliChrgs,
-        formData.OtherCharges,
-        formData.InsuranceChrgs,
-        formData.ODAChrgs,
-        formData.FuelCharges,
-    ]);
+    //     // Sum up all charge components + GST
+    //     let total =
+    //         freight +
+    //         fov +
+    //         docket +
+    //         delivery +
+    //         packing +
+    //         green +
+    //         hamali +
+    //         other +
+    //         insurance +
+    //         oda +
+    //         fuel;
+    //     if (total > 0) {
+    //         setFormData((prev) => ({
+    //             ...prev,
+    //             TotalAmt: total.toFixed(2), // two decimal points
+    //         }));
+    //     }
+    //     if (total > 0 && formData.totalgstPer > 0) {
+    //         const gstAmount = (total * parseFloat(formData.totalgstPer)) / 100;
+    //         total = total + gstAmount;
+    //         setGstData((prev) => ({
+    //             ...prev,
+    //             TotalGST: gstAmount.toFixed(2),
+    //             GSTPer: total.toFixed(2),
+    //         }));
+    //         setFormData((prev) => ({
+    //             ...prev,
+    //             TotalGST: gstAmount.toFixed(2),
+    //             TotalAmt: total.toFixed(2), // two decimal points
+    //         }));
+    //     }
+    // }, [
+    //     formData.Rate,
+    //     formData.FovChrgs,
+    //     formData.DocketChrgs,
+    //     formData.DeliveryChrgs,
+    //     formData.PackingChrgs,
+    //     formData.GreenChrgs,
+    //     formData.HamaliChrgs,
+    //     formData.OtherCharges,
+    //     formData.InsuranceChrgs,
+    //     formData.ODAChrgs,
+    //     formData.FuelCharges,
+    // ]);
 
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("bookingState"));
@@ -1106,74 +1106,155 @@ function Booking() {
     };
 
     useEffect(() => {
-        const calculateGstDetails = async (Customer_Code, Mode_Code, Rate, ODA_Chrgs, T_Flag) => {
+        const calculateGstDetails = async () => {
             try {
-                const response = await getApi(
-                    `/Booking/calculateGST?Customer_Code=${Customer_Code}&Mode_Code=${Mode_Code}&Rate=${Rate}&ODA_Chrgs=${ODA_Chrgs}&T_Flag=${T_Flag}`
-                );
+                const {
+                    Customer_Code,
+                    Mode_Code,
+                    Rate,
+                    BookMode,
+                    FovChrgs,
+                    DocketChrgs,
+                    ODAChrgs,
+                    DeliveryChrgs,
+                    PackingChrgs,
+                    GreenChrgs,
+                    HamaliChrgs,
+                    OtherCharges,
+                    InsuranceChrgs
+                } = formData;
+
+                if (!Customer_Code || !Mode_Code || !Rate || !BookMode) return;
+
+                // Build request body
+                const body = {
+                    Customer_Code,
+                    Mode_Code,
+                    Rate,
+                    T_Flag: BookMode,
+                    FovChrgsInput: FovChrgs || 0,
+                    DocketChrgsInput: DocketChrgs || 0,
+                    OdaChrgsInput: ODAChrgs || 0,
+                    DeliveryChrgsInput: DeliveryChrgs || 0,
+                    PackingChrgsInput: PackingChrgs || 0,
+                    GreenChrgsInput: GreenChrgs || 0,
+                    HamaliChrgsInput: HamaliChrgs || 0,
+                    OtherChargesInput: OtherCharges || 0,
+                    InsuranceChrgsInput: InsuranceChrgs || 0
+                };
+
+                const response = await postApi(`/Booking/calculateGST`, body);
 
                 if (response?.status === 1) {
                     const gst = response.Data;
-                    console.log('✅ GST API Response:', gst);
-                    if (formData.BookMode === "Credit") {
-                        setFormData((prev) => ({
-                            ...prev,
-                            FovChrgs: gst.Fov_Charges,
-                            DocketChrgs: gst.Docket_Charges,
-                            DeliveryChrgs: gst.Delivery_Charges,
-                            PackingChrgs: gst.Packing_Charges,
-                            GreenChrgs: gst.Green_Charges,
-                            HamaliChrgs: gst.Hamali_Charges,
-                            OtherCharges: gst.Other_Charges,
-                            InsuranceChrgs: gst.Insurance_Charges,
-                            FuelCharges: gst.Fuel_Charges,
-                            FuelPer: gst.CustomerFuel,
-                            CGST: gst.CGSTAMT,
-                            SGST: gst.SGSTAMT,
-                            IGST: gst.IGSTAMT,
-                            TotalGST: gst.TotalGST,
-                            totalgstPer: gst.GSTPer,
-                            TotalAmt: gst.TotalAmt
-                        }));
+                    console.log("✅ GST API Response:", gst);
 
-                        setGstData({
-                            CGSTAMT: gst.CGSTAMT,
-                            SGSTAMT: gst.SGSTAMT,
-                            IGSTAMT: gst.IGSTAMT,
-                            TotalGST: gst.TotalGST,
-                            CGSTPer: gst.CGSTPer,
-                            SGSTPer: gst.SGSTPer,
-                            IGSTPer: gst.IGSTPer,
-                            GSTPer: gst.GSTPer
-                        });
-                    }
+                    setGstData({
+                        CGSTAMT: gst.CGSTAMT,
+                        SGSTAMT: gst.SGSTAMT,
+                        IGSTAMT: gst.IGSTAMT,
+                        TotalGST: gst.TotalGST,
+                        CGSTPer: gst.CGSTPer,
+                        SGSTPer: gst.SGSTPer,
+                        IGSTPer: gst.IGSTPer,
+                        GSTPer: gst.CGSTPer+gst.SGSTPer+gst.IGSTPer,
+                    });
 
+                    setFormData((prev) => ({
+                        ...prev,
+                        FuelCharges: gst.Fuel_Charges,
+                        FuelPer: gst.CustomerFuel,
+                        CGST: gst.CGSTAMT,
+                        SGST: gst.SGSTAMT,
+                        IGST: gst.IGSTAMT,
+                        TotalGST: gst.TotalGST,
+                        totalgstPer: gst.CGSTPer+gst.SGSTPer+gst.IGSTPer,
+                        TotalAmt: gst.TotalAmt,
+                        FovChrgs: gst.Fov_Charges,
+                        FovPer:gst.Fov_Per || 0,
+                        DocketChrgs: gst.Docket_Charges,
+                        DeliveryChrgs: gst.Delivery_Charges,
+                        PackingChrgs: gst.Packing_Charges,
+                        GreenChrgs: gst.Green_Charges,
+                        HamaliChrgs: gst.Hamali_Charges,
+                        OtherCharges: gst.Other_Charges,
+                        InsuranceChrgs: gst.Insurance_Charges,
+                    }));
                 }
             } catch (error) {
                 console.error("❌ Error in GST API:", error);
             }
         };
-        console.log(formData.Customer_Code,
-            formData.Mode_Code,
-            formData.Rate,
-            formData.ODAChrgs,
-            formData.BookMode)
-        if (!skipGstCalc && formData.Customer_Code && formData.Mode_Code && formData.Rate && formData.BookMode) {
-            calculateGstDetails(
-                formData.Customer_Code,
-                formData.Mode_Code,
-                formData.Rate,
-                formData.ODAChrgs,
-                formData.BookMode
-            );
+
+        // Run only when essential fields change
+        if (
+            !skipGstCalc &&
+            formData.Customer_Code &&
+            formData.Mode_Code &&
+            formData.Rate &&
+            formData.BookMode
+        ) {
+            calculateGstDetails();
         }
     }, [
         formData.Customer_Code,
         formData.Mode_Code,
         formData.Rate,
+        formData.BookMode,
+        formData.FovChrgs,
+        formData.DocketChrgs,
         formData.ODAChrgs,
-        formData.BookMode
+        formData.DeliveryChrgs,
+        formData.PackingChrgs,
+        formData.GreenChrgs,
+        formData.HamaliChrgs,
+        formData.OtherCharges,
+        formData.InsuranceChrgs,
+        skipGstCalc
     ]);
+    useEffect(()=>{
+      const handleMakeRate = async () => {
+  try {
+    const body = {
+      Client_Code: formData.Customer_Code,
+      Mode_Codes: formData.Mode_Code,
+      Origin_Code: formData.OriginCode,
+      Destination_Codes: formData.DestinationCode,
+      Zone_Codes: formData.Dest_Zone,
+      State_Codes: getCity.find(c => c.City_Code === formData.DestinationCode)?.State_Code || "7",
+    //   Weight:100,
+      Method: formData.BookMode,
+      Dox_Spx: formData.DoxSpx,
+    };
+    const response = await postApi("/Master/GetCustomerFinalRate_CityState", body);
+    console.log(response);
+// 
+    if (response?.GetDataSuccess === 1 && response.Data.length > 0) {
+      const rateperKg = response.Data[0].Detail_Rate;
+// 
+      // ✅ Update rate and trigger GST calculation automatically
+      setFormData((prev) => ({
+        ...prev,
+        RatePerkg: rateperKg,
+      }));
+    }
+  } catch (error) {
+    console.error("❌ Error fetching rate:", error);
+  }
+};
+// 
+ if(formData.Customer_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode)
+    {
+    handleMakeRate();
+    }},
+   [formData.Customer_Code,
+      formData.Mode_Code,
+      formData.OriginCode,
+      formData.DestinationCode,
+      formData.Dest_Zone,
+      formData.BookMode,
+      formData.DoxSpx]);
+
     useEffect(() => {
         const getVolum = async (Customer_Code, Mode_Code) => {
             try {

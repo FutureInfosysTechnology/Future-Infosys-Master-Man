@@ -600,21 +600,21 @@ function ShipperName() {
                                             <label htmlFor="">Email ID</label>
                                             <input type="email" value={addShipper.shipperEmail}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperEmail: e.target.value })}
-                                                placeholder="Email Id" required />
+                                                placeholder="Email Id" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">GST No</label>
                                             <input type="text" value={addShipper.gstNo}
                                                 onChange={(e) => setAddShipper({ ...addShipper, gstNo: e.target.value })}
-                                                placeholder="Gst No" required />
+                                                placeholder="Gst No"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Company Name</label>
                                             <input type="text" value={addShipper.company}
                                                 onChange={(e) => setAddShipper({ ...addShipper, company: e.target.value })}
-                                                placeholder="Company Name" required />
+                                                placeholder="Company Name"  />
                                         </div>
 
                                     </div>

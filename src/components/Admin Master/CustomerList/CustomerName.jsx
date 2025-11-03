@@ -1156,7 +1156,7 @@ function CustomerName() {
                                                         <input
                                                             type={passwordVisible ? 'text' : 'password'}
                                                             placeholder="Password"
-                                                            required value={addCustData.Password}
+                                                            value={addCustData.Password}
                                                             onChange={(e) => setAddCustData({ ...addCustData, Password: e.target.value })}
                                                         />
                                                         <div

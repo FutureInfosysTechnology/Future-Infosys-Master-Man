@@ -606,21 +606,21 @@ function ReceiverName() {
                                             <label htmlFor="">Email ID</label>
                                             <input type="email" value={addReceiver.receiverEmail}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverEmail: e.target.value })}
-                                                placeholder="Email Id" required />
+                                                placeholder="Email Id" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">GST No</label>
                                             <input type="text" value={addReceiver.gstNo}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, gstNo: e.target.value })}
-                                                placeholder="Gst No" required />
+                                                placeholder="Gst No"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">HSN No</label>
                                             <input type="text" value={addReceiver.hsnNo}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, hsnNo: e.target.value })}
-                                                placeholder="HSN No" required />
+                                                placeholder="HSN No" />
                                         </div>
 
                                         <div className="input-field2">

@@ -357,7 +357,7 @@ function VendorName() {
                                                     setIsEditMode(true);
                                                     setOpenRow(null);
                                                     setVendorData({
-                                                        vendorCode: vendor.Vendor_Code,
+                                                        vendorCode: vendor.Vendor_Code.trim(),
                                                         vendorName: vendor.Vendor_Name,
                                                         vendAdd: vendor.Vendor_Adr,
                                                         pinCode: vendor.Pin_Code,

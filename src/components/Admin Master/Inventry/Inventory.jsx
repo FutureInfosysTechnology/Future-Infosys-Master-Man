@@ -38,10 +38,10 @@ function Inventory() {
                         onChange={() => handleChange('country')} />
 
                     <nav>
-                        <label htmlFor="zone" className="zone">Stock Entry</label>
-                        <label htmlFor="multiple" className="multiple">Branch Stock</label>
-                        <label htmlFor="state" className="state">Customer Stock</label>
-                        <label htmlFor="country" className="country">Employee Stock</label>
+                        <label htmlFor="zone" className="zone">Stock Details</label>
+                        <label htmlFor="multiple" className="multiple">Branch Stock Details</label>
+                        <label htmlFor="state" className="state">Customer Stock Details</label>
+                        <label htmlFor="country" className="country">Employee Stock Details</label>
                         <div className="slider"></div>
                     </nav>
                     <section>

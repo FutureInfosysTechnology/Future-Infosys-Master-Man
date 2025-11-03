@@ -25,7 +25,6 @@ function UserAdmin() {
         City_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
         UserType: "User",
         DocketBooking: 0,
-        DocketPrint: 0,
         CoshTopayBooking: 0,
         Smartbooking: 0,
         AutoMail: 0,
@@ -138,7 +137,6 @@ function UserAdmin() {
             City_Code: "",
             UserType: "Admin",
             DocketBooking: 0,
-            DocketPrint: 0,
             CoshTopayBooking: 0,
             Smartbooking: 0,
             AutoMail: 0,
@@ -231,7 +229,6 @@ function UserAdmin() {
             City_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             UserType: "User",
             DocketBooking: 0,
-            DocketPrint: 0,
             CoshTopayBooking: 0,
             Smartbooking: 0,
             AutoMail: 0,
@@ -626,7 +623,7 @@ function UserAdmin() {
                                                     <div className="card-body">
                                                         {[
                                                             { name: "DocketBooking", label: "Docket Booking" },
-                                                            { name: "DocketPrint", label: "Docket Print" },
+                                                            { name: "DocketPrint1", label: "Docket Print" },
                                                             { name: "CoshTopayBooking", label: "Docket Expenses" },
                                                             { name: "AutoMail", label: "Auto Mail" },
                                                             { name: "Smartbooking", label: "Smart Booking" },
@@ -1298,7 +1295,7 @@ function UserAdmin() {
                                     </thead>
                                     <tbody className='table-body'>
                                         {
-                                            getData.map((data, index) => (
+                                            getData.filter(data=>data.UserType==="User").map((data, index) => (
                                                 < tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                                     <td>
                                                         <PiDotsThreeOutlineVerticalFill

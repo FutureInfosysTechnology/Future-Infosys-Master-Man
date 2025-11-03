@@ -84,21 +84,21 @@ function Sidebar1() {
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/vehiclemaster">
                                 <i className="bi bi-truck"></i>
-                                <span>Transport Master</span>
+                                <span>Vehicle Details</span>
                             </Link>
                         </li>
 
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/inventory">
                                 <i className="bi bi-cart"></i>
-                                <span>Inventory</span>
+                                <span>Stock Details</span>
                             </Link>
                         </li>
 
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/regionmaster">
                                 <i className="bi bi-globe-americas"></i>
-                                <span>Region Master</span>
+                                <span>Status Master</span>
                             </Link>
                         </li>
                     </ul>
