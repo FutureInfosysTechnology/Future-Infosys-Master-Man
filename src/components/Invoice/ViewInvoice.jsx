@@ -12,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
-import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi ,deleteApi} from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -292,25 +292,25 @@ function ViewInvoice() {
         }
         fetchData('/Master/getCustomerdata', setGetCustomer);
     }, []);
-    const handleDelete = (index) => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'You won’t be able to revert this!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire(
-                    'Deleted!',
-                    'Your zone has been deleted.',
-                    'success'
-                );
-            }
-        });
-    };
+   const handleDelete = async (BillNo) => {
+           const confirmDelete = await Swal.fire({
+               title: 'Are you sure?',
+               text: 'Do you really want to delete this invoice?',
+               icon: 'warning',
+               showCancelButton: true,
+               confirmButtonText: 'Yes, delete it!',
+               cancelButtonText: 'Cancel'
+           });
+           if (confirmDelete.isConfirmed) {
+               try {
+                   await deleteApi(`/Smart/ResetInvoiceBill?BillNo=${BillNo}`);
+                   setInvoice(invoice.filter(inv=>inv.BillNo!==BillNo));
+                   Swal.fire('Deleted!', 'this invoie has been deleted.', 'success');
+               } catch (error) {
+                   console.error('Unable to delete Customer Rate:', error);
+               }
+           }
+       }
     useEffect(() => {
         const saved = localStorage.getItem("termArr");
         if (saved) setTermArr(JSON.parse(saved));
@@ -538,7 +538,7 @@ function ViewInvoice() {
                                                         <button className="edit-btn" onClick={() => handleOpenInvoicePrint(row.BillNo)}>
                                                             <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "18px" }}></i>
                                                         </button>
-                                                        <button onClick={() => handleDelete(index)} className="edit-btn">
+                                                        <button onClick={() => handleDelete(row.BillNo)} className="edit-btn">
                                                             <i className="bi bi-trash" style={{ fontSize: "18px" }}></i>
                                                         </button>
                                                     </div>
