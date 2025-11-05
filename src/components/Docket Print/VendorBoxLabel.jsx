@@ -1,201 +1,416 @@
-import React, { useState } from 'react'
-import Footer from '../../Components-2/Footer';
-import Sidebar1 from '../../Components-2/Sidebar1';
+import React, { useState, useEffect } from 'react';
 import Header from '../../Components-2/Header/Header';
+import Sidebar1 from '../../Components-2/Sidebar1';
 import barcode from '../../Assets/Images/barcode-svgrepo-com.png';
+import logo from '../../Assets/Images/AceLogo.jpeg';
+import 'jspdf-autotable';
+import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BarCode from "react-barcode";
+import { toWords } from "number-to-words";
+
 function VendorBoxLabel() {
-        const [data, setData] = useState([]);
-        const navigate = useNavigate();
-        const location = useLocation();
-        console.log(location);
-        console.log(location.state);
-        const fromPath = location?.state?.path || "/";
+    const [getBranch, setGetBranch] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [total, setTotal] = useState(0);
+    const navigate = useNavigate();
+    const location = useLocation();
+    console.log(location);
+    console.log(location.state);
+    const fromPath = location?.state?.path || "/";
+    const tab = location?.state?.tab;
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
+                if (response.status === 1) {
+                    console.log(response.Data);
+                    setGetBranch(response.Data[0]);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
         setData(location?.state?.data || []);
+        fetchData();
+    }, [])
+    function numberToIndianCurrency(num) {
+        if (!num || isNaN(num)) return "";
+
+        const [rupees, paise] = num.toFixed(2).split(".");
+
+        let result = toWords(Number(rupees))
+            .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Rupees";
+
+        if (Number(paise) > 0) {
+            result += " and " + toWords(Number(paise))
+                .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Paise";
+        }
+
+        return result + " Only";
+    }
+    useEffect(() => {
+        const totalCharges =
+            (Number(data[0]?.Rate) || 0) +
+            (Number(data[0]?.FuelCharges) || 0) +
+            (Number(data[0]?.GreenChrgs) || 0) +
+            (Number(data[0]?.DocketChrgs) || 0) +
+            (Number(data[0]?.HamaliChrgs) || 0) +
+            (Number(data[0]?.OtherCharges) || 0);
+        setTotal(totalCharges);
+    }, [data]);
+    const formateDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        if (isNaN(date)) return ""; // invalid date
+        return date.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    };
+    const cellsStyle = {
+        borderStyle: "solid", borderWidth: "2px 0 2px 2px", borderColor: "black",
+        textAlign: "start",
+        whiteSpace: "nowrap",
+        fontSize: "10px",
+        paddingLeft: "10px",
+        paddingRight: "10px",
+    }
+    const tableStyle = {
+        borderCollapse: "collapse",
+        height: "120px",
+    }
+
+    const handleDownloadPDF = async () => {
+        const docketElements = document.querySelectorAll(".docket");
+
+        if (docketElements.length === 0) return;
+
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm (A4 width)
+        const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm (A4 height)
+
+        for (let i = 0; i < docketElements.length; i++) {
+            const element = docketElements[i];
+
+            // Capture element as high-res image
+            const canvas = await html2canvas(element, {
+                scale: 4,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                scrollY: -window.scrollY,
+                windowWidth: document.documentElement.scrollWidth,
+            });
+
+            const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+            // Convert canvas dimensions (pixels) to mm
+            const pxToMm = (px) => (px * 25.4) / 96; // 96dpi ≈ 1 inch
+            const imgWidthMm = pxToMm(canvas.width);
+            const imgHeightMm = pxToMm(canvas.height);
+            const imgRatio = imgWidthMm / imgHeightMm;
+
+            // 🟩 Smaller left/right padding for more width
+            const leftRightPadding = 2; // mm (previously 5mm)
+            const topPadding = 10;      // mm
+
+            // 🟩 Compute image render size and position
+            let renderWidth = pdfWidth - leftRightPadding * 2;
+            let renderHeight = renderWidth / imgRatio;
+            let xOffset = leftRightPadding;
+            let yOffset = (pdfHeight - renderHeight) / 2 + topPadding;
+
+            // Prevent overflow if content too tall
+            if (yOffset + renderHeight > pdfHeight) {
+                yOffset = topPadding;
+                renderHeight = pdfHeight - topPadding * 2;
+                renderWidth = renderHeight * imgRatio;
+                xOffset = (pdfWidth - renderWidth) / 2;
+            }
+
+            // 🟩 Add image with minimal padding (nearly full width)
+            pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
+
+            if (i < docketElements.length - 1) pdf.addPage();
+        }
+
+        pdf.save("Receipts.pdf");
+    };
+
     return (
         <>
+            <style>
+                {`
+@media print {
+  /* Hide everything except docket container */
+  body * {
+    visibility: hidden;
+  }
+
+  #pdf, #pdf * {
+    visibility: visible;
+  }
+
+  #pdf {
+    position: absolute;
+    top: 0;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden;
+  }
+
+  .docket {
+    margin: 0;
+    padding: 0;
+    page-break-after: always;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: white;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0; /* removes browser default margins */
+    padding: 0;
+  }
+}
+`}
+            </style>
             <Header />
             <Sidebar1 />
-            <div className="main-body" id="main-body">
-                <div className="container">
-                    <div className="container" style={{ border: "1px solid black", padding: "0px" }}>
-                        <div style={{ display: "flex", flexDirection: "row", fontSize: "14px" }}>
-                            <div style={{ width: "80%", display: "flex", flexDirection: "column" }}>
-                                <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", alignItems: "center", height: "90px" }}>
-                                    <label htmlFor="">DOCKET NUMBER <b>A1139473</b></label>
-                                    <img src={barcode} alt="" style={{ height: "60px", width: "200px" }} />
-                                </div>
+            {loading && <div style={{ fontSize: "30px", color: "black" }}>Loading...</div>}
+            {data?.length > 0 && (
+                <div className="main-body" id="main-body">
+                    <div className="container py-0">
+                        <div className="container-2 py-1" style={{ borderRadius: "0px", width: "840px", gap: "5px", border: "none" }}>
+                            <div className="container-2" style={{ borderRadius: "0px", width: "840px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px" }}>
+                                <button
+                                    onClick={handleDownloadPDF}
+                                    style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
+                                >
+                                    Download
+                                </button>
+                                <button
+                                    onClick={() => window.print()}
+                                    style={{ padding: "5px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
+                                >
+                                    Print
+                                </button>
+                                <button
+                                    onClick={() => navigate(fromPath, { state: { tab: tab } })}
+                                    style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
+                                >
+                                    Exit
+                                </button>
+                            </div>
+                        </div>
+                        <div className="container-2" id='pdf' style={{ borderRadius: "0px", paddingLeft: "20px", fontFamily: '"Times New Roman", Times, serif', paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
+                            {
+                                data.map((docket, index) =>
+                                (
+                                    <div className="docket" key={index}>
+                                        <div className="container" style={{ border: "1px solid black", padding: "0px" }}>
+                                            <div style={{ display: "flex", flexDirection: "row", fontSize: "14px" }}>
+                                                <div style={{ width: "80%", display: "flex", flexDirection: "column" }}>
+                                                    <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", alignItems: "center", height: "90px" }}>
+                                                        <label htmlFor="">DOCKET NUMBER <b>A1139473</b></label>
+                                                        <img src={barcode} alt="" style={{ height: "60px", width: "200px" }} />
+                                                    </div>
 
-                                <div style={{ display: "flex", flexDirection: "row" }}>
-                                    <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
-                                        <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
-                                            <b style={{ border: "1px solid silver" }}>ACCOUNT NUMBER</b>
-                                            <label style={{ border: "1px solid silver" }} htmlFor="">S026</label>
-                                        </div>
+                                                    <div style={{ display: "flex", flexDirection: "row" }}>
+                                                        <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
+                                                            <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+                                                                <b style={{ border: "1px solid silver" }}>ACCOUNT No</b>
+                                                                <label style={{ border: "1px solid silver" }} htmlFor="">S026</label>
+                                                            </div>
 
-                                        <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
-                                            <b style={{ border: "1px solid silver" }}>CUSTOMER</b>
-                                            <label style={{ border: "1px solid silver" }} htmlFor="">FUTURE INFOSYS</label>
-                                        </div>
+                                                            <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+                                                                <b style={{ border: "1px solid silver" }}>CUSTOMER</b>
+                                                                <label style={{ border: "1px solid silver" }} htmlFor="">FUTURE INFOSYS</label>
+                                                            </div>
 
-                                        <div style={{ width: "20%", display: "flex", flexDirection: "column" }}>
-                                            <b style={{ border: "1px solid silver" }}>ORIGIN</b>
-                                            <label style={{ border: "1px solid silver" }} htmlFor="">INDIA</label>
-                                        </div>
-                                    </div>
+                                                            <div style={{ width: "20%", display: "flex", flexDirection: "column" }}>
+                                                                <b style={{ border: "1px solid silver" }}>ORIGIN</b>
+                                                                <label style={{ border: "1px solid silver" }} htmlFor="">INDIA</label>
+                                                            </div>
+                                                        </div>
 
-                                    <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
-                                        <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
-                                            <b style={{ border: "1px solid silver" }}>DESTINATION</b>
-                                            <b style={{ border: "1px solid silver" }}>UNITED KINGDOM</b>
-                                        </div>
+                                                        <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
+                                                            <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+                                                                <b style={{ border: "1px solid silver" }}>DESTINATION</b>
+                                                                <b style={{ border: "1px solid silver" }}>JAPAN</b>
+                                                            </div>
 
-                                        <div style={{ width: "20%", display: "flex", flexDirection: "column" }}>
-                                            <b style={{ border: "1px solid silver" }}>QTY</b>
-                                            <label style={{ border: "1px solid silver" }} htmlFor="">1</label>
-                                        </div>
+                                                            <div style={{ width: "20%", display: "flex", flexDirection: "column" }}>
+                                                                <b style={{ border: "1px solid silver" }}>QTY</b>
+                                                                <label style={{ border: "1px solid silver" }} htmlFor="">1</label>
+                                                            </div>
 
-                                        <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
-                                            <b style={{ border: "1px solid silver" }}>SERVICE</b>
-                                            <label style={{ border: "1px solid silver" }} htmlFor="">OM_SELF_DELHI</label>
-                                        </div>
-                                    </div>
-                                </div>
+                                                            <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+                                                                <b style={{ border: "1px solid silver" }}>SERVICE</b>
+                                                                <label style={{ border: "1px solid silver" }} htmlFor="">OM_SELF_DELHI</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                <div style={{ display: "flex", flexDirection: "row" }}>
-                                    <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
-                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>SENDER'S COMPANY</b>
-                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">SURESH KUMAR</label>
-                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>SENDER'S NAME</b>
-                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">SURESH KUMAR</label>
-                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>ADDRESS</b>
-                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "50px" }} htmlFor="">25/3/182 SHASHTRI NAGAR, WESTERN EXPRESS HIGWAY,
-                                            VILE PARLE EAST
-                                        </label>
-                                        <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-                                            <div style={{ width: "50%", border: "1px solid silver", height: "30px" }}>
-                                                <b>PIN CODE :</b> <label htmlFor="">400099</label>
-                                            </div>
+                                                    <div style={{ display: "flex", flexDirection: "row" }}>
+                                                        <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
+                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>SENDER'S COMPANY</b>
+                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">SURESH KUMAR</label>
+                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>SENDER'S NAME</b>
+                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">SURESH KUMAR</label>
+                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>ADDRESS</b>
+                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "50px" }} htmlFor="">25/3/182 SHASHTRI NAGAR, WESTERN EXPRESS HIGWAY,
+                                                                VILE PARLE EAST
+                                                            </label>
+                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
+                                                                <div style={{ width: "50%", border: "1px solid silver",display:"flex",flexDirection:"column" }}>
+                                                                    <b>PIN CODE :</b> <label htmlFor="">400099</label>
+                                                                </div>
 
-                                            <div style={{ width: "50%", border: "1px solid silver", height: "30px" }}>
-                                                <b>MOBILE NO :</b> <label htmlFor="">9898989898</label>
-                                            </div>
-                                        </div>
-                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">MUMBAI, MAHARASHTRA, INDIA</label>
-                                        <div style={{ display: "flex", flexDirection: "column", height: "60px", border: "1px solid silver", paddingLeft: "5px" }}>
-                                            <b>DESCRIPTION OF GOODS</b>
-                                            <label htmlFor="" style={{ marginTop: "7px" }}>CLOTH COVER</label>
-                                        </div>
-                                    </div>
+                                                                <div style={{ width: "50%", border: "1px solid silver" ,display:"flex",flexDirection:"column"  }}>
+                                                                    <b>MOBILE NO :</b> <label htmlFor="">9898989898</label>
+                                                                </div>
+                                                            </div>
+                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">MUMBAI, MAHARASHTRA, INDIA</label>
+                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
 
-                                    <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
-                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>RECIPIENT'S COMPANY</b>
-                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">RAMESH KUMAR</label>
-                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>RECIPIENT'S NAME</b>
-                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">RAMESH KUMAR</label>
-                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>ADDRESS</b>
-                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "50px" }} htmlFor="">9 ELMSTEAD ROAD, SALZBURG</label>
+                                                            <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver",width:"60%" }}>
+                                                                <b>DESCRIPTION OF GOODS</b>
+                                                                <label htmlFor="">CLOTH COVER</label>
+                                                            </div>
+                                                             <div style={{ display: "flex", flexDirection: "column",width:"40%", border: "1px solid silver" }}>
+                                                                    <b >INTERNATIONAL</b>
+                                                                    <label htmlFor="">NON-DOX</label>
+                                                            </div>
+                                                            </div>
+                                                        </div>
 
-                                        <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-                                            <div style={{ width: "50%", border: "1px solid silver", height: "30px" }}>
-                                                <b>PIN CODE :</b> <label htmlFor="">400099</label>
-                                            </div>
+                                                        <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
+                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>RECIPIENT'S COMPANY</b>
+                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">RAMESH KUMAR</label>
+                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>RECIPIENT'S NAME</b>
+                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">RAMESH KUMAR</label>
+                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }}>ADDRESS</b>
+                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "50px" }} htmlFor="">9 ELMSTEAD ROAD, SALZBURG</label>
 
-                                            <div style={{ width: "50%", border: "1px solid silver", height: "30px" }}>
-                                                <b>MOBILE NO :</b> <label htmlFor="">9898989898</label>
-                                            </div>
-                                        </div>
+                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
+                                                                <div style={{ width: "50%", border: "1px solid silver",display:"flex",flexDirection:"column"  }}>
+                                                                    <b>PIN CODE :</b> <label htmlFor="">400099</label>
+                                                                </div>
 
-                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">LONDON, UK, UNITED KINGDOM</label>
+                                                                <div style={{ width: "50%", border: "1px solid silver",display:"flex",flexDirection:"column"  }}>
+                                                                    <b>MOBILE NO :</b> <label htmlFor="">9898989898</label>
+                                                                </div>
+                                                            </div>
 
-                                        <div style={{ display: "flex", flexDirection: "row", height: "60px", textAlign: "center" }}>
-                                            <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
-                                                <b style={{ border: "1px solid silver", height: "30px" }}>INTERNATIONAL</b>
-                                                <label style={{ border: "1px solid silver", height: "30px" }} htmlFor="">NON-DOX</label>
-                                            </div>
+                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">LONDON, UK, UNITED KINGDOM</label>
 
-                                            <div style={{ display: "flex", flexDirection: "column", width: "35%", border: "1px solid silver" }}>
-                                                <b style={{ height: "30px" }}>BOOKING DATE</b>
-                                                <label style={{ height: "30px" }} htmlFor="">13/01/2025</label>
-                                            </div>
+                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
 
-                                            <div style={{ display: "flex", flexDirection: "column", width: "35%", border: "1px solid silver" }}>
-                                                <b style={{ height: "30px" }}>INSURANCE</b>
-                                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                    <input type="checkbox" />
-                                                    <label htmlFor="YES" style={{ marginLeft: "3px" }}>YES</label>
-                                                    <input type="checkbox" style={{ marginLeft: "10px" }} />
-                                                    <label htmlFor="NO" style={{ marginLeft: "3px" }}>NO</label>
+                                                                <div style={{ display: "flex", flexDirection: "column", width: "50%", border: "1px solid silver" }}>
+                                                                    <b style={{}}>BOOKING DATE</b>
+                                                                    <label style={{ }} htmlFor="">13/01/2025</label>
+                                                                </div>
+
+                                                                <div style={{ display: "flex", flexDirection: "column", width: "50%", border: "1px solid silver" }}>
+                                                                    <b style={{ }}>INSURANCE</b>
+                                                                    <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                                        <input type="checkbox" />
+                                                                        <label htmlFor="YES" style={{ marginLeft: "3px" }}>YES</label>
+                                                                        <input type="checkbox" style={{ marginLeft: "10px" }} />
+                                                                        <label htmlFor="NO" style={{ marginLeft: "3px" }}>NO</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div style={{ display: "flex", flexDirection: "row" }}>
+                                                        <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
+                                                            <b>SHIPPER AGREEMENT</b>
+                                                            <label htmlFor="">Shipper agrees to OM International
+                                                                Courier Cargo Ser.... standard terms
+                                                                and conditions of carriage.</label>
+                                                            <b style={{ marginTop: "5px", marginBottom: "5px" }}>SHIPPER'S SIGNATURE</b>
+                                                            <b>BOOKING DATE</b>
+                                                            <label htmlFor="">13/01/2025</label>
+                                                        </div>
+
+                                                        <div style={{ display: "flex", flexDirection: "column", width: "40%", border: "1px solid silver", paddingLeft: "5px", alignItems: "center" }}>
+                                                            <label htmlFor="" style={{ marginTop: "10px", fontSize: "18px" }}>PARCEL NUMBER</label>
+                                                            <img src={barcode} alt="" style={{ height: "60px", width: "200px", marginTop: "10px" }} />
+                                                            <b style={{ fontSize: "24px" }}>A113947301</b>
+                                                        </div>
+
+                                                        <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
+                                                            <b>Received in good condition</b>
+                                                            <b style={{ marginTop: "20px", marginBottom: "20px" }}>NAME</b>
+                                                            <b>SIGN</b>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ width: "20%", textAlign: "center", display: "flex", flexDirection: "column" }}>
+                                                    <div style={{ height: "90px", border: "1px solid silver", paddingTop: "10%", fontSize: "30px" }}>
+                                                        <b>1/1</b>
+                                                    </div>
+
+                                                    <b style={{ border: "1px solid silver" }}>Box Weight</b>
+                                                    <b style={{ border: "1px solid silver" }}>17.40</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px" }}>DIMS IN CM</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px" }}>59*34*41</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px" }}>BOX VOL WT</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px" }}>16.45</b>
+                                                    <b style={{ border: "1px solid silver", height: "20px" }}>ACTUAL WEIGHT</b>
+                                                    <b style={{ border: "1px solid silver", height: "20px" }}>17.40</b>
+                                                    <b style={{ border: "1px solid silver", height: "20px" }}>CHARGEABLE WT.</b>
+                                                    <b style={{ border: "1px solid silver", height: "20px" }}>18.00</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px" }}>PAYMENT METHOD</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px" }}>CREDIT</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>FREIGHT :</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>OTHER :</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>CGST @ :</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>SGST @ :</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>IGST @ :</b>
+                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>TOTAL :</b>
+                                                    <b style={{ border: "1px solid silver", height: "39px", textAlign: "start", paddingLeft: "5px" }}>REF NO.: 93163819 :</b>
                                                 </div>
                                             </div>
+
+                                            <div style={{ height: "70px", fontSize: "8px", display: "flex", flexDirection: "column", border: "1px solid black", paddingLeft: "5px" }}>
+                                                <b>TERMS & CONDITIONS :</b>
+                                                <b>1. NO CLAIMS WOULD BE ENTERTAINED FOR ANY DAMAGE DURING TRANSIT & DELAY IN DELIVERY DUE TO ANY REASON</b>
+                                                <b>2. MAXIMUM CLAIMS FOR LOSS OF PARCEL WOULD BE USD 50 UPTO 10 KGS & USD 100 ABOVE 10 KGS OR THE DECLARED VALUE WHICHEVER IS LOWER. </b>
+                                                <b>3. THIS AWB IS FOR THE ACCOUNT HOLDER AND IT IS NOT TRANSFERABLE.THIS RECEIPT DOES NOT IMPLY WE HAVE PHYSICALLY RECEIVED THE PARCEL IN OUR HUB</b>
+                                                <b>*** SUBJECT TO MUMBAI JURISDICTION***</b>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ))
+                            }
 
-                                <div style={{ display: "flex", flexDirection: "row" }}>
-                                    <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
-                                        <b>SHIPPER AGREEMENT</b>
-                                        <label htmlFor="">Shipper agrees to OM International
-                                            Courier Cargo Ser.... standard terms
-                                            and conditions of carriage.</label>
-                                        <b style={{ marginTop: "5px", marginBottom: "5px" }}>SHIPPER'S SIGNATURE</b>
-                                        <b>BOOKING DATE</b>
-                                        <label htmlFor="">13/01/2025</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "40%", border: "1px solid silver", paddingLeft: "5px", alignItems: "center" }}>
-                                        <label htmlFor="" style={{ marginTop: "10px", fontSize: "18px" }}>PARCEL NUMBER</label>
-                                        <img src={barcode} alt="" style={{ height: "60px", width: "200px", marginTop: "10px" }} />
-                                        <b style={{ fontSize: "24px" }}>A113947301</b>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
-                                        <b>Received in good condition</b>
-                                        <b style={{ marginTop: "20px", marginBottom: "20px" }}>NAME</b>
-                                        <b>SIGN</b>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style={{ width: "20%", textAlign: "center", display: "flex", flexDirection: "column" }}>
-                                <div style={{ height: "90px", border: "1px solid silver", paddingTop: "10%", fontSize: "30px" }}>
-                                    <b>1/1</b>
-                                </div>
-
-                                <b style={{ border: "1px solid silver" }}>Box Weight</b>
-                                <b style={{ border: "1px solid silver" }}>17.40</b>
-                                <b style={{ border: "1px solid silver", height: "30px" }}>DIMS IN CM</b>
-                                <b style={{ border: "1px solid silver", height: "30px" }}>59*34*41</b>
-                                <b style={{ border: "1px solid silver", height: "30px" }}>BOX VOL WT</b>
-                                <b style={{ border: "1px solid silver", height: "30px" }}>16.45</b>
-                                <b style={{ border: "1px solid silver", height: "20px" }}>ACTUAL WEIGHT</b>
-                                <b style={{ border: "1px solid silver", height: "20px" }}>17.40</b>
-                                <b style={{ border: "1px solid silver", height: "20px" }}>CHARGEABLE WT.</b>
-                                <b style={{ border: "1px solid silver", height: "20px" }}>18.00</b>
-                                <b style={{ border: "1px solid silver", height: "30px" }}>PAYMENT METHOD</b>
-                                <b style={{ border: "1px solid silver", height: "30px" }}>CREDIT</b>
-                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>FREIGHT :</b>
-                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>OTHER :</b>
-                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>CGST @ :</b>
-                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>SGST @ :</b>
-                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>IGST @ :</b>
-                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>TOTAL :</b>
-                                <b style={{ border: "1px solid silver", height: "39px", textAlign: "start", paddingLeft: "5px" }}>REF NO.: 93163819 :</b>
-                            </div>
                         </div>
 
-                        <div style={{ height: "70px", fontSize: "8px", display: "flex", flexDirection: "column", border: "1px solid black", paddingLeft: "5px" }}>
-                            <b>TERMS & CONDITIONS :</b>
-                            <b>1. NO CLAIMS WOULD BE ENTERTAINED FOR ANY DAMAGE DURING TRANSIT & DELAY IN DELIVERY DUE TO ANY REASON</b>
-                            <b>2. MAXIMUM CLAIMS FOR LOSS OF PARCEL WOULD BE USD 50 UPTO 10 KGS & USD 100 ABOVE 10 KGS OR THE DECLARED VALUE WHICHEVER IS LOWER. </b>
-                            <b>3. THIS AWB IS FOR THE ACCOUNT HOLDER AND IT IS NOT TRANSFERABLE.THIS RECEIPT DOES NOT IMPLY WE HAVE PHYSICALLY RECEIVED THE PARCEL IN OUR HUB</b>
-                            <b>*** SUBJECT TO MUMBAI JURISDICTION***</b>
-                        </div>
+
                     </div>
                 </div>
-                <Footer />
-            </div>
+            )
+
+            }
         </>
     )
 }

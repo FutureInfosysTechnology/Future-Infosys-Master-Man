@@ -29,6 +29,8 @@ function ProductionEntry() {
     const [creditNotes, setCreditNotes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [openRow, setOpenRow] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     // 🔄 Fetch helper
     const fetchData = async (endpoint, setData) => {
@@ -77,11 +79,18 @@ function ProductionEntry() {
             amount: "",
             user: "Admin"
         });
+        setIsEditMode(false);
+        setOpenRow(null);
     };
 
     // 💾 ADD / SAVE Credit Note
     const handleSave = async (e) => {
-        e.preventDefault();
+                e.preventDefault();
+        if(!formData.customer || !formData.date || !formData.noteNo)
+        {
+            return Swal.fire("Warning","Customer ,Date and Docket No is required", "warning");
+        }
+
 
         const payload = {
             Action: "ADD",
@@ -96,7 +105,7 @@ function ProductionEntry() {
         };
 
         try {
-            const response = await postApi("/Smart/AddUpdateCreditNote", payload, "POST");
+            const response = await postApi("/Smart/AddCreditNote", payload, "POST");
             Swal.fire("Success", response.message || "Credit Note Added Successfully", "success");
             handleReset();
             await fetchCreditNotes();
@@ -138,12 +147,8 @@ function ProductionEntry() {
     };
 
     // ❌ DELETE Credit Note
-    const handleDelete = async () => {
-        if (!formData.CreditNote_ID) {
-            Swal.fire("Warning", "Select a record to delete", "warning");
-            return;
-        }
-
+    const handleDelete = async (CreditNote_ID) => {
+        setOpenRow(null);
         const confirm = await Swal.fire({
             title: "Are you sure?",
             text: "This will permanently delete the credit note.",
@@ -155,7 +160,7 @@ function ProductionEntry() {
         if (!confirm.isConfirmed) return;
 
         try {
-            const response = await deleteApi(`/Smart/DeleteCreditNote/${formData.CreditNote_ID}`);
+            const response = await deleteApi(`/Smart/DeleteCreditNote?CreditNote_ID=${CreditNote_ID}`);
             Swal.fire("Deleted!", response.message || "Credit Note Deleted Successfully", "success");
             handleReset();
             fetchCreditNotes();
@@ -177,6 +182,8 @@ function ProductionEntry() {
             amount: note.Amount,
             user: note.User || "Admin"
         });
+        setOpenRow(null);
+        setIsEditMode(true);
     };
 
     return (
@@ -186,7 +193,7 @@ function ProductionEntry() {
                     <form onSubmit={handleSave} style={{ margin: "0px", padding: "0px" }}>
                         <div className="fields2">
                             <div className="input-field3">
-                                <label>Note No</label>
+                                <label>Docket No</label>
                                 <input
                                     type="text"
                                     placeholder="Enter note no"
@@ -217,11 +224,11 @@ function ProductionEntry() {
                                     value={
                                         formData.customer
                                             ? {
-                                                  value: formData.customer,
-                                                  label:
-                                                      getCustomer.find((c) => c.Customer_Code === formData.customer)
-                                                          ?.Customer_Name || ""
-                                              }
+                                                value: formData.customer,
+                                                label:
+                                                    getCustomer.find((c) => c.Customer_Code === formData.customer)
+                                                        ?.Customer_Name || ""
+                                            }
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -243,7 +250,7 @@ function ProductionEntry() {
                             </div>
 
                             <div className="input-field3">
-                                <label>Particulars</label>
+                                <label>Invoice No</label>
                                 <input
                                     type="text"
                                     placeholder="Enter particulars"
@@ -274,50 +281,52 @@ function ProductionEntry() {
                                     onChange={handleFormChange}
                                 />
                             </div>
-                        </div>
-                    </form>
-
-                    {/* BUTTONS */}
+                            {/* BUTTONS */}
                     <div
+                    className="input-field3"
                         style={{
                             display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            flexWrap: "wrap"
+                            flexDirection:"row",
+                            alignItems:"end",
+                            flexWrap: "wrap",
+                            marginTop:"16px",
+                            padding:"0px",
+                            flex:1,
+                           
+                
                         }}
                     >
-                        <div className="bottom-buttons">
-                            <button className="ok-btn" onClick={handleSave}>
+                        <div className="bottom-buttons" style={{padding:"0px"}}>
+                            {!isEditMode && (<button  className="ok-btn" onClick={handleSave} style={{margin:"0px"}}>
                                 Save
-                            </button>
+                            </button>)}
                         </div>
-                        <div className="bottom-buttons">
-                            <button className="ok-btn" onClick={handleUpdate}>
+                        <div className="bottom-buttons" style={{padding:"0px"}}>
+                            {isEditMode && (<button  type="button" className="ok-btn" onClick={handleUpdate} style={{margin:"0px"}}>
                                 Update
-                            </button>
+                            </button>)}
                         </div>
-                        <div className="bottom-buttons">
-                            <button className="ok-btn" onClick={handleDelete}>
-                                Delete
-                            </button>
-                        </div>
-                        <div className="bottom-buttons">
-                            <button className="ok-btn" onClick={handleReset}>
+                        <div className="bottom-buttons" style={{padding:"0px"}}>
+                            <button className="ok-btn" type="button" onClick={handleReset} style={{margin:"0px"}}>
                                 Cancel
                             </button>
                         </div>
                     </div>
+                        </div>
+                    </form>
+
 
                     {/* TABLE */}
                     <div className="table-container">
                         <table className="table table-bordered table-sm" style={{ whiteSpace: "nowrap" }}>
                             <thead className="table-head">
                                 <tr>
-                                    <th>SR No</th>
-                                    <th>Note No</th>
+                                    <th>Actions</th>
+                                    <th>ID</th>
+                                    <th>Docket No</th>
                                     <th>Date</th>
                                     <th>Customer</th>
-                                    <th>Particulars</th>
+                                    <th>Invoice No</th>
                                     <th>Remark</th>
                                     <th>Amount</th>
                                 </tr>
@@ -326,10 +335,41 @@ function ProductionEntry() {
                                 {creditNotes.map((note, index) => (
                                     <tr
                                         key={note.CreditNote_ID}
-                                        onClick={() => handleRowClick(note)}
-                                        style={{ cursor: "pointer" }}
+                                        style={{ fontSize: "12px", position: "relative" }}
                                     >
-                                        <td>{index + 1}</td>
+                                        <td>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "70px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                    <button className="edit-btn">
+                                                        <i className="bi bi-pen" style={{ fontSize: "15px" }}  onClick={() => handleRowClick(note)}></i>
+                                                    </button>
+                                                    <button onClick={() => handleDelete(note.CreditNote_ID)} className="edit-btn">
+                                                        <i className="bi bi-trash" style={{ fontSize: "15px" }}></i>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td>{note.CreditNote_ID}</td>
                                         <td>{note.Note_No}</td>
                                         <td>{new Date(note.Note_Date).toLocaleDateString()}</td>
                                         <td>{note.Customer_Name}</td>
