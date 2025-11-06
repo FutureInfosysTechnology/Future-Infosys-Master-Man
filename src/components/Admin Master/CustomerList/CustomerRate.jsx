@@ -182,7 +182,7 @@ function CustomerRate() {
 
                 // 🧠 set formdata using API response
                 setFormdata({
-                    Client_Code: Number(d.Client_Code) || "",
+                    Client_Code: d.Client_Code|| "",
                     Club_No: d.Club_No || "",
                     Mode_Code: d.Mode_Codes || [],
                     Zone_Code: d.Zone_Codes || [],

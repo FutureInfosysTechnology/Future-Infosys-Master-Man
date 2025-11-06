@@ -1222,7 +1222,7 @@ function Booking() {
       Destination_Codes: formData.DestinationCode,
       Zone_Codes: formData.Dest_Zone,
       State_Codes: getCity.find(c => c.City_Code === formData.DestinationCode)?.State_Code || "7",
-    //   Weight:100,
+      Weight: Math.max(parseFloat(formData.ActualWt) || 0,parseFloat(formData.VolumetricWt) || 0, parseFloat(formData.ChargedWt) || 0),
       Method: formData.BookMode,
       Dox_Spx: formData.DoxSpx,
     };
@@ -1253,7 +1253,10 @@ function Booking() {
       formData.DestinationCode,
       formData.Dest_Zone,
       formData.BookMode,
-      formData.DoxSpx]);
+      formData.DoxSpx,
+      formData.ActualWt,
+      formData.VolumetricWt,
+      formData.ChargedWt]);
 
     useEffect(() => {
         const getVolum = async (Customer_Code, Mode_Code) => {
