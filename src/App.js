@@ -47,6 +47,7 @@ import BoxSticker from './components/Docket Print/BoxSticker';
 import DocketBill from './components/Docket Print/DocketBill';
 import VendorBoxLabel from './components/Docket Print/VendorBoxLabel';
 import InternationalBooking from './components/Booking/Daily Booking/InternationalBooking';
+import NewDP from './components/Docket Print/NewDp1';
 
 export const refeshPend=createContext();
 function App() {
@@ -100,6 +101,7 @@ function App() {
           <Route path='/boxsticker' element={<BoxSticker />} />
           <Route path='/docketbill' element={<DocketBill />} />
           <Route path='/vendorboxlabel' element={<VendorBoxLabel />} />
+          <Route path='/newdp' element={<NewDP/>} />
 
           <Route path='/invoice' element={<Invoice />} />
           <Route path='/viewinvoice' element={<ViewInvoice />} />
