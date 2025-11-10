@@ -13,7 +13,8 @@ function ProductionEntry() {
         if (Array.isArray(response?.Data)) return response.Data;
         return [];
     };
-
+     const navigate=useNavigate();
+    const location=useLocation();
     const [formData, setFormData] = useState({
         CreditNote_ID: "",
         date: new Date(),
@@ -185,7 +186,9 @@ function ProductionEntry() {
         setOpenRow(null);
         setIsEditMode(true);
     };
-
+    const handleOpenInvoicePrint = (invNo) => {
+      navigate("/creditprint",{state:{invoiceNo:invNo,from:location.pathname,tab:"upload"}})
+    };
     return (
         <>
             <div className="body">
@@ -350,7 +353,7 @@ function ProductionEntry() {
                                                         flexDirection: "row",
                                                         position: "absolute",
                                                         alignItems: "center",
-                                                        left: "70px",
+                                                        left: "100px",
                                                         top: "0px",
                                                         borderRadius: "10px",
                                                         backgroundColor: "white",
@@ -360,6 +363,9 @@ function ProductionEntry() {
                                                         padding: "10px",
                                                     }}
                                                 >
+                                                     <button className='edit-btn' onClick={() => handleOpenInvoicePrint("001")}>
+                                                            <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
+                                                        </button>
                                                     <button className="edit-btn">
                                                         <i className="bi bi-pen" style={{ fontSize: "15px" }}  onClick={() => handleRowClick(note)}></i>
                                                     </button>

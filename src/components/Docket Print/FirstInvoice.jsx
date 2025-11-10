@@ -148,7 +148,7 @@ function FirstInvoice() {
     const packingTotal = isPackingChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.PackingChrgs || 0), 0) : 0;
     const otherTotal = isOtherChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.OtherCharges || 0), 0) : 0;
 
-    const freightTotal = invoiceData.reduce((sum, inv) => sum + Number(inv.TotalAmount || 0), 0);
+    const freightTotal = invoiceData.reduce((sum, inv) => sum + Number(inv.TotalAmt || 0), 0);
 
     const subTotal = docketTotal + hamaliTotal + deliveryTotal + fovTotal + fuelTotal + odaTotal + insuranceTotal + packingTotal + otherTotal + freightTotal;
     const igst = subTotal * 0.18; // 18%
@@ -267,22 +267,22 @@ function FirstInvoice() {
 
                                 <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", gap: "50px" }}>
                                     <div style={{ width: "25%" }}>
-                                        <img src={invoiceData[0]?.Branch_Logo} alt="" style={{ height: "120px", width: "100%" }} />
+                                        <img src={getBranch?.Branch_Logo} alt="" style={{ height: "120px", width: "100%" }} />
                                     </div>
                                     <div style={{ width: "75%", display: "flex", flexDirection: "column" }}>
                                         <div style={{ textAlign: "start", height: "40%" }}>
-                                            <p><b style={{ fontSize: "24px", fontWeight: "bold" }}>{invoiceData[0]?.Company_Name}</b></p>
+                                            <p><b style={{ fontSize: "24px", fontWeight: "bold" }}>{getBranch?.Company_Name}</b></p>
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "12px", textAlign: "start" }}>
-                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Address :</div><div style={{ textAlign: "start" }}>{invoiceData[0]?.Branch_Add1},{invoiceData[0]?.Branch_PIN}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Address :</div><div style={{ textAlign: "start" }}>{getBranch?.Branch_Add1},{getBranch?.Branch_PIN}</div></div>
                                             <div style={{ display: "flex", whiteSpace: "nowrap", gap: "20px" }}>
-                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>(+91) {invoiceData[0]?.MobileNo}</div></div>
-                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.Email}</div></div>
-                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.BranchGSTNo}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>(+91) {getBranch?.MobileNo}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{getBranch?.Email}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{getBranch?.BranchGSTNo}</div></div>
                                             </div>
                                             <div style={{ display: "flex", whiteSpace: "nowrap", gap: "20px" }}>
-                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>City :</div>    <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.Branch_Name[0]}</div></div>
-                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>State :</div>  <div style={{ width: "100%", textAlign: "start" }}>{invoiceData[0]?.State_Name}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>City :</div>    <div style={{ width: "100%", textAlign: "start" }}>{getBranch?.Branch_Name}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>State :</div>  <div style={{ width: "100%", textAlign: "start" }}>{getBranch?.State_Name}</div></div>
                                             </div>
                                         </div>
                                     </div>
@@ -305,7 +305,7 @@ function FirstInvoice() {
                                             <label htmlFor=""><b>:</b></label>
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.customerName}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.CustomerName}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Add1},{invoiceData[0]?.Customer_Add2},{invoiceData[0]?.Customer_Add3}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>(+91) {invoiceData[0]?.Customer_Mob}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Pin_Code}</label>
@@ -328,8 +328,8 @@ function FirstInvoice() {
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column" }}>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillNo}</label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillDate[0]}</label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{formatDateToDDMMYYYY(invoiceData[0]?.billfrom)}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillDate}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.BillFrom}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{formatDateToDDMMYYYY(invoiceData[0]?.BillTo)}</label>
                                         </div>
                                     </div>
@@ -380,13 +380,13 @@ function FirstInvoice() {
                                                         <tr key={index} style={rowStyle}>
                                                             <td style={cellStyle}>{index + 1}</td>
                                                             <td style={cellStyle}>{invoice?.DocketNo}</td>
-                                                            <td style={cellStyle}>{invoice?.BillDate[0]}</td>
-                                                            {isConsigChecked && <td style={cellStyle}>{invoice?.consigneeName}</td>}
-                                                            <td style={cellStyle}>{invoice?.fromDest}</td>
-                                                            <td style={cellStyle}>{invoice?.toDest}</td>
+                                                            <td style={cellStyle}>{formatDateToDDMMYYYY(invoice?.BookDate)}</td>
+                                                            {isConsigChecked && <td style={cellStyle}>{invoice?.ConsigneeName}</td>}
+                                                            <td style={cellStyle}>{invoice?.FromDest}</td>
+                                                            <td style={cellStyle}>{invoice?.ToDest}</td>
                                                             <td style={cellStyle}>{invoice?.ModeName}</td>
-                                                            <td style={cellStyle}>{invoice?.pcs}</td>
-                                                            {isActualChecked && <td style={cellStyle}>{invoice?.actualWt}</td>}
+                                                            <td style={cellStyle}>{invoice?.Qty}</td>
+                                                            {isActualChecked && <td style={cellStyle}>{invoice?.ActualWt}</td>}
                                                             {isVolChecked && <td style={cellStyle}>{invoice?.VolumetricWt}</td>}
                                                             {isCharedChecked && <td style={cellStyle}>{invoice?.ChargedWt}</td>}
                                                             {isRateChecked && <td style={cellStyle}>{invoice?.RatePerkg}</td>}
@@ -401,7 +401,7 @@ function FirstInvoice() {
                                                             {isPackingChecked && <td style={cellStyle}>{invoice?.PackingChrgs}</td>}
                                                             {isOtherChecked && <td style={cellStyle}>{invoice?.OtherCharges}</td>}
 
-                                                            <td style={cellStyle}>{invoice?.TotalAmount}</td>
+                                                            <td style={cellStyle}>{invoice?.TotalAmt}</td>
                                                         </tr>
                                                     ))
                                                 ) : (

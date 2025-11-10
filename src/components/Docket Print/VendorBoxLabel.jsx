@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../Components-2/Header/Header';
 import Sidebar1 from '../../Components-2/Sidebar1';
-import barcode from '../../Assets/Images/barcode-svgrepo-com.png';
+
 import logo from '../../Assets/Images/AceLogo.jpeg';
 import 'jspdf-autotable';
 import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
@@ -64,20 +64,21 @@ function VendorBoxLabel() {
         });
     };
     const handleDownloadPDF = async () => {
-        const docketElements = document.querySelectorAll(".docket");
+        // Select all container elements (each label)
+        const containerElements = document.querySelectorAll(".download");
 
-        if (docketElements.length === 0) return;
+        if (containerElements.length === 0) return;
 
         const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm (A4 width)
-        const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm (A4 height)
+        const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm
+        const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
-        for (let i = 0; i < docketElements.length; i++) {
-            const element = docketElements[i];
+        for (let i = 0; i < containerElements.length; i++) {
+            const element = containerElements[i];
 
-            // Capture element as high-res image
+            // Capture one container as a high-quality image
             const canvas = await html2canvas(element, {
-                scale: 4,
+                scale: 3,
                 useCORS: true,
                 backgroundColor: "#ffffff",
                 scrollY: -window.scrollY,
@@ -86,38 +87,33 @@ function VendorBoxLabel() {
 
             const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-            // Convert canvas dimensions (pixels) to mm
-            const pxToMm = (px) => (px * 25.4) / 96; // 96dpi ≈ 1 inch
+            // Convert px to mm
+            const pxToMm = (px) => (px * 25.4) / 96;
             const imgWidthMm = pxToMm(canvas.width);
             const imgHeightMm = pxToMm(canvas.height);
             const imgRatio = imgWidthMm / imgHeightMm;
 
-            // 🟩 Smaller left/right padding for more width
-            const leftRightPadding = 2; // mm (previously 5mm)
-            const topPadding = 10;      // mm
-
-            // 🟩 Compute image render size and position
-            let renderWidth = pdfWidth - leftRightPadding * 2;
+            // Fit to A4 page with small margins
+            let renderWidth = pdfWidth - 10; // 5mm margin each side
             let renderHeight = renderWidth / imgRatio;
-            let xOffset = leftRightPadding;
-            let yOffset = (pdfHeight - renderHeight) / 2 + topPadding;
 
-            // Prevent overflow if content too tall
-            if (yOffset + renderHeight > pdfHeight) {
-                yOffset = topPadding;
-                renderHeight = pdfHeight - topPadding * 2;
+            if (renderHeight > pdfHeight - 10) {
+                renderHeight = pdfHeight - 10;
                 renderWidth = renderHeight * imgRatio;
-                xOffset = (pdfWidth - renderWidth) / 2;
             }
 
-            // 🟩 Add image with minimal padding (nearly full width)
+            const xOffset = (pdfWidth - renderWidth) / 2;
+            const yOffset = (pdfHeight - renderHeight) / 2;
+
             pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
 
-            if (i < docketElements.length - 1) pdf.addPage();
+            // Add new page except after the last one
+            if (i < containerElements.length - 1) pdf.addPage();
         }
 
         pdf.save("Receipts.pdf");
     };
+
 
     return (
         <>
@@ -144,14 +140,18 @@ function VendorBoxLabel() {
     overflow: hidden;
   }
 
-  .docket {
-    margin: 0;
+  .download {
+    margin-top: 20px;
     padding: 0;
+    width: auto !important;
+    height: auto !important;
     page-break-after: always;
   }
 
   body {
     margin: 0;
+     width: auto !important;
+    height: auto !important;
     padding: 0;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -166,6 +166,9 @@ function VendorBoxLabel() {
 }
 `}
             </style>
+
+
+
             <Header />
             <Sidebar1 />
             {loading && <div style={{ fontSize: "30px", color: "black" }}>Loading...</div>}
@@ -198,381 +201,202 @@ function VendorBoxLabel() {
                             {
                                 data.map((docket, index) =>
                                 (
-                                    <div className="docket" key={index}>
-                                        <div className="container" style={{ border: "1px solid black", padding: "0px" }}>
-                                            <div style={{ display: "flex", flexDirection: "row", fontSize: "14px" }}>
-                                                <div style={{ width: "80%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", alignItems: "center"}}>
-                                                        <label htmlFor="">DOCKET NUMBER </label>
-                                                        <BarCode
-                                                            value={docket?.DocketNo}
-                                                            format='CODE128'
-                                                            background='#fff'
-                                                            lineColor='#000'
-                                                            width={2}
-                                                            height={48}
-                                                            displayValue={true}
-                                                        />
-                                                    </div>
-
-                                                    <div style={{ display: "flex", flexDirection: "row" }}>
-                                                        <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
-
-                                                            <div style={{ width: "85%", display: "flex", flexDirection: "column", textAlign: "start" }}>
-                                                                <b style={{ border: "1px solid silver", paddingLeft: "5px" }}>CUSTOMER NAME</b>
-                                                                <label style={{ border: "1px solid silver", paddingLeft: "5px" }} htmlFor="">{docket?.Customer_Name}</label>
-                                                            </div>
-                                                            <div style={{ width: "15%", display: "flex", flexDirection: "column" }}>
-                                                                <b style={{ border: "1px solid silver" }}>QTY</b>
-                                                                <label style={{ border: "1px solid silver" }} htmlFor="">{docket?.Qty}</label>
-                                                            </div>
-
-                                                        </div>
-
-                                                        <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
-
-                                                            <div style={{ width: "25%", display: "flex", flexDirection: "column" }}>
-                                                                <b style={{ border: "1px solid silver" }}>ORIGIN</b>
-                                                                <label style={{ border: "1px solid silver" }} htmlFor="">{docket?.Origin_Name}</label>
-                                                            </div>
-                                                            <div style={{ width: "35%", display: "flex", flexDirection: "column" }}>
-                                                                <b style={{ border: "1px solid silver" }}>DESTINATION</b>
-                                                                <label style={{ border: "1px solid silver" }}>{docket?.Destination_Name}</label>
-                                                            </div>
-
-
-                                                            <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
-                                                                <b style={{ border: "1px solid silver" }}>SERVICE</b>
-                                                                <label style={{ border: "1px solid silver" }} htmlFor="">OM_SELF_DELHI</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div style={{ display: "flex", flexDirection: "row" }}>
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>SENDER'S COMPANY</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Shipper_Name}</label>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>SENDER'S NAME</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Shipper_Name}</label>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>ADDRESS</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.ShipperAdd},{docket?.ShipperAdd2},{docket?.ShipperAdd3}</label>
-                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-                                                                <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
-                                                                    <b>PIN CODE :</b> <label htmlFor=""> {docket?.ShippePin}</label>
+                                    <div className="docket" key={index} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                        {
+                                            Array.from({ length: docket.Qty }, (_, i) => (
+                                                <div className='download' style={{ width: "840px"}}>
+                                                    <div className="container" style={{width:"840px", border: "1px solid black", padding: "0px" }}>
+                                                        <div style={{ display: "flex", flexDirection: "row", fontSize: "14px" }}>
+                                                            <div style={{ width: "80%", display: "flex", flexDirection: "column" }}>
+                                                                <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", alignItems: "center" }}>
+                                                                    <label htmlFor="">DOCKET NUMBER </label>
+                                                                    <BarCode
+                                                                        value={docket?.DocketNo}
+                                                                        format='CODE128'
+                                                                        background='#fff'
+                                                                        lineColor='#000'
+                                                                        width={2}
+                                                                        height={48}
+                                                                        displayValue={true}
+                                                                    />
                                                                 </div>
 
-                                                                <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
-                                                                    <b>MOBILE NO :</b> <label htmlFor="">(+91) {docket?.ShipperPhone}</label>
-                                                                </div>
-                                                            </div>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">{docket?.Shippercity},{docket?.Shipper_State_Name},</label>
-                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
+                                                                <div style={{ display: "flex", flexDirection: "row" }}>
+                                                                    <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
 
-                                                                <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", width: "60%" }}>
-                                                                    <b>DESCRIPTION OF GOODS</b>
-                                                                    <label htmlFor="">CLOTH COVER</label>
-                                                                </div>
-                                                                <div style={{ display: "flex", flexDirection: "column", width: "40%", border: "1px solid silver" }}>
-                                                                    <b >INTERNATIONAL</b>
-                                                                    <label htmlFor="">NON-DOX</label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                                        <div style={{ width: "85%", display: "flex", flexDirection: "column", textAlign: "start" }}>
+                                                                            <b style={{ border: "1px solid silver", paddingLeft: "5px" }}>CUSTOMER NAME</b>
+                                                                            <label style={{ border: "1px solid silver", paddingLeft: "5px" }} htmlFor="">{docket?.Customer_Name}</label>
+                                                                        </div>
+                                                                        <div style={{ width: "15%", display: "flex", flexDirection: "column" }}>
+                                                                            <b style={{ border: "1px solid silver" }}>QTY</b>
+                                                                            <label style={{ border: "1px solid silver" }} htmlFor="">{docket?.Qty}</label>
+                                                                        </div>
 
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>RECIPIENT'S COMPANY</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Name}</label>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>RECIPIENT'S NAME</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Name}</label>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>ADDRESS</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Add1},{docket?.Consignee_Add2}</label>
+                                                                    </div>
 
-                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-                                                                <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
-                                                                    <b>PIN CODE :</b> <label htmlFor="">{docket?.Consignee_Pin}</label>
-                                                                </div>
+                                                                    <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
 
-                                                                <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
-                                                                    <b>MOBILE NO :</b> <label htmlFor="">(+91) {docket?.Consignee_Mob}</label>
-                                                                </div>
-                                                            </div>
+                                                                        <div style={{ width: "25%", display: "flex", flexDirection: "column" }}>
+                                                                            <b style={{ border: "1px solid silver" }}>ORIGIN</b>
+                                                                            <label style={{ border: "1px solid silver" }} htmlFor="">{docket?.Origin_Name}</label>
+                                                                        </div>
+                                                                        <div style={{ width: "35%", display: "flex", flexDirection: "column" }}>
+                                                                            <b style={{ border: "1px solid silver" }}>DESTINATION</b>
+                                                                            <label style={{ border: "1px solid silver" }}>{docket?.Destination_Name}</label>
+                                                                        </div>
 
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">{docket?.Consignee_City}, {docket?.Consignee_State_Name},{docket?.Consignee_Country}</label>
 
-                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-
-                                                                <div style={{ display: "flex", flexDirection: "column", width: "50%", border: "1px solid silver" }}>
-                                                                    <b style={{}}>BOOKING DATE</b>
-                                                                    <label style={{}} htmlFor="">{docket?.BookDate}</label>
+                                                                        <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+                                                                            <b style={{ border: "1px solid silver" }}>SERVICE</b>
+                                                                            <label style={{ border: "1px solid silver" }} htmlFor="">OM_SELF_DELHI</label>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
 
-                                                                <div style={{ display: "flex", flexDirection: "column", width: "50%", border: "1px solid silver" }}>
-                                                                    <b style={{}}>INSURANCE</b>
-                                                                    <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                                        <input type="checkbox" />
-                                                                        <label htmlFor="YES" style={{ marginLeft: "3px" }}>YES</label>
-                                                                        <input type="checkbox" style={{ marginLeft: "10px" }} />
-                                                                        <label htmlFor="NO" style={{ marginLeft: "3px" }}>NO</label>
+                                                                <div style={{ display: "flex", flexDirection: "row" }}>
+                                                                    <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
+                                                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>SENDER'S COMPANY</b>
+                                                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Shipper_Name}</label>
+                                                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>SENDER'S NAME</b>
+                                                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Shipper_Name}</label>
+                                                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>ADDRESS</b>
+                                                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.ShipperAdd},{docket?.ShipperAdd2},{docket?.ShipperAdd3}</label>
+                                                                        <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
+                                                                            <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
+                                                                                <b>PIN CODE :</b> <label htmlFor=""> {docket?.ShippePin}</label>
+                                                                            </div>
+
+                                                                            <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
+                                                                                <b>MOBILE NO :</b> <label htmlFor="">(+91) {docket?.ShipperPhone}</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">{docket?.Shippercity},{docket?.Shipper_State_Name},</label>
+                                                                        <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
+
+                                                                            <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", width: "60%" }}>
+                                                                                <b>DESCRIPTION OF GOODS</b>
+                                                                                <label htmlFor="">CLOTH COVER</label>
+                                                                            </div>
+                                                                            <div style={{ display: "flex", flexDirection: "column", width: "40%", border: "1px solid silver" }}>
+                                                                                <b >INTERNATIONAL</b>
+                                                                                <label htmlFor="">NON-DOX</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
+                                                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>RECIPIENT'S COMPANY</b>
+                                                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Name}</label>
+                                                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>RECIPIENT'S NAME</b>
+                                                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Name}</label>
+                                                                        <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>ADDRESS</b>
+                                                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Add1},{docket?.Consignee_Add2}</label>
+
+                                                                        <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
+                                                                            <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
+                                                                                <b>PIN CODE :</b> <label htmlFor="">{docket?.Consignee_Pin}</label>
+                                                                            </div>
+
+                                                                            <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
+                                                                                <b>MOBILE NO :</b> <label htmlFor="">(+91) {docket?.Consignee_Mob}</label>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">{docket?.Consignee_City}, {docket?.Consignee_State_Name},{docket?.Consignee_Country}</label>
+
+                                                                        <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
+
+                                                                            <div style={{ display: "flex", flexDirection: "column", width: "50%", border: "1px solid silver" }}>
+                                                                                <b style={{}}>BOOKING DATE</b>
+                                                                                <label style={{}} htmlFor="">{docket?.BookDate}</label>
+                                                                            </div>
+
+                                                                            <div style={{ display: "flex", flexDirection: "column", width: "50%", border: "1px solid silver" }}>
+                                                                                <b style={{}}>INSURANCE</b>
+                                                                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                                                                                    <input type="checkbox" />
+                                                                                    <label htmlFor="YES" style={{ marginLeft: "3px" }}>YES</label>
+                                                                                    <input type="checkbox" style={{ marginLeft: "10px" }} />
+                                                                                    <label htmlFor="NO" style={{ marginLeft: "3px" }}>NO</label>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div style={{ display: "flex", flexDirection: "row" }}>
+                                                                    <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
+                                                                        <b>SHIPPER AGREEMENT</b>
+                                                                        <label htmlFor="">Shipper agrees to OM International
+                                                                            Courier Cargo Ser.... standard terms
+                                                                            and conditions of carriage.</label>
+                                                                        <b style={{ marginTop: "5px", marginBottom: "5px" }}>SHIPPER'S SIGNATURE</b>
+                                                                        <b>BOOKING DATE</b>
+                                                                        <label htmlFor="">{docket?.BookDate}</label>
+                                                                    </div>
+
+                                                                    <div style={{ display: "flex", flexDirection: "column", width: "40%", border: "1px solid silver", paddingLeft: "5px", alignItems: "center" }}>
+                                                                        <label htmlFor="" style={{ marginTop: "10px", fontSize: "18px" }}>PARCEL NUMBER</label>
+                                                                        <BarCode
+                                                                            value={docket?.vendorAwbno}
+                                                                            format='CODE128'
+                                                                            background='#fff'
+                                                                            lineColor='#000'
+                                                                            width={2}
+                                                                            height={70}
+                                                                            displayValue={true}
+                                                                        />
+                                                                    </div>
+
+                                                                    <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
+                                                                        <b>Received in good condition</b>
+                                                                        <b style={{ marginTop: "20px", marginBottom: "20px" }}>NAME</b>
+                                                                        <b>SIGN</b>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </div>
 
-                                                    <div style={{ display: "flex", flexDirection: "row" }}>
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
-                                                            <b>SHIPPER AGREEMENT</b>
-                                                            <label htmlFor="">Shipper agrees to OM International
-                                                                Courier Cargo Ser.... standard terms
-                                                                and conditions of carriage.</label>
-                                                            <b style={{ marginTop: "5px", marginBottom: "5px" }}>SHIPPER'S SIGNATURE</b>
-                                                            <b>BOOKING DATE</b>
-                                                            <label htmlFor="">{docket?.BookDate}</label>
-                                                        </div>
-
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "40%", border: "1px solid silver", paddingLeft: "5px", alignItems: "center" }}>
-                                                            <label htmlFor="" style={{ marginTop: "10px", fontSize: "18px" }}>PARCEL NUMBER</label>
-                                                            <BarCode
-                                                                value={docket?.vendorAwbno}
-                                                                format='CODE128'
-                                                                background='#fff'
-                                                                lineColor='#000'
-                                                                width={2}
-                                                                height={70}
-                                                                displayValue={true}
-                                                            />
-                                                        </div>
-
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
-                                                            <b>Received in good condition</b>
-                                                            <b style={{ marginTop: "20px", marginBottom: "20px" }}>NAME</b>
-                                                            <b>SIGN</b>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div style={{ width: "20%", textAlign: "center", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ height: "112.50px", border: "1px solid silver", paddingTop: "10%", fontSize: "30px" }}>
-                                                        <b>1/1</b>
-                                                    </div>
-
-                                                    <b style={{ border: "1px solid silver",height: "30px"  }}>Box Weight</b>
-                                                    <b style={{ border: "1px solid silver" ,height: "30px" }}>{docket?.ActualWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px" }}>DIMS IN CM</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px" }}>{docket?.VolumetricWt}*{docket?.ActualWt}*{docket?.ChargedWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>BOX VOL WT</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.VolumetricWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>ACTUAL WEIGHT</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.ActualWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>CHARGEABLE WT.</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.ChargedWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px" }}>PAYMENT METHOD</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px" }}>{docket?.T_Flag}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>FREIGHT : {docket?.Rate} </b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>OTHER : {docket?.OtherCharges}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>CGST @ : {docket?.CGSTPer}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>SGST @ : {docket?.SGSTPer}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>IGST @ : {docket?.IGSTPer}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>TOTAL : {docket?.TotalAmt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "61px" ,textAlign: "start", paddingLeft: "5px" }}>REF NO.: 93163819 :</b>
-                                                </div>
-                                            </div>
-
-                                            <div style={{ height: "70px", fontSize: "8px", display: "flex", flexDirection: "column", border: "1px solid black", paddingLeft: "5px" }}>
-                                                <b>TERMS & CONDITIONS :</b>
-                                                <b>1. NO CLAIMS WOULD BE ENTERTAINED FOR ANY DAMAGE DURING TRANSIT & DELAY IN DELIVERY DUE TO ANY REASON</b>
-                                                <b>2. MAXIMUM CLAIMS FOR LOSS OF PARCEL WOULD BE USD 50 UPTO 10 KGS & USD 100 ABOVE 10 KGS OR THE DECLARED VALUE WHICHEVER IS LOWER. </b>
-                                                <b>3. THIS AWB IS FOR THE ACCOUNT HOLDER AND IT IS NOT TRANSFERABLE.THIS RECEIPT DOES NOT IMPLY WE HAVE PHYSICALLY RECEIVED THE PARCEL IN OUR HUB</b>
-                                                <b>*** SUBJECT TO MUMBAI JURISDICTION***</b>
-                                            </div>
-                                        </div>
-                                        <div className="container" style={{ border: "1px solid black", padding: "0px" }}>
-                                            <div style={{ display: "flex", flexDirection: "row", fontSize: "14px" }}>
-                                                <div style={{ width: "80%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", alignItems: "center"}}>
-                                                        <label htmlFor="">DOCKET NUMBER </label>
-                                                        <BarCode
-                                                            value={docket?.DocketNo}
-                                                            format='CODE128'
-                                                            background='#fff'
-                                                            lineColor='#000'
-                                                            width={2}
-                                                            height={48}
-                                                            displayValue={true}
-                                                        />
-                                                    </div>
-
-                                                    <div style={{ display: "flex", flexDirection: "row" }}>
-                                                        <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
-
-                                                            <div style={{ width: "85%", display: "flex", flexDirection: "column", textAlign: "start" }}>
-                                                                <b style={{ border: "1px solid silver", paddingLeft: "5px" }}>CUSTOMER NAME</b>
-                                                                <label style={{ border: "1px solid silver", paddingLeft: "5px" }} htmlFor="">{docket?.Customer_Name}</label>
-                                                            </div>
-                                                            <div style={{ width: "15%", display: "flex", flexDirection: "column" }}>
-                                                                <b style={{ border: "1px solid silver" }}>QTY</b>
-                                                                <label style={{ border: "1px solid silver" }} htmlFor="">{docket?.Qty}</label>
-                                                            </div>
-
-                                                        </div>
-
-                                                        <div style={{ display: "flex", flexDirection: "row", width: "50%", textAlign: "center" }}>
-
-                                                            <div style={{ width: "25%", display: "flex", flexDirection: "column" }}>
-                                                                <b style={{ border: "1px solid silver" }}>ORIGIN</b>
-                                                                <label style={{ border: "1px solid silver" }} htmlFor="">{docket?.Origin_Name}</label>
-                                                            </div>
-                                                            <div style={{ width: "35%", display: "flex", flexDirection: "column" }}>
-                                                                <b style={{ border: "1px solid silver" }}>DESTINATION</b>
-                                                                <label style={{ border: "1px solid silver" }}>{docket?.Destination_Name}</label>
-                                                            </div>
-
-
-                                                            <div style={{ width: "40%", display: "flex", flexDirection: "column" }}>
-                                                                <b style={{ border: "1px solid silver" }}>SERVICE</b>
-                                                                <label style={{ border: "1px solid silver" }} htmlFor="">OM_SELF_DELHI</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div style={{ display: "flex", flexDirection: "row" }}>
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>SENDER'S COMPANY</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Shipper_Name}</label>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>SENDER'S NAME</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Shipper_Name}</label>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>ADDRESS</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.ShipperAdd},{docket?.ShipperAdd2},{docket?.ShipperAdd3}</label>
-                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-                                                                <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
-                                                                    <b>PIN CODE :</b> <label htmlFor=""> {docket?.ShippePin}</label>
+                                                            <div style={{ width: "20%", textAlign: "center", display: "flex", flexDirection: "column" }}>
+                                                                <div style={{ height: "112.50px", border: "1px solid silver", paddingTop: "10%", fontSize: "30px" }}>
+                                                                    <b>{i + 1}/{docket?.Qty}</b>
                                                                 </div>
 
-                                                                <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
-                                                                    <b>MOBILE NO :</b> <label htmlFor="">(+91) {docket?.ShipperPhone}</label>
-                                                                </div>
-                                                            </div>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">{docket?.Shippercity},{docket?.Shipper_State_Name},</label>
-                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-
-                                                                <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", width: "60%" }}>
-                                                                    <b>DESCRIPTION OF GOODS</b>
-                                                                    <label htmlFor="">CLOTH COVER</label>
-                                                                </div>
-                                                                <div style={{ display: "flex", flexDirection: "column", width: "40%", border: "1px solid silver" }}>
-                                                                    <b >INTERNATIONAL</b>
-                                                                    <label htmlFor="">NON-DOX</label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>RECIPIENT'S COMPANY</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Name}</label>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>RECIPIENT'S NAME</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Name}</label>
-                                                            <b style={{ paddingLeft: "5px", border: "1px solid silver", }}>ADDRESS</b>
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", }} htmlFor="">{docket?.Consignee_Add1},{docket?.Consignee_Add2}</label>
-
-                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-                                                                <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
-                                                                    <b>PIN CODE :</b> <label htmlFor="">{docket?.Consignee_Pin}</label>
-                                                                </div>
-
-                                                                <div style={{ width: "50%", border: "1px solid silver", display: "flex", flexDirection: "column" }}>
-                                                                    <b>MOBILE NO :</b> <label htmlFor="">(+91) {docket?.Consignee_Mob}</label>
-                                                                </div>
-                                                            </div>
-
-                                                            <label style={{ paddingLeft: "5px", border: "1px solid silver", height: "30px" }} htmlFor="">{docket?.Consignee_City}, {docket?.Consignee_State_Name},{docket?.Consignee_Country}</label>
-
-                                                            <div style={{ display: "flex", flexDirection: "row", textAlign: "center" }}>
-
-                                                                <div style={{ display: "flex", flexDirection: "column", width: "50%", border: "1px solid silver" }}>
-                                                                    <b style={{}}>BOOKING DATE</b>
-                                                                    <label style={{}} htmlFor="">{docket?.BookDate}</label>
-                                                                </div>
-
-                                                                <div style={{ display: "flex", flexDirection: "column", width: "50%", border: "1px solid silver" }}>
-                                                                    <b style={{}}>INSURANCE</b>
-                                                                    <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                                                        <input type="checkbox" />
-                                                                        <label htmlFor="YES" style={{ marginLeft: "3px" }}>YES</label>
-                                                                        <input type="checkbox" style={{ marginLeft: "10px" }} />
-                                                                        <label htmlFor="NO" style={{ marginLeft: "3px" }}>NO</label>
-                                                                    </div>
-                                                                </div>
+                                                                <b style={{ border: "1px solid silver", height: "30px" }}>Box Weight</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px" }}>{docket?.ActualWt}</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px" }}>DIMS IN CM</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px" }}>{docket?.VolumetricWt}*{docket?.ActualWt}*{docket?.ChargedWt}</b>
+                                                                <b style={{ border: "1px solid silver", height: "20px" }}>BOX VOL WT</b>
+                                                                <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.VolumetricWt}</b>
+                                                                <b style={{ border: "1px solid silver", height: "20px" }}>ACTUAL WEIGHT</b>
+                                                                <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.ActualWt}</b>
+                                                                <b style={{ border: "1px solid silver", height: "20px" }}>CHARGEABLE WT.</b>
+                                                                <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.ChargedWt}</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px" }}>PAYMENT METHOD</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px" }}>{docket?.T_Flag}</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>FREIGHT : {docket?.Rate} </b>
+                                                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>OTHER : {docket?.OtherCharges}</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>CGST @ : {docket?.CGSTPer}</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>SGST @ : {docket?.SGSTPer}</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>IGST @ : {docket?.IGSTPer}</b>
+                                                                <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>TOTAL : {docket?.TotalAmt}</b>
+                                                                <b style={{ border: "1px solid silver", height: "61px", textAlign: "start", paddingLeft: "5px" }}>REF NO.: 93163819 :</b>
                                                             </div>
                                                         </div>
-                                                    </div>
 
-                                                    <div style={{ display: "flex", flexDirection: "row" }}>
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
-                                                            <b>SHIPPER AGREEMENT</b>
-                                                            <label htmlFor="">Shipper agrees to OM International
-                                                                Courier Cargo Ser.... standard terms
-                                                                and conditions of carriage.</label>
-                                                            <b style={{ marginTop: "5px", marginBottom: "5px" }}>SHIPPER'S SIGNATURE</b>
-                                                            <b>BOOKING DATE</b>
-                                                            <label htmlFor="">{docket?.BookDate}</label>
-                                                        </div>
-
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "40%", border: "1px solid silver", paddingLeft: "5px", alignItems: "center" }}>
-                                                            <label htmlFor="" style={{ marginTop: "10px", fontSize: "18px" }}>PARCEL NUMBER</label>
-                                                            <BarCode
-                                                                value={docket?.vendorAwbno}
-                                                                format='CODE128'
-                                                                background='#fff'
-                                                                lineColor='#000'
-                                                                width={2}
-                                                                height={70}
-                                                                displayValue={true}
-                                                            />
-                                                        </div>
-
-                                                        <div style={{ display: "flex", flexDirection: "column", width: "30%", border: "1px solid silver", paddingLeft: "5px" }}>
-                                                            <b>Received in good condition</b>
-                                                            <b style={{ marginTop: "20px", marginBottom: "20px" }}>NAME</b>
-                                                            <b>SIGN</b>
+                                                        <div style={{ height: "70px", fontSize: "8px", display: "flex", flexDirection: "column", border: "1px solid black", paddingLeft: "5px" }}>
+                                                            <b>TERMS & CONDITIONS :</b>
+                                                            <b>1. NO CLAIMS WOULD BE ENTERTAINED FOR ANY DAMAGE DURING TRANSIT & DELAY IN DELIVERY DUE TO ANY REASON</b>
+                                                            <b>2. MAXIMUM CLAIMS FOR LOSS OF PARCEL WOULD BE USD 50 UPTO 10 KGS & USD 100 ABOVE 10 KGS OR THE DECLARED VALUE WHICHEVER IS LOWER. </b>
+                                                            <b>3. THIS AWB IS FOR THE ACCOUNT HOLDER AND IT IS NOT TRANSFERABLE.THIS RECEIPT DOES NOT IMPLY WE HAVE PHYSICALLY RECEIVED THE PARCEL IN OUR HUB</b>
+                                                            <b>*** SUBJECT TO MUMBAI JURISDICTION***</b>
                                                         </div>
                                                     </div>
                                                 </div>
+                                            ))
+                                        }
 
-                                                <div style={{ width: "20%", textAlign: "center", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ height: "112.50px", border: "1px solid silver", paddingTop: "10%", fontSize: "30px" }}>
-                                                        <b>1/1</b>
-                                                    </div>
 
-                                                    <b style={{ border: "1px solid silver",height: "30px"  }}>Box Weight</b>
-                                                    <b style={{ border: "1px solid silver" ,height: "30px" }}>{docket?.ActualWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px" }}>DIMS IN CM</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px" }}>{docket?.VolumetricWt}*{docket?.ActualWt}*{docket?.ChargedWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>BOX VOL WT</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.VolumetricWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>ACTUAL WEIGHT</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.ActualWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>CHARGEABLE WT.</b>
-                                                    <b style={{ border: "1px solid silver", height: "20px" }}>{docket?.ChargedWt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px" }}>PAYMENT METHOD</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px" }}>{docket?.T_Flag}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>FREIGHT : {docket?.Rate} </b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>OTHER : {docket?.OtherCharges}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>CGST @ : {docket?.CGSTPer}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>SGST @ : {docket?.SGSTPer}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>IGST @ : {docket?.IGSTPer}</b>
-                                                    <b style={{ border: "1px solid silver", height: "30px", textAlign: "start", paddingLeft: "5px" }}>TOTAL : {docket?.TotalAmt}</b>
-                                                    <b style={{ border: "1px solid silver", height: "61px" ,textAlign: "start", paddingLeft: "5px" }}>REF NO.: 93163819 :</b>
-                                                </div>
-                                            </div>
-
-                                            <div style={{ height: "70px", fontSize: "8px", display: "flex", flexDirection: "column", border: "1px solid black", paddingLeft: "5px" }}>
-                                                <b>TERMS & CONDITIONS :</b>
-                                                <b>1. NO CLAIMS WOULD BE ENTERTAINED FOR ANY DAMAGE DURING TRANSIT & DELAY IN DELIVERY DUE TO ANY REASON</b>
-                                                <b>2. MAXIMUM CLAIMS FOR LOSS OF PARCEL WOULD BE USD 50 UPTO 10 KGS & USD 100 ABOVE 10 KGS OR THE DECLARED VALUE WHICHEVER IS LOWER. </b>
-                                                <b>3. THIS AWB IS FOR THE ACCOUNT HOLDER AND IT IS NOT TRANSFERABLE.THIS RECEIPT DOES NOT IMPLY WE HAVE PHYSICALLY RECEIVED THE PARCEL IN OUR HUB</b>
-                                                <b>*** SUBJECT TO MUMBAI JURISDICTION***</b>
-                                            </div>
-                                        </div>
                                     </div>
                                 ))
                             }

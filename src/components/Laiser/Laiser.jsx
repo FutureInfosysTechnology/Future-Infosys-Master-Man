@@ -6,12 +6,13 @@ import OrderEntry from "./OrderEntry";
 import PaymentEntry from "./PaymentEntry";
 import ProductionEntry from "./ProductionEntry";
 import PaymentReceived from "./PaymentReceived";
+import { useLocation } from "react-router-dom";
 
 
 
 function Laiser() {
-
-    const [activeTab, setActiveTab] = useState('delivered'); // Default to 'zone'
+    const location=useLocation();
+    const [activeTab, setActiveTab] = useState( location?.state?.tab||'delivered'); // Default to 'zone'
 
     const handleChange = (event) => {
         setActiveTab(event.target.id);
@@ -36,8 +37,8 @@ function Laiser() {
                         onChange={handleChange}/>
 
                     <nav>
-                        <label htmlFor="delivered" className="delivered">Payment Received Entry</label>
-                        <label htmlFor="undelivered" className="undelivered">Pay Out Standing</label>
+                        <label htmlFor="delivered" className="delivered">Payment Mode</label>
+                        <label htmlFor="undelivered" className="undelivered">Ledgers</label>
                         <label htmlFor="upload" className="upload">Credit Note</label>
 
                         <div className="slider"></div>

@@ -501,7 +501,7 @@ function ProductWiseFuel() {
                                                         setAddCust({
                                                             FuelPer: cust.Fuel_Per,
                                                             fovper: cust.Fov_Per,
-                                                            custCode: cust.Customer_Code,
+                                                            custCode: String(cust.Customer_Code),
                                                             modeCode: cust.Mode_Code,
                                                             fuelCharge: cust.Fuel_Charges?.trim(),
                                                             fovCharge: cust.Fov_Charges?.trim(),
@@ -529,7 +529,7 @@ function ProductWiseFuel() {
                                         </td>
 
                                         <td>{cust.ID}</td>
-                                        <td>{getCustomerNameByCode(cust.Customer_Code)}</td>
+                                        <td>{getCustomerNameByCode(String(cust.Customer_Code))}</td>
                                         <td>{getModeNameByCode(cust.Mode_Code)}</td>
                                         <td>{cust.Fuel_Charges}</td>
                                         <td>{cust.Fov_Charges}</td>

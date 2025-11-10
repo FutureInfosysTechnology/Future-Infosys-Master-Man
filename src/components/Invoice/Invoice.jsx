@@ -27,22 +27,22 @@ function Invoice() {
             <Sidebar1 />
             <div className="main-body" id="main-body">
 
-                <div className="container">
-                    <nav>
-                        <label onClick={() => setActiveTab("state")}>Pending Invoice</label>
-                        <label onClick={() => setActiveTab("zone")}>Generate Invoice</label>
-                        <label onClick={() => setActiveTab("multiple")}>View Invoice</label>
-                        <label onClick={() => setActiveTab("Sum")}>Invoice Summary</label>
-                        <label onClick={() => setActiveTab("print")}>Docket Print</label>
-                        <label onClick={() => setActiveTab("country")}>Performance Invoice</label>
-                        <label onClick={() => setActiveTab("view")}>View Performance Invoice</label>
+                <div className="container" >
+                    <nav style={{height:"28px"}}>
+                        <label  onClick={() => setActiveTab("state")}>Pending Invoice</label>
+                        <label  onClick={() => setActiveTab("zone")}>Generate Invoice</label>
+                        <label  onClick={() => setActiveTab("multiple")}>View Invoice</label>
+                        <label  onClick={() => setActiveTab("Sum")}>Invoice Summary</label>
+                        <label  onClick={() => setActiveTab("print")}>Docket Print</label>
+                        <label  onClick={() => setActiveTab("country")}>Performance Invoice</label>
+                        <label  onClick={() => setActiveTab("view")}>View Performance Invoice</label>
 
                         <div
                             className="slider"
                             style={{ left: `${["state", "zone", "multiple", "Sum","print", "country", "view",].indexOf(activeTab) * 14.28}%`, width: "14.28%", }}
                         />
                     </nav>
-                    <section>
+                    <section >
                         {activeTab === 'state' && <PendingInvoice />}
                         {activeTab === 'zone' && <GenerateInvoice />}
                         {activeTab === 'multiple' && <ViewInvoice />}

@@ -55,10 +55,10 @@ function CustomerRate() {
     const [editIndex, setEditIndex] = useState(null);
     const [submittedData, setSubmittedData] = useState([]);
     const [tableRowData, setTableRowData] = useState({
-        On_Addition: "",
-        Lower_Wt: "",
-        Upper_Wt: "",
-        Rate: "",
+        On_Addition: 0,
+        Lower_Wt: 0,
+        Upper_Wt: 0,
+        Rate: 0,
         Rate_Flag: ""
     })
 
@@ -313,10 +313,10 @@ function CustomerRate() {
             setSubmittedData((prev) => [...prev, tableRowData]);
         }
         setTableRowData({
-            On_Addition: "",
-            Lower_Wt: "",
-            Upper_Wt: "",
-            Rate: ""
+            On_Addition: 0,
+            Lower_Wt: 0,
+            Upper_Wt: 0,
+            Rate:0,
         });
     };
     const formatDate = (date) => {
@@ -390,10 +390,10 @@ function CustomerRate() {
                     Weight: "",
                 });
                 setTableRowData({
-                    On_Addition: "",
-                    Lower_Wt: "",
-                    Upper_Wt: "",
-                    Rate: "",
+                    On_Addition: 0,
+                    Lower_Wt: 0,
+                    Upper_Wt: 0,
+                    Rate: 0,
                     Rate_Flag: ""
                 });
                 setSubmittedData([]);
@@ -419,6 +419,14 @@ function CustomerRate() {
             confirmButtonText: 'OK',
         });
     }
+    if (submittedData.length<1) {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Empty Rate Detail',
+                text: 'Please take atleast one Ratedetails.',
+                confirmButtonText: 'OK',
+            });
+        }
 
     // ✅ Match backend key names exactly
     const requestBody = {
@@ -440,10 +448,11 @@ function CustomerRate() {
         ConnectingHub: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || null,
         RatePer: 100,
         RateDetails: submittedData.map((data) => ({
-            On_Addition: data.On_Addition,
-            Lower_Wt: data.Lower_Wt,
-            Upper_Wt: data.Upper_Wt,
-            Rate: data.Rate,
+            Club_No:formdata.Club_No,
+            On_Addition:Number(data.On_Addition),
+            Lower_Wt: Number(data.Lower_Wt),
+            Upper_Wt: Number(data.Upper_Wt),
+            Rate: Number(data.Rate),
             Rate_Flag: data.Rate_Flag,
         })),
     };
@@ -466,15 +475,13 @@ function CustomerRate() {
                 Amount: "",
                 Weight: "",
             });
-
             setTableRowData({
-                On_Addition: "",
-                Lower_Wt: "",
-                Upper_Wt: "",
-                Rate: "",
+                On_Addition: 0,
+                Lower_Wt: 0,
+                Upper_Wt: 0,
+                Rate: 0,
                 Rate_Flag: ""
             });
-
             setSubmittedData([]);
 
             Swal.fire('Updated!', response.message || 'Rate master updated successfully.', 'success');
@@ -634,6 +641,7 @@ function CustomerRate() {
                                 <tr>
                                     <th scope="col">Actions</th>
                                     <th scope="col">Club.No</th>
+                                    <th scope="col">Customer_Code</th>
                                     <th scope="col">Customer_Name</th>
                                     <th scope="col">Mode_Name</th>
                                     <th scope="col">Zone_Name</th>
@@ -643,8 +651,8 @@ function CustomerRate() {
                                     <th scope="col">Method</th>
                                     <th scope="col">Dox_Spx</th>
                                     <th scope="col">RatePerKg</th>
-                                    <th scope="col">Amount</th>
-                                    <th scope="col">Weight</th>
+                                    <th scope="col">Min_Amount</th>
+                                    <th scope="col">Min_Weight</th>
 
                                 </tr>
                             </thead>
@@ -698,6 +706,7 @@ function CustomerRate() {
                                         </td>
 
                                         <td>{rate?.Club_No}</td>
+                                        <td>{rate?.Client_Code}</td>
                                         <td>{rate?.Customer_Name}</td>
                                         <td>{rate?.Mode_Name}</td>
                                         <td>{rate?.Zone_Name}</td>
@@ -706,7 +715,7 @@ function CustomerRate() {
                                         <td>{rate?.State_Name}</td>
                                         <td>{rate?.Method}</td>
                                         <td>{rate?.Dox_Spx}</td>
-                                        <td>{rate?.RatePer}</td>
+                                        <td>{rate?.RateDetails[0]?.Rate}</td>
                                         <td>{rate?.Amount}</td>
                                         <td>{rate?.Weight}</td>
 
@@ -1232,7 +1241,7 @@ function CustomerRate() {
                                             <tr>
                                                 <th>Rate Type</th>
                                                 <th>Document Rate</th>
-                                                <th>Min Weight</th>
+                                                <th>Weight</th>
                                                 <th>Max Weight</th>
                                                 <th>Rate</th>
                                                 <th>Action</th>
@@ -1289,7 +1298,7 @@ function CustomerRate() {
                                                         name="On_Addition" onChange={handleChange} style={{ textAlign: "center" }} />
                                                 </td>
                                                 <td>
-                                                    <input type="text" className="form-control" placeholder="Min Weight" value={tableRowData.Lower_Wt}
+                                                    <input type="text" className="form-control" placeholder="Weight" value={tableRowData.Lower_Wt}
                                                         name="Lower_Wt" onChange={handleChange} style={{ textAlign: "center" }} />
                                                 </td>
                                                 <td>

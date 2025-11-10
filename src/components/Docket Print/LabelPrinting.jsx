@@ -1,99 +1,68 @@
-import React, { useState } from "react";
-
-const LabelPrinting = () => {
-  const [formData, setFormData] = useState({
-    autoType: "",
-    bookDate: "",
-    consigneeName: "",
-    address1: "",
-    address2: "",
-    pincode: "",
-    contactNo: "",
-    email: "",
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+import React, { useState } from 'react'
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
+import { useLocation, useNavigate } from "react-router-dom"
+import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+function LabelPrinting() {
+    const [data, setData] = useState([]);
+    const [formData, setFormData] = useState({
+        from: "",
+        to: "",
+        toDate: new Date(),
+    })
+    const location = useLocation();
     console.log(formData);
-  };
+    const navigate = useNavigate();
+    
+    const handleFormChange = (value, key) => {
+        setFormData({ ...formData, [key]: value });
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await getApi(`/Booking/DocketPrint_2?FromDocket=${formData.from}&ToDocket=${formData.to}`);
+            if (response.status === 1) {
+                console.log(response);
+                console.log(response.Data);
+                setData(response.Data);
+                response.Data && navigate("/labelprint", { state: { data: response.Data, path: location.pathname,tab:"label" } });
+            }
+            else {
+                Swal.fire("Warning", `Warong Docket Number`, "warning");
+            }
+        }
+        catch (error) {
+            console.error("API Error:", error);
+        }
+        finally {
+        }
+    }
+    return (
+        <>
+            <div className="container1">
+                <form onSubmit={handleSubmit}>
+                    <div className="fields2">
+                        <div className="input-field3">
+                            <label htmlFor="">From</label>
+                            <input type="text" placeholder='From Docket' value={formData.from} onChange={(e) => handleFormChange(e.target.value, "from")} />
+                        </div>
+                        <div className="input-field3">
+                            <label htmlFor="">To</label>
+                            <input type="text" placeholder='To Docket' value={formData.to} onChange={(e) => handleFormChange(e.target.value, "to")} />
+                        </div>
 
-  return (
-    <div className="booking-form-container">
-      <h2>Booking Form</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="fields2">
-          <div className="input-field3">
-            <label>Auto Type</label>
-            <input type="text" name="autoType" value={formData.autoType} onChange={handleChange} placeholder="Auto Type" />
-          </div>
 
-          <div className="input-field3">
-            <label>Book Date</label>
-            <input type="date" name="bookDate" value={formData.bookDate} onChange={handleChange} placeholder="Book Date" />
-          </div>
 
-          <div className="input-field3">
-            <label>Consignee Name</label>
-            <input type="text" name="consigneeName" value={formData.consigneeName} onChange={handleChange} placeholder="Consignee Name" />
-          </div>
-
-          <div className="input-field3">
-            <label>Address Line 1</label>
-            <input type="text" name="address1" value={formData.address1} onChange={handleChange} placeholder="Address" />
-          </div>
-
-          <div className="input-field3">
-            <label>Address Line 2</label>
-            <input type="text" name="address2" value={formData.address2} onChange={handleChange} placeholder="Address" />
-          </div>
-
-          <div className="input-field3">
-            <label>Pin Code</label>
-            <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} placeholder="Pin Code" />
-          </div>
-
-          <div className="input-field3">
-            <label>Consignee Name</label>
-            <input type="text" name="consigneeName" value={formData.consigneeName} onChange={handleChange} placeholder="Consignee Name" />
-          </div>
-
-          <div className="input-field3">
-            <label>Address Line 1</label>
-            <input type="text" name="address1" value={formData.address1} onChange={handleChange} placeholder="Address" />
-          </div>
-
-          <div className="input-field3">
-            <label>Address Line 2</label>
-            <input type="text" name="address2" value={formData.address2} onChange={handleChange} placeholder="Address" />
-          </div>
-
-          <div className="input-field3">
-            <label>Pin Code</label>
-            <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} placeholder="Pin Code" />
-          </div>
-
-          <div className="input-field3">
-            <label>Mobile No</label>
-            <input type="text" name="contactNo" value={formData.contactNo} onChange={handleChange} placeholder="Mobile No" />
-          </div>
-
-          <div className="input-field3">
-            <label>Email ID</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email ID" />
-          </div>
-        </div>
-
-        <div className="bottom-buttons">
-          <button type="submit" className="ok-btn">Save</button>
-        </div>
-      </form>
-    </div>
-  );
-};
+                        <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "12px" }}>
+                            <button type='submit' className='ok-btn'>Submit</button>
+                            <button className='ok-btn'>Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </>
+    )
+}
 
 export default LabelPrinting;

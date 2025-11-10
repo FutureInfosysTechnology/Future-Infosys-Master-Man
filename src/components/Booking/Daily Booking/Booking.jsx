@@ -1157,7 +1157,7 @@ function Booking() {
                         CGSTPer: gst.CGSTPer,
                         SGSTPer: gst.SGSTPer,
                         IGSTPer: gst.IGSTPer,
-                        GSTPer: gst.CGSTPer+gst.SGSTPer+gst.IGSTPer,
+                        GSTPer: gst.CGSTPer + gst.SGSTPer + gst.IGSTPer,
                     });
 
                     setFormData((prev) => ({
@@ -1168,10 +1168,10 @@ function Booking() {
                         SGST: gst.SGSTAMT,
                         IGST: gst.IGSTAMT,
                         TotalGST: gst.TotalGST,
-                        totalgstPer: gst.CGSTPer+gst.SGSTPer+gst.IGSTPer,
+                        totalgstPer: gst.CGSTPer + gst.SGSTPer + gst.IGSTPer,
                         TotalAmt: gst.TotalAmt,
                         FovChrgs: gst.Fov_Charges,
-                        FovPer:gst.Fov_Per || 0,
+                        FovPer: gst.Fov_Per || 0,
                         DocketChrgs: gst.Docket_Charges,
                         DeliveryChrgs: gst.Delivery_Charges,
                         PackingChrgs: gst.Packing_Charges,
@@ -1212,51 +1212,51 @@ function Booking() {
         formData.InsuranceChrgs,
         skipGstCalc
     ]);
-    useEffect(()=>{
-      const handleMakeRate = async () => {
-  try {
-    const body = {
-      Client_Code: formData.Customer_Code,
-      Mode_Codes: formData.Mode_Code,
-      Origin_Code: formData.OriginCode,
-      Destination_Codes: formData.DestinationCode,
-      Zone_Codes: formData.Dest_Zone,
-      State_Codes: getCity.find(c => c.City_Code === formData.DestinationCode)?.State_Code || "7",
-      Weight: Math.max(parseFloat(formData.ActualWt) || 0,parseFloat(formData.VolumetricWt) || 0, parseFloat(formData.ChargedWt) || 0),
-      Method: formData.BookMode,
-      Dox_Spx: formData.DoxSpx,
-    };
-    const response = await postApi("/Master/GetCustomerFinalRate_CityState", body);
-    console.log(response);
-// 
-    if (response?.GetDataSuccess === 1 && response.Data.length > 0) {
-      const rateperKg = response.Data[0].Detail_Rate;
-// 
-      // ✅ Update rate and trigger GST calculation automatically
-      setFormData((prev) => ({
-        ...prev,
-        RatePerkg: rateperKg,
-      }));
-    }
-  } catch (error) {
-    console.error("❌ Error fetching rate:", error);
-  }
-};
-// 
- if(formData.Customer_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode)
-    {
-    handleMakeRate();
-    }},
-   [formData.Customer_Code,
-      formData.Mode_Code,
-      formData.OriginCode,
-      formData.DestinationCode,
-      formData.Dest_Zone,
-      formData.BookMode,
-      formData.DoxSpx,
-      formData.ActualWt,
-      formData.VolumetricWt,
-      formData.ChargedWt]);
+    useEffect(() => {
+        const handleMakeRate = async () => {
+            try {
+                const body = {
+                    Client_Code: formData.Customer_Code,
+                    Mode_Codes: formData.Mode_Code,
+                    Origin_Code: formData.OriginCode,
+                    Destination_Codes: formData.DestinationCode,
+                    Zone_Codes: formData.Dest_Zone,
+                    State_Codes: getCity.find(c => c.City_Code === formData.DestinationCode)?.State_Code || "7",
+                    Weight: Math.max(parseFloat(formData.ActualWt) || 0, parseFloat(formData.VolumetricWt) || 0, parseFloat(formData.ChargedWt) || 0),
+                    Method: formData.BookMode,
+                    Dox_Spx: formData.DoxSpx,
+                };
+                const response = await postApi("/Master/GetCustomerFinalRate_CityState", body);
+                console.log(response);
+                // 
+                if (response?.GetDataSuccess === 1 && response.Data.length > 0) {
+                    const rateperKg = response.Data[0].Detail_Rate;
+                    // 
+                    // ✅ Update rate and trigger GST calculation automatically
+                    setFormData((prev) => ({
+                        ...prev,
+                        RatePerkg: rateperKg,
+                    }));
+                }
+            } catch (error) {
+                console.error("❌ Error fetching rate:", error);
+            }
+        };
+        // 
+        if (formData.Customer_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode) {
+            handleMakeRate();
+        }
+    },
+        [formData.Customer_Code,
+        formData.Mode_Code,
+        formData.OriginCode,
+        formData.DestinationCode,
+        formData.Dest_Zone,
+        formData.BookMode,
+        formData.DoxSpx,
+        formData.ActualWt,
+        formData.VolumetricWt,
+        formData.ChargedWt]);
 
     useEffect(() => {
         const getVolum = async (Customer_Code, Mode_Code) => {
