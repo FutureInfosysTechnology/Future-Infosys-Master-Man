@@ -132,37 +132,22 @@ function VendorBoxLabel() {
   #pdf {
     position: absolute;
     top: 0;
-    width: auto !important;
-    height: auto !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
-    overflow: hidden;
   }
 
   .download {
-    margin-top: 20px;
-    padding: 0;
-    width: auto !important;
-    height: auto !important;
+    width: 100% !important;
     page-break-after: always;
+    margin: 0 !important;
   }
 
-  body {
-    margin: 0;
-     width: auto !important;
-    height: auto !important;
-    padding: 0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    background: white;
-  }
-
-  @page {
+  @page:first {
     size: A4 portrait;
-    margin: 0; /* removes browser default margins */
-    padding: 0;
-  }
+    margin: 0in; /* removes browser default margins */
+  }  
 }
 `}
             </style>
@@ -175,8 +160,8 @@ function VendorBoxLabel() {
             {data?.length > 0 && (
                 <div className="main-body" id="main-body">
                     <div className="container py-0">
-                        <div className="container-2 py-1" style={{ borderRadius: "0px", width: "840px", gap: "5px", border: "none" }}>
-                            <div className="container-2" style={{ borderRadius: "0px", width: "840px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px" }}>
+                        <div className="container-2 py-1" style={{ borderRadius: "0px", width: "883px", gap: "5px", border: "none" }}>
+                            <div className="container-2" style={{ borderRadius: "0px", width: "883px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px" }}>
                                 <button
                                     onClick={handleDownloadPDF}
                                     style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
@@ -197,18 +182,18 @@ function VendorBoxLabel() {
                                 </button>
                             </div>
                         </div>
-                        <div className="container-2" id='pdf' style={{ borderRadius: "0px", paddingLeft: "20px", fontFamily: '"Times New Roman", Times, serif', paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
+                        <div className="container-2" id='pdf' style={{ borderRadius: "0px", paddingLeft: "20px", fontFamily: '"Times New Roman", Times, serif', paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "883px", direction: "flex", flexDirection: "column", gap: "5px" }}>
                             {
                                 data.map((docket, index) =>
                                 (
                                     <div className="docket" key={index} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                                         {
                                             Array.from({ length: docket.Qty }, (_, i) => (
-                                                <div className='download' style={{ width: "840px"}}>
-                                                    <div className="container" style={{width:"840px", border: "1px solid black", padding: "0px" }}>
-                                                        <div style={{ display: "flex", flexDirection: "row", fontSize: "14px" }}>
+                                                <div className='download' style={{width:"840px"}} >
+                                                    <div className="container" style={{border: "1px solid black", padding: "0px",width:"840px" }}>
+                                                        <div style={{ display: "flex", flexDirection: "row", fontSize: "14px",width:"100%"}}>
                                                             <div style={{ width: "80%", display: "flex", flexDirection: "column" }}>
-                                                                <div style={{ display: "flex", flexDirection: "column", border: "1px solid silver", alignItems: "center" }}>
+                                                                <div style={{ display: "flex",flexDirection: "column", border: "1px solid silver", alignItems: "center" }}>
                                                                     <label htmlFor="">DOCKET NUMBER </label>
                                                                     <BarCode
                                                                         value={docket?.DocketNo}
@@ -383,8 +368,7 @@ function VendorBoxLabel() {
                                                                 <b style={{ border: "1px solid silver", height: "61px", textAlign: "start", paddingLeft: "5px" }}>REF NO.: 93163819 :</b>
                                                             </div>
                                                         </div>
-
-                                                        <div style={{ height: "70px", fontSize: "8px", display: "flex", flexDirection: "column", border: "1px solid black", paddingLeft: "5px" }}>
+                                                        <div style={{fontSize: "8px", display: "flex", flexDirection: "column", border: "1px solid black", paddingLeft: "5px" }}>
                                                             <b>TERMS & CONDITIONS :</b>
                                                             <b>1. NO CLAIMS WOULD BE ENTERTAINED FOR ANY DAMAGE DURING TRANSIT & DELAY IN DELIVERY DUE TO ANY REASON</b>
                                                             <b>2. MAXIMUM CLAIMS FOR LOSS OF PARCEL WOULD BE USD 50 UPTO 10 KGS & USD 100 ABOVE 10 KGS OR THE DECLARED VALUE WHICHEVER IS LOWER. </b>

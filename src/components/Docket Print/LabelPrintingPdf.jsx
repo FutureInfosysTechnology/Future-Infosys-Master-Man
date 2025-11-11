@@ -120,16 +120,17 @@ function LabelPrintingPdf() {
             <style>
                 {`
 @media print {
-  /* Hide everything except docket container */
+
   body * {
     visibility: hidden;
   }
 
-  .docket, .docket * {
+
+  #pdf, #pdf * {
     visibility: visible;
   }
 
-  .docket {
+  #pdf {
     position: absolute;
     top: 0;
     width: auto !important;
@@ -137,30 +138,18 @@ function LabelPrintingPdf() {
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
-    overflow: hidden;
   }
+
   .download {
-    margin-top: 20px;
-    margin-left: 80px;
-    padding: 0;
     page-break-after: always;
+    margin: 0 !important;
   }
-
-  body {
-    margin: 0;
-    padding: 0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    background: red;
-  }
-
-  @page {
+    @page:first {
     size: A4 portrait;
-    margin: 0 !important; /* removes browser default margins */
-    padding: 0 !important;
-    
-  }
+    margin: 0in; /* removes browser default margins */
+  }  
 }
+
 `}
             </style>
 
@@ -207,7 +196,7 @@ function LabelPrintingPdf() {
                                                             borderBottom: "2px solid black", width: "100%", display: "flex", justifyContent: "center", alignItems: "center"
                                                             , fontWeight: "bolder", fontSize: "30px"
                                                         }}
-                                                        >Box/Pcs - {i+1} of {docket.Qty}</div>
+                                                        >Box/Pcs - {i + 1} of {docket.Qty}</div>
                                                         <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
                                                             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "50%", borderRight: "2px solid black", padding: "5px" }}>
                                                                 <img src={getBranch?.Branch_Logo} width={200} height={60} />
@@ -227,37 +216,9 @@ function LabelPrintingPdf() {
                                                             />
                                                         </div>
                                                         <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
-                                                           
+
                                                             <div
-                                                            className="px-1"
-                                                                style={{
-                                                                    display: "flex",
-                                                                    flexDirection: "column",
-                                                                    width: "50%",
-                                                                    borderRight: "2px solid black", 
-                                                                    lineHeight: "1.1", // 🔹 reduce line spacing
-                                                                }}
-                                                            >
-                                                                <div style={{fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Awb No:</div> {/* 🔹 small margin */}
-                                                                <div style={{fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.vendorAwbno}</div>
-                                                            </div>
-                                                             <div
-                                                             className="px-1"
-                                                                style={{
-                                                                    display: "flex",
-                                                                    flexDirection: "column",
-                                                                    width: "50%",
-                                                                    lineHeight: "1.1", // 🔹 reduce line spacing
-                                                                }}
-                                                            >
-                                                                <div style={{fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>BookDate:</div> {/* 🔹 small margin */}
-                                                                <div style={{fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.BookDate}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
-                                                           
-                                                            <div
-                                                            className="px-1"
+                                                                className="px-1"
                                                                 style={{
                                                                     display: "flex",
                                                                     flexDirection: "column",
@@ -266,27 +227,26 @@ function LabelPrintingPdf() {
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
                                                                 }}
                                                             >
-                                                                <div style={{fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Origin:</div> {/* 🔹 small margin */}
-                                                                <div style={{fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Origin_Name}</div>
+                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Awb No:</div> {/* 🔹 small margin */}
+                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.vendorAwbno}</div>
                                                             </div>
-                                                             <div
-                                                             className="px-1"
+                                                            <div
+                                                                className="px-1"
                                                                 style={{
                                                                     display: "flex",
                                                                     flexDirection: "column",
                                                                     width: "50%",
-                                                                    fontWeight: "bolder",
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
                                                                 }}
                                                             >
-                                                                <div style={{fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Destination:</div> {/* 🔹 small margin */}
-                                                                <div style={{fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Destination_Name}</div>
+                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>BookDate:</div> {/* 🔹 small margin */}
+                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.BookDate}</div>
                                                             </div>
                                                         </div>
                                                         <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
-                                                           
+
                                                             <div
-                                                            className="px-1"
+                                                                className="px-1"
                                                                 style={{
                                                                     display: "flex",
                                                                     flexDirection: "column",
@@ -295,11 +255,11 @@ function LabelPrintingPdf() {
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
                                                                 }}
                                                             >
-                                                                <div style={{ fontWeight: "bold",fontSize: "18px", marginBottom: "2px" }}>Pcs:</div> {/* 🔹 small margin */}
-                                                                <div style={{fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Qty}</div>
+                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Origin:</div> {/* 🔹 small margin */}
+                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Origin_Name}</div>
                                                             </div>
-                                                             <div
-                                                               className="px-1"
+                                                            <div
+                                                                className="px-1"
                                                                 style={{
                                                                     display: "flex",
                                                                     flexDirection: "column",
@@ -308,11 +268,40 @@ function LabelPrintingPdf() {
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
                                                                 }}
                                                             >
-                                                                <div style={{fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Mode Name:</div> {/* 🔹 small margin */}
-                                                                <div style={{ fontWeight: "bolder",fontSize: "28px", marginTop: "0px" }}>{docket?.Mode_Name}</div>
+                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Destination:</div> {/* 🔹 small margin */}
+                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Destination_Name}</div>
                                                             </div>
                                                         </div>
-                                                        <div  className="p-1" style={{fontWeight: "bold",lineHeight: "1.1",textAlign:"center",fontSize:"15px"}}>
+                                                        <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
+
+                                                            <div
+                                                                className="px-1"
+                                                                style={{
+                                                                    display: "flex",
+                                                                    flexDirection: "column",
+                                                                    width: "50%",
+                                                                    borderRight: "2px solid black",
+                                                                    lineHeight: "1.1", // 🔹 reduce line spacing
+                                                                }}
+                                                            >
+                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Pcs:</div> {/* 🔹 small margin */}
+                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Qty}</div>
+                                                            </div>
+                                                            <div
+                                                                className="px-1"
+                                                                style={{
+                                                                    display: "flex",
+                                                                    flexDirection: "column",
+                                                                    width: "50%",
+                                                                    fontWeight: "bolder",
+                                                                    lineHeight: "1.1", // 🔹 reduce line spacing
+                                                                }}
+                                                            >
+                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Mode Name:</div> {/* 🔹 small margin */}
+                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Mode_Name}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="p-1" style={{ fontWeight: "bold", lineHeight: "1.1", textAlign: "center", fontSize: "15px" }}>
                                                             {getBranch?.Branch_Add1},{getBranch?.Branch_Add2},{getBranch?.Branch_Name},
                                                             {getBranch?.Branch_PIN},(+91) {getBranch?.MobileNo}
                                                         </div>
