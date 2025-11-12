@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import Header from '../../Components-2/Header/Header';
 import Sidebar1 from '../../Components-2/Sidebar1';
 import Footer from '../../Components-2/Footer';
@@ -6,58 +6,64 @@ import GenerateInvoice from './GenerateInvoice';
 import ViewInvoice from './ViewInvoice';
 import PerformanceBill from './PerformanceBill';
 import PendingInvoice from './PendingInvoice';
-import "./permonce.css"
 import ViewPerforma from './ViewPerforma';
-import { useLocation } from 'react-router-dom';
 import InvoiceSum from './InvoiceSum';
 import DocketInvoicePrint from './DocketInvoicePrint';
+import { useLocation } from 'react-router-dom';
 
 function Invoice() {
-    const location = useLocation();
-    const [activeTab, setActiveTab] = useState(location?.state?.tab || 'state');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location?.state?.tab || 'pending');
 
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+  // ✅ Define all tabs dynamically
+  const tabs = [
+    { id: 'pending', label: 'Pending Invoice', component: <PendingInvoice /> },
+    { id: 'generate', label: 'Generate Invoice', component: <GenerateInvoice /> },
+    { id: 'viewInvoice', label: 'View Invoice', component: <ViewInvoice /> },
+    { id: 'summary', label: 'Invoice Summary', component: <InvoiceSum /> },
+    { id: 'print', label: 'Docket Print', component: <DocketInvoicePrint /> },
+    { id: 'performance', label: 'Performance Invoice', component: <PerformanceBill /> },
+    { id: 'viewPerformance', label: 'View Performance Invoice', component: <ViewPerforma /> },
+  ];
 
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
+      <div className="main-body" id="main-body">
+        <div className="container">
+          {/* ✅ Navigation Tabs */}
+          <nav style={{ height: "28px" }}>
+            {tabs.map(tab => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                
+              >
+                {tab.label}
+              </label>
+            ))}
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
-            <div className="main-body" id="main-body">
+            {/* ✅ Animated Slider */}
+            <div
+              className="slider"
+              style={{
+                left: `${tabs.findIndex(t => t.id === activeTab) * (100 / tabs.length)}%`,
+                width: `${100 / tabs.length}%`,
+              }}
+            />
+          </nav>
 
-                <div className="container" >
-                    <nav style={{height:"28px"}}>
-                        <label  onClick={() => setActiveTab("state")}>Pending Invoice</label>
-                        <label  onClick={() => setActiveTab("zone")}>Generate Invoice</label>
-                        <label  onClick={() => setActiveTab("multiple")}>View Invoice</label>
-                        <label  onClick={() => setActiveTab("Sum")}>Invoice Summary</label>
-                        <label  onClick={() => setActiveTab("print")}>Docket Print</label>
-                        <label  onClick={() => setActiveTab("country")}>Performance Invoice</label>
-                        <label  onClick={() => setActiveTab("view")}>View Performance Invoice</label>
+          {/* ✅ Dynamic Section Rendering */}
+          <section>
+            {tabs.find(t => t.id === activeTab)?.component}
+          </section>
+        </div>
 
-                        <div
-                            className="slider"
-                            style={{ left: `${["state", "zone", "multiple", "Sum","print", "country", "view",].indexOf(activeTab) * 14.28}%`, width: "14.28%", }}
-                        />
-                    </nav>
-                    <section >
-                        {activeTab === 'state' && <PendingInvoice />}
-                        {activeTab === 'zone' && <GenerateInvoice />}
-                        {activeTab === 'multiple' && <ViewInvoice />}
-                        {activeTab === 'Sum' && <InvoiceSum />}
-                        {activeTab === 'print' && <DocketInvoicePrint />}
-                        {activeTab === 'country' && <PerformanceBill />}
-                        {activeTab === 'view' && <ViewPerforma />}
-                        
-
-                    </section>
-                </div>
-                <Footer />
-            </div>
-        </>
-    )
+        <Footer />
+      </div>
+    </>
+  );
 }
 
-export default Invoice
+export default Invoice;

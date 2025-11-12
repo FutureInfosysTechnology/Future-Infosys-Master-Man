@@ -7,10 +7,10 @@ import DockerPrint1 from "./DockerPrint1";
 import DocketPrint2 from "./DocketPrint2";
 import DocketPrint3 from "./DocketPrint3";
 import DocketPrint4 from "./DocketPrint4";
-import BulkImport from "../Booking/Daily Manifest/BulkImport";
 import LabelPrinting from "./LabelPrinting";
 import "./DocketPrint.css"
 import { useLocation } from "react-router-dom";
+import BoxSticker from "./BoxSticker";
 
 
 function DocketPrint() {
@@ -77,7 +77,7 @@ function DocketPrint() {
                         </div>
 
                         <div className={`content content-6 ${activeTab === 'sticker' ? 'active' : ''}`}>
-                            <BulkImport />
+                            <BoxSticker />
                         </div>
                     </section>
                 </div>

@@ -8,6 +8,9 @@ import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import Select from "react-select";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 
 function StockEntry() {
@@ -26,7 +29,7 @@ function StockEntry() {
         qty: "",
         fromDocketNo: "",
         toDocketNo: "",
-        stockDate: ""
+        stockDate: new Date(),
     })
 
 
@@ -61,7 +64,7 @@ function StockEntry() {
 
     const fetchBranchData = async () => {
         try {
-            const response = await getApi('/Master/getBranch');
+            const response = await getApi('/Master/getAllBranchData');
             setGetBranch(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             console.error('Fetch Error:', err);
@@ -96,7 +99,7 @@ function StockEntry() {
                     qty: '',
                     fromDocketNo: '',
                     toDocketNo: '',
-                    stockDate: ''
+                    stockDate: new Date(),
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -126,7 +129,7 @@ function StockEntry() {
                     qty: "",
                     fromDocketNo: "",
                     toDocketNo: "",
-                    stockDate: ""
+                    stockDate: new Date(),
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -199,7 +202,7 @@ function StockEntry() {
                         <div>
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
-                                setAddStock({ cityCode: "", qty: "", fromDocketNo: "", toDocketNo: "", stockDate: "" })
+                                setAddStock({ cityCode: "", qty: "", fromDocketNo: "", toDocketNo: "", stockDate: new Date(), })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
                                 <span>ADD NEW</span>
@@ -266,24 +269,24 @@ function StockEntry() {
                                                 >
 
                                                     <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setOpenRow(null);
-                                                    setAddStock({
-                                                        cityCode: stock.City_Code,
-                                                        qty: stock.Qty,
-                                                        fromDocketNo: stock.FromDocketNo,
-                                                        toDocketNo: stock.ToDocketNo,
-                                                        stockDate: stock.Stock_Date
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button className='edit-btn' onClick={() =>{
-                                                    setOpenRow(null);
-                                                    handleDeleteStock(stock.City_Code);
-                                                }}>
-                                                    <i className='bi bi-trash'></i></button>
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setAddStock({
+                                                            cityCode: stock.City_Code,
+                                                            qty: stock.Qty,
+                                                            fromDocketNo: stock.FromDocketNo,
+                                                            toDocketNo: stock.ToDocketNo,
+                                                            stockDate: stock.Stock_Date
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setOpenRow(null);
+                                                        handleDeleteStock(stock.City_Code);
+                                                    }}>
+                                                        <i className='bi bi-trash'></i></button>
                                                 </div>
                                             )}
                                         </td>
@@ -335,7 +338,14 @@ function StockEntry() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-stock" contentLabel="Modal">
+                        className="custom-modal-stock" contentLabel="Modal" style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Stock Entry Master</header>
@@ -345,14 +355,38 @@ function StockEntry() {
                                     <div className="fields2">
                                         <div className="input-field1">
                                             <label htmlFor="">Branch Name</label>
-                                            <select value={addStock.cityCode}
-                                                onChange={(e) => setAddStock({ ...addStock, cityCode: e.target.value })}
-                                                required aria-readonly={isEditMode}>
-                                                <option disabled value="">Select branch</option>
-                                                {getBranch.map((branch, index) => (
-                                                    <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getBranch.map(branch => ({
+                                                    value: branch.Branch_Code,
+                                                    label: branch.Branch_Name,
+                                                }))}
+                                                value={
+                                                    addStock.cityCode
+                                                        ? {
+                                                            value: addStock.cityCode,
+                                                            label:
+                                                                getBranch.find(b => b.Branch_Code === addStock.cityCode)?.Branch_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={selected =>
+                                                    setAddStock({
+                                                        ...addStock,
+                                                        cityCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select branch"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                                isDisabled={isEditMode}
+                                            />
+
                                         </div>
 
                                         <div className="input-field1">
@@ -378,9 +412,20 @@ function StockEntry() {
 
                                         <div className="input-field1">
                                             <label htmlFor="">Stock Date</label>
-                                            <input type="date" value={addStock.stockDate}
-                                                onChange={(e) => setAddStock({ ...addStock, stockDate: e.target.value })}
-                                                required />
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={addStock.stockDate}
+                                                onChange={(date) =>
+                                                    setAddStock({
+                                                        ...addStock,
+                                                        stockDate: date,
+                                                    })
+                                                }
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                                required
+                                            />
+
                                         </div>
 
                                     </div>

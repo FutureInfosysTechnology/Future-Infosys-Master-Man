@@ -3,7 +3,9 @@ import Swal from "sweetalert2";
 import Modal from 'react-modal';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { postApi, getApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
-
+import Select from "react-select";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 function CustomerStock() {
     const [openRow, setOpenRow] = useState(null);
@@ -23,7 +25,7 @@ function CustomerStock() {
         qty: "",
         fromDocketNo: "",
         toDocketNo: "",
-        stockDate: ""
+        stockDate: new Date(),
     })
 
 
@@ -41,7 +43,7 @@ function CustomerStock() {
 
     const fetchCustomerData = async () => {
         try {
-            const response = await getApi('/Master/getCustomer');
+            const response = await getApi('/Master/getCustomerData');
             setGetCustomer(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             setError(err);
@@ -52,7 +54,7 @@ function CustomerStock() {
 
     const fetchBranchData = async () => {
         try {
-            const response = await getApi('/Master/getBranch');
+            const response = await getApi('/Master/getAllBranchData');
             setGetBranch(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             console.error('Fetch Error:', err);
@@ -107,7 +109,7 @@ function CustomerStock() {
                     fromDocketNo: '',
                     toDocketNo: '',
                     cityCode: '',
-                    stockDate: ''
+                    stockDate: new Date(),
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -138,7 +140,7 @@ function CustomerStock() {
                     qty: "",
                     fromDocketNo: "",
                     toDocketNo: "",
-                    stockDate: ""
+                    stockDate: new Date(),
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -256,25 +258,25 @@ function CustomerStock() {
                                             >
 
                                                 <button className='edit-btn' onClick={() => {
-                                                setIsEditMode(true);
-                                                setOpenRow(null);
-                                                setAddCustStock({
-                                                    custCode: cust.Customer_Name,
-                                                    qty: cust.Qty,
-                                                    fromDocketNo: cust.FromDocketNo,
-                                                    toDocketNo: cust.ToDocketNo,
-                                                    cityCode: cust.City_Code,
-                                                    stockDate: cust.Stock_Date
-                                                });
-                                                setModalIsOpen(true);
-                                            }}>
-                                                <i className='bi bi-pen'></i>
-                                            </button>
-                                            <button className='edit-btn' onClick={() =>{
-                                                setOpenRow(null);
-                                                handleDeleteCustStock(cust.Customer_Code);
-                                            }}>
-                                                <i className='bi bi-trash'></i></button>
+                                                    setIsEditMode(true);
+                                                    setOpenRow(null);
+                                                    setAddCustStock({
+                                                        custCode: cust.Customer_Name,
+                                                        qty: cust.Qty,
+                                                        fromDocketNo: cust.FromDocketNo,
+                                                        toDocketNo: cust.ToDocketNo,
+                                                        cityCode: cust.City_Code,
+                                                        stockDate: cust.Stock_Date
+                                                    });
+                                                    setModalIsOpen(true);
+                                                }}>
+                                                    <i className='bi bi-pen'></i>
+                                                </button>
+                                                <button className='edit-btn' onClick={() => {
+                                                    setOpenRow(null);
+                                                    handleDeleteCustStock(cust.Customer_Code);
+                                                }}>
+                                                    <i className='bi bi-trash'></i></button>
                                             </div>
                                         )}
                                     </td>
@@ -327,7 +329,14 @@ function CustomerStock() {
 
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                    className="custom-modal-volumetric" contentLabel="Modal">
+                    className="custom-modal-volumetric" contentLabel="Modal" style={{
+                        content: {
+                            width: '90%',
+                            top: '50%',             // Center vertically
+                            left: '50%',
+                            whiteSpace: "nowrap"
+                        },
+                    }}>
                     <div className="custom-modal-content">
                         <div className="header-tittle">
                             <header>Customer Stock Master</header>
@@ -337,25 +346,73 @@ function CustomerStock() {
                                 <div className="fields2">
                                     <div className="input-field1">
                                         <label htmlFor="">Customer Name</label>
-                                        <select value={addCustStock.custCode}
-                                            onChange={(e) => setAddCustStock({ ...addCustStock, custCode: e.target.value })}
-                                            aria-readonly={isEditMode}>
-                                            <option value="" disabled>Select Customer Name</option>
-                                            {getCustomer.map((cust, index) => (
-                                                <option value={cust.Customer_Code} key={index}>{cust.Customer_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getCustomer.map(cust => ({
+                                                value: cust.Customer_Code,
+                                                label: cust.Customer_Name,
+                                            }))}
+                                            value={
+                                                addCustStock.custCode
+                                                    ? {
+                                                        value: addCustStock.custCode,
+                                                        label:
+                                                            getCustomer.find(c => c.Customer_Code === addCustStock.custCode)
+                                                                ?.Customer_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={selected =>
+                                                setAddCustStock({
+                                                    ...addCustStock,
+                                                    custCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Customer Name"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                            isDisabled={isEditMode}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
                                         <label htmlFor="">Branch Name</label>
-                                        <select value={addCustStock.cityCode}
-                                            onChange={(e) => setAddCustStock({ ...addCustStock, cityCode: e.target.value })} required>
-                                            <option disabled value="">Select City Name</option>
-                                            {getBranch.map((branch, index) => (
-                                                <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getBranch.map(branch => ({
+                                                value: branch.Branch_Code,
+                                                label: branch.Branch_Name,
+                                            }))}
+                                            value={
+                                                addCustStock.cityCode
+                                                    ? {
+                                                        value: addCustStock.cityCode,
+                                                        label:
+                                                            getBranch.find(b => b.Branch_Code === addCustStock.cityCode)
+                                                                ?.Branch_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={selected =>
+                                                setAddCustStock({
+                                                    ...addCustStock,
+                                                    cityCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select City Name"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
@@ -381,8 +438,20 @@ function CustomerStock() {
 
                                     <div className="input-field1">
                                         <label htmlFor="">Stock Date</label>
-                                        <input type="date" value={addCustStock.stockDate}
-                                            onChange={(e) => setAddCustStock({ ...addCustStock, stockDate: e.target.value })} required />
+                                        <DatePicker
+                                            portalId="root-portal"
+                                            selected={addCustStock.stockDate}
+                                            onChange={(date) =>
+                                                setAddCustStock({
+                                                    ...addCustStock,
+                                                    stockDate: date,
+                                                })
+                                            }
+                                            dateFormat="dd/MM/yyyy"
+                                            className="form-control form-control-sm"
+                                            required
+                                        />
+
                                     </div>
 
                                     <div className="bottom-buttons" style={{ marginLeft: "25px" }}>

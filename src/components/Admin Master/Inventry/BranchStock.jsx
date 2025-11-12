@@ -7,6 +7,10 @@ import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import Select from "react-select";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+
 
 
 
@@ -26,7 +30,7 @@ function BranchStock() {
         qty: "",
         fromDocketNo: "",
         toDocketNo: "",
-        stockDate: ""
+        stockDate: new Date(),
     })
 
     const filteredgetBranch = getBranchStock.filter((branch) =>
@@ -60,7 +64,7 @@ function BranchStock() {
 
     const fetchBranchData = async () => {
         try {
-            const response = await getApi('/Master/getBranch');
+            const response = await getApi('/Master/getAllBranchData');
             setGetBranch(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             console.error('Fetch Error:', err);
@@ -95,7 +99,7 @@ function BranchStock() {
                     qty: '',
                     fromDocketNo: '',
                     toDocketNo: '',
-                    stockDate: ''
+                    stockDate: new Date(),
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -124,7 +128,7 @@ function BranchStock() {
                     qty: "",
                     fromDocketNo: "",
                     toDocketNo: "",
-                    stockDate: ""
+                   stockDate: new Date(),
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -173,7 +177,7 @@ function BranchStock() {
                         <div>
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
-                                setAddBranchStock({ cityCode: "", qty: "", fromDocketNo: "", toDocketNo: "", stockDate: "" })
+                                setAddBranchStock({ cityCode: "", qty: "", fromDocketNo: "", toDocketNo: "", stockDate: new Date(), })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
                                 <span>ADD NEW</span>
@@ -309,7 +313,15 @@ function BranchStock() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-volumetric" contentLabel="Modal">
+                        className="custom-modal-volumetric" contentLabel="Modal" style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap",
+                                height:"auto",
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Branch Stock Master</header>
@@ -319,15 +331,40 @@ function BranchStock() {
                                     <div className="fields2">
                                         <div className="input-field1">
                                             <label htmlFor="">Branch Name</label>
-                                            <select value={addBranchStock.cityCode}
-                                                onChange={(e) => setAddBranchStock({ ...addBranchStock, cityCode: e.target.value })}
-                                                required aria-readonly={isEditMode}>
-                                                <option value="" disabled >Select Branch Name</option>
-                                                {getBranch.map((branch, index) => (
-                                                    <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getBranch.map(branch => ({
+                                                    value: branch.Branch_Code,
+                                                    label: branch.Branch_Name,
+                                                }))}
+                                                value={
+                                                    addBranchStock.cityCode
+                                                        ? {
+                                                            value: addBranchStock.cityCode,
+                                                            label:
+                                                                getBranch.find(b => b.Branch_Code === addBranchStock.cityCode)
+                                                                    ?.Branch_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={selected =>
+                                                    setAddBranchStock({
+                                                        ...addBranchStock,
+                                                        cityCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select Branch Name"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                                isDisabled={isEditMode}
+                                            />
                                         </div>
+
 
                                         <div className="input-field1">
                                             <label htmlFor="">Quantity</label>
@@ -352,8 +389,20 @@ function BranchStock() {
 
                                         <div className="input-field1">
                                             <label htmlFor="">Stock Date</label>
-                                            <input type="date" value={addBranchStock.stockDate}
-                                                onChange={(e) => setAddBranchStock({ ...addBranchStock, stockDate: e.target.value })} required />
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={addBranchStock.stockDate}
+                                                onChange={(date) =>
+                                                    setAddBranchStock({
+                                                        ...addBranchStock,
+                                                        stockDate: date,
+                                                    })
+                                                }
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                                disabled={isEditMode}
+                                                required
+                                            />
                                         </div>
 
                                         <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "25px" }}>
@@ -363,9 +412,10 @@ function BranchStock() {
                                         </div>
                                     </div>
                                 </form>
-
-                                <div className="table-container1" style={{ margin: "10px" }}>
-                                    <table className="table" style={{ height: "100px" }} >
+                            </div>
+                            <div className='container2' style={{ width: "100%" }}>
+                                <div className="table-container1" style={{ width: "100%" }}>
+                                    <table className="table table-bordered table-sm" style={{ width: "50%", whiteSpace: "nowrap" }}>
                                         <thead>
                                             <tr>
                                                 <th>From Awb No</th>

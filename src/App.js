@@ -43,13 +43,13 @@ import SecondInvoice from './components/Docket Print/SecondInvoice';
 import UserAdmin from './components/User Control/UserAdmin';
 import BranchAdmin from './components/User Control/BranchAdmin';
 import PerformanceInvoice from './components/Docket Print/PerformanceInvoice';
-import BoxSticker from './components/Docket Print/BoxSticker';
 import DocketBill from './components/Docket Print/DocketBill';
 import VendorBoxLabel from './components/Docket Print/VendorBoxLabel';
 import InternationalBooking from './components/Booking/Daily Booking/InternationalBooking';
 import NewDP from './components/Docket Print/NewDp1';
 import CreditPrint from './components/Docket Print/CreditPrint';
 import LabelPrintingPdf from './components/Docket Print/LabelPrintingPdf';
+import BoxStickerPdf from './components/Docket Print/BoxStickerPdf';
 
 export const refeshPend=createContext();
 function App() {
@@ -100,7 +100,7 @@ function App() {
           <Route path='/firstinvoice' element={<FirstInvoice />} />
           <Route path='/secondinvoice' element={<SecondInvoice />} />
           <Route path='/performanceinvoice' element={<PerformanceInvoice />} />
-          <Route path='/boxsticker' element={<BoxSticker />} />
+          <Route path='/boxstickerprint' element={<BoxStickerPdf/>} />
           <Route path='/docketbill' element={<DocketBill />} />
           <Route path='/vendorboxlabel' element={<VendorBoxLabel />} />
           <Route path='/newdp' element={<NewDP/>} />

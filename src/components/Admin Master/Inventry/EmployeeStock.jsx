@@ -10,6 +10,8 @@ import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesA
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Select from "react-select";
+
 
 
 function EmployeeStock() {
@@ -30,7 +32,7 @@ function EmployeeStock() {
         qty: "",
         fromDocketNo: "",
         toDocketNo: "",
-        stockDate: ""
+        stockDate: new Date(),
     })
 
 
@@ -48,7 +50,7 @@ function EmployeeStock() {
 
     const fetchBranchData = async () => {
         try {
-            const response = await getApi('/Master/getBranch');
+            const response = await getApi('/Master/getAllBranchData');
             setGetBranch(Array.isArray(response.Data) ? response.Data : []);
         } catch (err) {
             console.error('Fetch Error:', err);
@@ -115,7 +117,7 @@ function EmployeeStock() {
                     qty: '',
                     fromDocketNo: '',
                     toDocketNo: '',
-                    stockDate: ''
+                    stockDate: new Date(),
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -146,7 +148,7 @@ function EmployeeStock() {
                     qty: "",
                     fromDocketNo: "",
                     toDocketNo: "",
-                    stockDate: ""
+                    stockDate: new Date(),
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -232,7 +234,7 @@ function EmployeeStock() {
                     <div>
                         <button className='add-btn' onClick={() => {
                             setModalIsOpen(true); setIsEditMode(false);
-                            setAddEmpStock({ empCode: "", cityCode: "", qty: "", fromDocketNo: "", toDocketNo: "", stockDate: "" })
+                            setAddEmpStock({ empCode: "", cityCode: "", qty: "", fromDocketNo: "", toDocketNo: "", stockDate: new Date(), })
                         }}>
                             <i className="bi bi-plus-lg"></i>
                             <span>ADD NEW</span>
@@ -299,26 +301,26 @@ function EmployeeStock() {
                                                 }}
                                             >
 
-                                                 <button className='edit-btn' onClick={() => {
-                                                setIsEditMode(true);
-                                                setOpenRow(null);
-                                                setAddEmpStock({
-                                                    empCode: emp.Employee_Code,
-                                                    qty: emp.Qty,
-                                                    fromDocketNo: emp.FromDocketNo,
-                                                    toDocketNo: emp.ToDocketNo,
-                                                    cityCode: emp.City_Code,
-                                                    stockDate: emp.Stock_Date
-                                                });
-                                                setModalIsOpen(true);
-                                            }}>
-                                                <i className='bi bi-pen'></i>
-                                            </button>
-                                            <button className='edit-btn' onClick={() => {
-                                                setOpenRow(null);
-                                                handleDeleteEmpStock(emp.Employee_Code);
-                                            }}>
-                                                <i className='bi bi-trash'></i></button>
+                                                <button className='edit-btn' onClick={() => {
+                                                    setIsEditMode(true);
+                                                    setOpenRow(null);
+                                                    setAddEmpStock({
+                                                        empCode: emp.Employee_Code,
+                                                        qty: emp.Qty,
+                                                        fromDocketNo: emp.FromDocketNo,
+                                                        toDocketNo: emp.ToDocketNo,
+                                                        cityCode: emp.City_Code,
+                                                        stockDate: emp.Stock_Date
+                                                    });
+                                                    setModalIsOpen(true);
+                                                }}>
+                                                    <i className='bi bi-pen'></i>
+                                                </button>
+                                                <button className='edit-btn' onClick={() => {
+                                                    setOpenRow(null);
+                                                    handleDeleteEmpStock(emp.Employee_Code);
+                                                }}>
+                                                    <i className='bi bi-trash'></i></button>
                                             </div>
                                         )}
                                     </td>
@@ -369,7 +371,14 @@ function EmployeeStock() {
                 </div>
 
                 <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                    className="custom-modal-volumetric" contentLabel="Modal">
+                    className="custom-modal-volumetric" contentLabel="Modal" style={{
+                        content: {
+                            width: '90%',
+                            top: '50%',             // Center vertically
+                            left: '50%',
+                            whiteSpace: "nowrap"
+                        },
+                    }}>
                     <div className="custom-modal-content">
                         <div className="header-tittle">
                             <header>Employee Master</header>
@@ -380,26 +389,75 @@ function EmployeeStock() {
                                 <div className="fields2">
                                     <div className="input-field1">
                                         <label htmlFor="">Employee Name</label>
-                                        <select value={addEmpStock.empCode}
-                                            onChange={(e) => setAddEmpStock({ ...addEmpStock, empCode: e.target.value })}
-                                            required aria-readonly={isEditMode}>
-                                            <option value="" disabled>Select Employee Name</option>
-                                            {getEmp.map((emp, index) => (
-                                                <option value={emp.Employee_Code} key={index}>{emp.Employee_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getEmp.map(emp => ({
+                                                value: emp.Employee_Code,
+                                                label: emp.Employee_Name,
+                                            }))}
+                                            value={
+                                                addEmpStock.empCode
+                                                    ? {
+                                                        value: addEmpStock.empCode,
+                                                        label:
+                                                            getEmp.find(e => e.Employee_Code === addEmpStock.empCode)
+                                                                ?.Employee_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={selected =>
+                                                setAddEmpStock({
+                                                    ...addEmpStock,
+                                                    empCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Employee Name"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                            isDisabled={isEditMode}
+                                        />
                                     </div>
 
                                     <div className="input-field1">
                                         <label htmlFor="">Branch Name</label>
-                                        <select value={addEmpStock.cityCode}
-                                            onChange={(e) => setAddEmpStock({ ...addEmpStock, cityCode: e.target.value })} required>
-                                            <option disabled value="">Select Branch</option>
-                                            {getBranch.map((branch, index) => (
-                                                <option value={branch.Branch_Code} key={index}>{branch.Branch_Name}</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getBranch.map(branch => ({
+                                                value: branch.Branch_Code,
+                                                label: branch.Branch_Name,
+                                            }))}
+                                            value={
+                                                addEmpStock.cityCode
+                                                    ? {
+                                                        value: addEmpStock.cityCode,
+                                                        label:
+                                                            getBranch.find(b => b.Branch_Code === addEmpStock.cityCode)
+                                                                ?.Branch_Name || "",
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={selected =>
+                                                setAddEmpStock({
+                                                    ...addEmpStock,
+                                                    cityCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Branch"
+                                            isSearchable={true}
+                                            isClearable={false}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                            }}
+                                        />
                                     </div>
+
 
                                     <div className="input-field1">
                                         <label htmlFor="">Quantity</label>
@@ -424,8 +482,19 @@ function EmployeeStock() {
 
                                     <div className="input-field1">
                                         <label htmlFor="">Stock Date</label>
-                                        <input type="date" required value={addEmpStock.stockDate}
-                                            onChange={(e) => setAddEmpStock({ ...addEmpStock, stockDate: e.target.value })} />
+                                        <DatePicker
+                                            portalId="root-portal"
+                                            selected={addEmpStock.stockDate}
+                                            onChange={(date) =>
+                                                setAddEmpStock({
+                                                    ...addEmpStock,
+                                                    stockDate: date,
+                                                })
+                                            }
+                                            dateFormat="dd/MM/yyyy"
+                                            className="form-control form-control-sm"
+                                            required
+                                        />
                                     </div>
 
                                 </div>

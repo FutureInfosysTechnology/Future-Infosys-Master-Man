@@ -232,7 +232,7 @@ function NewDP1() {
                                 data.map((docket, index) =>
                                 (
                                     <div className="docket" key={index}>
-                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "10px" }}>
+                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "50px" }}>
                                             <div className='div1' style={{ width: "100%", height: "80px", border: "2px solid black", display: "flex", color: "black" }}>
                                                 <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "2px solid black" }}>
                                                     <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "75%" }} />
@@ -418,7 +418,7 @@ function NewDP1() {
                                                 <div><b>Email :</b> {getBranch?.Email}</div>
                                             </div>
                                         </div>
-                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "10px" }}>
+                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "50px" }}>
                                             <div className='div1' style={{ width: "100%", height: "80px", border: "2px solid black", display: "flex", color: "black" }}>
                                                 <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "2px solid black" }}>
                                                     <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "75%" }} />
@@ -604,7 +604,7 @@ function NewDP1() {
                                                 <div><b>Email :</b> {getBranch?.Email}</div>
                                             </div>
                                         </div>
-                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "10px" }}>
+                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "50px" }}>
                                             <div className='div1' style={{ width: "100%", height: "80px", border: "2px solid black", display: "flex", color: "black" }}>
                                                 <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "2px solid black" }}>
                                                     <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "75%" }} />

@@ -293,9 +293,11 @@ function FirstInvoice() {
                                         <div style={{ display: "flex", flexDirection: "column" }}>
                                             <label htmlFor=""><b>Client Name</b></label>
                                             <label htmlFor=""><b>Address</b></label>
-                                            <label htmlFor=""><b>Client Mobile No </b></label>
+                                            <label htmlFor=""><b>State</b></label>
                                             <label htmlFor=""><b>Pin Code</b></label>
-                                            <label htmlFor=""><b>GST No</b></label>
+                                            <label htmlFor=""><b>Mobile No </b></label>
+                                            <label htmlFor=""><b>Gst No</b></label>
+                                            <label htmlFor=""><b>Email</b></label>
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
                                             <label htmlFor=""><b>:</b></label>
@@ -307,9 +309,11 @@ function FirstInvoice() {
                                         <div style={{ display: "flex", flexDirection: "column" }}>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.CustomerName}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Customer_Add1},{invoiceData[0]?.Customer_Add2},{invoiceData[0]?.Customer_Add3}</label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>(+91) {invoiceData[0]?.Customer_Mob}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.State_Name}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Pin_Code}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>(+91) {invoiceData[0]?.Customer_Mob}</label>
                                             <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Gst_No}</label>
+                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{invoiceData[0]?.Email_Id}</label>
                                         </div>
                                     </div>
 
@@ -354,7 +358,7 @@ function FirstInvoice() {
                                                     <th style={headerCellStyle}>Origin</th>
                                                     <th style={headerCellStyle}>Destination</th>
                                                     <th style={headerCellStyle}>Mode</th>
-                                                    <th style={headerCellStyle}>Pieces</th>
+                                                    <th style={headerCellStyle}>Qty</th>
                                                     {isActualChecked && <th style={headerCellStyle}>Weight</th>}
                                                     {isVolChecked && <th style={headerCellStyle}>Volumetric Wt</th>}
                                                     {isCharedChecked && <th style={headerCellStyle}>Charged Wt</th>}
@@ -365,7 +369,7 @@ function FirstInvoice() {
                                                     {isDeliveryChecked && <th style={headerCellStyle}>Delivery Chrgs</th>}
                                                     {isFovChecked && <th style={headerCellStyle}>FOV Chrgs</th>}
                                                     {isFuelChecked && <th style={headerCellStyle}>Fuel Chrgs</th>}
-                                                    {isODAChecked && <th style={headerCellStyle}>Airline Chrgs</th>}
+                                                    {isODAChecked && <th style={headerCellStyle}>ODA Chrgs</th>}
                                                     {isInsuranceChecked && <th style={headerCellStyle}>Insurance Chrgs</th>}
                                                     {isPackingChecked && <th style={headerCellStyle}>Packing Chrgs</th>}
                                                     {isOtherChecked && <th style={headerCellStyle}>Other Chrgs</th>}
@@ -450,14 +454,14 @@ function FirstInvoice() {
 
                                         {isFuelChecked && (
                                             <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Fuel Surcharge</div>
+                                                <div>Fuel Charges</div>
                                                 <div>{fuelTotal.toFixed(2)}</div>
                                             </div>
                                         )}
 
                                         {isODAChecked && (
                                             <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Airline F. Charges</div>
+                                                <div>ODA Charges</div>
                                                 <div>{odaTotal.toFixed(2)}</div>
                                             </div>
                                         )}
@@ -518,10 +522,10 @@ function FirstInvoice() {
                                 </div>
 
                                 <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", justifyContent: "space-around", fontSize: "15px" }}>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Bank Name :</div>    <div style={{ textAlign: "start" }}>{invoiceData[0]?.Bank_Name}</div></div>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Branch :</div>  <div style={{ textAlign: "start" }}>{invoiceData[0]?.Company_Name}</div></div>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>A/C No :</div> <div style={{ textAlign: "start" }}>{invoiceData[0]?.AccountNo}</div></div>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>IFSC Code :</div> <div style={{ textAlign: "start" }}>{invoiceData[0]?.IFSC_Code}</div></div>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Bank Name :</div>    <div style={{ textAlign: "start" }}>{getBranch?.Bank_Name}</div></div>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Branch :</div>  <div style={{ textAlign: "start" }}>{getBranch?.Company_Name}</div></div>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>A/C No :</div> <div style={{ textAlign: "start" }}>{getBranch?.AccountNo}</div></div>
+                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>IFSC Code :</div> <div style={{ textAlign: "start" }}>{getBranch?.IFSC_Code}</div></div>
                                 </div>
                                 <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", padding: "5px", fontSize: "10px" }}>
                                     <div style={{ display: "flex", width: "60%", gap: "2px", flexDirection: "column" }}>
@@ -537,12 +541,12 @@ function FirstInvoice() {
                                     <div style={{ display: "flex", width: "40%", justifyContent: "center", alignItems: "center" }}>
                                         <div style={{
                                             display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "40%",
-                                            gap: "100px", fontWeight: "bold", fontSize: "13px", height: "130px", backgroundImage: `url(${invoiceData[0]?.Company_Stamp})`, // 👈 use your stored image
+                                            gap: "100px", fontWeight: "bold", fontSize: "13px", height: "130px", backgroundImage: `url(${getBranch?.Company_Stamp})`, // 👈 use your stored image
                                             backgroundSize: "contain",
                                             backgroundPosition: "center",
                                             backgroundRepeat: "no-repeat",
                                         }}>
-                                            <div style={{}}>For <b style={{ marginLeft: "5px", fontWeight: "bold", fontSize: "11px" }}>{invoiceData[0]?.Company_Name}</b></div>
+                                            <div style={{}}>For <b style={{ marginLeft: "5px", fontWeight: "bold", fontSize: "11px" }}>{getBranch?.Company_Name}</b></div>
                                             <div> Auth. Signatory</div>
                                         </div>
                                     </div>

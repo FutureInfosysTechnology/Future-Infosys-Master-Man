@@ -72,7 +72,7 @@ function EmailBooking() {
     }
 
     try {
-      const response = await getApi(`/Booking/AutoMailsend?CustomerName=${encodeURIComponent(CustomerName)}&fromdt=${fromdt}&todt=${todt}`);
+      const response = await getApi(`/Booking/AutoMailsend?CustomerName=${encodeURIComponent(allOptions.find(c=>c.value===CustomerName)?.label)}&fromdt=${fromdt}&todt=${todt}`);
       if (response.status === 1) {
         setEmailData(response.Data);
         setSelectedDockets([]);
@@ -154,7 +154,6 @@ function EmailBooking() {
       Swal.fire("Error", "Please select at least one docket to export", "error");
       return;
     }
-
     // Filter only selected rows
     const selectedData = EmailData.filter((row) =>
       selectedDockets.includes(row.DocketNo)
@@ -276,7 +275,7 @@ function EmailBooking() {
               className="blue-selectbooking"
               classNamePrefix="blue-selectbooking"
               options={allOptions}
-              value={formData.CustomerName ? { label: formData.CustomerName, value: formData.CustomerName } : null}
+              value={formData.CustomerName ? { label: allOptions.find(c=>c.value===formData.CustomerName)?.label || "", value: formData.CustomerName } : null}
               onChange={handleSearchChange}
               placeholder="Search Customer..."
               isClearable

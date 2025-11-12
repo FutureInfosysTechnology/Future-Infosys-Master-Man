@@ -26,7 +26,7 @@ function DocketPrint2() {
                 console.log(response);
                 console.log(response.Data);
                 setData(response.Data);
-                response.Data && navigate("/vendorboxlabel", { state: { data: response.Data, path: location.pathname } });
+                response.Data && navigate("/vendorboxlabel", { state: { data: response.Data, path: location.pathname ,tab:"print2"} });
             }
             else {
                 Swal.fire("Warning", `Warong Docket Number`, "warning");

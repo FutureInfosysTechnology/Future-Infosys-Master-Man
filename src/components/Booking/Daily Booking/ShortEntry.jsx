@@ -27,22 +27,90 @@ function ShortEntry() {
     Consignee_Pin: '',
     Cityname: '',
     Consignee_Name: '',
-    Pcs: '',
+    Pcs: 0,
     DoxSpx: '',
-    ActualWt: '',
-    Chargablewt: '',
-    Amount: '',
+    ActualWt: 0,
+    Chargablewt: 0,
+    Amount: 0,
     Mode_code: '',
     Mode_Name: '',
     ShipperName: '',
     ShipperPhone: '',
     Consignee_Mob: '',
-    volumetricWt: ''
+    volumetricWt: 0,
+    RatePerkg: 0,
   });
 
   const allModeOptions = getMode.map(mode => ({ label: mode.Mode_Name, value: mode.Mode_Code }));
   const allDesOptions = getDest.map(dest => ({ label: dest.City_Name, value: dest.City_Code }));
   const allCustomerOptions = getCustomer.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString() }));
+
+  useEffect(() => {
+    const RateFunc = () => {
+      const actual = parseFloat(formData.ActualWt) || 0;
+      const volumetric = parseFloat(formData.volumetricWt) || 0;
+      const manualCharged = parseFloat(formData.ChargedWt) || 0;
+      const ratePerKg = parseFloat(formData.RatePerkg) || 0;
+
+      const highestWeight = Math.max(actual, volumetric, manualCharged);
+      const freightAmount = highestWeight * ratePerKg;
+
+
+      setFormData((prev) => ({
+        ...prev,
+        Amount: freightAmount,
+      }));
+    }
+
+    if (formData.RatePerkg!==0) {
+      RateFunc();
+    }
+  }, [formData.ActualWt, formData.volumetricWt, formData.ChargedWt, formData.RatePerkg]);
+
+   useEffect(() => {
+          const handleMakeRate = async () => {
+              try {
+                  const body = {
+                      Client_Code: formData.Customer_Code,
+                      Mode_Codes: formData.Mode_code,
+                      Origin_Code: formData.Origin_code,
+                      Destination_Codes: formData.Destination_Code,
+                      Zone_Codes:  getDest.find(c => c.City_Code === formData.Destination_Code)?.Zone_Code || "W",
+                      State_Codes: getDest.find(c => c.City_Code === formData.Destination_Code)?.State_Code || "7",
+                      Weight: Math.max(parseFloat(formData.ActualWt) || 0, parseFloat(formData.volumetricWt) || 0, parseFloat(formData.ChargedWt) || 0),
+                      Method: getCustomer.find(c=>c.Customer_Code===formData.Customer_Code)?.Booking_Type,
+                      Dox_Spx: formData.DoxSpx,
+                  };
+                  const response = await postApi("/Master/GetCustomerFinalRate_CityState", body);
+                  console.log(response);
+                  // 
+                  if (response?.GetDataSuccess === 1 && response.Data.length > 0) {
+                      const rateperKg = response.Data[0].Detail_Rate;
+                      // 
+                      // ✅ Update rate and trigger GST calculation automatically
+                      setFormData((prev) => ({
+                          ...prev,
+                          RatePerkg: rateperKg,
+                      }));
+                  }
+              } catch (error) {
+                  console.error("❌ Error fetching rate:", error);
+              }
+          };
+          // 
+          if (formData.Customer_Code && formData.Mode_code && formData.Destination_Code && formData.Origin_code) {
+              handleMakeRate();
+          }
+      },
+          [formData.Customer_Code,
+          formData.Mode_code,
+          formData.Origin_code,
+          formData.Destination_Code,
+          formData.Dest_Zone,
+          formData.DoxSpx,
+          formData.ActualWt,
+          formData.volumetricWt,
+          formData.ChargedWt]);
 
   useEffect(() => {
     setBookingDate(new Date());
@@ -68,17 +136,18 @@ function ShortEntry() {
       Consignee_Pin: '',
       Cityname: '',
       Consignee_Name: '',
-      Pcs: '',
+      Pcs: 0,
       DoxSpx: '',
-      ActualWt: '',
-      Chargablewt: '',
-      Amount: '',
+      ActualWt: 0,
+      Chargablewt: 0,
+      Amount: 0,
       Mode_code: '',
       Mode_Name: '',
       ShipperName: '',
       ShipperPhone: '',
       Consignee_Mob: '',
-      volumetricWt: ''
+      volumetricWt: 0,
+      RatePerkg: 0,
 
     }));
     setSelectedDestination(null);
@@ -444,7 +513,8 @@ function ShortEntry() {
               >
                 <option value="">Product</option>
                 <option value="Dox">Dox</option>
-                <option value="Spx">Spx</option>
+                <option value="Box">Box</option>
+                <option value="Parcel">Parcel</option>
               </select>
             </div>
 
@@ -464,28 +534,26 @@ function ShortEntry() {
             </div>
 
             <div className="col-md-4">
+              <label className="form-label">Rate Per Kg</label>
+              <input type="number" min="0" className="form-control" value={formData.RatePerkg} onChange={(e) => setFormData({ ...formData, RatePerkg: e.target.value })} />
+            </div>
+
+            <div className="col-md-4">
               <label className="form-label">Amount</label>
               <input type="number" min="0" className="form-control" value={formData.Amount} onChange={(e) => setFormData({ ...formData, Amount: e.target.value })} />
             </div>
-
+          </div>
+          <div className="row g-2" style={{ display: "flex", justifyContent: "center" }}>
             <div className="col-md-2 custom-save-button">
-
               <button className="btn btn-success w-100" onClick={handleSave}>Save</button>
             </div>
             <div className="col-md-2 custom-save-button">
-
-
               <button type="button" className="btn btn-primary w-100" onClick={handleUpdate}>Update</button>
-
-
             </div>
             <div className="col-md-2 custom-save-button">
-
               <button type="button" className="btn btn-warning w-100" onClick={handleSearch}>Search</button>
-
             </div>
             <div className="col-md-2 custom-save-button">
-
               <button type="button" className="btn btn-danger w-100" onClick={() => handleDelete(formData.Docket_No)}>Delete</button>
             </div>
           </div>

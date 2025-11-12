@@ -26,7 +26,7 @@ function DocketPrint3() {
                         console.log(response);
                         console.log(response.Data);
                         setData(response.Data);
-                        response.Data && navigate("/newdp", { state: { data:response.Data,path:location.pathname } });
+                        response.Data && navigate("/newdp", { state: { data:response.Data,path:location.pathname,tab:"print3" } });
                     }
                     else
                     {
