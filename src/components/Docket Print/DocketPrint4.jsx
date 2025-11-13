@@ -24,7 +24,7 @@ const DocketPrint4 = () => {
                         console.log(response);
                         console.log(response.Data);
                         setData(response.Data);
-                        response.Data && navigate("/MobileReceipt", { state: { data:response.Data,path:location.pathname,tab:"print4" } });
+                        response.Data && navigate("/newdp2", { state: { data:response.Data,path:location.pathname,tab:"print4" } });
                     }
                     else
                     {

@@ -47,6 +47,7 @@ import DocketBill from './components/Docket Print/DocketBill';
 import VendorBoxLabel from './components/Docket Print/VendorBoxLabel';
 import InternationalBooking from './components/Booking/Daily Booking/InternationalBooking';
 import NewDP from './components/Docket Print/NewDp1';
+import NewDP2 from './components/Docket Print/NewDp2';
 import CreditPrint from './components/Docket Print/CreditPrint';
 import LabelPrintingPdf from './components/Docket Print/LabelPrintingPdf';
 import BoxStickerPdf from './components/Docket Print/BoxStickerPdf';
@@ -104,6 +105,7 @@ function App() {
           <Route path='/docketbill' element={<DocketBill />} />
           <Route path='/vendorboxlabel' element={<VendorBoxLabel />} />
           <Route path='/newdp' element={<NewDP/>} />
+          <Route path='/newdp2' element={<NewDP2/>} />
           <Route path='creditprint' element={<CreditPrint/>} />
           <Route path='/labelprint' element={<LabelPrintingPdf/>} />
 
