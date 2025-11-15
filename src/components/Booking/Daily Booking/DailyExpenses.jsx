@@ -7,7 +7,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { getApi, postApi, putApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import Select from 'react-select';
+import Select from "react-select"
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -16,12 +16,6 @@ function DailyExpenses() {
 
     const [data, setData] = useState([]);
     const [getBankName, setGetBankName] = useState([]);
-    const [getReceiver, setGetReceiver] = useState([]);
-    const [getCustomerdata, setgetCustomerdata] = useState([]);
-    const [getVendor, setGetVendor] = useState([]);
-    const [getCity, setGetCity] = useState([]);
-    const [editIndex, setEditIndex] = useState(null);
-    const [modalData, setModalData] = useState({ code: '', name: '' });
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [formData, setFormData] = useState({
@@ -77,17 +71,11 @@ function DailyExpenses() {
 
         } catch (err) {
             console.log(err);
-            Swal.fire("Error", "Something went wrong", "error");
         }
     };
     useEffect(() => {
         const fetchInitialData = async () => {
             await fetchData('/Master/Getbank', setGetBankName);
-            await fetchData('/Master/getCustomerdata', setgetCustomerdata);
-            await fetchData('/Master/GetReceiver', setGetReceiver);
-            await fetchData('/Master/getVendor', setGetVendor);
-            await fetchData('/Master/getdomestic', setGetCity);
-
         };
         fetchCashToPayData();
         fetchInitialData();
@@ -110,18 +98,17 @@ function DailyExpenses() {
 
                 setFormData((prev) => ({
                     ...prev,
-                    Customer_Code: data.Customer_Code,
-                    consignor: data.Customer_Code,
+                    Customer_Code: data.Customer_Name,
                     Consignee_Code: data.Consignee_Name,
-                    product: data.DoxSpx,
-                    origin: data.Origin_code,
-                    destination: data.Destination_Code,
+                    product: data.Mode_Name,
+                    origin: data.Origin_name,
+                    destination: data.Destination_Name,
                     qty: data.Qty,
                     chargedWeight: data.ChargedWt,
                     totalAmount: data.Rate,
                     manifestNumber: data.ManifestNo,
                     manifestDate: data.ManifestDate,
-                    BookMode: data.Mode_Name,
+                    BookMode: data.T_Flag,
                 }));
             } else {
                 Swal.fire("Not Found", "Invalid Docket No", "error");
@@ -141,35 +128,35 @@ function DailyExpenses() {
 
     /**************** function to delete table row ************/
     const handleDelete = async (id) => {
-    try {
-        const confirmDelete = await Swal.fire({
-            title: "Are you sure?",
-            text: "This record will be permanently deleted!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel"
-        });
+        try {
+            const confirmDelete = await Swal.fire({
+                title: "Are you sure?",
+                text: "This record will be permanently deleted!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "Cancel"
+            });
 
-        if (!confirmDelete.isConfirmed) return;
+            if (!confirmDelete.isConfirmed) return;
 
-        const res = await deleteApi(`/DeleteCashToPayGP?ID=${id}`);
+            const res = await deleteApi(`/DeleteCashToPayGP?ID=${id}`);
 
-        if (res.status === 1) {
-            Swal.fire("Deleted!", res.message, "success");
+            if (res.status === 1) {
+                Swal.fire("Deleted!", res.message, "success");
 
-            // Remove from UI
-            setData((prev) => prev.filter((item) => item.ID !== id));
+                // Remove from UI
+                setData((prev) => prev.filter((item) => item.ID !== id));
 
-        } else {
-            Swal.fire("Error", res.message, "error");
+            } else {
+                Swal.fire("Error", res.message, "error");
+            }
+
+        } catch (err) {
+            console.log(err);
+            Swal.fire("Error", "Something went wrong", "error");
         }
-
-    } catch (err) {
-        console.log(err);
-        Swal.fire("Error", "Something went wrong", "error");
-    }
-};
+    };
 
 
 
@@ -205,6 +192,8 @@ function DailyExpenses() {
 
             if (res.status === 1) {
                 Swal.fire("Success", "Cash To Pay Saved Successfully", "success");
+                await fetchCashToPayData();
+                // setData([...prev,res?.data]);
 
                 // Reset form
                 setFormData({
@@ -324,14 +313,14 @@ function DailyExpenses() {
                                     <th scope="col">Quantity</th>
                                     <th scope="col">Forwarding No</th>
                                     <th scope="col">Status</th>
-                                    
+
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
                                 {currentRows.map((row, index) => (
                                     <tr key={row.ID}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row" ,justifyContent:"center"}}>
+                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
 
                                                 <button className='edit-btn' type="button" onClick={() => handleDelete(row.ID)}>
                                                     <i className='bi bi-trash'></i>
@@ -421,164 +410,63 @@ function DailyExpenses() {
                                                 {/* Customer Name */}
                                                 <div className="input-field3">
                                                     <label>Customer Name</label>
-                                                    <Select
-                                                        className="blue-selectbooking"
-                                                        classNamePrefix="blue-selectbooking"
-                                                        options={getCustomerdata.map((cust) => ({
-                                                            value: cust.Customer_Code,
-                                                            label: cust.Customer_Name,
-                                                            Booking_Type: cust.Booking_Type,
-                                                        }))}
-                                                        value={
-                                                            formData.Customer_Code ?
-                                                                {
-                                                                    value: formData.Customer_Code,
-                                                                    label: getCustomerdata.find(opt => opt.Customer_Code === formData.Customer_Code)?.Customer_Name || ""
-                                                                }
-                                                                : null
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Customer Name"
+                                                        value={formData.Customer_Code}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, Customer_Code: e.target.value })
                                                         }
-                                                        onChange={(selectedOption) => {
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                Customer_Code: selectedOption.value,
-                                                                BookMode: selectedOption.Booking_Type,
-                                                            }));
-                                                        }}
-                                                        placeholder="Select Customer"
-                                                        isSearchable
-                                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                        styles={{
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                        }}
+                                                        readOnly
                                                     />
                                                 </div>
 
-                                                {/* Booking */}
+                                                {/* Booking Mode */}
                                                 <div className="input-field3">
                                                     <label>Booking Mode</label>
-                                                    <select
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Booking Mode"
                                                         value={formData.BookMode}
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, BookMode: e.target.value })
                                                         }
-                                                    >
-                                                        <option value="" disabled>
-                                                            Select Booking Mode
-                                                        </option>
-                                                        <option value="Cash">Cash</option>
-                                                        <option value="Credit">Credit</option>
-                                                        <option value="To-pay">To-pay</option>
-                                                        <option value="Google Pay">Google Pay</option>
-                                                        <option value="RTGS">RTGS</option>
-                                                        <option value="NEFT">NEFT</option>
-                                                    </select>
-                                                </div>
-
-                                                {/* Consignor */}
-                                                <div className="input-field3">
-                                                    <label>Consignor</label>
-                                                    <Select
-                                                        className="blue-selectbooking"
-                                                        classNamePrefix="blue-selectbooking"
-                                                        options={getCustomerdata.map((cust) => ({
-                                                            value: cust.Customer_Code,
-                                                            label: cust.Customer_Name,
-                                                            Booking_Type: cust.Booking_Type,
-                                                        }))}
-                                                        value={
-                                                            formData.consignor ?
-                                                                {
-                                                                    value: formData.consignor,
-                                                                    label: getCustomerdata.find(opt => opt.Customer_Code === formData.consignor)?.Customer_Name || ""
-                                                                }
-                                                                : null
-                                                        }
-                                                        onChange={(selectedOption) => {
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                consignor: selectedOption.value,
-                                                                BookMode: selectedOption.Booking_Type,
-                                                            }));
-                                                        }}
-                                                        placeholder="Select Customer"
-                                                        isSearchable
-                                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                        styles={{
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                        }}
+                                                        readOnly
                                                     />
                                                 </div>
 
                                                 {/* Consignee */}
                                                 <div className="input-field3">
                                                     <label>Consignee Name</label>
-                                                    <Select
-                                                        className="blue-selectbooking"
-                                                        classNamePrefix="blue-selectbooking"
-                                                        options={getReceiver.map((rec) => ({
-                                                            value: rec.Receiver_Code,
-                                                            label: rec.Receiver_Name,
-                                                        }))}
-                                                        value={
-                                                            formData.Consignee_Code ?
-                                                                {
-                                                                    value: formData.Consignee_Code, label: getReceiver.find((rec) => rec.Receiver_Code === formData.Consignee_Code)?.Receiver_Name || ""
-                                                                }
-                                                                : null
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Consignee Name"
+                                                        value={formData.Consignee_Code}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, Consignee_Code: e.target.value })
                                                         }
-                                                        onChange={(selectedOption) => {
-                                                            if (selectedOption) {
-                                                                setFormData(prev => ({
-                                                                    ...prev,
-                                                                    Consignee_Code: selectedOption.value,
-
-                                                                }));
-                                                            }
-                                                        }}
-                                                        isSearchable
-                                                        placeholder="Select Receiver Name"
-                                                        menuPortalTarget={document.body}
-                                                        styles={{
-                                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                                        }}
+                                                        readOnly
                                                     />
                                                 </div>
 
                                                 {/* Vendor */}
                                                 <div className="input-field3">
                                                     <label>Vendor</label>
-                                                    <Select
-                                                        className="blue-selectbooking"
-                                                        classNamePrefix="blue-selectbooking"
-                                                        options={getVendor.map((ven) =>
-                                                        ({
-                                                            value: ven.Vendor_Code,
-                                                            label: ven.Vendor_Name
-                                                        }),
-                                                        )}
-                                                        value={
-                                                            formData.Vendor_Code
-                                                                ? { value: formData.Vendor_Code, label: getVendor.find(ven => ven.Vendor_Code === formData.Vendor_Code)?.Vendor_Name || "" }
-                                                                : null
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Vendor Name"
+                                                        value={formData.Vendor_Code}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, Vendor_Code: e.target.value })
                                                         }
-                                                        onChange={(selectedOption) => {
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                Vendor_Code: selectedOption.value,
-                                                            }));
-                                                        }}
-                                                        placeholder="Select Vendor Name"
-                                                        isSearchable
-                                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                        styles={{
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                        }}
+                                                        readOnly
                                                     />
                                                 </div>
 
                                                 {/* Product */}
-                                                <div className="input-field3">
-                                                    <label>Product</label>
+                                                <div className="
+                                                input-field3">
+                                                    <label>Mode Name</label>
                                                     <input
                                                         type="text"
                                                         placeholder="Enter Product"
@@ -589,70 +477,31 @@ function DailyExpenses() {
                                                     />
                                                 </div>
 
+                                                {/* Origin */}
                                                 <div className="input-field3">
                                                     <label>Origin</label>
-                                                    <Select
-                                                        className="blue-selectbooking"
-                                                        classNamePrefix="blue-selectbooking"
-                                                        options={getCity.map(city => ({
-                                                            value: city.City_Code,
-                                                            label: city.City_Name
-                                                        }))}
-                                                        value={
-                                                            formData.origin
-                                                                ? {
-                                                                    value: formData.origin,
-                                                                    label: getCity.find(c => c.City_Code === formData.origin)?.City_Name || ""
-                                                                }
-                                                                : null
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Origin"
+                                                        value={formData.origin}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, origin: e.target.value })
                                                         }
-                                                        onChange={(selected) =>
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                origin: selected.value
-                                                            }))
-                                                        }
-                                                        placeholder="Select Origin"
-                                                        isSearchable
-                                                        menuPortalTarget={document.body}
-                                                        styles={{
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 })
-                                                        }}
                                                     />
                                                 </div>
 
+                                                {/* Destination */}
                                                 <div className="input-field3">
                                                     <label>Destination</label>
-                                                    <Select
-                                                        className="blue-selectbooking"
-                                                        classNamePrefix="blue-selectbooking"
-                                                        options={getCity.map(city => ({
-                                                            value: city.City_Code,
-                                                            label: city.City_Name
-                                                        }))}
-                                                        value={
-                                                            formData.destination
-                                                                ? {
-                                                                    value: formData.destination,
-                                                                    label: getCity.find(c => c.City_Code === formData.destination)?.City_Name || ""
-                                                                }
-                                                                : null
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Destination"
+                                                        value={formData.destination}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, destination: e.target.value })
                                                         }
-                                                        onChange={(selected) =>
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                destination: selected.value
-                                                            }))
-                                                        }
-                                                        placeholder="Select Destination"
-                                                        isSearchable
-                                                        menuPortalTarget={document.body}
-                                                        styles={{
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 })
-                                                        }}
                                                     />
                                                 </div>
-
 
                                                 {/* Manifest Number */}
                                                 <div className="input-field3">
@@ -706,7 +555,6 @@ function DailyExpenses() {
                                                         }
                                                     />
                                                 </div>
-
 
                                                 {/* Total Amount */}
                                                 <div className="input-field3">
@@ -796,9 +644,6 @@ function DailyExpenses() {
                                                     />
                                                 </div>
 
-                                                {/* Booking Mode */}
-
-
                                                 {/* Bank Name */}
                                                 <div className="input-field3">
                                                     <label>Bank Name</label>
@@ -814,9 +659,8 @@ function DailyExpenses() {
                                                                 ? {
                                                                     value: formData.bankCode,
                                                                     label:
-                                                                        getBankName.find(
-                                                                            (b) => b.Bank_Code === formData.bankCode
-                                                                        )?.Bank_Name || "",
+                                                                        getBankName.find((b) => b.Bank_Code === formData.bankCode)
+                                                                            ?.Bank_Name || "",
                                                                 }
                                                                 : null
                                                         }
@@ -827,7 +671,7 @@ function DailyExpenses() {
                                                             })
                                                         }
                                                         placeholder="Select Bank Name"
-                                                        isSearchable={true}
+                                                        isSearchable
                                                         menuPortalTarget={document.body}
                                                         styles={{
                                                             menuPortal: (base) => ({ ...base, zIndex: 9999 }),
@@ -839,9 +683,7 @@ function DailyExpenses() {
                                         </div>
 
                                         <div className="bottom-buttons">
-                                            <button type="submit" className="ok-btn">
-                                                Submit
-                                            </button>
+                                            <button type="submit" className="ok-btn">Submit</button>
                                             <button
                                                 onClick={() => setModalIsOpen(false)}
                                                 className="ok-btn"
@@ -854,6 +696,7 @@ function DailyExpenses() {
                             </div>
                         </div>
                     </Modal>
+
 
 
                 </div>
