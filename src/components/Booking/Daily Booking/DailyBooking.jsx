@@ -93,7 +93,7 @@ function DailyBooking() {
               Docket Print
             </label>
             <label htmlFor="vendorrate" className="vendorrate">
-              Docket Expenses
+              Cash To Pay Received
             </label>
             <label htmlFor="vendorfuel" className="vendorfuel">
               Auto Mail
