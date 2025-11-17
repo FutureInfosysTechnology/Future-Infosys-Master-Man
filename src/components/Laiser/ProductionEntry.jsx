@@ -186,8 +186,8 @@ function ProductionEntry() {
         setOpenRow(null);
         setIsEditMode(true);
     };
-    const handleOpenInvoicePrint = (invNo) => {
-      navigate("/creditprint",{state:{invoiceNo:invNo,from:location.pathname,tab:"upload"}})
+    const handleOpenCreditPrint = (invNo) => {
+      navigate("/creditprint",{state:{invoiceNo:invNo,from:location.pathname,tab:"creditNote"}})
     };
     return (
         <>
@@ -363,7 +363,7 @@ function ProductionEntry() {
                                                         padding: "10px",
                                                     }}
                                                 >
-                                                     <button className='edit-btn' onClick={() => handleOpenInvoicePrint("001")}>
+                                                     <button className='edit-btn' onClick={() => handleOpenCreditPrint("001")}>
                                                             <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
                                                         </button>
                                                     <button className="edit-btn">

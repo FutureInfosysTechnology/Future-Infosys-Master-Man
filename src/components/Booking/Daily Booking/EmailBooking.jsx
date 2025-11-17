@@ -240,6 +240,7 @@ function EmailBooking() {
 
       if (response?.success) {
         Swal.fire("✅ Success", `Email sent successfully to ${response?.to}`, "success");
+        setSelectedDockets([]);
       } else {
         Swal.fire("❌ Error", response?.error || "Email sending failed", "error");
       }
@@ -376,7 +377,7 @@ function EmailBooking() {
               <th>Remark</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody style={{fontWeight:"normal",fontSize:"8px"}}>
             {currentRows.length === 0 ? (
               <tr>
                 <td colSpan="18" className="text-center text-danger">No Data Found</td>

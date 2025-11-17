@@ -15,7 +15,10 @@ import "react-datepicker/dist/react-datepicker.css";
 function DailyExpenses() {
 
     const [data, setData] = useState([]);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [filterData, setFilterData] = useState([]);
     const [getBankName, setGetBankName] = useState([]);
+    const [quary, setQuary] = useState("");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [formData, setFormData] = useState({
@@ -45,7 +48,6 @@ function DailyExpenses() {
 
 
 
-    const rowsPerPage = 10;
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
@@ -229,18 +231,53 @@ function DailyExpenses() {
         }
     };
 
+    useEffect(() => {
+        const filteredRows = currentRows.filter((row) => {
+            const q = quary.toLowerCase();
 
+            return (
+                row.Destination_Name?.toLowerCase().includes(q) ||
+                row.DocketNo?.toLowerCase().includes(q) ||
+                row.Booking_type?.toLowerCase().includes(q)
+            );
+        });
 
+        setFilterData(filteredRows);
+    }, [quary, currentRows, data, currentPage]);
 
     /**************** function to export table data in excel and pdf ************/
     const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(data);
+
+        const exportData = currentRows.map(row => ({
+            "Docket No": row.DocketNo,
+            "Customer Name": row.Vendor_Name?.trim(),
+            "Consignee Name": row.ReceiverName,
+            "Credit Type": row.Booking_type,
+            "Origin": row.Origin_Name,
+            "Destination": row.Destination_Name,
+            "Receiver Name": row.ReceiverName,
+            "Received Date": row.ExpDate,
+            "Received Amount": row.ReceivedAmount,
+            "Balance Amount": row.BalanceAmount,
+            "Total Amount": row.TotalAmount,
+            "Bank Name": getBankName.find(b => b.Bank_Code === row.Bank_Code)?.Bank_Name || "",
+            "Remark": row.Remark
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'multipleCity');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'multipleCity.xlsx');
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, "FilteredData");
+
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        const file = new Blob([excelBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+        });
+
+        saveAs(file, "CashToPayReceived.xlsx");
     };
+
+
 
     const handleExportPDF = () => {
         const pdfData = data.map(({ id, mode, name }) => [id, mode, name]);
@@ -293,7 +330,14 @@ function DailyExpenses() {
                         </div>
 
                         <div className="search-input">
-                            <input className="add-input" type="text" placeholder="search" />
+                            <input
+                                className="add-input"
+                                type="text"
+                                placeholder="Search..."
+                                value={quary}
+                                onChange={(e) => setQuary(e.target.value)}
+                            />
+
                             <button type="submit" title="search">
                                 <i className="bi bi-search"></i>
                             </button>
@@ -301,61 +345,115 @@ function DailyExpenses() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead>
                                 <tr>
-                                    <th scope="col">Actions</th>
-                                    <th scope="col">Sr.No</th>
-                                    <th scope="col">Destination Name</th>
-                                    <th scope="col">Consignee name</th>
-                                    <th scope="col">Booking Date</th>
-                                    <th scope="col">Expense Docket No</th>
-                                    <th scope="col">Quantity</th>
-                                    <th scope="col">Forwarding No</th>
-                                    <th scope="col">Status</th>
-
+                                    <th>Actions</th>
+                                    <th>Sr.No</th>
+                                    <th>Docket No</th>
+                                    <th>Customer Name</th>       {/* Vendor or Consignor? */}
+                                    <th>Consignee Name</th>
+                                    <th>Credit Type</th>
+                                    <th>Origin</th>
+                                    <th>Destination</th>
+                                    <th>Receiver Name</th>
+                                    <th>Received Date</th>
+                                    <th>Received Amount</th>
+                                    <th>Balance Amount</th>
+                                    <th>Total Amount</th>
+                                    <th>Bank Name</th>
+                                    <th>Remark</th>
                                 </tr>
                             </thead>
+
                             <tbody className='table-body'>
-                                {currentRows.map((row, index) => (
+                                {filterData.map((row, index) => (
                                     <tr key={row.ID}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-
-                                                <button className='edit-btn' type="button" onClick={() => handleDelete(row.ID)}>
+                                            <div style={{ display: "flex", justifyContent: "center" }}>
+                                                <button className='edit-btn' onClick={() => handleDelete(row.ID)}>
                                                     <i className='bi bi-trash'></i>
                                                 </button>
                                             </div>
                                         </td>
-                                        <td>{index + 1}</td>  {/* Sr.No */}
-                                        <td>{row.Destination_Code}</td> {/* Destination Name / Code */}
-                                        <td>{row.Consignee_Name}</td>    {/* Consignee */}
 
-                                        <td>{row.BookDate ? row.BookDate.substring(0, 10) : ""}</td> {/* Booking Date */}
+                                        <td>{index + 1}</td>
 
-                                        <td>{row.DocketNo}</td>          {/* Expense Docket No */}
+                                        <td>{row.DocketNo}</td>
 
-                                        <td>{row.Qty}</td>               {/* Quantity */}
+                                        {/* Customer Name → Vendor_Name */}
+                                        <td>{row.Vendor_Name?.trim()}</td>
 
-                                        <td>{row.ManifestNo || "-"}</td> {/* Forwarding / Manifest No */}
+                                        {/* Consignee Name → No field available (use ReceiverName or create new field) */}
+                                        <td>{row.ReceiverName}</td>
 
-                                        <td>{row.Booking_type}</td>      {/* Status = booking type (COD/Credit/Prepaid) */}
+                                        {/* Credit Type */}
+                                        <td>{row.Booking_type}</td>
 
+                                        {/* Origin */}
+                                        <td>{row.Origin_Name}</td>
+
+                                        {/* Destination */}
+                                        <td>{row.Destination_Name}</td>
+
+                                        {/* Receiver Name */}
+                                        <td>{row.ReceiverName}</td>
+
+                                        {/* Received Date */}
+                                        <td>{row.ExpDate}</td>
+
+                                        {/* Received Amount */}
+                                        <td>{row.ReceivedAmount}</td>
+
+                                        {/* Balance Amount */}
+                                        <td>{row.BalanceAmount}</td>
+
+                                        {/* Total Amount */}
+                                        <td>{row.TotalAmount}</td>
+
+                                        {/* Bank Name */}
+                                        <td>{getBankName.find(b => b.Bank_Code === row.Bank_Code)?.Bank_Name || ""}</td>
+
+                                        {/* Remark */}
+                                        <td>{row.Remark}</td>
                                     </tr>
                                 ))}
                             </tbody>
-
                         </table>
                     </div>
 
-                    <div className="pagination">
-                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            {'<'}
-                        </button>
-                        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                            {'>'}
-                        </button>
+
+
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                                {'<'}
+                            </button>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                                {'>'}
+                            </button>
+                        </div>
+
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                            <select
+                                id="rowsPerPage"
+                                value={rowsPerPage}
+                                onChange={(e) => {
+                                    setRowsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                style={{ height: "40px", width: "50px" }}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
                     </div>
 
 
@@ -469,7 +567,7 @@ function DailyExpenses() {
                                                     <label>Mode Name</label>
                                                     <input
                                                         type="text"
-                                                        placeholder="Enter Product"
+                                                        placeholder="Enter Mode Name"
                                                         value={formData.product}
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, product: e.target.value })
@@ -535,7 +633,7 @@ function DailyExpenses() {
                                                     <label>Qty</label>
                                                     <input
                                                         type="text"
-                                                        placeholder="Enter PCL"
+                                                        placeholder="Enter Qty"
                                                         value={formData.qty}
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, qty: e.target.value })

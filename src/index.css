@@ -51,4 +51,7 @@ input[type="password"]::-webkit-clear-button,
 input[type="password"]::-webkit-reveal-button {
     display: none;
 }
-
+td{
+ font-weight: normal;
+ font-size:12px;
+}

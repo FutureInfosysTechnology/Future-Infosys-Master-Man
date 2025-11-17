@@ -32,6 +32,7 @@ function FirstInvoice() {
     const invNo = location?.state?.invoiceNo || "";
     const fromPath = location?.state?.from || "/";
     const termArr = location?.state?.termArr || [];
+    const tab = location?.state?.tab;
     const [getBranch, setGetBranch] = useState([]);
     const [invoiceData, setInvoiceData] = useState([]);
     console.log(location.state);
@@ -92,7 +93,6 @@ function FirstInvoice() {
     }, [])
     useEffect(() => {
         const fetchInvoiceData = async () => {
-            const loginData = JSON.parse(localStorage.getItem("Login"));
             try {
                 const response = await getApi(`/Smart/InvoicePrintPdf?InvoiceNos=${invNo}`);
 
@@ -246,7 +246,7 @@ function FirstInvoice() {
                             Print
                         </button>
                         <button
-                            onClick={() => navigate(fromPath, { state: { tab: "multiple" } })}
+                            onClick={() => navigate(fromPath, { state: { tab: tab } })}
                             style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Exit

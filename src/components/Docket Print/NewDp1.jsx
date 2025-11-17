@@ -271,7 +271,7 @@ function NewDP1() {
                                                             <div><b>Crossing :</b> {docket?.Vendor_Name}</div>
                                                         </div>
                                                         <div style={{ height: "100%", width: "40%", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
-                                                            <div><b>Crs No :</b> {docket?.vendorAwbno} </div>
+                                                            <div><b>Ref No :</b> {docket?.vendorAwbno} </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -318,11 +318,11 @@ function NewDP1() {
                                                         <div style={{ width: "55%", height: "100%" }}>
                                                             <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
                                                             <div style={{ display: "flex", justifyContent: "center", borderBottom: "2px solid black", }}>  <BarCode
-                                                                value={docket?.vendorAwbno}
+                                                                value={docket?.DocketNo}
                                                                 format='CODE128'
                                                                 background='#fff'
                                                                 lineColor='#000'
-                                                                width={3}
+                                                                width={2}
                                                                 height={30}
                                                                 displayValue={true}
                                                             /></div>
@@ -457,7 +457,7 @@ function NewDP1() {
                                                             <div><b>Crossing :</b> {docket?.Vendor_Name}</div>
                                                         </div>
                                                         <div style={{ height: "100%", width: "40%", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
-                                                            <div><b>Crs No :</b> {docket?.vendorAwbno} </div>
+                                                            <div><b>Ref No :</b> {docket?.vendorAwbno} </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -504,11 +504,11 @@ function NewDP1() {
                                                         <div style={{ width: "55%", height: "100%" }}>
                                                             <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
                                                             <div style={{ display: "flex", justifyContent: "center", borderBottom: "2px solid black", }}>  <BarCode
-                                                                value={docket?.vendorAwbno}
+                                                                value={docket?.DocketNo}
                                                                 format='CODE128'
                                                                 background='#fff'
                                                                 lineColor='#000'
-                                                                width={3}
+                                                                width={2}
                                                                 height={30}
                                                                 displayValue={true}
                                                             /></div>
@@ -643,7 +643,7 @@ function NewDP1() {
                                                             <div><b>Crossing :</b> {docket?.Vendor_Name}</div>
                                                         </div>
                                                         <div style={{ height: "100%", width: "40%", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
-                                                            <div><b>Crs No :</b> {docket?.vendorAwbno} </div>
+                                                            <div><b>Ref No :</b> {docket?.vendorAwbno} </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -690,11 +690,11 @@ function NewDP1() {
                                                         <div style={{ width: "55%", height: "100%" }}>
                                                             <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
                                                             <div style={{ display: "flex", justifyContent: "center", borderBottom: "2px solid black", }}>  <BarCode
-                                                                value={docket?.vendorAwbno}
+                                                                value={docket?.DocketNo}
                                                                 format='CODE128'
                                                                 background='#fff'
                                                                 lineColor='#000'
-                                                                width={3}
+                                                                width={2}
                                                                 height={30}
                                                                 displayValue={true}
                                                             /></div>
@@ -790,6 +790,7 @@ function NewDP1() {
                                                 <div><b>Email :</b> {getBranch?.Email}</div>
                                             </div>
                                         </div>
+                                       
                                     </div>
                                 ))
                             }

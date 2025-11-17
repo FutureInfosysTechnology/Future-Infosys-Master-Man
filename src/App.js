@@ -51,6 +51,7 @@ import NewDP2 from './components/Docket Print/NewDp2';
 import CreditPrint from './components/Docket Print/CreditPrint';
 import LabelPrintingPdf from './components/Docket Print/LabelPrintingPdf';
 import BoxStickerPdf from './components/Docket Print/BoxStickerPdf';
+import VendorBillPrint from './components/Docket Print/VendorBillPrint';
 
 export const refeshPend=createContext();
 function App() {
@@ -106,7 +107,8 @@ function App() {
           <Route path='/vendorboxlabel' element={<VendorBoxLabel />} />
           <Route path='/newdp' element={<NewDP/>} />
           <Route path='/newdp2' element={<NewDP2/>} />
-          <Route path='creditprint' element={<CreditPrint/>} />
+          <Route path='/creditprint' element={<CreditPrint/>} />
+          <Route path='/vendorbill' element={<VendorBillPrint/>} />
           <Route path='/labelprint' element={<LabelPrintingPdf/>} />
 
           <Route path='/invoice' element={<Invoice />} />

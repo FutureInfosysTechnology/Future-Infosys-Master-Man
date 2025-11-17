@@ -18,7 +18,6 @@ function Laiser() {
     { id: "paymentMode", label: "Payment Mode", component: <PaymentReceived /> },
     { id: "ledgers", label: "Ledgers", component: <PaymentEntry /> },
     { id: "creditNote", label: "Credit Note", component: <ProductionEntry /> },
-    { id: "Print", label: "Credit Note Print", component: <CreditPrint/> },
   ];
 
   return (

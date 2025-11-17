@@ -369,7 +369,7 @@ function ViewInvoice() {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
     const handleOpenInvoicePrint = (invNo) => {
-        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname, termArr: termArr } })
+        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname, termArr: termArr,tab:"viewInvoice" } })
     };
     const handleAddRow = (e) => {
         e.preventDefault();

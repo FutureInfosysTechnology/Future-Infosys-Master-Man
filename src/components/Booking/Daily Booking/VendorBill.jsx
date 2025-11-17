@@ -8,24 +8,43 @@ import Swal from "sweetalert2";
 import Select from 'react-select';
 import CreatableSelect from "react-select/creatable";
 import DatePicker from 'react-datepicker';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, putApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function VendorBill() {
     const getTodayDate = () => {
-        const today = new Date();
-        return today;
+        return new Date().toISOString().split("T")[0]; // "2025-11-17"
     };
+    const convertToYMD = (dateStr) => {
+        if (!dateStr) return "";
+        const [day, month, year] = dateStr.split("/");
+        return `${year}-${month}-${day}`;
+    };
+
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
-    const [zones, setZones] = useState([]);
+    const navigate=useNavigate();
+    const location=useLocation();
+    const [data, setData] = useState([]);
+    const [openRow, setOpenRow] = useState(null);
     const [getVendor, setGetVendor] = useState([]);
-    const [editIndex, setEditIndex] = useState(null);
+    const [filterData, setFilterData] = useState([]);
+    const [quary, setQuary] = useState("");
+    const [getCustomerdata, setgetCustomerdata] = useState([]);
+    const [getCity, setGetCity] = useState([]);
+    const [getMode, setGetMode] = useState([]);
+    const [isEditMode, setIsEditMode] = useState(false);
     const [modalData, setModalData] = useState({ code: '', name: '' });
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [formData, setFormData] = useState({
         vendorCode: "",
+        custCode: "",
+        orgCode: "",
+        destCode: "",
+        modeCode: "",
         vendorAwbNo: "",
         billNo: "",
         billDate: getTodayDate(),
@@ -55,68 +74,173 @@ function VendorBill() {
     useEffect(() => {
 
         fetchData('/Master/getVendor', setGetVendor);
+        fetchData('/Master/getCustomerdata', setgetCustomerdata);
+        fetchData('/Master/getdomestic', setGetCity);
+        fetchData('/Master/getMode', setGetMode);
+        fetchVendorBill();
 
 
     }, []);
-    const rowsPerPage = 10;
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
-    const totalPages = Math.ceil(zones.length / rowsPerPage);
+    const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.ceil(data.length / rowsPerPage);
 
-    const handleEdit = (index) => {
-        setEditIndex(index);
-        setModalData({ code: zones[index].code, name: zones[index].name });
-        setModalIsOpen(true);
+    useEffect(() => {
+        const q = quary.toLowerCase();
+
+        const filteredRows = currentRows.filter((row) =>
+            row.BillNo?.toLowerCase().includes(q) ||
+            row.Customer_Name?.toLowerCase().includes(q) ||
+            row.Origin_Name?.toLowerCase().includes(q) ||
+            row.Destination_Name?.toLowerCase().includes(q)
+        );
+
+        setFilterData(filteredRows);
+    }, [quary, currentRows, data, currentPage]);;
+
+
+    const fetchVendorBill = async () => {
+        try {
+            const res = await getApi("/getVendorBills");
+
+            if (res.status === 1) {
+                setData(res.data);   // store grouped bill list
+            } else {
+                Swal.fire("Error", "No vendor bills found", "error");
+            }
+
+        } catch (err) {
+            console.log("Fetch Vendor Bill Error:", err);
+            Swal.fire("Error", err.message, "error");
+        }
     };
 
 
-    const handleDelete = (index) => {
+    const handleDelete = (vendorId) => {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'You won’t be able to revert this!',
+            text: 'This bill will be permanently deleted!',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                const updatedZones = zones.filter((_, i) => i !== index);
-                setZones(updatedZones);
-                Swal.fire(
-                    'Deleted!',
-                    'Your zone has been deleted.',
-                    'success'
-                );
+                try {
+                    const res = await deleteApi(`/deleteVendorBill?VendorID=${vendorId}`);
+
+                    if (res.status === 1) {
+                        // remove row from UI
+                        setData(prev => prev.filter(item => item.VendorID !== vendorId));
+                        await fetchVendorBill();
+
+                        Swal.fire("Deleted!", "Vendor Bill Deleted Successfully", "success");
+                    }
+                } catch (err) {
+                    Swal.fire("Error", err.message, "error");
+                }
             }
         });
     };
 
-    const handleSave = (index) => {
-        const updatedZones = [...zones];
-        updatedZones[editIndex] = { id: editIndex + 1, ...modalData };
-        setZones(updatedZones);
-        setEditIndex(null);
-        setModalIsOpen(false);
-        Swal.fire('Saved!', 'Your changes have been saved.', 'success');
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        if (!formData.vendorCode) {
+            Swal.fire("Warning", "Vendor Name is required", "warning");
+        }
+        try {
+            const payload = {
+                BillNo: formData.billNo,
+                BillDate: formData.billDate,
+                BillFrom: formData.billFrom,
+                BillTo: formData.billTo,
+                VendorAWBNo: formData.vendorAwbNo,
+                Amount: formData.amount,
+                FuelCharges: formData.fuelChrgs,
+                OtherCharges: formData.otherChrgs,
+                GST: formData.gst,
+                TotalAmount: formData.totalAmt,
+
+                Customer_Code: formData.custCode,
+                Vendor_Code: formData.vendorCode,
+                Origin_Code: formData.orgCode,
+                Destination_Code: formData.destCode,
+                Mode_Code: formData.modeCode
+            };
+
+            const res = await postApi("/addVendorBill", payload);
+
+            if (res.status === 1) {
+                Swal.fire("Success", "Vendor Bill Added Successfully!", "success");
+                await fetchVendorBill();
+                setFormData({
+                    vendorCode: "",
+                    custCode: "",
+                    orgCode: "",
+                    destCode: "",
+                    modeCode: "",
+                    vendorAwbNo: "",
+                    billNo: "",
+                    billDate: getTodayDate(),
+                    billFrom: getTodayDate(),
+                    billTo: getTodayDate(),
+                    amount: 0,
+                    fuelChrgs: 0,
+                    otherChrgs: 0,
+                    gst: 0,
+                    totalAmt: 0,
+                });
+                setModalIsOpen(false);
+            }
+
+        } catch (err) {
+            Swal.fire("Error", err.message, "error");
+        }
     };
 
 
 
     /**************** function to export table data in excel and pdf ************/
     const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(zones);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Zones');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'zones.xlsx');
-    };
 
+        const exportData = currentRows.map((row) => ({
+            VendorID: row.VendorID,
+            BillNo: row.BillNo,
+            BillDate: row.BillDate,
+            BillFrom: row.BillFrom,
+            BillTo: row.BillTo,
+            Customer_Name: row.Customer_Name,
+            Vendor_Name: row.Vendor_Name?.trim(),
+            Origin: row.Origin_Name,
+            Destination: row.Destination_Name,
+            Mode: row.Mode_Code,
+            Amount: row.Amount,
+            FuelCharges: row.FuelCharges,
+            OtherCharges: row.OtherCharges,
+            GST: row.GST,
+            TotalAmount: row.TotalAmount,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'VendorBills');
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const file = new Blob([excelBuffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+        });
+
+        saveAs(file, 'VendorBills.xlsx');
+    };
+    const handleOpenVendorBillPrint = (invNo) => {
+      navigate("/vendorbill",{state:{invoiceNo:invNo,from:location.pathname,tab:"vendorcharge"}})
+    };
     const handleExportPDF = () => {
         const input = document.getElementById('table-to-pdf');
-
         html2canvas(input, { scale: 2 }).then((canvas) => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF();
@@ -158,7 +282,26 @@ function VendorBill() {
                 <div className="container1">
                     <div className="addNew">
                         <div>
-                            <button className='add-btn' onClick={() => { setModalIsOpen(true) }}>
+                            <button className='add-btn' onClick={() => {
+                                setModalIsOpen(true);
+                                setFormData({
+                                    vendorCode: "",
+                                    custCode: "",
+                                    orgCode: "",
+                                    destCode: "",
+                                    modeCode: "",
+                                    vendorAwbNo: "",
+                                    billNo: "",
+                                    billDate: getTodayDate(),
+                                    billFrom: getTodayDate(),
+                                    billTo: getTodayDate(),
+                                    amount: 0,
+                                    fuelChrgs: 0,
+                                    otherChrgs: 0,
+                                    gst: 0,
+                                    totalAmt: 0,
+                                });
+                            }}>
                                 <i className="bi bi-plus-lg"></i>
                                 <span>ADD NEW</span>
                             </button>
@@ -173,7 +316,14 @@ function VendorBill() {
                         </div>
 
                         <div className="search-input">
-                            <input className="add-input" type="text" placeholder="search" />
+                            <input
+                                className="add-input"
+                                type="text"
+                                placeholder="Search..."
+                                value={quary}
+                                onChange={(e) => setQuary(e.target.value)}
+                            />
+
                             <button type="submit" title="search">
                                 <i className="bi bi-search"></i>
                             </button>
@@ -181,60 +331,184 @@ function VendorBill() {
                     </div>
 
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm' >
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead>
                                 <tr>
-                                    <th scope="col">Sr.No</th>
-                                    <th scope="col">AWB No</th>
-                                    <th scope="col">Booking Date</th>
-                                    <th scope='col'>Customer</th>
-                                    <th scope='col'>Consignee</th>
-                                    <th scope='col'>Destination</th>
-                                    <th scope="col">Actions</th>
+                                    <th>Actions</th>
+                                    <th>Vendor ID</th>
+                                    <th>Bill No</th>
+                                    <th>Bill Date</th>
+                                    <th>Bill From</th>
+                                    <th>Bill To</th>
+                                    <th>Customer Name</th>
+                                    <th>Vendor Name</th>
+                                    <th>Origin</th>
+                                    <th>Destination</th>
+                                    <th>Mode</th>
+                                    <th>Amount</th>
+                                    <th>Fuel Charges</th>
+                                    <th>Other Charges</th>
+                                    <th>GST</th>
+                                    <th>Total Amount</th>
                                 </tr>
                             </thead>
-                            <tbody className='table-body'>
 
-                                {currentRows.map((zone, index) => (
-                                    <tr key={zone.id}>
-                                        <td>{zone.id}</td>
-                                        <td>{zone.code}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
+                            <tbody className='table-body'>
+                                {filterData.map((row, index) => (
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <div style={{ display: "flex", flexDirection: "row" }}>
-                                                <button onClick={() => handleEdit(index)} className='edit-btn'><i className='bi bi-pen'></i></button>
-                                                <button onClick={() => handleDelete(index)} className='edit-btn'><i className='bi bi-trash'></i></button>
-                                            </div>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "60px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+                                                    <button className='edit-btn' onClick={() => handleOpenVendorBillPrint("001")}>
+                                                            <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
+                                                        </button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setFormData({
+                                                            vendorCode: row.Vendor_Code,
+                                                            custCode: row.Customer_Code,
+                                                            orgCode: row.Origin_Code,
+                                                            destCode: row.Destination_Code,
+                                                            modeCode: row.Mode_Code,
+                                                            vendorAwbNo: row.VendorAWBNo,
+                                                            billNo: row.BillNo,
+
+                                                            billDate: convertToYMD(row.BillDate),
+                                                            billFrom: convertToYMD(row.BillFrom),
+                                                            billTo: convertToYMD(row.BillTo),
+
+                                                            amount: row.Amount,
+                                                            fuelChrgs: row.FuelCharges,
+                                                            otherChrgs: row.OtherCharges,
+                                                            gst: row.GST,
+                                                            totalAmt: row.TotalAmount,
+                                                        });
+
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button onClick={() => {
+                                                        handleDelete(row.VendorID);
+                                                        setOpenRow(null);
+                                                    }}
+                                                        className='edit-btn'>
+                                                        <i className='bi bi-trash'></i></button>
+                                                </div>
+                                            )}
                                         </td>
+
+
+
+                                        {/* Sr No */}
+                                        <td>{row.VendorID}</td>
+
+                                        {/* Bill Data */}
+                                        <td>{row.BillNo}</td>
+                                        <td>{row.BillDate}</td>
+                                        <td>{row.BillFrom}</td>
+                                        <td>{row.BillTo}</td>
+
+                                        {/* Customer */}
+                                        <td>{row.Customer_Name}</td>
+
+                                        {/* Vendor */}
+                                        <td>{row.Vendor_Name?.trim()}</td>
+
+                                        {/* Origin / Destination */}
+                                        <td>{row.Origin_Name}</td>
+                                        <td>{row.Destination_Name}</td>
+
+                                        {/* Mode */}
+                                        <td>{row.Mode_Code}</td>
+
+                                        {/* Amount Details */}
+                                        <td>{row.Amount}</td>
+                                        <td>{row.FuelCharges}</td>
+                                        <td>{row.OtherCharges}</td>
+                                        <td>{row.GST}</td>
+                                        <td>{row.TotalAmount}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="pagination">
-                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            {'<'}
-                        </button>
-                        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                            {'>'}
-                        </button>
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                                {'<'}
+                            </button>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                                {'>'}
+                            </button>
+                        </div>
+
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                            <select
+                                id="rowsPerPage"
+                                value={rowsPerPage}
+                                onChange={(e) => {
+                                    setRowsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                style={{ height: "40px", width: "50px" }}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
                     </div>
 
 
-                    <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-volumetric" contentLabel='Modal'>
+                    <Modal
+                        overlayClassName="custom-overlay"
+                        isOpen={modalIsOpen}
+                        className="custom-modal"
+                        style={{
+                            content: {
+                                width: "90%",
+                                top: "50%",
+                                left: "50%",
+                                whiteSpace: "nowrap",
+                            },
+                        }}
+                        contentLabel="Modal"
+                    >
                         <div className='custom-modal-content'>
                             <div className="header-tittle">
                                 <header>Vendor Bill Master</header>
                             </div>
 
                             <div className='container2'>
-                                <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                                <form onSubmit={(e) => { handleSave(e); }}>
 
                                     <div className="fields2">
                                         <div className="input-field1">
@@ -262,6 +536,120 @@ function VendorBill() {
                                                 }}
                                             />
                                         </div>
+                                        <div className="input-field1">
+                                            <label htmlFor="">Customer Name</label>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCustomerdata.map(c => ({ value: c.Customer_Code, label: c.Customer_Name }))}
+                                                value={
+                                                    formData.custCode
+                                                        ? { value: formData.custCode, label: getCustomerdata.find(opt => opt.Customer_Code === formData.custCode)?.Customer_Name || "" }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        custCode: selectedOption.value,
+                                                    }));
+                                                }}
+                                                placeholder="Select Vendor Name"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="input-field1">
+                                            <label>Mode</label>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getMode.map(m => ({
+                                                    value: m.Mode_Code,
+                                                    label: m.Mode_Name
+                                                }))}
+                                                value={
+                                                    formData.modeCode
+                                                        ? {
+                                                            value: formData.modeCode,
+                                                            label: getMode.find(x => x.Mode_Code === formData.modeCode)?.Mode_Name || ""
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        modeCode: selectedOption.value,
+                                                    }));
+                                                }}
+                                                placeholder="Select Mode"
+                                                isSearchable
+                                                menuPortalTarget={document.body}
+                                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                            />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Origin</label>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCity.map(city => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name
+                                                }))}
+                                                value={
+                                                    formData.orgCode
+                                                        ? {
+                                                            value: formData.orgCode,
+                                                            label: getCity.find(x => x.City_Code === formData.orgCode)?.City_Name || ""
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        orgCode: selectedOption.value,
+                                                    }));
+                                                }}
+                                                placeholder="Select Origin"
+                                                isSearchable
+                                                menuPortalTarget={document.body}
+                                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                            />
+                                        </div>
+                                        <div className="input-field1">
+                                            <label>Destination</label>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getCity.map(city => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name
+                                                }))}
+                                                value={
+                                                    formData.destCode
+                                                        ? {
+                                                            value: formData.destCode,
+                                                            label: getCity.find(x => x.City_Code === formData.destCode)?.City_Name || ""
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        destCode: selectedOption.value,
+                                                    }));
+                                                }}
+                                                placeholder="Select Destination"
+                                                isSearchable
+                                                menuPortalTarget={document.body}
+                                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                            />
+                                        </div>
+
 
                                         {/* 🟩 Bill No */}
                                         <div className="input-field1">
@@ -378,7 +766,8 @@ function VendorBill() {
                                         </div>
                                     </div>
                                     <div className='bottom-buttons'>
-                                        <button type='submit' className='ok-btn'>Submit</button>
+                                        {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
+                                        {isEditMode && (<button type='button' className='ok-btn'>Update</button>)}
                                         <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                     </div>
                                 </form>
