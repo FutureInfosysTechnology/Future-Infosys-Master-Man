@@ -4,10 +4,13 @@ import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import Toggle from 'react-toggle';
+import 'react-toggle/style.css';
 import { getApi, postApi, putApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 function ShortEntry() {
   const [getCustomer, setGetCustomer] = useState([]);
+  const [toggleActive, setToggleActive] = useState(false);
   const [getMode, setGetMode] = useState([]);
   const [getDest, setGetDestination] = useState([]);
   const today = new Date();
@@ -18,6 +21,7 @@ function ShortEntry() {
   const handleDateChange = (date) => {
     setBookingDate(date);
   };
+  const onToggle = () => setToggleActive(!toggleActive);
   const [formData, setFormData] = useState({
     Customer_Code: '',
     Customer_Name: '',
@@ -62,55 +66,55 @@ function ShortEntry() {
       }));
     }
 
-    if (formData.RatePerkg!==0) {
+    if (formData.RatePerkg !== 0) {
       RateFunc();
     }
   }, [formData.ActualWt, formData.volumetricWt, formData.ChargedWt, formData.RatePerkg]);
 
-   useEffect(() => {
-          const handleMakeRate = async () => {
-              try {
-                  const body = {
-                      Client_Code: formData.Customer_Code,
-                      Mode_Codes: formData.Mode_code,
-                      Origin_Code: formData.Origin_code,
-                      Destination_Codes: formData.Destination_Code,
-                      Zone_Codes:  getDest.find(c => c.City_Code === formData.Destination_Code)?.Zone_Code || "W",
-                      State_Codes: getDest.find(c => c.City_Code === formData.Destination_Code)?.State_Code || "7",
-                      Weight: Math.max(parseFloat(formData.ActualWt) || 0, parseFloat(formData.volumetricWt) || 0, parseFloat(formData.ChargedWt) || 0),
-                      Method: getCustomer.find(c=>c.Customer_Code===formData.Customer_Code)?.Booking_Type,
-                      Dox_Spx: formData.DoxSpx,
-                  };
-                  const response = await postApi("/Master/GetCustomerFinalRate_CityState", body);
-                  console.log(response);
-                  // 
-                  if (response?.GetDataSuccess === 1 && response.Data.length > 0) {
-                      const rateperKg = response.Data[0].Detail_Rate;
-                      // 
-                      // ✅ Update rate and trigger GST calculation automatically
-                      setFormData((prev) => ({
-                          ...prev,
-                          RatePerkg: rateperKg,
-                      }));
-                  }
-              } catch (error) {
-                  console.error("❌ Error fetching rate:", error);
-              }
-          };
+  useEffect(() => {
+    const handleMakeRate = async () => {
+      try {
+        const body = {
+          Client_Code: formData.Customer_Code,
+          Mode_Codes: formData.Mode_code,
+          Origin_Code: formData.Origin_code,
+          Destination_Codes: formData.Destination_Code,
+          Zone_Codes: getDest.find(c => c.City_Code === formData.Destination_Code)?.Zone_Code || "W",
+          State_Codes: getDest.find(c => c.City_Code === formData.Destination_Code)?.State_Code || "7",
+          Weight: Math.max(parseFloat(formData.ActualWt) || 0, parseFloat(formData.volumetricWt) || 0, parseFloat(formData.ChargedWt) || 0),
+          Method: getCustomer.find(c => c.Customer_Code === formData.Customer_Code)?.Booking_Type,
+          Dox_Spx: formData.DoxSpx,
+        };
+        const response = await postApi("/Master/GetCustomerFinalRate_CityState", body);
+        console.log(response);
+        // 
+        if (response?.GetDataSuccess === 1 && response.Data.length > 0) {
+          const rateperKg = response.Data[0].Detail_Rate;
           // 
-          if (formData.Customer_Code && formData.Mode_code && formData.Destination_Code && formData.Origin_code) {
-              handleMakeRate();
-          }
-      },
-          [formData.Customer_Code,
-          formData.Mode_code,
-          formData.Origin_code,
-          formData.Destination_Code,
-          formData.Dest_Zone,
-          formData.DoxSpx,
-          formData.ActualWt,
-          formData.volumetricWt,
-          formData.ChargedWt]);
+          // ✅ Update rate and trigger GST calculation automatically
+          setFormData((prev) => ({
+            ...prev,
+            RatePerkg: rateperKg,
+          }));
+        }
+      } catch (error) {
+        console.error("❌ Error fetching rate:", error);
+      }
+    };
+    // 
+    if (formData.Customer_Code && formData.Mode_code && formData.Destination_Code && formData.Origin_code) {
+      handleMakeRate();
+    }
+  },
+    [formData.Customer_Code,
+    formData.Mode_code,
+    formData.Origin_code,
+    formData.Destination_Code,
+    formData.Dest_Zone,
+    formData.DoxSpx,
+    formData.ActualWt,
+    formData.volumetricWt,
+    formData.ChargedWt]);
 
   useEffect(() => {
     setBookingDate(new Date());
@@ -156,8 +160,8 @@ function ShortEntry() {
   };
   const handleSave = async (e) => {
     e.preventDefault();
-    if (formData.ShipperPhone.length !== 10 || formData.Consignee_Mob.length !== 10) {
-      Swal.fire('Error', 'Mobile numbers must be exactly 10 digits.', 'error');
+    if (!bookingDate) {
+      Swal.fire('Error', 'BookDate is required.', 'error');
       return;
     }
     const payload = {
@@ -366,27 +370,52 @@ function ShortEntry() {
               />
             </div>
 
-            <div className="col-md-6 col-lg-4">
-              <label className="form-label">Docket No</label>
-              <input
-                type="text"
-                placeholder="Docket No"
-                className="form-control"
-                value={formData.Docket_No}
-                onChange={(e) =>
-                  setFormData({ ...formData, Docket_No: e.target.value })
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSearch();
-                  } else if (e.key === "Tab") {
-                    setTimeout(handleSearch, 100);
-                  }
-                }}
-              />
-            </div>
+           <div className="col-md-6 col-lg-4">
+  <label className="form-label">Docket No</label>
 
+  <div className="position-relative">
+    <input
+      type="text"
+      className={
+        toggleActive
+          ? "docket-input form-control pe-5"
+          : "docket-input disabled form-control pe-5"
+      }
+      placeholder={toggleActive ? "Enter Docket No" : "Auto Booking On"}
+      disabled={!toggleActive}
+      value={formData.Docket_No}
+      onChange={(e) =>
+        setFormData({ ...formData, Docket_No: e.target.value })
+      }
+      onKeyDown={(e) => {
+        if (
+          (toggleActive && e.key === "Enter") ||
+          (toggleActive && e.key === "Tab")
+        ) {
+          handleSearch();
+        }
+      }}
+    />
+
+    {/* Toggle INSIDE input, right side */}
+    <div
+      className="position-absolute"
+      style={{
+        top: "58%",
+        right: "7px",
+        transform: "translateY(-50%)",
+      }}
+    >
+      <Toggle
+        onClick={onToggle}
+        on={<h2>ON</h2>}
+        off={<h2>OFF</h2>}
+        offstyle="danger"
+        active={toggleActive}
+      />
+    </div>
+  </div>
+</div>
 
             <div className="col-md-4">
               <label className="form-label">Shipper Name</label>

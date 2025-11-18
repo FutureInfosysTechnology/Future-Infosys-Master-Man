@@ -21,7 +21,7 @@ function Booking() {
     const location = useLocation();
     const [inputValue, setInputValue] = useState("");
     const [inputValue1, setInputValue1] = useState("");
-
+    const [getCust, setGetCust] = useState([]);
     const [skipGstCalc, setSkipGstCalc] = useState(false);
     // Utility function to format date safely
     const formatDate = (inputDate) => {
@@ -79,6 +79,8 @@ function Booking() {
     const [isEWayChecked, setIsEWayChecked] = useState(false);
     const [isInvoiceValue, setIsInvoiceValue] = useState(false);
     const [isInvoiceNo, setIsInvoiceNo] = useState(false);
+    const [isShipChecked, setIsShipChecked] = useState(false);
+    const [isReceChecked, setIsReceChecked] = useState(false);
     const [dispatchDate, setDispatchDate] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -276,6 +278,32 @@ function Booking() {
         ChargeWt: 0
     })
     useEffect(() => {
+        const found = getCust.find(
+            (c) =>
+                c?.Customer_Code === formData.Customer_Code &&
+                c?.Mode_Code === formData.Mode_Code
+        );
+
+        if (!found) {
+            console.log("not found");
+            setFormData((prev) => ({
+                ...prev,
+                FuelPer: 0,
+                FuelCharges: 0,
+                FovPer: 0,
+                FovChrgs: 0,
+                DocketChrgs: 0,
+                ODAChrgs: 0,
+                DeliveryChrgs: 0,
+                PackingChrgs: 0,
+                GreenChrgs: 0,
+                HamaliChrgs: 0,
+                OtherCharges: 0,
+                InsuranceChrgs: 0,
+            }));
+        }
+    }, [formData.Customer_Code, formData.Mode_Code, getCust]);
+    useEffect(() => {
         if (formData.freight) {
             const freight = parseFloat(formData.freight) || 0;
             const fuelPer = parseFloat(formData.FuelPer) || 0;
@@ -351,6 +379,7 @@ function Booking() {
             }
         }
     };
+
 
 
     const handleGenerateCode = () => {
@@ -556,6 +585,8 @@ function Booking() {
             setIsInvoiceValue(savedState.isInvoiceValue || false);
             setIsInvoiceNo(savedState.isInvoiceNo || false);
             setDispatchDate(savedState.dispatchDate || false);
+            setIsShipChecked(savedState.isShipChecked || false);
+            setIsReceChecked(savedState.isReceChecked || false);
         }
         fetchReceiverData();
         fetchShipper();
@@ -590,6 +621,8 @@ function Booking() {
             isInvoiceNo: newValue,
             dispatchDate: newValue,
             isAllChecked: newValue,
+            isShipChecked: newValue,
+            isReceChecked: newValue,
         };
 
         // Update React states
@@ -608,11 +641,56 @@ function Booking() {
         setIsInvoiceValue(newValue);
         setIsInvoiceNo(newValue);
         setDispatchDate(newValue);
+        setIsShipChecked(newValue);
+        setIsReceChecked(newValue);
 
         // Save to localStorage
         localStorage.setItem("bookingState", JSON.stringify(allFields));
     };
+    useEffect(() => {
+        const allFields = {
+            isFovChecked,
+            isDocketChecked,
+            isDeliveryChecked,
+            isPackingChecked,
+            isGreenChecked,
+            isHamaliChecked,
+            isOtherChecked,
+            isInsuranceChecked,
+            isODAChecked,
+            isFuelChecked,
+            isReceChecked,
+            isShipChecked,
+            isRemarkChecked,
+            isEWayChecked,
+            isInvoiceNo,
+            isInvoiceValue,
+            dispatchDate,
+        };
 
+        // Check if all are true
+        const allChecked = Object.values(allFields).every(Boolean);
+        setIsAllChecked(allChecked);
+        handleCheckboxChange('isAllChecked', allChecked)
+    }, [
+        isFovChecked,
+        isDocketChecked,
+        isDeliveryChecked,
+        isPackingChecked,
+        isGreenChecked,
+        isHamaliChecked,
+        isOtherChecked,
+        isInsuranceChecked,
+        isODAChecked,
+        isFuelChecked,
+        isReceChecked,
+        isShipChecked,
+        isRemarkChecked,
+        isEWayChecked,
+        isInvoiceNo,
+        isInvoiceValue,
+        dispatchDate,
+    ]);
     const handleFovChange = (e) => {
         setIsFovChecked(e.target.checked);
         handleCheckboxChange('isFovChecked', e.target.checked);
@@ -686,6 +764,16 @@ function Booking() {
     const handledispatch = (e) => {
         setDispatchDate(e.target.checked);
         handleCheckboxChange('dispatchDate', e.target.checked);
+    }
+
+    const handleShipCheck = (e) => {
+        setIsShipChecked(e.target.checked);
+        handleCheckboxChange('isShipChecked', e.target.checked);
+    }
+
+    const handleReceCheck = (e) => {
+        setIsReceChecked(e.target.checked);
+        handleCheckboxChange('isReceChecked', e.target.checked);
     }
     const fetchData = async (endpoint, setData) => {
         setLoading(true); // Set loading state to true
@@ -2230,7 +2318,7 @@ function Booking() {
                                 <div className="container-fluid" style={{ paddingLeft: "1rem" }}>
                                     <div className="row g-2 align-items-end">
                                         {/* Shipper Name Input */}
-                                        <div className="col-md-10 col-sm-9 col-12">
+                                        {isShipChecked && <div className="col-md-10 col-sm-9 col-12">
                                             <div className="input-field">
                                                 <label htmlFor="shipper">Shipper Name</label>
                                                 <CreatableSelect
@@ -2268,10 +2356,10 @@ function Booking() {
                                                 />
 
                                             </div>
-                                        </div>
+                                        </div>}
 
                                         {/* Plus Button */}
-                                        <div className="col-md-2 col-sm-3 col-12">
+                                        {isShipChecked && <div className="col-md-2 col-sm-3 col-12">
                                             <label className="invisible">+</label>
                                             <button
                                                 type="button"
@@ -2296,79 +2384,81 @@ function Booking() {
                                             >
                                                 <i className="bi bi-plus" style={{ fontSize: "20px" }}></i>
                                             </button>
-                                        </div>
+                                        </div>}
                                     </div>
                                 </div>
 
                                 <div className="fields2">
-                                    <div className="input-field">
-                                        <label htmlFor="shipper-address">Shipper Address</label>
-                                        <input
-                                            type="text"
-                                            id="shipper-address"
-                                            placeholder="Shipper Address"
-                                            value={formData.ShipperAdd}
-                                            onChange={(e) => setFormData({ ...formData, ShipperAdd: e.target.value })}
-                                            className="form-control custom-input"
-                                        />
-                                    </div>
-                                    <div className="input-field">
-                                        <label htmlFor="">State Name</label>
-                                        <Select
-                                            className="blue-selectbooking"
-                                            classNamePrefix="blue-selectbooking"
-                                            options={getState.map((st) => ({
-                                                value: st.State_Code,
-                                                label: st.State_Name,
-                                            }))}
-                                            value={
-                                                formData.Shipper_StateCode
-                                                    ? {
-                                                        value: formData.Shipper_StateCode,
-                                                        label:
-                                                            getState.find((s) => s.State_Code === formData.Shipper_StateCode)
-                                                                ?.State_Name || "",
-                                                    }
-                                                    : null
-                                            }
-                                            onChange={(selected) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    Shipper_StateCode: selected ? selected.value : "",
-                                                })
-                                            }
-                                            placeholder="Select State"
-                                            isSearchable={true}
-                                            isClearable={false}
-                                            menuPortalTarget={document.body}
-                                            styles={{
-                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                            }}
-                                        />
+                                    {isShipChecked && <>
+                                        <div className="input-field">
+                                            <label htmlFor="shipper-address">Shipper Address</label>
+                                            <input
+                                                type="text"
+                                                id="shipper-address"
+                                                placeholder="Shipper Address"
+                                                value={formData.ShipperAdd}
+                                                onChange={(e) => setFormData({ ...formData, ShipperAdd: e.target.value })}
+                                                className="form-control custom-input"
+                                            />
+                                        </div>
+                                        <div className="input-field">
+                                            <label htmlFor="">State Name</label>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getState.map((st) => ({
+                                                    value: st.State_Code,
+                                                    label: st.State_Name,
+                                                }))}
+                                                value={
+                                                    formData.Shipper_StateCode
+                                                        ? {
+                                                            value: formData.Shipper_StateCode,
+                                                            label:
+                                                                getState.find((s) => s.State_Code === formData.Shipper_StateCode)
+                                                                    ?.State_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        Shipper_StateCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
 
-                                    </div>
+                                        </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Shipper Mobile No</label>
-                                        <input
-                                            type="tel"
-                                            placeholder="Shipper Mobile No"
-                                            maxLength={10}
-                                            value={formData.ShipperPhone}
-                                            onChange={(e) => setFormData({ ...formData, ShipperPhone: e.target.value })}
-                                        />
-                                    </div>
+                                        <div className="input-field1">
+                                            <label htmlFor="">Shipper Mobile No</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="Shipper Mobile No"
+                                                maxLength={10}
+                                                value={formData.ShipperPhone}
+                                                onChange={(e) => setFormData({ ...formData, ShipperPhone: e.target.value })}
+                                            />
+                                        </div>
 
-                                    <div className="input-field1">
-                                        <label htmlFor="">Pin_Code</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Pin Code"
-                                            maxLength={6}
-                                            value={formData.ShipperPin}
-                                            onChange={(e) => setFormData({ ...formData, ShipperPin: e.target.value })}
-                                        />
-                                    </div>
+                                        <div className="input-field1">
+                                            <label htmlFor="">Pin_Code</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Pin Code"
+                                                maxLength={6}
+                                                value={formData.ShipperPin}
+                                                onChange={(e) => setFormData({ ...formData, ShipperPin: e.target.value })}
+                                            />
+                                        </div>
+                                    </>}
                                     <div className="input-field1">
                                         <label htmlFor="">Booking Mode</label>
                                         <select value={formData.BookMode} onChange={(e) => setFormData({ ...formData, BookMode: e.target.value })}>
@@ -2641,7 +2731,7 @@ function Booking() {
                                 onKeyDown={handleKeyDown}
                             >
                                 {/* Receiver Name Row */}
-                                <div className="container-fluid mb-2">
+                                {isReceChecked && <div className="container-fluid mb-2">
                                     <div className="row g-2 align-items-end">
                                         <div className="col-md-10 col-sm-9 col-12">
                                             <div className="input-field mt-2" style={{ width: "100%", position: "relative" }}>
@@ -2704,8 +2794,6 @@ function Booking() {
                                                 />
 
                                             </div>
-
-
                                         </div>
                                         <div className="col-md-2 col-sm-3 col-12">
                                             <label className="invisible">+</label>
@@ -2736,120 +2824,122 @@ function Booking() {
                                             </button>
                                         </div>
                                     </div>
-                                </div>
+                                </div>}
 
                                 {/* Other Receiver Fields */}
                                 <div className="fields2">
-                                    <div className="input-field">
-                                        <label>Mobile No</label>
-                                        <input
-                                            type="tel"
-                                            placeholder="Mobile No"
-                                            maxLength={10}
-                                            value={formData.ConsigneeMob}
-                                            onChange={(e) => setFormData({ ...formData, ConsigneeMob: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label>Receiver Address</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Receiver Address"
-                                            value={formData.ConsigneeAdd1}
-                                            onChange={(e) => setFormData({ ...formData, ConsigneeAdd1: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label>Receiver Address2</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Receiver Address2"
-                                            value={formData.ConsigneeAdd2}
-                                            onChange={(e) => setFormData({ ...formData, ConsigneeAdd2: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label>Pin Code</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Pin Code"
-                                            value={formData.ConsigneePin}
-                                            maxLength={6}
-                                            pattern="[0-9]{6}"
-                                            onChange={(e) => setFormData({ ...formData, ConsigneePin: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label htmlFor="">State Name</label>
-                                        <Select
-                                            className="blue-selectbooking"
-                                            classNamePrefix="blue-selectbooking"
-                                            options={getState.map((st) => ({
-                                                value: st.State_Code,
-                                                label: st.State_Name,
-                                            }))}
-                                            value={
-                                                formData.ConsigneeState
-                                                    ? {
-                                                        value: formData.ConsigneeState,
-                                                        label:
-                                                            getState.find((s) => s.State_Code === formData.ConsigneeState)
-                                                                ?.State_Name || "",
-                                                    }
-                                                    : null
-                                            }
-                                            onChange={(selected) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    ConsigneeState: selected ? selected.value : "",
-                                                })
-                                            }
-                                            placeholder="Select State"
-                                            isSearchable={true}
-                                            isClearable={false}
-                                            menuPortalTarget={document.body}
-                                            styles={{
-                                                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                            }}
-                                        />
-
-                                    </div>
-                                    <div className="input-field">
-                                        <label>Country</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Country"
-                                            value={formData.ConsigneeCountry}
-                                            onChange={(e) => setFormData({ ...formData, ConsigneeCountry: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label>GST No</label>
-                                        <input
-                                            type="text"
-                                            placeholder="GST No"
-                                            value={formData.ConsigneeGST}
-                                            onChange={(e) => setFormData({ ...formData, ConsigneeGST: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="input-field">
-                                        <label>Email ID</label>
-                                        <div>
+                                    {isReceChecked && <>
+                                        <div className="input-field">
+                                            <label>Mobile No</label>
                                             <input
-                                                type="email"
-                                                placeholder="Email ID"
-                                                value={formData.ConsigneeEmail}
-                                                onChange={(e) => setFormData({ ...formData, ConsigneeEmail: e.target.value })}
-                                                style={{ flex: 1 }}
+                                                type="tel"
+                                                placeholder="Mobile No"
+                                                maxLength={10}
+                                                value={formData.ConsigneeMob}
+                                                onChange={(e) => setFormData({ ...formData, ConsigneeMob: e.target.value })}
                                             />
                                         </div>
-                                    </div>
+
+                                        <div className="input-field">
+                                            <label>Receiver Address</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Receiver Address"
+                                                value={formData.ConsigneeAdd1}
+                                                onChange={(e) => setFormData({ ...formData, ConsigneeAdd1: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="input-field">
+                                            <label>Receiver Address2</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Receiver Address2"
+                                                value={formData.ConsigneeAdd2}
+                                                onChange={(e) => setFormData({ ...formData, ConsigneeAdd2: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="input-field">
+                                            <label>Pin Code</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Pin Code"
+                                                value={formData.ConsigneePin}
+                                                maxLength={6}
+                                                pattern="[0-9]{6}"
+                                                onChange={(e) => setFormData({ ...formData, ConsigneePin: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="input-field">
+                                            <label htmlFor="">State Name</label>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getState.map((st) => ({
+                                                    value: st.State_Code,
+                                                    label: st.State_Name,
+                                                }))}
+                                                value={
+                                                    formData.ConsigneeState
+                                                        ? {
+                                                            value: formData.ConsigneeState,
+                                                            label:
+                                                                getState.find((s) => s.State_Code === formData.ConsigneeState)
+                                                                    ?.State_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        ConsigneeState: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
+                                        </div>
+                                        <div className="input-field">
+                                            <label>Country</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Country"
+                                                value={formData.ConsigneeCountry}
+                                                onChange={(e) => setFormData({ ...formData, ConsigneeCountry: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="input-field">
+                                            <label>GST No</label>
+                                            <input
+                                                type="text"
+                                                placeholder="GST No"
+                                                value={formData.ConsigneeGST}
+                                                onChange={(e) => setFormData({ ...formData, ConsigneeGST: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="input-field">
+                                            <label>Email ID</label>
+                                            <div>
+                                                <input
+                                                    type="email"
+                                                    placeholder="Email ID"
+                                                    value={formData.ConsigneeEmail}
+                                                    onChange={(e) => setFormData({ ...formData, ConsigneeEmail: e.target.value })}
+                                                    style={{ flex: 1 }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </>}
                                     <div className="input-field3" style={{ marginTop: "23px" }}>
                                         <button className="btn btn-success" style={{}}>Save</button>
                                     </div>
@@ -4403,6 +4493,25 @@ function Booking() {
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 All Select</label>
                                         </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isShipChecked}
+                                                onChange={handleShipCheck}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Shipper Details</label>
+                                        </div>
+
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isReceChecked}
+                                                onChange={handleReceCheck}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Receiver Details</label>
+                                        </div>
+
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isFovChecked}

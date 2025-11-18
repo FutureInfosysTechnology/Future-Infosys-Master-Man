@@ -139,9 +139,8 @@ function ScanbyAirway() {
     return (
         <>
 
-            <div className="container1" style={{ padding: "0px" }}>
-
-                <form action="" style={{ padding: "0px", margin: "0px" }} onSubmit={handleSubmit}>
+            <div className="container1" style={{ padding: "0px", }}>
+                <form action="" style={{ padding: "0px", margin: "0px" ,background:" #f2f4f3"}} onSubmit={handleSubmit}>
                     <div className="fields2">
                         <div className="input-field3">
                             <label>Status</label>

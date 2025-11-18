@@ -43,6 +43,7 @@ function DailyExpenses() {
         remark: "",
         BookMode: "",
         bankCode: "",
+        tsd: "",
     });
 
 
@@ -219,6 +220,7 @@ function DailyExpenses() {
                     remark: "",
                     BookMode: "",
                     bankCode: "",
+                    tsd: "",
                 });
 
             } else {
@@ -777,6 +779,18 @@ function DailyExpenses() {
                                                     />
                                                 </div>
 
+                                                <div className="input-field3">
+                                                    <label htmlFor="">TDS</label>
+                                                    <select value={formData.tds} onChange={(e) => setFormData({ ...formData, tds: e.target.value })}>
+                                                        <option value="" disabled>Select Booking Mode</option>
+                                                        <option value="Cash">Cash</option>
+                                                        <option value="Credit">Credit</option>
+                                                        <option value="To-pay">To-pay</option>
+                                                        <option value="Google Pay">Google Pay</option>
+                                                        <option value="RTGS">RTGS</option>
+                                                        <option value="NEFT">NEFT</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
 

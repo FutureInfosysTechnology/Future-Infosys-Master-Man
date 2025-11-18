@@ -20,10 +20,11 @@ function ProductionEntry() {
         date: new Date(),
         customer: "",
         noteNo: "",
+        docketNo:"",
         parti: "",
         remark: "",
         amount: "",
-        user: "Admin"
+        docketNo:"",
     });
 
     const [getCustomer, setGetCustomer] = useState([]);
@@ -32,6 +33,13 @@ function ProductionEntry() {
     const [error, setError] = useState(null);
     const [openRow, setOpenRow] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    function formatDateToYMD(dateStr) {
+    if (!dateStr) return "";
+
+    const [dd, mm, yyyy] = dateStr.split("/");
+
+    return `${yyyy}-${mm}-${dd}`;
+}
 
     // 🔄 Fetch helper
     const fetchData = async (endpoint, setData) => {
@@ -75,10 +83,10 @@ function ProductionEntry() {
             date: new Date(),
             customer: "",
             noteNo: "",
+            docketNo:"",
             parti: "",
             remark: "",
             amount: "",
-            user: "Admin"
         });
         setIsEditMode(false);
         setOpenRow(null);
@@ -94,15 +102,13 @@ function ProductionEntry() {
 
 
         const payload = {
-            Action: "ADD",
-            CreditNote_ID: null,
             Note_No: formData.noteNo,
-            Note_Date: formData.date.toISOString().split("T")[0],
+            Docket_No:formData.docketNo,
+            Note_Date: (formData.date),
             Customer_Code: String(formData.customer),
             Particulars: formData.parti,
             Remark: formData.remark,
             Amount: parseFloat(formData.amount),
-            User: formData.user
         };
 
         try {
@@ -128,7 +134,8 @@ function ProductionEntry() {
         const payload = {
             CreditNote_ID: formData.CreditNote_ID,
             Note_No: formData.noteNo,
-            Note_Date: formData.date.toISOString().split("T")[0],
+            Docket_No:formData.docketNo,
+            Note_Date: (formData.date),
             Customer_Code: formData.customer,
             Particulars: formData.parti,
             Remark: formData.remark,
@@ -175,13 +182,13 @@ function ProductionEntry() {
     const handleRowClick = (note) => {
         setFormData({
             CreditNote_ID: note.CreditNote_ID,
-            date: new Date(note.Note_Date),
+            date: formatDateToYMD(note.Note_Date),
             customer: note.Customer_Code,
             noteNo: note.Note_No,
+            docketNo: note?.Docket_No,
             parti: note.Particulars,
             remark: note.Remark,
             amount: note.Amount,
-            user: note.User || "Admin"
         });
         setOpenRow(null);
         setIsEditMode(true);
@@ -193,31 +200,9 @@ function ProductionEntry() {
         <>
             <div className="body">
                 <div className="container1">
-                    <form onSubmit={handleSave} style={{ margin: "0px", padding: "0px" }}>
+                    <form onSubmit={handleSave} style={{ margin: "0px", padding: "0px",background:" #f2f4f3" }}>
                         <div className="fields2">
-                            <div className="input-field3">
-                                <label>Docket No</label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter note no"
-                                    name="noteNo"
-                                    value={formData.noteNo}
-                                    onChange={handleFormChange}
-                                />
-                            </div>
-
-                            <div className="input-field3">
-                                <label>Date</label>
-                                <DatePicker
-                                    portalId="root-portal"
-                                    selected={formData.date}
-                                    onChange={(date) => setFormData({ ...formData, date })}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="form-control form-control-sm"
-                                />
-                            </div>
-
-                            <div className="input-field">
+                             <div className="input-field1">
                                 <label>Customer</label>
                                 <Select
                                     options={getCustomer.map((cust) => ({
@@ -252,11 +237,44 @@ function ProductionEntry() {
                                 />
                             </div>
 
+                             <div className="input-field3">
+                                <label>Note Date</label>
+                                <DatePicker
+                                    portalId="root-portal"
+                                    selected={formData.date}
+                                    onChange={(date) => setFormData({ ...formData, date })}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
+                            </div>
+
+                            <div className="input-field3">
+                                <label>Note No</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter note no"
+                                    name="noteNo"
+                                    value={formData.noteNo}
+                                    onChange={handleFormChange}
+                                />
+                            </div>
+
+                           <div className="input-field3">
+                                <label>Docket No</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter docket no"
+                                    name="docketNo"
+                                    value={formData.docketNo}
+                                    onChange={handleFormChange}
+                                />
+                            </div>
+
                             <div className="input-field3">
                                 <label>Invoice No</label>
                                 <input
                                     type="text"
-                                    placeholder="Enter particulars"
+                                    placeholder="Enter invoice no"
                                     name="parti"
                                     value={formData.parti}
                                     onChange={handleFormChange}
@@ -327,8 +345,9 @@ function ProductionEntry() {
                                     <th>Actions</th>
                                     <th>ID</th>
                                     <th>Docket No</th>
-                                    <th>Date</th>
-                                    <th>Customer</th>
+                                    <th>Note No</th>
+                                    <th>Note Date</th>
+                                    <th>Customer Name</th>
                                     <th>Invoice No</th>
                                     <th>Remark</th>
                                     <th>Amount</th>
@@ -376,8 +395,9 @@ function ProductionEntry() {
                                             )}
                                         </td>
                                         <td>{note.CreditNote_ID}</td>
+                                        <td>{note?.Docket_No}</td>
                                         <td>{note.Note_No}</td>
-                                        <td>{new Date(note.Note_Date).toLocaleDateString()}</td>
+                                        <td>{note.Note_Date}</td>
                                         <td>{note.Customer_Name}</td>
                                         <td>{note.Particulars}</td>
                                         <td>{note.Remark}</td>

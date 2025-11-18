@@ -26,7 +26,7 @@ function Complaint() {
             <div className="body">
                 <div className="container1" style={{ padding: "0px" }}>
 
-                    <form action="" style={{ marginBottom: "10px" }}>
+                    <form action="" style={{ marginBottom: "10px",backgroundColor:"#f2f4f3" }}>
                         <div className="fields2 row mx-0">
                             <div className="col-12 col-md-3">
                                 <label htmlFor="" className='form-lable' style={{fontSize: "12px", fontWeight: 500,width:"100%",paddingLeft:"2px", color: "#2e2e2e"}}>Select Docket No</label>

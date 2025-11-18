@@ -239,7 +239,7 @@ const delStatus = async (id) => {
         <>
 
             <div className="container1">
-                <form className="order-form" onSubmit={handleSubmit}>
+                <form className="order-form" onSubmit={handleSubmit} style={{backgroundColor:"#f2f4f3"}}>
                     <div className="order-fields" style={{ display: "flex", justifyContent: "start", alignItems: "center" }}>
                         <div className="input-field" style={{ width: "180px" }}>
                             <label htmlFor="">Docket No</label>

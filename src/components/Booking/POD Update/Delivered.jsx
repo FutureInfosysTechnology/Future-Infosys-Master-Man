@@ -122,7 +122,7 @@ function Delivered() {
         <>
             <div className="body">
                 <div className="container1">
-                    <form onSubmit={handleSubmit} style={{ marginBottom: "10px" }}>
+                    <form onSubmit={handleSubmit} style={{ marginBottom: "10px",backgroundColor:"#f2f4f3" }}>
                         <div className="fields2">
                             <div className="input-field3">
                                 <label >LR_NO</label>

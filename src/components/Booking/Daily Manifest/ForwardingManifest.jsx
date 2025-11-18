@@ -56,7 +56,7 @@ function ForwardingManifest() {
                         </div>
                     </div>
 
-                    <form action="">
+                    <form action="" style={{background:" #f2f4f3"}}>
                         <div className="fields2">
                             <div className="input-field3">
                                 <label htmlFor="">Manifest Date</label>

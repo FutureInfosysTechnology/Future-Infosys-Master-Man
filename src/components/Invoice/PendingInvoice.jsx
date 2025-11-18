@@ -237,7 +237,7 @@ function PendingInvoice() {
 
             <div className="body">
                 <div className="container1">
-                    <form onSubmit={handleSubmit} style={{ margin: "0px", padding: "0px" }}>
+                    <form onSubmit={handleSubmit} style={{ margin: "0px", padding: "0px",backgroundColor:"#f2f4f3" }}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
                             <div className="input-field1">
                                 <label htmlFor="">Customer</label>

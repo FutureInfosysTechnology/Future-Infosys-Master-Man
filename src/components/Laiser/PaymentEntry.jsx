@@ -152,7 +152,7 @@ function PaymentEntry() {
             <div className="body">
                 <div className="container1">
 
-                    <form action=""  className="order-form" style={{ margin: "0px" }}>
+                    <form action=""  className="order-form" style={{ margin: "0px",background:" #f2f4f3" }}>
 
                         <div className="order-fields">
                             <div className="input-field3" style={{ width: "500px" }}>

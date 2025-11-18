@@ -34,7 +34,7 @@ function Inscan() {
 
                         <div className="slider"></div>
                     </nav>
-                    <section>
+                    <section >
                         <div className={`content content-1 ${activeTab === 'mode' ? 'active' : ''}`}>
                             <ScanbyAirway />
                         </div>

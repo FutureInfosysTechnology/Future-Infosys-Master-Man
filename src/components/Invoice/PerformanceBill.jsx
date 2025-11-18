@@ -534,7 +534,7 @@ function PerformanceBill() {
                     <div className='container-2'>
                         <div className="card left-card">
                             <div className="section-title">SHIPPER</div>
-                            <form style={{ margin: "0px", padding: "0px" }}>
+                            <form style={{ margin: "0px", padding: "0px" ,backgroundColor:"#f2f4f3"}}>
                                 <div className="fields2 row mx-0 ">
                                     <div className="input-field col-md-6">
                                         <label className="form-label">Shipper</label>
@@ -680,7 +680,7 @@ function PerformanceBill() {
                         </div>
                         <div className="card right-card mx-0">
                             <div className="section-title">RECEIVER</div>
-                            <form action="" style={{ margin: "0px", padding: "0px" }}>
+                            <form action="" style={{ margin: "0px", padding: "0px" ,backgroundColor:"#f2f4f3"}}>
                                 <div className="fields2 row mx-0">
                                     <div className="input-field col-md-6">
                                         <label className="form-label">Receiver</label>
@@ -852,7 +852,7 @@ function PerformanceBill() {
 
                  <div className="card mt-0" style={{width:"100%"}}>
   <div className="section-title">Courier Details</div>
-  <form className="m-0 px-2 py-2" >
+  <form className="m-0 px-2 py-2" style={{backgroundColor:"#f2f4f3"}}>
     <div className="row g-3 mx-0">
       
       {/* Invoice No */}

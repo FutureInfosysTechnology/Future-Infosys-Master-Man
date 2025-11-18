@@ -121,7 +121,7 @@ function ViewPerforma() {
 
             <div className="body">
                 <div className="container1">
-                    <form style={{ margin: "0px", padding: "0px" }} onSubmit={handleSubmit}>
+                    <form style={{ margin: "0px", padding: "0px" ,backgroundColor:"#f2f4f3" }} onSubmit={handleSubmit}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
                             <div className="input-field3">
                                 <label htmlFor="">Invoice No</label>

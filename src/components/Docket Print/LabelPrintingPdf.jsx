@@ -227,7 +227,7 @@ function LabelPrintingPdf() {
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
                                                                 }}
                                                             >
-                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Awb No:</div> {/* 🔹 small margin */}
+                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Ref No:</div> {/* 🔹 small margin */}
                                                                 <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.vendorAwbno}</div>
                                                             </div>
                                                             <div
