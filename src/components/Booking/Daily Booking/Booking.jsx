@@ -81,6 +81,7 @@ function Booking() {
     const [isInvoiceNo, setIsInvoiceNo] = useState(false);
     const [isShipChecked, setIsShipChecked] = useState(false);
     const [isReceChecked, setIsReceChecked] = useState(false);
+    const [isVenChecked, setIsVenChecked] = useState(false);
     const [dispatchDate, setDispatchDate] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -505,67 +506,6 @@ function Booking() {
 
 
     const onToggle = () => setToggleActive(!toggleActive);
-    // useEffect(() => {
-    //     // Parse all numeric fields safely
-    //     const freight = parseFloat(formData.Rate) || 0;
-    //     const fov = parseFloat(formData.FovChrgs) || 0;
-    //     const docket = parseFloat(formData.DocketChrgs) || 0;
-    //     const delivery = parseFloat(formData.DeliveryChrgs) || 0;
-    //     const packing = parseFloat(formData.PackingChrgs) || 0;
-    //     const green = parseFloat(formData.GreenChrgs) || 0;
-    //     const hamali = parseFloat(formData.HamaliChrgs) || 0;
-    //     const other = parseFloat(formData.OtherCharges) || 0;
-    //     const insurance = parseFloat(formData.InsuranceChrgs) || 0;
-    //     const oda = parseFloat(formData.ODAChrgs) || 0;
-    //     const fuel = parseFloat(formData.FuelCharges) || 0;
-
-    //     // Sum up all charge components + GST
-    //     let total =
-    //         freight +
-    //         fov +
-    //         docket +
-    //         delivery +
-    //         packing +
-    //         green +
-    //         hamali +
-    //         other +
-    //         insurance +
-    //         oda +
-    //         fuel;
-    //     if (total > 0) {
-    //         setFormData((prev) => ({
-    //             ...prev,
-    //             TotalAmt: total.toFixed(2), // two decimal points
-    //         }));
-    //     }
-    //     if (total > 0 && formData.totalgstPer > 0) {
-    //         const gstAmount = (total * parseFloat(formData.totalgstPer)) / 100;
-    //         total = total + gstAmount;
-    //         setGstData((prev) => ({
-    //             ...prev,
-    //             TotalGST: gstAmount.toFixed(2),
-    //             GSTPer: total.toFixed(2),
-    //         }));
-    //         setFormData((prev) => ({
-    //             ...prev,
-    //             TotalGST: gstAmount.toFixed(2),
-    //             TotalAmt: total.toFixed(2), // two decimal points
-    //         }));
-    //     }
-    // }, [
-    //     formData.Rate,
-    //     formData.FovChrgs,
-    //     formData.DocketChrgs,
-    //     formData.DeliveryChrgs,
-    //     formData.PackingChrgs,
-    //     formData.GreenChrgs,
-    //     formData.HamaliChrgs,
-    //     formData.OtherCharges,
-    //     formData.InsuranceChrgs,
-    //     formData.ODAChrgs,
-    //     formData.FuelCharges,
-    // ]);
-
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("bookingState"));
         if (savedState) {
@@ -587,6 +527,7 @@ function Booking() {
             setDispatchDate(savedState.dispatchDate || false);
             setIsShipChecked(savedState.isShipChecked || false);
             setIsReceChecked(savedState.isReceChecked || false);
+            setIsVenChecked(savedState.isVenChecked || false);
         }
         fetchReceiverData();
         fetchShipper();
@@ -623,6 +564,7 @@ function Booking() {
             isAllChecked: newValue,
             isShipChecked: newValue,
             isReceChecked: newValue,
+            isVenChecked: newValue,
         };
 
         // Update React states
@@ -643,6 +585,7 @@ function Booking() {
         setDispatchDate(newValue);
         setIsShipChecked(newValue);
         setIsReceChecked(newValue);
+        setIsVenChecked(newValue);
 
         // Save to localStorage
         localStorage.setItem("bookingState", JSON.stringify(allFields));
@@ -661,6 +604,7 @@ function Booking() {
             isFuelChecked,
             isReceChecked,
             isShipChecked,
+            isVenChecked,
             isRemarkChecked,
             isEWayChecked,
             isInvoiceNo,
@@ -685,6 +629,7 @@ function Booking() {
         isFuelChecked,
         isReceChecked,
         isShipChecked,
+        isVenChecked,
         isRemarkChecked,
         isEWayChecked,
         isInvoiceNo,
@@ -775,6 +720,11 @@ function Booking() {
         setIsReceChecked(e.target.checked);
         handleCheckboxChange('isReceChecked', e.target.checked);
     }
+
+    const handleVenCheck = (e) => {
+        setIsVenChecked(e.target.checked);
+        handleCheckboxChange('isVenChecked', e.target.checked);
+    }
     const fetchData = async (endpoint, setData) => {
         setLoading(true); // Set loading state to true
 
@@ -795,7 +745,19 @@ function Booking() {
     };
     const handleSaveReceiver = async (e) => {
         e.preventDefault();
-
+        const errors = [];
+        if (!addReceiver.receiverCode) errors.push("Consignee Code is required");
+        if (!addReceiver.receiverName) errors.push("Consignee Name is required");
+        if (!addReceiver.cityCode) errors.push("City Code is required");
+        if (!addReceiver.stateCode) errors.push("State Code is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             receiverCode: addReceiver.receiverCode,
             receiverName: addReceiver.receiverName,
@@ -847,7 +809,19 @@ function Booking() {
 
     const handleSaveShipper = async (e) => {
         e.preventDefault();
-
+         const errors = [];
+        if (!addShipper.shipperCode) errors.push("Shipper Code is required");
+        if (!addShipper.shipperName) errors.push("Shipper Name is required");
+        if (!addShipper.cityCode) errors.push("City Code is required");
+        if (!addShipper.stateCode) errors.push("State Code is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             shipperCode: addShipper.shipperCode,
             // customerCode: addReceiver.custCode,
@@ -1150,23 +1124,6 @@ function Booking() {
         };
         fetchModeData();
     }, []);
-
-    // 🎯 Mode Name Select Handler
-    const handleModeNameChange = (e) => {
-        const modeName = e.target.value;
-        setSelectedModeName(modeName);
-
-        const selectedMode = getMode.find((mode) => mode.Mode_Name === modeName);
-        if (selectedMode) {
-            setFormData((prevFormData) => ({
-                ...prevFormData,
-                Mode_Code: selectedMode.Mode_Code // ✅ this must match
-            }));
-        }
-    };
-
-    // Keep input synced with selected value
-    // 👈 formData.Shipper_Name हटा दिया
 
 
 
@@ -2576,7 +2533,7 @@ function Booking() {
                                     </div>
 
 
-                                    <div className="card border p-1 mx-0" style={{ overflowX: "hidden" }}>
+                                    <div className="card border p-1 mx-0" style={{ overflowX: "hidden", width: "100%" }}>
                                         <div className="section-title">Vendor Information</div>
 
                                         <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
@@ -2619,7 +2576,7 @@ function Booking() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                        {isVenChecked && <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
                                             <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
                                                 <div className="input-field" style={{ flex: "5", position: "relative" }}>
                                                     <label>Vendor Name</label>
@@ -2708,7 +2665,7 @@ function Booking() {
                                                     </button>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div>}
 
 
                                     </div>
@@ -2724,7 +2681,7 @@ function Booking() {
 
 
                         <div className="right-card" style={{ margin: "0px" }}>
-                            <div className="section-title">Receiver Docket Information</div>
+                            <div className="section-title">Consignee Docket Information</div>
                             <form
                                 onSubmit={handleSaveReceiverFromBooking}
                                 style={{ padding: 0, margin: 0, backgroundColor: "white" }}
@@ -2735,7 +2692,7 @@ function Booking() {
                                     <div className="row g-2 align-items-end">
                                         <div className="col-md-10 col-sm-9 col-12">
                                             <div className="input-field mt-2" style={{ width: "100%", position: "relative" }}>
-                                                <label>Receiver Name</label>
+                                                <label>Consignee Name</label>
                                                 <CreatableSelect
                                                     className="blue-selectbooking"
                                                     classNamePrefix="blue-selectbooking"
@@ -2786,7 +2743,7 @@ function Booking() {
                                                     isClearable
                                                     isSearchable
                                                     formatCreateLabel={(inputValue1) => `Create "${inputValue1}"`}
-                                                    placeholder="Select Receiver Name"
+                                                    placeholder="Select Consignee Name"
                                                     menuPortalTarget={document.body}
                                                     styles={{
                                                         menuPortal: (base) => ({ ...base, zIndex: 9999 }),
@@ -2841,20 +2798,20 @@ function Booking() {
                                         </div>
 
                                         <div className="input-field">
-                                            <label>Receiver Address</label>
+                                            <label>Consignee Address</label>
                                             <input
                                                 type="text"
-                                                placeholder="Receiver Address"
+                                                placeholder="Consignee Address"
                                                 value={formData.ConsigneeAdd1}
                                                 onChange={(e) => setFormData({ ...formData, ConsigneeAdd1: e.target.value })}
                                             />
                                         </div>
 
                                         <div className="input-field">
-                                            <label>Receiver Address2</label>
+                                            <label>Consignee Address2</label>
                                             <input
                                                 type="text"
-                                                placeholder="Receiver Address2"
+                                                placeholder="Consignee Address2"
                                                 value={formData.ConsigneeAdd2}
                                                 onChange={(e) => setFormData({ ...formData, ConsigneeAdd2: e.target.value })}
                                             />
@@ -3470,7 +3427,7 @@ function Booking() {
                                         </div>
 
                                         <div className="input-field3">
-                                            <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                            <button type="button" className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
                                                 onClick={handleGenerateCode}>Generate Code</button>
                                         </div>
 
@@ -3478,21 +3435,21 @@ function Booking() {
                                             <label htmlFor="">Shipper Name</label>
                                             <input type="text" value={addShipper.shipperName}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperName: e.target.value })}
-                                                placeholder="Shipper Name" required />
+                                                placeholder="Shipper Name"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addShipper.shipperAdd1}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperAdd1: e.target.value })}
-                                                placeholder="Address" required />
+                                                placeholder="Address"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addShipper.shipperAdd2}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperAdd2: e.target.value })}
-                                                placeholder="Address" required />
+                                                placeholder="Address"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -3500,7 +3457,7 @@ function Booking() {
                                             <input type="tel" id="pincode" name="pincode" maxLength="6"
                                                 value={addShipper.shipperPin}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperPin: e.target.value })}
-                                                placeholder="Pin Code" required />
+                                                placeholder="Pin Code"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -3580,28 +3537,28 @@ function Booking() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={addShipper.shipperMob}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperMob: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" required />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Email ID</label>
                                             <input type="email" value={addShipper.shipperEmail}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperEmail: e.target.value })}
-                                                placeholder="Email Id" required />
+                                                placeholder="Email Id"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">GST No</label>
                                             <input type="text" value={addShipper.gstNo}
                                                 onChange={(e) => setAddShipper({ ...addShipper, gstNo: e.target.value })}
-                                                placeholder="Gst No" required />
+                                                placeholder="Gst No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Company Name</label>
                                             <input type="text" value={addShipper.company}
                                                 onChange={(e) => setAddShipper({ ...addShipper, company: e.target.value })}
-                                                placeholder="Company Name" required />
+                                                placeholder="Company Name" />
                                         </div>
 
                                     </div>
@@ -3627,7 +3584,7 @@ function Booking() {
                         }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
-                                <header>Receiver Name Master</header>
+                                <header>Consignee Name Master</header>
                             </div>
 
                             <div className='container2'>
@@ -3644,30 +3601,30 @@ function Booking() {
 
 
                                         <div className="input-field3">
-                                            <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                            <button type="button" className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
                                                 onClick={handleGenerateCode1}>Generate Code</button>
                                         </div>
 
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Customer Name</label>
+                                            <label htmlFor="">Consignee Name</label>
                                             <input type="text" value={addReceiver.receiverName}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverName: e.target.value })}
-                                                placeholder="Customer Name" required />
+                                                placeholder="Consignee Name" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addReceiver.receiverAdd1}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverAdd1: e.target.value })}
-                                                placeholder="Address" required />
+                                                placeholder="Address" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addReceiver.receiverAdd2}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverAdd2: e.target.value })}
-                                                placeholder="Address" required />
+                                                placeholder="Address" />
                                         </div>
 
                                         <div className="input-field3">
@@ -3675,7 +3632,7 @@ function Booking() {
                                             <input type="tel" id="pincode" name="pincode" maxLength="6"
                                                 value={addReceiver.receiverPin}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverPin: e.target.value })}
-                                                placeholder="Pin Code" required />
+                                                placeholder="Pin Code" />
                                         </div>
 
                                         <div className="input-field3">
@@ -3755,28 +3712,28 @@ function Booking() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={addReceiver.receiverMob}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverMob: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" required />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Email ID</label>
                                             <input type="email" value={addReceiver.receiverEmail}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverEmail: e.target.value })}
-                                                placeholder="Email Id" required />
+                                                placeholder="Email Id" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">GST No</label>
                                             <input type="text" value={addReceiver.gstNo}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, gstNo: e.target.value })}
-                                                placeholder="Gst No" required />
+                                                placeholder="Gst No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">HSN No</label>
                                             <input type="text" value={addReceiver.hsnNo}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, hsnNo: e.target.value })}
-                                                placeholder="HSN No" required />
+                                                placeholder="HSN No" />
                                         </div>
 
                                         <div className="input-field2">
@@ -4489,7 +4446,7 @@ function Booking() {
                                             <input type="checkbox"
                                                 checked={isAllChecked}
                                                 onChange={handleAllChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="all" id="all" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 All Select</label>
                                         </div>
@@ -4498,7 +4455,7 @@ function Booking() {
                                             <input type="checkbox"
                                                 checked={isShipChecked}
                                                 onChange={handleShipCheck}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="ship" id="ship" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Shipper Details</label>
                                         </div>
@@ -4507,11 +4464,19 @@ function Booking() {
                                             <input type="checkbox"
                                                 checked={isReceChecked}
                                                 onChange={handleReceCheck}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="rec" id="rec" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Receiver Details</label>
+                                                Consingee Details</label>
                                         </div>
 
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isVenChecked}
+                                                onChange={handleVenCheck}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="ven" id="ven" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                Vendor Details</label>
+                                        </div>
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isFovChecked}

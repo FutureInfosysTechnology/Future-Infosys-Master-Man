@@ -333,7 +333,7 @@ function BankName() {
                                                         placeholder="Enter Code/ Generate Code"
                                                         value={addBank.BankCode}
                                                         onChange={(e) => setAddBank({ ...addBank, BankCode: e.target.value })}
-                                                        maxLength="3" readOnly={isEditMode} />
+                                                        maxLength="3" readOnly={isEditMode} required/>
                                                 </div>
 
                                                 {!isEditMode && (

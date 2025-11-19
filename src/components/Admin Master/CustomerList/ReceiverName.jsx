@@ -124,7 +124,19 @@ function ReceiverName() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-
+        const errors = [];
+        if (!addReceiver.receiverCode) errors.push("Consignee Code is required");
+        if (!addReceiver.receiverName) errors.push("Consignee Name is required");
+        if (!addReceiver.cityCode) errors.push("City Code is required");
+        if (!addReceiver.stateCode) errors.push("State Code is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             ReceiverCode: addReceiver.receiverCode,
             ReceiverName: addReceiver.receiverName,
@@ -176,6 +188,19 @@ function ReceiverName() {
 
     const handleSaveReceiver = async (e) => {
         e.preventDefault();
+        const errors = [];
+        if (!addReceiver.receiverCode) errors.push("Consignee Code is required");
+        if (!addReceiver.receiverName) errors.push("Consignee Name is required");
+        if (!addReceiver.cityCode) errors.push("City Code is required");
+        if (!addReceiver.stateCode) errors.push("State Code is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
 
         const requestBody = {
             receiverCode: addReceiver.receiverCode,
@@ -336,16 +361,15 @@ function ReceiverName() {
                                 <tr>
                                     <th scope="col">Actions</th>
                                     <th scope="col">Sr.No</th>
-                                    <th scope="col">Receiver_Code</th>
-                                    <th scope="col">Receiver_Name</th>
+                                    <th scope="col">Consignee_Code</th>
+                                    <th scope="col">Consignee_Name</th>
                                     <th scope="col">GST_No</th>
-                                    <th scope="col">Receiver_Add</th>
+                                    <th scope="col">Consignee_Add</th>
                                     <th scope="col">Pin_Code</th>
                                     <th scope="col">City_Name</th>
                                     <th scope="col">State_Name</th>
                                     <th scope="col">Mobile_No</th>
                                     <th scope="col">Email_ID</th>
-
                                     <th scope="col">HSN_No</th>
 
                                 </tr>
@@ -471,7 +495,7 @@ function ReceiverName() {
                         }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
-                                <header>Receiver Name Master</header>
+                                <header>Consignee Name Master</header>
                             </div>
 
                             <div className='container2'>
@@ -488,30 +512,30 @@ function ReceiverName() {
 
                                         {!isEditMode && (
                                             <div className="input-field3">
-                                                <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                                <button type="button" className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
                                                     onClick={handleGenerateCode}>Generate Code</button>
                                             </div>
                                         )}
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Customer Name</label>
+                                            <label htmlFor="">Consignee Name</label>
                                             <input type="text" value={addReceiver.receiverName}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverName: e.target.value })}
-                                                placeholder="Customer Name" required />
+                                                placeholder="Consignee Name"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addReceiver.receiverAdd1}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverAdd1: e.target.value })}
-                                                placeholder="Address" required />
+                                                placeholder="Address"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addReceiver.receiverAdd2}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverAdd2: e.target.value })}
-                                                placeholder="Address" required />
+                                                placeholder="Address"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -519,7 +543,7 @@ function ReceiverName() {
                                             <input type="tel" id="pincode" name="pincode" maxLength="6"
                                                 value={addReceiver.receiverPin}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverPin: e.target.value })}
-                                                placeholder="Pin Code" required />
+                                                placeholder="Pin Code"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -599,7 +623,7 @@ function ReceiverName() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={addReceiver.receiverMob}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, receiverMob: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" required />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -613,7 +637,7 @@ function ReceiverName() {
                                             <label htmlFor="">GST No</label>
                                             <input type="text" value={addReceiver.gstNo}
                                                 onChange={(e) => setAddReceiver({ ...addReceiver, gstNo: e.target.value })}
-                                                placeholder="Gst No"  />
+                                                placeholder="Gst No" />
                                         </div>
 
                                         <div className="input-field3">

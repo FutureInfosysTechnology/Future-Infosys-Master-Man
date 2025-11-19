@@ -40,6 +40,7 @@ function VendorBill() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [formData, setFormData] = useState({
+        vendorId:"",
         vendorCode: "",
         custCode: "",
         orgCode: "",
@@ -202,6 +203,63 @@ function VendorBill() {
         }
     };
 
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        if (!formData.vendorId) {
+            Swal.fire("Warning", "Vendor ID is required", "warning");
+        }
+        try {
+            const payload = {
+                VendorID:formData.vendorId,
+                BillNo: formData.billNo,
+                BillDate: formData.billDate,
+                BillFrom: formData.billFrom,
+                BillTo: formData.billTo,
+                VendorAWBNo: formData.vendorAwbNo,
+                Amount: formData.amount,
+                FuelCharges: formData.fuelChrgs,
+                OtherCharges: formData.otherChrgs,
+                GST: formData.gst,
+                TotalAmount: formData.totalAmt,
+
+                Customer_Code: formData.custCode,
+                Vendor_Code: formData.vendorCode,
+                Origin_Code: formData.orgCode,
+                Destination_Code: formData.destCode,
+                Mode_Code: formData.modeCode
+            };
+
+            const res = await putApi("/UpdateVendorBillMaster", payload);
+
+            if (res.status === 1) {
+                Swal.fire("Success", "Vendor Bill Updated Successfully!", "success");
+                await fetchVendorBill();
+                setFormData({
+                    vendorId:"",
+                    vendorCode: "",
+                    custCode: "",
+                    orgCode: "",
+                    destCode: "",
+                    modeCode: "",
+                    vendorAwbNo: "",
+                    billNo: "",
+                    billDate: getTodayDate(),
+                    billFrom: getTodayDate(),
+                    billTo: getTodayDate(),
+                    amount: 0,
+                    fuelChrgs: 0,
+                    otherChrgs: 0,
+                    gst: 0,
+                    totalAmt: 0,
+                });
+                setModalIsOpen(false);
+            }
+
+        } catch (err) {
+            Swal.fire("Error", err.message, "error");
+        }
+    };
+    
 
 
     /**************** function to export table data in excel and pdf ************/
@@ -386,6 +444,7 @@ function VendorBill() {
                                                         setIsEditMode(true);
                                                         setOpenRow(null);
                                                         setFormData({
+                                                            vendorId:row.VendorID,
                                                             vendorCode: row.Vendor_Code,
                                                             custCode: row.Customer_Code,
                                                             orgCode: row.Origin_Code,
@@ -767,7 +826,7 @@ function VendorBill() {
                                     </div>
                                     <div className='bottom-buttons'>
                                         {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
-                                        {isEditMode && (<button type='button' className='ok-btn'>Update</button>)}
+                                        {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
                                         <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                     </div>
                                 </form>

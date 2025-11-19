@@ -121,7 +121,19 @@ function EmployeeName() {
 
     const handleSaveEmp = async (e) => {
         e.preventDefault();
-
+         const errors = [];
+                // if (!formData.DocketNo) errors.push("DocketNo is required");
+                if (!addEmp.empCode) errors.push("Employee Code is required");
+                if (!addEmp.empName) errors.push("Employee Name is required");
+                if (!addEmp.cityCode) errors.push("Branch Name is required");
+                if (errors.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: errors.map(err => `<div>${err}</div>`).join(''),
+                    });
+                    return;
+                }
         const requestBody = {
             EmployeeName: addEmp.empName,
             EmployeeCode: addEmp.empCode,
@@ -404,7 +416,7 @@ function EmployeeName() {
 
                                                 {!isEditMode && (
                                                     <div className="input-field1">
-                                                        <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                                        <button type="button" className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
                                                             onClick={handleGenerateCode}>Generate Code</button>
                                                     </div>
                                                 )}
@@ -413,7 +425,7 @@ function EmployeeName() {
                                                     <label htmlFor="">Employee Name</label>
                                                     <input type="text" value={addEmp.empName}
                                                         onChange={(e) => setAddEmp({ ...addEmp, empName: e.target.value })}
-                                                        placeholder="Enter Employee Name" required />
+                                                        placeholder="Enter Employee Name"  />
                                                 </div>
 
                                                 <div className="input-field1">
@@ -473,7 +485,7 @@ function EmployeeName() {
                                                             value={addEmp.pass}
                                                             onChange={(e) => setAddEmp({ ...addEmp, pass: e.target.value })}
                                                             placeholder="Enter Password"
-                                                            required
+                                                            
                                                         />
                                                         <div
                                                             style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}

@@ -11,6 +11,7 @@ import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
 import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import Select from 'react-select';
 
 
 function VendorName() {
@@ -26,6 +27,7 @@ function VendorName() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [vendorData, setVendorData] = useState({
+        vendorID:'',
         vendorCode: '',
         vendorName: '',
         contactPerson: '',
@@ -114,19 +116,33 @@ function VendorName() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-
+         const errors = [];
+        // if (!formData.DocketNo) errors.push("DocketNo is required");
+        if (!vendorData.vendorName) errors.push("Vendor Name is required");
+        if (!vendorData.vendorCode) errors.push("Vendor Code is required");
+        if (!vendorData.cityCode) errors.push("City Name is required");
+        if (!vendorData.stateCode) errors.push("State Name is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
-            VendorCode: vendorData.vendorCode.trim(),
-            VendorName: vendorData.vendorName,
-            ContactPerson: vendorData.contactPerson,
-            VendorAdr: vendorData.vendAdd,
-            PinCode: vendorData.pinCode,
-            MobileNo: vendorData.vendMob,
-            MobileNo2: vendorData.contMob,
-            StateCode: vendorData.stateCode,
+            ID:vendorData.vendorID,
+            Vendor_Code: vendorData.vendorCode.trim(),
+            Vendor_Name: vendorData.vendorName,
+            Contact_Person: vendorData.contactPerson,
+            Vendor_Adr: vendorData.vendAdd,
+            Pin_Code: vendorData.pinCode,
+            Mobile_No: vendorData.vendMob,
+            Mobile_No_2: vendorData.contMob,
+            State_Code: vendorData.stateCode,
             Email: vendorData.email,
-            FuelCharges: vendorData.fuelCharge,
-            CityCode: vendorData.cityCode
+            Fuel_Charges: vendorData.fuelCharge,
+            City_Code: vendorData.cityCode
         }
 
         try {
@@ -134,6 +150,7 @@ function VendorName() {
             if (response.status === 1) {
                 setGetVendor(getVendor.map((vendor) => vendor.Vendor_Code === vendorData.vendorCode ? response.Data : vendor));
                 setVendorData({
+                    vendorID:'',
                     vendorCode: '',
                     vendorName: '',
                     contactPerson: '',
@@ -161,7 +178,20 @@ function VendorName() {
 
     const handleSaveVendor = async (e) => {
         e.preventDefault();
-
+         const errors = [];
+        // if (!formData.DocketNo) errors.push("DocketNo is required");
+        if (!vendorData.vendorName) errors.push("Vendor Name is required");
+        if (!vendorData.vendorCode) errors.push("Vendor Code is required");
+        if (!vendorData.cityCode) errors.push("City Name is required");
+        if (!vendorData.stateCode) errors.push("State Name is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             VendorCode: vendorData.vendorCode.trim(),
             VendorName: vendorData.vendorName,
@@ -181,6 +211,7 @@ function VendorName() {
             if (response.status === 1) {
                 setGetVendor([...getVendor, response.Data]);
                 setVendorData({
+                    vendorID:'',
                     vendorCode: '',
                     vendorName: '',
                     contactPerson: '',
@@ -282,6 +313,7 @@ function VendorName() {
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
                                 setVendorData({
+                                    vendorID:'',
                                     vendorCode: '', vendorName: '', contactPerson: '', pinCode: '',
                                     vendAdd: '', vendMob: '', contMob: '', stateCode: '', email: '',
                                     fuelCharge: '', cityCode: ''
@@ -313,7 +345,7 @@ function VendorName() {
                             <thead className='table-sm'>
                                 <tr>
                                     <th scope="col" style={{ width: "250px" }}>Actions</th>
-                                    <th scope="col">Sr.No</th>
+                                    <th scope="col">Vendor_ID</th>
                                     <th scope="col">Vendor_Code</th>
                                     <th scope="col">Vendor_Name</th>
                                     <th scope="col">Mobile_No</th>
@@ -328,7 +360,7 @@ function VendorName() {
                             </thead>
                             <tbody className='table-body'>
                                 {currentRows.map((vendor, index) => (
-                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                    <tr key={vendor.ID} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
                                             <PiDotsThreeOutlineVerticalFill
                                                 style={{ fontSize: "20px", cursor: "pointer" }}
@@ -342,7 +374,7 @@ function VendorName() {
                                                         flexDirection: "row",
                                                         position: "absolute",
                                                         alignItems: "center",
-                                                        left: "130px",
+                                                        left: "60px",
                                                         top: "0px",
                                                         borderRadius: "10px",
                                                         backgroundColor: "white",
@@ -357,6 +389,7 @@ function VendorName() {
                                                     setIsEditMode(true);
                                                     setOpenRow(null);
                                                     setVendorData({
+                                                        vendorID:vendor.ID,
                                                         vendorCode: vendor.Vendor_Code.trim(),
                                                         vendorName: vendor.Vendor_Name,
                                                         vendAdd: vendor.Vendor_Adr,
@@ -382,7 +415,7 @@ function VendorName() {
                                                 </div>
                                             )}
                                         </td>
-                                        <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                                        <td>{vendor.ID}</td>
                                         <td>{vendor.Vendor_Code}</td>
                                         <td>{vendor.Vendor_Name}</td>
                                         <td>{vendor.Mobile_No}</td>
@@ -433,7 +466,15 @@ function VendorName() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-vendor" contentLabel="Modal">
+                        className="custom-modal-vendor" contentLabel="Modal" 
+                         style={{
+                            content: {
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Vendor Name Master</header>
@@ -453,7 +494,7 @@ function VendorName() {
 
                                         {!isEditMode && (
                                             <div className="input-field3">
-                                                <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                                <button type="button" className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
                                                     onClick={handleGenerateCode}>Generate Code</button>
                                             </div>
                                         )}
@@ -462,7 +503,7 @@ function VendorName() {
                                             <label htmlFor="">Vendor Name</label>
                                             <input type="text" placeholder="Enter Vendor Name"
                                                 value={vendorData.vendorName}
-                                                onChange={(e) => setVendorData({ ...vendorData, vendorName: e.target.value })} required />
+                                                onChange={(e) => setVendorData({ ...vendorData, vendorName: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
@@ -470,13 +511,13 @@ function VendorName() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={vendorData.vendMob}
                                                 onChange={(e) => setVendorData({ ...vendorData, vendMob: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No" required />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Email ID</label>
                                             <input type="email" placeholder="Enter Email Id"
-                                                value={vendorData.email} required
+                                                value={vendorData.email}
                                                 onChange={(e) => setVendorData({ ...vendorData, email: e.target.value })} />
                                         </div>
 
@@ -484,7 +525,7 @@ function VendorName() {
                                             <label htmlFor="">Address</label>
                                             <input type="text" placeholder="Enter Address"
                                                 value={vendorData.vendAdd}
-                                                onChange={(e) => setVendorData({ ...vendorData, vendAdd: e.target.value })} required />
+                                                onChange={(e) => setVendorData({ ...vendorData, vendAdd: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3" >
@@ -492,34 +533,84 @@ function VendorName() {
                                             <input type="tel" id="pincode" name="pincode" maxLength="6"
                                                 value={vendorData.pinCode}
                                                 onChange={(e) => setVendorData({ ...vendorData, pinCode: e.target.value })}
-                                                placeholder="Enter Pin Code" required />
+                                                placeholder="Enter Pin Code" />
                                         </div>
 
-                                        <div className="input-field3">
+                                         <div className="input-field3">
                                             <label htmlFor="">City Name</label>
-                                            <select value={vendorData.cityCode}
-                                                onChange={(e) => setVendorData({ ...vendorData, cityCode: e.target.value })} required>
-                                                <option value="" disabled>Select City</option>
-                                                {international.map((city, index) => (
-                                                    <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={international.map((city) => ({
+                                                    value: city.City_Code,
+                                                    label: city.City_Name,
+                                                }))}
+                                                value={
+                                                    vendorData.cityCode
+                                                        ? {
+                                                            value: vendorData.cityCode,
+                                                            label:
+                                                                international.find((c) => c.City_Code === vendorData.cityCode)
+                                                                    ?.City_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setVendorData({
+                                                        ...vendorData,
+                                                        cityCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select City"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">State Name</label>
-                                            <select value={vendorData.stateCode}
-                                                onChange={(e) => setVendorData({ ...vendorData, stateCode: e.target.value })} required>
-                                                <option value="" disabled>Select State</option>
-                                                {state.map((state, index) => (
-                                                    <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={state.map((st) => ({
+                                                    value: st.State_Code,
+                                                    label: st.State_Name,
+                                                }))}
+                                                value={
+                                                    vendorData.stateCode
+                                                        ? {
+                                                            value: vendorData.stateCode,
+                                                            label:
+                                                                state.find((s) => s.State_Code === vendorData.stateCode)
+                                                                    ?.State_Name || "",
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selected) =>
+                                                    setVendorData({
+                                                        ...vendorData,
+                                                        stateCode: selected ? selected.value : "",
+                                                    })
+                                                }
+                                                placeholder="Select State"
+                                                isSearchable={true}
+                                                isClearable={false}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                }}
+                                            />
+
                                         </div>
 
                                         <div className="input-field3" >
                                             <label htmlFor="">Contact Person</label>
-                                            <input type="text" placeholder="Enter Contact Person" required
+                                            <input type="text" placeholder="Enter Contact Person"
                                                 value={vendorData.contactPerson}
                                                 onChange={(e) => setVendorData({ ...vendorData, contactPerson: e.target.value })} />
                                         </div>
@@ -529,27 +620,16 @@ function VendorName() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={vendorData.contMob}
                                                 onChange={(e) => setVendorData({ ...vendorData, contMob: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No" required />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Fuel %</label>
-                                            <input type="text" placeholder="Enter Client Fuel %" required
+                                            <input type="text" placeholder="Enter Client Fuel %" 
                                                 value={vendorData.fuelCharge}
                                                 onChange={(e) => setVendorData({ ...vendorData, fuelCharge: e.target.value })} />
                                         </div>
 
-                                    </div>
-
-                                    <div className="select-radio">
-                                        <input type="checkbox" name="mode" id="SMS" />
-                                        <img src={sms} />
-
-                                        <input type="checkbox" name="mode" id="E-mail" />
-                                        <img src={mail} />
-
-                                        <input type="checkbox" name="mode" id="Fax" />
-                                        <img src={whatsapp} />
                                     </div>
 
                                     <div className='bottom-buttons'>

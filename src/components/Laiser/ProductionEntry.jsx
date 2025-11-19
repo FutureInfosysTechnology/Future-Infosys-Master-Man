@@ -13,18 +13,18 @@ function ProductionEntry() {
         if (Array.isArray(response?.Data)) return response.Data;
         return [];
     };
-     const navigate=useNavigate();
-    const location=useLocation();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [formData, setFormData] = useState({
         CreditNote_ID: "",
         date: new Date(),
         customer: "",
         noteNo: "",
-        docketNo:"",
+        docketNo: "",
         parti: "",
         remark: "",
         amount: "",
-        docketNo:"",
+        docketNo: "",
     });
 
     const [getCustomer, setGetCustomer] = useState([]);
@@ -34,12 +34,12 @@ function ProductionEntry() {
     const [openRow, setOpenRow] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     function formatDateToYMD(dateStr) {
-    if (!dateStr) return "";
+        if (!dateStr) return "";
 
-    const [dd, mm, yyyy] = dateStr.split("/");
+        const [dd, mm, yyyy] = dateStr.split("/");
 
-    return `${yyyy}-${mm}-${dd}`;
-}
+        return `${yyyy}-${mm}-${dd}`;
+    }
 
     // 🔄 Fetch helper
     const fetchData = async (endpoint, setData) => {
@@ -83,7 +83,7 @@ function ProductionEntry() {
             date: new Date(),
             customer: "",
             noteNo: "",
-            docketNo:"",
+            docketNo: "",
             parti: "",
             remark: "",
             amount: "",
@@ -94,16 +94,15 @@ function ProductionEntry() {
 
     // 💾 ADD / SAVE Credit Note
     const handleSave = async (e) => {
-                e.preventDefault();
-        if(!formData.customer || !formData.date || !formData.noteNo)
-        {
-            return Swal.fire("Warning","Customer ,Date and Docket No is required", "warning");
+        e.preventDefault();
+        if (!formData.customer || !formData.date || !formData.noteNo) {
+            return Swal.fire("Warning", "Customer ,Date and Docket No is required", "warning");
         }
 
 
         const payload = {
             Note_No: formData.noteNo,
-            Docket_No:formData.docketNo,
+            Docket_No: formData.docketNo,
             Note_Date: (formData.date),
             Customer_Code: String(formData.customer),
             Particulars: formData.parti,
@@ -134,7 +133,7 @@ function ProductionEntry() {
         const payload = {
             CreditNote_ID: formData.CreditNote_ID,
             Note_No: formData.noteNo,
-            Docket_No:formData.docketNo,
+            Docket_No: formData.docketNo,
             Note_Date: (formData.date),
             Customer_Code: formData.customer,
             Particulars: formData.parti,
@@ -194,15 +193,15 @@ function ProductionEntry() {
         setIsEditMode(true);
     };
     const handleOpenCreditPrint = (invNo) => {
-      navigate("/creditprint",{state:{invoiceNo:invNo,from:location.pathname,tab:"creditNote"}})
+        navigate("/creditprint", { state: { invoiceNo: invNo, from: location.pathname, tab: "creditNote" } })
     };
     return (
         <>
             <div className="body">
                 <div className="container1">
-                    <form onSubmit={handleSave} style={{ margin: "0px", padding: "0px",background:" #f2f4f3" }}>
+                    <form onSubmit={handleSave} style={{ margin: "0px", padding: "0px", background: " #f2f4f3" }}>
                         <div className="fields2">
-                             <div className="input-field1">
+                            <div className="input-field1">
                                 <label>Customer</label>
                                 <Select
                                     options={getCustomer.map((cust) => ({
@@ -237,7 +236,7 @@ function ProductionEntry() {
                                 />
                             </div>
 
-                             <div className="input-field3">
+                            <div className="input-field3">
                                 <label>Note Date</label>
                                 <DatePicker
                                     portalId="root-portal"
@@ -259,7 +258,7 @@ function ProductionEntry() {
                                 />
                             </div>
 
-                           <div className="input-field3">
+                            <div className="input-field3">
                                 <label>Docket No</label>
                                 <input
                                     type="text"
@@ -282,6 +281,18 @@ function ProductionEntry() {
                             </div>
 
                             <div className="input-field3">
+                                <label>Amount</label>
+                                <input
+                                    type="number"
+                                    placeholder="Enter amount"
+                                    name="amount"
+                                    value={formData.amount}
+                                    onChange={handleFormChange}
+                                />
+                            </div>
+
+
+                            <div className="input-field3">
                                 <label>Remark</label>
                                 <input
                                     type="text"
@@ -292,47 +303,37 @@ function ProductionEntry() {
                                 />
                             </div>
 
-                            <div className="input-field3">
-                                <label>Amount</label>
-                                <input
-                                    type="number"
-                                    placeholder="Enter amount"
-                                    name="amount"
-                                    value={formData.amount}
-                                    onChange={handleFormChange}
-                                />
-                            </div>
                             {/* BUTTONS */}
-                    <div
-                    className="input-field3"
-                        style={{
-                            display: "flex",
-                            flexDirection:"row",
-                            alignItems:"end",
-                            flexWrap: "wrap",
-                            marginTop:"16px",
-                            padding:"0px",
-                            flex:1,
-                           
-                
-                        }}
-                    >
-                        <div className="bottom-buttons" style={{padding:"0px"}}>
-                            {!isEditMode && (<button  className="ok-btn" onClick={handleSave} style={{margin:"0px"}}>
-                                Save
-                            </button>)}
-                        </div>
-                        <div className="bottom-buttons" style={{padding:"0px"}}>
-                            {isEditMode && (<button  type="button" className="ok-btn" onClick={handleUpdate} style={{margin:"0px"}}>
-                                Update
-                            </button>)}
-                        </div>
-                        <div className="bottom-buttons" style={{padding:"0px"}}>
-                            <button className="ok-btn" type="button" onClick={handleReset} style={{margin:"0px"}}>
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
+                            <div
+                                className="input-field3"
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "end",
+                                    flexWrap: "wrap",
+                                    marginTop: "16px",
+                                    padding: "0px",
+                                    flex: 1,
+
+
+                                }}
+                            >
+                                <div className="bottom-buttons" style={{ padding: "0px" }}>
+                                    {!isEditMode && (<button className="ok-btn" onClick={handleSave} style={{ margin: "0px" }}>
+                                        Save
+                                    </button>)}
+                                </div>
+                                <div className="bottom-buttons" style={{ padding: "0px" }}>
+                                    {isEditMode && (<button type="button" className="ok-btn" onClick={handleUpdate} style={{ margin: "0px" }}>
+                                        Update
+                                    </button>)}
+                                </div>
+                                <div className="bottom-buttons" style={{ padding: "0px" }}>
+                                    <button className="ok-btn" type="button" onClick={handleReset} style={{ margin: "0px" }}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
 
@@ -382,11 +383,11 @@ function ProductionEntry() {
                                                         padding: "10px",
                                                     }}
                                                 >
-                                                     <button className='edit-btn' onClick={() => handleOpenCreditPrint("001")}>
-                                                            <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
-                                                        </button>
+                                                    <button className='edit-btn' onClick={() => handleOpenCreditPrint("001")}>
+                                                        <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
+                                                    </button>
                                                     <button className="edit-btn">
-                                                        <i className="bi bi-pen" style={{ fontSize: "15px" }}  onClick={() => handleRowClick(note)}></i>
+                                                        <i className="bi bi-pen" style={{ fontSize: "15px" }} onClick={() => handleRowClick(note)}></i>
                                                     </button>
                                                     <button onClick={() => handleDelete(note.CreditNote_ID)} className="edit-btn">
                                                         <i className="bi bi-trash" style={{ fontSize: "15px" }}></i>

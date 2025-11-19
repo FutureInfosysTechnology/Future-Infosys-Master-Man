@@ -123,6 +123,19 @@ function ShipperName() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+         const errors = [];
+        if (!addShipper.shipperCode) errors.push("Shipper Code is required");
+        if (!addShipper.shipperName) errors.push("Shipper Name is required");
+        if (!addShipper.cityCode) errors.push("City Code is required");
+        if (!addShipper.stateCode) errors.push("State Code is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             Shipper_Code: addShipper.shipperCode,
             Shipper_Name: addShipper.shipperName,
@@ -169,7 +182,19 @@ function ShipperName() {
 
     const handleSaveShipper = async (e) => {
         e.preventDefault();
-
+        const errors = [];
+        if (!addShipper.shipperCode) errors.push("Shipper Code is required");
+        if (!addShipper.shipperName) errors.push("Shipper Name is required");
+        if (!addShipper.cityCode) errors.push("City Code is required");
+        if (!addShipper.stateCode) errors.push("State Code is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             shipperCode: addShipper.shipperCode,
             // customerCode: addReceiver.custCode,
@@ -483,7 +508,7 @@ function ShipperName() {
                                         </div>
 
                                         <div className="input-field3">
-                                            <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                            <button type="button" className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
                                                 onClick={handleGenerateCode}>Generate Code</button>
                                         </div>
 
@@ -491,21 +516,21 @@ function ShipperName() {
                                             <label htmlFor="">Shipper Name</label>
                                             <input type="text" value={addShipper.shipperName}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperName: e.target.value })}
-                                                placeholder="Shipper Name" required />
+                                                placeholder="Shipper Name"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addShipper.shipperAdd1}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperAdd1: e.target.value })}
-                                                placeholder="Address" required />
+                                                placeholder="Address"  />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addShipper.shipperAdd2}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperAdd2: e.target.value })}
-                                                placeholder="Address" required />
+                                                placeholder="Address"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -513,7 +538,7 @@ function ShipperName() {
                                             <input type="tel" id="pincode" name="pincode" maxLength="6"
                                                 value={addShipper.shipperPin}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperPin: e.target.value })}
-                                                placeholder="Pin Code" required />
+                                                placeholder="Pin Code"  />
                                         </div>
 
                                         <div className="input-field3">
@@ -593,7 +618,7 @@ function ShipperName() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={addShipper.shipperMob}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperMob: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" required />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" />
                                         </div>
 
                                         <div className="input-field3">

@@ -25,7 +25,7 @@ function CustomerList() {
                     <nav className="nav">
                         <label onClick={() => setActiveTab('zone')}>Customer Name</label>
                         <label onClick={() => setActiveTab('state')}>Customer Rate</label>
-                        <label onClick={() => setActiveTab('multiple')}>Receiver Name</label>
+                        <label onClick={() => setActiveTab('multiple')}>Consignee Name</label>
                         <label onClick={() => setActiveTab('shipper')}>Shipper Name</label>
                         <label onClick={() => setActiveTab('country')}>Customer Volumetric</label>
 

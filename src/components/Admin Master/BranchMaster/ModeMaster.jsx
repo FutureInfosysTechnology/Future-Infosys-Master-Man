@@ -328,7 +328,7 @@ function ModeMaster() {
                                                     placeholder="Enter Code/ Generate Code"
                                                     value={addMode.modeCode}
                                                     onChange={(e) => setAddMode({ ...addMode, modeCode: e.target.value })}
-                                                    readOnly={isEditMode} />
+                                                    readOnly={isEditMode} required/>
                                             </div>
 
                                             {!isEditMode && (

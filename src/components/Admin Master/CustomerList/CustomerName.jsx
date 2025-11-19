@@ -188,7 +188,24 @@ function CustomerName() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-
+        const errors = [];
+        if (!addCustData.custCode) errors.push("Customer Code is required");
+        if (!addCustData.custName) errors.push("Customer Name is required");
+        if (!addCustData.bankBranch) errors.push("Branch is required");
+        if (!addCustData.custStatus) errors.push("Customer Status is required");
+        if (!addCustData.bookingType) errors.push("Booking Mode is required");
+        if (!addCustData.billPeriod) errors.push("Billing Period is required");
+        if (!addCustData.cityCode) errors.push("City Code is required");
+        if (!addCustData.stateCode) errors.push("State Code is required");
+        if (!addCustData.gstType) errors.push("GST Type is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             CustomerCode: addCustData.custCode,
             CustomerName: addCustData.custName,
@@ -291,7 +308,24 @@ function CustomerName() {
 
     const handleSaveCustomerName = async (e) => {
         e.preventDefault();
-
+        const errors = [];
+        if (!addCustData.custCode) errors.push("Customer Code is required");
+        if (!addCustData.custName) errors.push("Customer Name is required");
+        if (!addCustData.bankBranch) errors.push("Branch is required");
+        if (!addCustData.custStatus) errors.push("Customer Status is required");
+        if (!addCustData.bookingType) errors.push("Booking Mode is required");
+        if (!addCustData.billPeriod) errors.push("Billing Period is required");
+        if (!addCustData.cityCode) errors.push("City Code is required");
+        if (!addCustData.stateCode) errors.push("State Code is required");
+        if (!addCustData.gstType) errors.push("GST Type is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             customerCode: addCustData.custCode,
             customerName: addCustData.custName,
@@ -780,19 +814,19 @@ function CustomerName() {
                                                         placeholder="Enter Code/ Generate Code"
                                                         value={addCustData.custCode}
                                                         onChange={(e) => setAddCustData({ ...addCustData, custCode: e.target.value })}
-                                                        maxLength="3" required readOnly={isEditMode} />
+                                                        maxLength="3" readOnly={isEditMode} />
                                                 </div>
 
                                                 {!isEditMode && (
                                                     <div className="input-field3">
-                                                        <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                                        <button type="button" className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
                                                             onClick={handleGenerateCode}>Generate Code</button>
                                                     </div>
                                                 )}
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Customer Name</label>
-                                                    <input type="text" placeholder="Customer Name" required
+                                                    <input type="text" placeholder="Customer Name"
                                                         value={addCustData.custName}
                                                         onChange={(e) => setAddCustData({ ...addCustData, custName: e.target.value })} />
                                                 </div>
@@ -835,42 +869,42 @@ function CustomerName() {
                                                     <label htmlFor="">Customer Mobile No</label>
                                                     <input type="tel" maxLength="10" id="mobile"
                                                         name="mobile" pattern="[0-9]{10}" placeholder="Customer Mobile No"
-                                                        value={addCustData.custMob} required
+                                                        value={addCustData.custMob}
                                                         onChange={(e) => setAddCustData({ ...addCustData, custMob: e.target.value })} />
                                                 </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Email ID</label>
                                                     <input type="email" placeholder="Email Id"
-                                                        value={addCustData.emailID} required
+                                                        value={addCustData.emailID}
                                                         onChange={(e) => setAddCustData({ ...addCustData, emailID: e.target.value })} />
                                                 </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Address</label>
                                                     <input type="text" placeholder="Address"
-                                                        value={addCustData.custAdd1} required
+                                                        value={addCustData.custAdd1}
                                                         onChange={(e) => setAddCustData({ ...addCustData, custAdd1: e.target.value })} />
                                                 </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Address</label>
                                                     <input type="text" placeholder="Address"
-                                                        value={addCustData.custAdd2} required
+                                                        value={addCustData.custAdd2}
                                                         onChange={(e) => setAddCustData({ ...addCustData, custAdd2: e.target.value })} />
                                                 </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Address</label>
                                                     <input type="text" placeholder="Address"
-                                                        value={addCustData.custAdd3} required
+                                                        value={addCustData.custAdd3}
                                                         onChange={(e) => setAddCustData({ ...addCustData, custAdd3: e.target.value })} />
                                                 </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Pin code</label>
                                                     <input type="tel" id="pincode" name="pincode" maxLength="6"
-                                                        placeholder="Pin Code" value={addCustData.pinCode} required
+                                                        placeholder="Pin Code" value={addCustData.pinCode}
                                                         onChange={(e) => setAddCustData({ ...addCustData, pinCode: e.target.value })} />
                                                 </div>
 
@@ -950,14 +984,14 @@ function CustomerName() {
                                                     <label htmlFor="">GST No</label>
                                                     <input type="tel" value={addCustData.gstNo}
                                                         onChange={(e) => setAddCustData({ ...addCustData, gstNo: e.target.value })}
-                                                        placeholder="Gst No." required />
+                                                        placeholder="Gst No." />
                                                 </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">HSN No</label>
                                                     <input type="text" value={addCustData.hsnNo}
                                                         onChange={(e) => setAddCustData({ ...addCustData, hsnNo: e.target.value })}
-                                                        placeholder="HSN No" required />
+                                                        placeholder="HSN No" />
                                                 </div>
 
                                                 <div className="input-field3">
@@ -997,7 +1031,7 @@ function CustomerName() {
                                                             borderTopRightRadius: "0px", borderBottomRightRadius: "0px"
                                                         }} type="text" placeholder="GST" value={addCustData.gst}
                                                             onChange={(e) => setAddCustData({ ...addCustData, gst: e.target.value })}
-                                                            disabled={!isGstEnabled} required />
+                                                            disabled={!isGstEnabled} />
                                                         <select style={{
                                                             width: "30%", borderLeft: "transparent",
                                                             borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
@@ -1018,7 +1052,7 @@ function CustomerName() {
                                                             borderTopRightRadius: "0px", borderBottomRightRadius: "0px"
                                                         }} type="text" placeholder="Fuel" value={addCustData.fuel}
                                                             onChange={(e) => setAddCustData({ ...addCustData, fuel: e.target.value })}
-                                                            disabled={!isFuelEnabled} required />
+                                                            disabled={!isFuelEnabled} />
                                                         <select style={{
                                                             width: "30%", borderLeft: "transparent",
                                                             borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
@@ -1039,7 +1073,7 @@ function CustomerName() {
                                                             borderTopRightRadius: "0px", borderBottomRightRadius: "0px"
                                                         }} type="text" placeholder="Discount" value={addCustData.discount}
                                                             onChange={(e) => setAddCustData({ ...addCustData, discount: e.target.value })}
-                                                            disabled={!isDiscountEnabled} required />
+                                                            disabled={!isDiscountEnabled} />
                                                         <select style={{
                                                             width: "30%", borderLeft: "transparent",
                                                             borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px",
@@ -1126,7 +1160,7 @@ function CustomerName() {
                                                     <label htmlFor="">Contant Person</label>
                                                     <input type="text" value={addCustData.contactPerson}
                                                         onChange={(e) => setAddCustData({ ...addCustData, contactPerson: e.target.value })}
-                                                        placeholder="Contact Person" required />
+                                                        placeholder="Contact Person" />
                                                 </div>
 
                                                 <div className="input-field3">
@@ -1134,14 +1168,14 @@ function CustomerName() {
                                                     <input type="tel" maxLength="10"
                                                         value={addCustData.contactPersonMob}
                                                         onChange={(e) => setAddCustData({ ...addCustData, contactPersonMob: e.target.value })}
-                                                        name="contactPersonMob" pattern="[0-9]{10}" placeholder="Mobile No" required />
+                                                        name="contactPersonMob" pattern="[0-9]{10}" placeholder="Mobile No" />
                                                 </div>
 
                                                 <div className="input-field3">
                                                     <label htmlFor="">Description</label>
                                                     <input type="text" placeholder="Description"
                                                         value={addCustData.description}
-                                                        onChange={(e) => setAddCustData({ ...addCustData, description: e.target.value })} required />
+                                                        onChange={(e) => setAddCustData({ ...addCustData, description: e.target.value })} />
                                                 </div>
 
                                                 <div className="input-field3">
@@ -1311,7 +1345,7 @@ function CustomerName() {
 
                                         <div className="input-field1">
                                             <label htmlFor="">Contract Amount</label>
-                                            <input type="text" placeholder="Enter Contract Amount" required
+                                            <input type="text" placeholder="Enter Contract Amount"
                                                 value={contractData.contractAmount}
                                                 onChange={(e) => setContractData({ ...contractData, contractAmount: e.target.value })} />
                                         </div>
@@ -1320,19 +1354,19 @@ function CustomerName() {
                                             <label htmlFor="">Advance Amount</label>
                                             <input type="text" placeholder="Advance Amount"
                                                 value={contractData.advAmt}
-                                                onChange={(e) => setContractData({ ...contractData, advAmt: e.target.value })} required />
+                                                onChange={(e) => setContractData({ ...contractData, advAmt: e.target.value })} />
                                         </div>
 
                                         <div className="input-field1">
                                             <label htmlFor="">Deposit Amount</label>
-                                            <input type="text" placeholder="Enter Deposit Amount" required
+                                            <input type="text" placeholder="Enter Deposit Amount"
                                                 value={contractData.depositAmount}
                                                 onChange={(e) => setContractData({ ...contractData, depositAmount: e.target.value })} />
                                         </div>
 
                                         <div className="input-field1">
                                             <label htmlFor="">Balance</label>
-                                            <input type="text" placeholder="Enter Balance" required
+                                            <input type="text" placeholder="Enter Balance"
                                                 value={contractData.balance}
                                                 onChange={(e) => setContractData({ ...contractData, balance: e.target.value })} />
                                         </div>

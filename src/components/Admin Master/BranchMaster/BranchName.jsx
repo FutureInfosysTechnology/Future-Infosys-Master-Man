@@ -145,6 +145,20 @@ function BranchName() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+         const errors = [];
+        // if (!formData.DocketNo) errors.push("DocketNo is required");
+        if (!branchData.branchCode) errors.push("Branch Name is required");
+        if (!branchData.bankCode) errors.push("Bank Code is required");
+        if (!branchData.cityCode) errors.push("City Name is required");
+        if (!branchData.stateCode) errors.push("State Name is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
         const requestBody = {
             branchCode: branchData.branchCode,
             branchName: branchData.branchName,
@@ -219,7 +233,9 @@ function BranchName() {
         const errors = [];
         // if (!formData.DocketNo) errors.push("DocketNo is required");
         if (!branchData.branchCode) errors.push("Branch Name is required");
-        if (!branchData.stateCode) errors.push("Branch Satet is required");
+        if (!branchData.bankCode) errors.push("Bank Code is required");
+        if (!branchData.cityCode) errors.push("City Name is required");
+        if (!branchData.stateCode) errors.push("State Name is required");
         if (errors.length > 0) {
             Swal.fire({
                 icon: 'error',

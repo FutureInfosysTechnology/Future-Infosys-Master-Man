@@ -19,8 +19,8 @@ function PaymentEntry() {
         return [];
     }
     const [getCustomer, setGetCustomer] = useState([]);
-     const [loading, setLoading] = useState(true);
-        const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [zones, setZones] = useState([]);
     const [editIndex, setEditIndex] = useState(null);
     const [modalData, setModalData] = useState({ code: '', name: '' });
@@ -31,6 +31,7 @@ function PaymentEntry() {
         fromDate: firstDayOfMonth,
         toDate: today,
         customer: "",
+       
 
     });
         const fetchData = async (endpoint, setData) => {
@@ -191,6 +192,8 @@ function PaymentEntry() {
                                 />
 
                             </div>
+
+                            
 
                             <div className="input-field3" style={{width:"150px"}}>
                                 <label htmlFor="">From Date</label>
