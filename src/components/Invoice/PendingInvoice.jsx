@@ -240,7 +240,7 @@ function PendingInvoice() {
                     <form onSubmit={handleSubmit} style={{ margin: "0px", padding: "0px",backgroundColor:"#f2f4f3" }}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
                             <div className="input-field1">
-                                <label htmlFor="">Customer</label>
+                                <label htmlFor="">Customer Name</label>
                                 <Select
                                     options={customerOptions}
                                     value={customerOptions.find(opt => opt.value === formData.customer) || null}
@@ -295,7 +295,7 @@ function PendingInvoice() {
                                 />
                             </div>
                             <div className="input-field1">
-                                <label htmlFor="">Branch Name</label>
+                                <label htmlFor="">Mode Name</label>
                                 <Select
                                     options={modeOptions}
                                     value={modeOptions.find(opt => opt.value === formData.mode) || null}
@@ -305,7 +305,7 @@ function PendingInvoice() {
                                             mode: selectedOption ? selectedOption.value : ""
                                         })
                                     }
-                                    placeholder="Select Branch"
+                                    placeholder="Select Mode"
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"

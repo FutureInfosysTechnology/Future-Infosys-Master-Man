@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 
@@ -23,9 +24,8 @@ function PaymentReceived() {
     const [getBankName, setGetBankName] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [zones, setZones] = useState([]);
+    const [data, setData] = useState([]);
     const [isEditMode, setIsEditMode] = useState(null);
-    const [modalData, setModalData] = useState({ code: '', name: '' });
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -64,23 +64,38 @@ function PaymentReceived() {
         }
     };
 
-
+    const fetchPaymentData = async () => {
+        try {
+            const response = await getApi("/getPaymentOutstandingData");
+            console.log("API Response for", response);  // 👀 Check here
+            setData(extrectArray(response));
+        } catch (err) {
+            console.error('Fetch Error:', err);
+        } finally {
+        }
+    };
     useEffect(() => {
         fetchData('/Master/getCustomerdata', setGetCustomer);
         fetchData('/Master/GetAllBranchData', setGetBranch);
         fetchData('/Master/Getbank', setGetBankName);
+        fetchPaymentData();
     }, []);
     const handleFormChange = (value, key) => {
         setFormData({ ...formData, [key]: value })
     }
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;
-
+    const [openRow, setOpenRow] = useState(null);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = zones.slice(indexOfFirstRow, indexOfLastRow);
+    const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
 
-    const totalPages = Math.ceil(zones.length / rowsPerPage);
+    const totalPages = Math.ceil(data.length / rowsPerPage);
+    const ymdToDmy = (dateStr) => {
+        if(!dateStr) return "";
+  const [year, month, day] = dateStr.split("-");
+  return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+};
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -105,7 +120,8 @@ function PaymentReceived() {
 
             if (response?.success) {
                 Swal.fire("Success", "Payment Received Added Successfully", "success");
-
+                setModalIsOpen(false);
+                await fetchPaymentData();
 
                 // Reset form
                 setAddPayment({
@@ -148,8 +164,8 @@ function PaymentReceived() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                const updatedZones = zones.filter((_, i) => i !== index);
-                setZones(updatedZones);
+                const updatedZones = data.filter((_, i) => i !== index);
+                setData(updatedZones);
                 Swal.fire(
                     'Deleted!',
                     'Your zone has been deleted.',
@@ -164,9 +180,9 @@ function PaymentReceived() {
 
     /**************** function to export table data in excel and pdf ************/
     const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(zones);
+        const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Zones');
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'data');
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
         saveAs(file, 'zones.xlsx');
@@ -215,7 +231,7 @@ function PaymentReceived() {
                     <form action="" style={{ margin: "0px", background: " #f2f4f3" }}>
 
                         <div className="fields2">
-                            <div className="input-field">
+                            <div className="input-field1">
                                 <label htmlFor="">Customer Name</label>
                                 <Select
                                     options={getCustomer.map(cust => ({
@@ -224,9 +240,10 @@ function PaymentReceived() {
                                     }))}
                                     value={
                                         formData.customer
-                                            ? { value:formData.customer,
-                                            label:getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name
-                                        }
+                                            ? {
+                                                value: formData.customer,
+                                                label: getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name
+                                            }
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -254,16 +271,18 @@ function PaymentReceived() {
 
                             </div>
 
-                            <div className="input-field1">
+                            <div className="input-field3">
                                 <label htmlFor="">Branch Name</label>
                                 <Select
                                     options={getBranch.map(b => ({
                                         value: b.Branch_Code,   // adjust keys from your API
                                         label: b.Branch_Name
                                     }))}
-                                    value={
+                                     value={
                                         formData.branch
-                                            ? getBranch.find(c => c.Branch_Code === formData.branch)
+                                            ? {
+                                                value:formData.branch,
+                                                label:getBranch.find(c => c.Branch_Code === formData.branch)?.Branch_Name || ""}
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -318,7 +337,7 @@ function PaymentReceived() {
                                 <input type="text" placeholder="Enter Bill no"
                                     value={formData.billNo} onChange={(e) => setFormData({ ...formData, billNo: e.target.value })} />
                             </div>
-                            <div className="bottom-buttons input-field3" style={{ marginTop: "22px" }}>
+                            <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "15px" }}>
                                 <button className="ok-btn">Submit</button>
                             </div>
 
@@ -353,51 +372,125 @@ function PaymentReceived() {
                         </div>
                     </div>
                     <div className='table-container'>
-                        <table className='table table-bordered table-sm'>
+                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead className='table-info body-bordered table-sm'>
                                 <tr>
-                                    <th scope="col">Sr.No</th>
-                                    <th scope="col">Bill No</th>
-                                    <th scope="col">Customer Name</th>
-                                    <th scope="col">Credit Type</th>
-                                    <th scope="col">Billing Date</th>
-                                    <th scope="col">Bill Amount</th>
-                                    <th scope="col">Actions</th>
+                                    <th>Actions</th>
+                                    <th>Sr.No</th>
+                                    <th>Customer Name</th>
+                                    <th>GST No</th>
+                                    <th>Booking Type</th>
+                                    <th>Branch Name</th>
+                                    <th>Bank Name</th>
+                                    <th>Transaction No</th>
+                                    <th>Receiver Name</th>
+                                    <th>Payment Type</th>
+                                    <th>Pay Received Date</th>
+                                    <th>TDS</th>
+                                    <th>Payment Received</th>
+                                    <th>Outstanding Amount</th>
+                                    <th>Remark</th>
+                                    <th>Bill No</th>
+                                    <th>Bill Date</th>
+                                    <th>Total Amount</th>
+
                                 </tr>
                             </thead>
-                            <tbody className='table-body'>
 
-                                {currentRows.map((zone, index) => (
-                                    <tr key={zone.id}>
-                                        <td>{zone.id}</td>
-                                        <td>{zone.code}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
-                                        <td>{zone.name}</td>
+                            <tbody>
+                                {currentRows.map((row, index) => (
+                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
-                                            <button className='add-btn' style={{ width: "50px", marginRight: "5px" }} onClick={() => { setModalIsOpen(true); setModalData({ code: '', name: '' }) }}>
-                                                <i className="bi bi-plus-lg"></i>
-                                            </button>
-                                            <button className='edit-btn'>
-                                                <i className='bi bi-pen'></i></button>
-                                            <button onClick={() => handleDelete(index)} className='edit-btn'>
-                                                <i className='bi bi-trash'></i></button>
+                                            <PiDotsThreeOutlineVerticalFill
+                                                style={{ fontSize: "20px", cursor: "pointer" }}
+                                                onClick={() => setOpenRow(openRow === index ? null : index)}
+                                            />
+                                            {openRow === index && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        flexDirection: "row",
+                                                        position: "absolute",
+                                                        alignItems: "center",
+                                                        left: "60px",
+                                                        top: "0px",
+                                                        borderRadius: "10px",
+                                                        backgroundColor: "white",
+                                                        zIndex: "999999",
+                                                        height: "30px",
+                                                        width: "50px",
+                                                        padding: "10px",
+                                                    }}
+                                                >
+
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setOpenRow(null);
+                                                    }}><i className='bi bi-pen'></i></button>
+                                                    <button className='edit-btn' onClick={() =>{
+                                                        setOpenRow(null);
+                                                         handleDelete(row.BillNo)}}>
+                                                        <i className='bi bi-trash'></i>
+                                                    </button>
+                                                </div>
+
+                                            )}
                                         </td>
+                                        <td>{index + 1}</td>
+                                        <td>{row.Customer_Name}</td>
+                                        <td>{row.Gst_No}</td>
+                                        <td>{row.Booking_Type}</td>
+                                        <td>{getBranch.find(f => f.Branch_Code === row.Branch_Code)?.Branch_Name}</td>
+                                        <td>{getBankName.find(f => f.Bank_Code === row.Bank_Code)?.Bank_Name}</td>
+                                        <td>{row.Transation_No}</td>
+                                        <td>{row.Receiver_Name}</td>
+                                        <td>{row.Payment_Type}</td>
+                                        <td>{ymdToDmy(row.PayReceivedDate)}</td>
+                                        <td>{row.TDS}</td>
+                                        <td>{row.PaymentReceived}</td>
+                                        <td>{row.OutstandingAmount}</td>
+                                        <td>{row.Remark}</td>
+                                        <td>{row.BillNo}</td>
+                                        <td>{row.InvoiceDate}</td>
+                                        <td>{row.TotalAmount}</td>
+
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="pagination">
-                        <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            {'<'}
-                        </button>
-                        <span style={{ color: "#333", padding: "5px" }}>Page {currentPage} of {totalPages}</span>
-                        <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                            {'>'}
-                        </button>
+
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                                {'<'}
+                            </button>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                                {'>'}
+                            </button>
+                        </div>
+
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                            <select
+                                id="rowsPerPage"
+                                value={rowsPerPage}
+                                onChange={(e) => {
+                                    setRowsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                style={{ height: "40px", width: "50px" }}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
                     </div>
 
 
@@ -432,8 +525,8 @@ function PaymentReceived() {
                                                 value={
                                                     addPayment.Customer_Code
                                                         ? {
-                                                            value:addPayment.Customer_Code,
-                                                            label:getCustomer.find(c => c.Customer_Code === addPayment.Customer_Code)?.Customer_Name || ""
+                                                            value: addPayment.Customer_Code,
+                                                            label: getCustomer.find(c => c.Customer_Code === addPayment.Customer_Code)?.Customer_Name || ""
                                                         }
                                                         : null
                                                 }
@@ -555,7 +648,7 @@ function PaymentReceived() {
                                         </div>
                                     </div>
                                     <div className='bottom-buttons' style={{ marginTop: "18px", marginLeft: "25px" }}>
-                                        <button type='submit'   className='ok-btn' >Submit</button>
+                                        <button type='submit' className='ok-btn' >Submit</button>
                                         <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
                                     </div>
 

@@ -123,8 +123,7 @@ fetchData('/Runsheet/getViewRunsheet',params);
         });
     };
 
-
-
+    const loginBranch=JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "";
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
@@ -171,10 +170,17 @@ fetchData('/Runsheet/getViewRunsheet',params);
                         <div className="input-field3">
                             <label htmlFor="">Delivery Boy</label>
                            <Select
-                                options={empData.map(emp => ({
+                                options={
+                                    loginBranch?
+                                    empData.filter(f=>f.City_Code===loginBranch).map(emp => ({
                                     value: emp.Employee_Code,   // adjust keys from your API
                                     label: emp.Employee_Name
-                                }))}
+                                })):
+                                empData.map(emp => ({
+                                    value: emp.Employee_Code,   // adjust keys from your API
+                                    label: emp.Employee_Name
+                                }))
+                            }
                                 value={
                                     formData.empName
                                         ? { value: formData.empName, label: empData.find(c => c.Employee_Code === formData.empName)?.Employee_Name || "" }

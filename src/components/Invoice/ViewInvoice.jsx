@@ -12,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
-import { getApi ,deleteApi} from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, deleteApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -20,10 +20,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 function ViewInvoice() {
 
-
     const navigate = useNavigate();
     const location = useLocation();
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [quary, setQuary] = useState("");
+    const [filterData, setFilterData] = useState([]);
     const [invoice, setInvoice] = useState([])
     const [openRow, setOpenRow] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -113,7 +114,7 @@ function ViewInvoice() {
             isActualChecked: newValue,
             isVolChecked: newValue,
             isRateChecked: newValue,
-            isConsigChecked:newValue,
+            isConsigChecked: newValue,
         };
         // Update React states
         setIsAllChecked(newValue);
@@ -292,25 +293,25 @@ function ViewInvoice() {
         }
         fetchData('/Master/getCustomerdata', setGetCustomer);
     }, []);
-   const handleDelete = async (BillNo) => {
-           const confirmDelete = await Swal.fire({
-               title: 'Are you sure?',
-               text: 'Do you really want to delete this invoice?',
-               icon: 'warning',
-               showCancelButton: true,
-               confirmButtonText: 'Yes, delete it!',
-               cancelButtonText: 'Cancel'
-           });
-           if (confirmDelete.isConfirmed) {
-               try {
-                   await deleteApi(`/Smart/ResetInvoiceBill?BillNo=${BillNo}`);
-                   setInvoice(invoice.filter(inv=>inv.BillNo!==BillNo));
-                   Swal.fire('Deleted!', 'this invoie has been deleted.', 'success');
-               } catch (error) {
-                   console.error('Unable to delete Customer Rate:', error);
-               }
-           }
-       }
+    const handleDelete = async (BillNo) => {
+        const confirmDelete = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete this invoice?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        });
+        if (confirmDelete.isConfirmed) {
+            try {
+                await deleteApi(`/Smart/ResetInvoiceBill?BillNo=${BillNo}`);
+                setInvoice(invoice.filter(inv => inv.BillNo !== BillNo));
+                Swal.fire('Deleted!', 'this invoie has been deleted.', 'success');
+            } catch (error) {
+                console.error('Unable to delete Customer Rate:', error);
+            }
+        }
+    }
     useEffect(() => {
         const saved = localStorage.getItem("termArr");
         if (saved) setTermArr(JSON.parse(saved));
@@ -320,6 +321,18 @@ function ViewInvoice() {
     useEffect(() => {
         localStorage.setItem("termArr", JSON.stringify(termArr));
     }, [termArr]);
+
+    useEffect(() => {
+        const filteredRows = currentRows.filter((row) => {
+            const q = quary.toLowerCase();
+
+            return (
+                String(row.BillNo)?.toLowerCase().includes(q)
+            );
+        });
+
+        setFilterData(filteredRows);
+    }, [quary, currentRows, invoice, currentPage]);
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -330,7 +343,7 @@ function ViewInvoice() {
                 InvoiceDate: formData.invDate?.toISOString().split("T")[0] || "",
                 BillFrom: formData.fromDate?.toISOString().split("T")[0] || "",
                 BillTO: formData.toDate?.toISOString().split("T")[0] || "",
-                CustomerName: formData.customer || "",
+                CustomerName: getCustomer.find(f => f.Customer_Code === formData.customer)?.Customer_Name || "",
                 Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
                 BranchName: JSON.parse(localStorage.getItem("Login"))?.Branch_Name || "MUMBAI",
                 pageSize: rowsPerPage,
@@ -369,7 +382,7 @@ function ViewInvoice() {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
     const handleOpenInvoicePrint = (invNo) => {
-        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname, termArr: termArr,tab:"viewInvoice" } })
+        navigate("/firstinvoice", { state: { invoiceNo: invNo, from: location.pathname, termArr: termArr, tab: "viewInvoice" } })
     };
     const handleAddRow = (e) => {
         e.preventDefault();
@@ -400,7 +413,7 @@ function ViewInvoice() {
 
             <div className="body">
                 <div className="container1">
-                    <form style={{ margin: "0px", padding: "0px" ,backgroundColor:"#f2f4f3"}} onSubmit={(e) => e.preventDefault()}>
+                    <form style={{ margin: "0px", padding: "0px", backgroundColor: "#f2f4f3" }} onSubmit={(e) => e.preventDefault()}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
                             <div className="input-field1">
                                 <label htmlFor="">Customer</label>
@@ -478,15 +491,25 @@ function ViewInvoice() {
                             <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
                                 <button className="ok-btn" style={{ height: "35px" }} onClick={() => setModalIsOpen(true)}>SetUp</button>
                             </div>
-                        </div>
-                    </form>
-                    <div style={{ width: "100%", display: "flex", justifyContent: "end", marginTop: "10px" }}>
-                        <div className="search-input">
-                            <input style={{}} className="add-input" type="text" placeholder="search" />
+                            <div style={{ display: "flex", flex: "1", justifyContent: "end", marginTop: "10px" }}>
+                               <div className="search-input">
+                            <input
+                                className="add-input"
+                                type="text"
+                                placeholder="Search..."
+                                value={quary}
+                                onChange={(e) => setQuary(e.target.value)}
+                            />
+
                             <button type="submit" title="search">
                                 <i className="bi bi-search"></i>
                             </button>
                         </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div style={{ width: "100%", display: "flex", justifyContent: "end", marginTop: "10px" }}>
+                        
 
                     </div>
                     {loading ? (<div className="loader"></div>) : (
@@ -509,7 +532,7 @@ function ViewInvoice() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {currentRows.map((row, index) => (
+                                    {filterData.map((row, index) => (
                                         <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                             {/* Actions */}
                                             <td>

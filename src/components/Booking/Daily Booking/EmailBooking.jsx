@@ -270,7 +270,7 @@ function EmailBooking() {
           {/* 🔍 react-select Searchable Dropdown */}
           <div className="scol-12 col-md-3">
 
-            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Client Name</h6>
+            <h6 className="form-label mb-0" style={{ fontSize: "0.85rem" }}>Customer_Name</h6>
 
             <Select
               className="blue-selectbooking"

@@ -12,7 +12,7 @@ function Navavtar() {
 
     const handleSignOut = () => {
         // Perform sign-out logic (e.g., clearing tokens)
-        localStorage.removeItem('token');
+        localStorage.removeItem('Login');
 
         navigate('/login');
     }

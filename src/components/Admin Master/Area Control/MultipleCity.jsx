@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { getApi, postApi } from "./Zonemaster/ServicesApi";
+import { getApi, postApi, putApi } from "./Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
@@ -86,7 +86,7 @@ function MultipleCity() {
         }
 
         try {
-            const response = await postApi('/Master/UpdateMultipleCity', requestBody, 'POST');
+            const response = await postApi('/Master/UpdateMultipleCity', requestBody);
             if (response.status === 1) {
                 setmultipleCity(multipleCity.map((city) => city.City_Code === addCity.CityCode ? response.Data : city));
                 setAddCity({
@@ -112,15 +112,17 @@ function MultipleCity() {
 
     const handleSave = async (e) => {
         e.preventDefault();
-
+        const payload={
+            VendorCode:addCity.VendorCode,
+            ModeCode:addCity.ModeCode,
+            ZoneCode:addCity.ZoneCode,
+            CountryCode:addCity.CountryCode,
+            StateCode:addCity.StateCode,
+            CityCode:addCity.CityCode,
+            ProductType:addCity.ProductType
+        }
         try {
-            const response = await postApi(`/Master/AddMultiplaCity?VendorCode=${addCity.VendorCode}
-                &ModeCode=${addCity.ModeCode}
-                &ZoneCode=${addCity.ZoneCode}
-                &CountryCode=${addCity.CountryCode}
-                &StateCode=${addCity.StateCode}
-                &CityCode=${addCity.CityCode}
-                &ProductType=${addCity.ProductType}`);
+            const response = await postApi(`/Master/AddMultiplaCity`,payload);
             if (response.status === 1) {
                 setAddCity({
                     VendorCode: '',
@@ -134,7 +136,8 @@ function MultipleCity() {
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
             } else {
-                Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
+                Swal.fire('Error!', response.message || 'Failed to save data.', 'error');
+
             }
         } catch (err) {
             console.error('Save Error:', err);

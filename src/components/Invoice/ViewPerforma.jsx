@@ -19,8 +19,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 
 function ViewPerforma() {
-    const navigate=useNavigate();
-    const location=useLocation();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const [invoice, setInvoice] = useState([])
     const [openRow, setOpenRow] = useState(null);
@@ -40,7 +40,7 @@ function ViewPerforma() {
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = invoice.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(invoice.length / rowsPerPage);
-   const today = new Date();
+    const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
         invDate: firstDayOfMonth,
@@ -56,9 +56,9 @@ function ViewPerforma() {
                 invoiceNos: formData.invoiceNo,
                 invoiceDate: formData.invDate?.toISOString().split("T")[0] || "",
                 invoiceDue: formData.dueDate?.toISOString().split("T")[0] || "",
-                 pageSize:rowsPerPage,
-                pageNumber:currentPage,
-                locationCode:JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
+                pageSize: rowsPerPage,
+                pageNumber: currentPage,
+                locationCode: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM",
                 // branchName: JSON.parse(localStorage.getItem("Login"))?.Branch_Name || "MUMBAI",
             });
 
@@ -113,7 +113,7 @@ function ViewPerforma() {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
     const handleOpenInvoicePrint = (invNo) => {
-      navigate("/performanceinvoice",{state:{invoiceNo:invNo,from:location.pathname,tab:"viewPerformance"}})
+        navigate("/performanceinvoice", { state: { invoiceNo: invNo, from: location.pathname, tab: "viewPerformance" } })
     };
 
     return (
@@ -121,7 +121,7 @@ function ViewPerforma() {
 
             <div className="body">
                 <div className="container1">
-                    <form style={{ margin: "0px", padding: "0px" ,backgroundColor:"#f2f4f3" }} onSubmit={handleSubmit}>
+                    <form style={{ margin: "0px", padding: "0px", backgroundColor: "#f2f4f3" }} onSubmit={handleSubmit}>
                         <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
                             <div className="input-field3">
                                 <label htmlFor="">Invoice No</label>
@@ -151,18 +151,20 @@ function ViewPerforma() {
                             <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
                                 <button className="ok-btn" style={{ height: "35px" }} type="submit">Submit</button>
                             </div>
-                            
+
+                            <div style={{ display: "flex", flex: "1", justifyContent: "end", marginTop: "10px" }}>
+                                <div className="search-input mt-2">
+                                    <input style={{}} className="add-input" type="text" placeholder="search" />
+                                    <button type="submit" title="search">
+                                        <i className="bi bi-search"></i>
+                                    </button>
+                                </div>
+
+                            </div>
+
                         </div>
                     </form>
-                    <div style={{ width: "100%", display: "flex", justifyContent: "end", marginTop: "10px" }}>
-                        <div className="search-input">
-                            <input style={{}} className="add-input" type="text" placeholder="search" />
-                            <button type="submit" title="search">
-                                <i className="bi bi-search"></i>
-                            </button>
-                        </div>
 
-                    </div>
                     {loading ? (<div className="loader"></div>) : (
                         <div className='table-container' style={{ margin: "0px" }}>
                             <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
@@ -221,7 +223,7 @@ function ViewPerforma() {
                                             <td>{row.DocketNo}</td>
                                             <td>{row.Qty}</td>
                                             <td>{row.TotalWeight}</td>
-                                            
+
                                         </tr>
                                     ))}
                                 </tbody>

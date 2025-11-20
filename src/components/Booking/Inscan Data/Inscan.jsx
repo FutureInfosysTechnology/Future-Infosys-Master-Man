@@ -4,51 +4,59 @@ import Sidebar1 from "../../../Components-2/Sidebar1";
 import Footer from "../../../Components-2/Footer";
 import ScanbyAirway from "./ScanbyAirway";
 import ScanbyManifest from "./ScanbyManifest";
-
-
+import ScanbyDRSNo from "./ScanbyDRSNo";
 
 function Inscan() {
+  const [activeTab, setActiveTab] = useState("airway");
 
-    const [activeTab, setActiveTab] = useState('mode'); // Default to 'zone'
+  // All tabs defined here
+  const tabs = [
+    { id: "airway", label: "Scan by Docket No", component: <ScanbyAirway /> },
+    { id: "manifest", label: "Inscan Process View", component: <ScanbyManifest /> },
+    { id: "drs", label: "Inscan by DRS No", component: <ScanbyDRSNo /> },
+  ];
 
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-    return (
-        <>
+      <div className="main-body" id="main-body">
+        <div className="container-transport">
 
-            <Header />
-            <Sidebar1 />
+          {/* Navigation Tabs */}
+          <nav>
+            {tabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={activeTab === tab.id ? "active-tab" : ""}
+              >
+                {tab.label}
+              </label>
+            ))}
 
-            <div className="main-body" id="main-body">
-                <div className="container-transport">
-                    <input type="radio" name="slider" id="mode" checked={activeTab === 'mode'}
-                        onChange={handleChange}/>
-                    <input type="radio" name="slider" id="product" checked={activeTab === 'product'}
-                        onChange={handleChange}/>
+            {/* Slider */}
+            <div
+              className="slider"
+              style={{
+                left: `${tabs.findIndex((t) => t.id === activeTab) * (100 / tabs.length)}%`,
+                width: `${100 / tabs.length}%`,
+              }}
+            />
+          </nav>
 
-                    <nav>
-                        <label htmlFor="mode" className="mode">Scan by Docket no</label>
-                        <label htmlFor="product" className="product">Inscan Process View</label>
+          {/* Content Section */}
+          <section>
+            {tabs.find((t) => t.id === activeTab)?.component}
+          </section>
 
-                        <div className="slider"></div>
-                    </nav>
-                    <section >
-                        <div className={`content content-1 ${activeTab === 'mode' ? 'active' : ''}`}>
-                            <ScanbyAirway />
-                        </div>
+        </div>
 
-                        <div className={`content content-2 ${activeTab === 'product' ? 'active' : ''}`}>
-                            <ScanbyManifest />
-                        </div>
-                    </section>
-                </div>
-                <Footer />
-            </div>
-
-        </>
-    );
-};
+        <Footer />
+      </div>
+    </>
+  );
+}
 
 export default Inscan;

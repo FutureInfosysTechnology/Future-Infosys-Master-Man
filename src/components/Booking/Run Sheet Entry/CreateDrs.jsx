@@ -131,13 +131,7 @@ function CreateDrs() {
         }
     };
 
-    const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value
-        }));
-    };
+    const loginBranch=JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "";
 
     const handleDocketNoSelect = () => {
         setFormData((prevData) => ({
@@ -255,10 +249,17 @@ function CreateDrs() {
                         <div className="input-field3" >
                             <label htmlFor="">Employee Name</label>
                             <Select
-                                options={empData.map(emp => ({
+                                 options={
+                                    loginBranch?
+                                    empData.filter(f=>f.City_Code===loginBranch).map(emp => ({
                                     value: emp.Employee_Code,   // adjust keys from your API
                                     label: emp.Employee_Name
-                                }))}
+                                })):
+                                empData.map(emp => ({
+                                    value: emp.Employee_Code,   // adjust keys from your API
+                                    label: emp.Employee_Name
+                                }))
+                            }
                                 value={
                                     formData.empName
                                         ? { value: formData.empName, label: empData.find(c => c.Employee_Code === formData.empName)?.Employee_Name || "" }

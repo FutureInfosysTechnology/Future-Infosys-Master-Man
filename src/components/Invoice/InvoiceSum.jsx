@@ -159,8 +159,8 @@ function InvoiceSum() {
             <div className="body">
                 <div className="container1">
                     <form style={{ margin: "0px", padding: "0px",backgroundColor:"#f2f4f3" }} onSubmit={(e) => e.preventDefault()}>
-                        <div className="fields2" style={{ display: "flex", alignItems: "center" }}>
-                            <div className="input-field">
+                        <div className="fields2" style={{ display: "flex", alignItems: "center",overflow:"hidden" }}>
+                            <div className="input-field3">
                                 <label htmlFor="">Branch Name</label>
                                 <Select
                                     options={getBranch.map(branch => ({
@@ -198,7 +198,7 @@ function InvoiceSum() {
                                 />
                             </div>
 
-                            <div className="input-field">
+                            <div className="input-field1">
                                 <label htmlFor="">Customer</label>
                                 <Select
                                     options={getCustomer.map(cust => ({
@@ -254,9 +254,11 @@ function InvoiceSum() {
                                     className="form-control form-control-sm"
                                 />
                             </div>
-                            <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "10px" }}>
-                                <button className="ok-btn" style={{ height: "35px" }} onClick={handleSubmit}>Submit</button>
+                            <div className="bottom-buttons" style={{ marginTop: "20px", marginLeft: "15px"}}>
+                                <button className="ok-btn" style={{padding:"0px",margin:"0px",width:"65px"}} onClick={handleSubmit}>Submit</button>
                             </div>
+
+                            
                         </div>
                     </form>
                     <div style={{ width: "100%", display: "flex", justifyContent: "end", marginTop: "10px" }}>
