@@ -258,16 +258,21 @@ function InvoiceSum() {
                                 <button className="ok-btn" style={{padding:"0px",margin:"0px",width:"65px"}} onClick={handleSubmit}>Submit</button>
                             </div>
 
+                            <div style={{ display: "flex", flex: "1", justifyContent: "end", marginTop: "10px" }}>
+                                <div className="search-input mt-2">
+                                    <input style={{}} className="add-input" type="text" placeholder="search" />
+                                    <button type="submit" title="search">
+                                        <i className="bi bi-search"></i>
+                                    </button>
+                                </div>
+
+                            </div>
+
                             
                         </div>
                     </form>
                     <div style={{ width: "100%", display: "flex", justifyContent: "end", marginTop: "10px" }}>
-                        <div className="search-input">
-                            <input style={{}} className="add-input" type="text" placeholder="search" />
-                            <button type="submit" title="search">
-                                <i className="bi bi-search"></i>
-                            </button>
-                        </div>
+                        
 
                     </div>
                     {loading ? (<div className="loader"></div>) : (

@@ -12,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
-import { getApi, deleteApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, deleteApi,putApi,postApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -23,6 +23,7 @@ function ViewInvoice() {
     const navigate = useNavigate();
     const location = useLocation();
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [EditIsOpen, setEditIsOpen] = useState(false);
     const [quary, setQuary] = useState("");
     const [filterData, setFilterData] = useState([]);
     const [invoice, setInvoice] = useState([])
@@ -52,6 +53,10 @@ function ViewInvoice() {
         invDate: today,
         customer: "",
         invoiceNo: "",
+    });
+    const [modalData, setModalData] = useState({
+        billNo: "",
+        docketNo: "",
     });
     const [isFovChecked, setIsFovChecked] = useState(false);
     const [isTermChecked, setIsTermChecked] = useState(false);
@@ -338,7 +343,7 @@ function ViewInvoice() {
         try {
             setLoading(true);
 
-            const queryParams = new URLSearchParams({
+            const payload = ({
                 InvoiceNos: formData.invoiceNo || "",
                 InvoiceDate: formData.invDate?.toISOString().split("T")[0] || "",
                 BillFrom: formData.fromDate?.toISOString().split("T")[0] || "",
@@ -350,7 +355,7 @@ function ViewInvoice() {
                 pageNumber: currentPage,
             });
 
-            const response = await getApi(`/Smart/getInvoiceGenerateData?${queryParams.toString()}`);
+            const response = await postApi(`/Smart/getInvoiceGenerateData`,payload);
             console.log(response);
 
             if (response?.status === 1 && Array.isArray(response.Data)) {
@@ -408,6 +413,34 @@ function ViewInvoice() {
         }
         setTerm("");
     };
+    const handleDocketUpdate = async (action, docketNo, billNo,e) => {
+        e.preventDefault();
+    try {
+        if (!docketNo || !billNo) {
+            return Swal.fire("Missing Fields", "Docket No & Bill No are required", "warning");
+        }
+
+        const endpoint =
+            action === "add"
+                ? "/Smart/AddMissingDocketToBill"
+                : "/Smart/RemoveDocketFromBill";
+
+        const response = await putApi(
+            `${endpoint}?DocketNo=${docketNo}&BillNo=${billNo}`
+        );
+
+        if (response.status === 1 || response.Status === 1) {
+            Swal.fire("Success", response.message || response.Message, "success");
+            setEditIsOpen(false);
+        } else {
+            Swal.fire("Failed", response.message || response.Message, "error");
+        }
+
+    } catch (error) {
+        Swal.fire("Error", error.message, "error");
+    }
+};
+
     return (
         <>
 
@@ -492,24 +525,24 @@ function ViewInvoice() {
                                 <button className="ok-btn" style={{ height: "35px" }} onClick={() => setModalIsOpen(true)}>SetUp</button>
                             </div>
                             <div style={{ display: "flex", flex: "1", justifyContent: "end", marginTop: "10px" }}>
-                               <div className="search-input">
-                            <input
-                                className="add-input"
-                                type="text"
-                                placeholder="Search..."
-                                value={quary}
-                                onChange={(e) => setQuary(e.target.value)}
-                            />
+                                <div className="search-input">
+                                    <input
+                                        className="add-input"
+                                        type="text"
+                                        placeholder="Search..."
+                                        value={quary}
+                                        onChange={(e) => setQuary(e.target.value)}
+                                    />
 
-                            <button type="submit" title="search">
-                                <i className="bi bi-search"></i>
-                            </button>
-                        </div>
+                                    <button type="submit" title="search">
+                                        <i className="bi bi-search"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </form>
                     <div style={{ width: "100%", display: "flex", justifyContent: "end", marginTop: "10px" }}>
-                        
+
 
                     </div>
                     {loading ? (<div className="loader"></div>) : (
@@ -558,10 +591,14 @@ function ViewInvoice() {
                                                             padding: "10px",
                                                         }}
                                                     >
-                                                        <button className="edit-btn" onClick={() => handleOpenInvoicePrint(row.BillNo)}>
+                                                        <button className="edit-btn" onClick={() => {setEditIsOpen(true);setOpenRow(null);setModalData({billNo:row?.BillNo,docketNo:""})}}>
+                                                            <i className="bi bi-pen" style={{ fontSize: "18px" }}></i>
+                                                        </button>
+
+                                                        <button className="edit-btn" onClick={() =>{;setOpenRow(null); handleOpenInvoicePrint(row.BillNo)}}>
                                                             <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "18px" }}></i>
                                                         </button>
-                                                        <button onClick={() => handleDelete(row.BillNo)} className="edit-btn">
+                                                        <button onClick={() =>{;setOpenRow(null); handleDelete(row.BillNo)}} className="edit-btn">
                                                             <i className="bi bi-trash" style={{ fontSize: "18px" }}></i>
                                                         </button>
                                                     </div>
@@ -842,6 +879,58 @@ function ViewInvoice() {
 
                                 )
                             }
+                        </div>
+                    </Modal >
+
+                    <Modal overlayClassName="custom-overlay" isOpen={EditIsOpen}
+                        className="custom-modal-setup" contentLabel="Modal"
+                        style={{
+                            content: {
+                                width: '80%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap",
+                                minHeight: "60%",
+                                display: "flex",
+                                justifyContent: "center",
+
+                            },
+                        }}>
+                        <div className="custom modal-content">
+                            <div className="header-tittle">
+                                <header>Add or Remove Docket No</header>
+                            </div>
+
+                            <div className='container2'>
+                                <form>
+                                    <div className="fields2">
+
+                                        <div className="input-field1">
+                                            <label htmlFor="">Bill No</label>
+
+                                            <input type="text" placeholder="Enter Bill no"
+                                                value={modalData.billNo} readOnly
+                                                onChange={(e) => setModalData({ ...modalData, billNo: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="input-field1">
+                                            <label htmlFor="">Docket No</label>
+
+                                            <input type="text" placeholder="Enter Docket no"
+                                                value={modalData.docketNo} required
+                                                onChange={(e) => setModalData({ ...modalData, docketNo: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className='bottom-buttons' style={{display:"flex",alignItems:"end",marginTop:"20px",marginLeft:"10px",flexWrap:"wrap"}}>
+                                            <button type="submit" className='ok-btn' onClick={(e)=>handleDocketUpdate("add", modalData.docketNo, modalData.billNo,e)}>Add</button>
+                                            <button type="submit" className='ok-btn' onClick={(e)=>handleDocketUpdate("remove", modalData.docketNo, modalData.billNo,e)}>Remove</button>
+                                            <button type="button" className='ok-btn' onClick={()=>setEditIsOpen(false)}>close</button>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+
                         </div>
                     </Modal >
 

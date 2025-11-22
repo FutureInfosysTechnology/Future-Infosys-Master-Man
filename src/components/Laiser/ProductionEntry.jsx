@@ -33,6 +33,14 @@ function ProductionEntry() {
     const [error, setError] = useState(null);
     const [openRow, setOpenRow] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const indexOfLastRow = currentPage * rowsPerPage;
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+    const currentRows = creditNotes.slice(indexOfFirstRow, indexOfLastRow);
+
+    const totalPages = Math.ceil(creditNotes.length / rowsPerPage);
     function formatDateToYMD(dateStr) {
         if (!dateStr) return "";
 
@@ -41,6 +49,13 @@ function ProductionEntry() {
         return `${yyyy}-${mm}-${dd}`;
     }
 
+    const handlePreviousPage = () => {
+        if (currentPage > 1) setCurrentPage(currentPage - 1);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    };
     // 🔄 Fetch helper
     const fetchData = async (endpoint, setData) => {
         try {
@@ -355,7 +370,7 @@ function ProductionEntry() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {creditNotes.map((note, index) => (
+                                {currentRows.map((note, index) => (
                                     <tr
                                         key={note.CreditNote_ID}
                                         style={{ fontSize: "12px", position: "relative" }}
@@ -407,6 +422,38 @@ function ProductionEntry() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    <div className="row" style={{ whiteSpace: "nowrap" }}>
+                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                                {'<'}
+                            </button>
+                            <span style={{ color: "#333", padding: "5px" }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                                {'>'}
+                            </button>
+                        </div>
+
+                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                            <select
+                                id="rowsPerPage"
+                                value={rowsPerPage}
+                                onChange={(e) => {
+                                    setRowsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                style={{ height: "40px", width: "50px" }}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>

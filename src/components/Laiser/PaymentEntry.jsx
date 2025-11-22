@@ -36,6 +36,11 @@ function PaymentEntry() {
         billNo: "",
 
     });
+     const ymdToDmy = (dateStr) => {
+        if (!dateStr) return "";
+        const [year, month, day] = dateStr.split("-");
+        return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+    };
     const [addPayment, setAddPayment] = useState({
         Customer_Code: "",
         Branch_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
@@ -89,15 +94,8 @@ function PaymentEntry() {
         e.preventDefault();
 
         try {
-            const queryString = new URLSearchParams({
-                Branch_Code: formData.branch,
-                Customer_Code: formData.customer,
-                InvoiceNo: formData.billNo,
-                InvoiceDate: (formData.billDate).toISOString().split("T")[0],
-                SearchCustomer: "GLOBAL"
-            });
 
-            const response = await getApi(`/GetPaymentReceived?${queryString}`);
+            const response = await getApi(`/GetPaymentReceived?Branch_Code=${formData.branch}&Customer_Code=${formData.customer}&InvoiceNo=${formData.billNo}&InvoiceDate=${formData.billDate}&AllCustomerData=1&page=${currentPage}&limit=${rowsPerPage}`);
             console.log(response);
 
             Swal.fire("Success", "Payment Received Added Successfully", "success");
@@ -339,22 +337,23 @@ function PaymentEntry() {
                                 <tr>
                                     <th>Actions</th>
                                     <th>Sr.No</th>
+                                    <th>Branch Name</th>
                                     <th>Customer Name</th>
                                     <th>GST No</th>
                                     <th>Booking Type</th>
-                                    <th>Branch Name</th>
+                                    <th>Bill No</th>
+                                    <th>Bill Date</th>
+                                    <th>Total Amount</th>
+                                    <th>Payment Received</th>
+                                    <th>TDS</th>
+                                    <th>Outstanding Amount</th>
+                                    <th>Pay Received Date</th>
                                     <th>Bank Name</th>
                                     <th>Transaction No</th>
                                     <th>Receiver Name</th>
                                     <th>Payment Type</th>
-                                    <th>Pay Received Date</th>
-                                    <th>TDS</th>
-                                    <th>Payment Received</th>
-                                    <th>Outstanding Amount</th>
                                     <th>Remark</th>
-                                    <th>Bill No</th>
-                                    <th>Invoice Date</th>
-                                    <th>Total Amount</th>
+                                    
 
                                 </tr>
                             </thead>
@@ -400,22 +399,22 @@ function PaymentEntry() {
                                             )}
                                         </td>
                                         <td>{index + 1}</td>
+                                        <td>{getBranch.find(f => f.Branch_Code === row.Branch_Code)?.Branch_Name}</td>
                                         <td>{row.Customer_Name}</td>
                                         <td>{row.Gst_No}</td>
                                         <td>{row.Booking_Type}</td>
-                                        <td>{getBranch.find(f => f.Branch_Code === row.Branch_Code)?.Branch_Name}</td>
+                                        <td>{row.BillNo}</td>
+                                        <td>{row.InvoiceDate}</td>
+                                        <td>{row.TotalAmount}</td>
+                                        <td>{row.PaymentReceived}</td>
+                                        <td>{row.TDS}</td>
+                                        <td>{row.OutstandingAmount}</td>
+                                        <td>{ymdToDmy(row.PayReceivedDate)}</td>
                                         <td>{getBankName.find(f => f.Bank_Code === row.Bank_Code)?.Bank_Name}</td>
                                         <td>{row.Transation_No}</td>
                                         <td>{row.Receiver_Name}</td>
                                         <td>{row.Payment_Type}</td>
-                                        <td>{row.PayReceivedDate}</td>
-                                        <td>{row.TDS}</td>
-                                        <td>{row.PaymentReceived}</td>
-                                        <td>{row.OutstandingAmount}</td>
                                         <td>{row.Remark}</td>
-                                        <td>{row.BillNo}</td>
-                                        <td>{row.InvoiceDate}</td>
-                                        <td>{row.TotalAmount}</td>
 
                                     </tr>
                                 ))}

@@ -92,10 +92,10 @@ function PaymentReceived() {
 
     const totalPages = Math.ceil(data.length / rowsPerPage);
     const ymdToDmy = (dateStr) => {
-        if(!dateStr) return "";
-  const [year, month, day] = dateStr.split("-");
-  return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
-};
+        if (!dateStr) return "";
+        const [year, month, day] = dateStr.split("-");
+        return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+    };
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -231,6 +231,47 @@ function PaymentReceived() {
                     <form action="" style={{ margin: "0px", background: " #f2f4f3" }}>
 
                         <div className="fields2">
+
+                            <div className="input-field3">
+                                <label htmlFor="">Branch Name</label>
+                                <Select
+                                    options={getBranch.map(b => ({
+                                        value: b.Branch_Code,   // adjust keys from your API
+                                        label: b.Branch_Name
+                                    }))}
+                                    value={
+                                        formData.branch
+                                            ? {
+                                                value: formData.branch,
+                                                label: getBranch.find(c => c.Branch_Code === formData.branch)?.Branch_Name || ""
+                                            }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            branch: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                    placeholder="Select Branch"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
+
+                            </div>
+
                             <div className="input-field1">
                                 <label htmlFor="">Customer Name</label>
                                 <Select
@@ -271,44 +312,7 @@ function PaymentReceived() {
 
                             </div>
 
-                            <div className="input-field3">
-                                <label htmlFor="">Branch Name</label>
-                                <Select
-                                    options={getBranch.map(b => ({
-                                        value: b.Branch_Code,   // adjust keys from your API
-                                        label: b.Branch_Name
-                                    }))}
-                                     value={
-                                        formData.branch
-                                            ? {
-                                                value:formData.branch,
-                                                label:getBranch.find(c => c.Branch_Code === formData.branch)?.Branch_Name || ""}
-                                            : null
-                                    }
-                                    onChange={(selectedOption) =>
-                                        setFormData({
-                                            ...formData,
-                                            branch: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
 
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                    placeholder="Select Branch"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                />
-
-                            </div>
 
                             <div className="input-field3">
                                 <label htmlFor="">From Date</label>
@@ -377,6 +381,8 @@ function PaymentReceived() {
                                 <tr>
                                     <th>Actions</th>
                                     <th>Sr.No</th>
+                                    <th>Bill No</th>
+                                    <th>Bill Date</th>
                                     <th>Customer Name</th>
                                     <th>GST No</th>
                                     <th>Booking Type</th>
@@ -390,8 +396,6 @@ function PaymentReceived() {
                                     <th>Payment Received</th>
                                     <th>Outstanding Amount</th>
                                     <th>Remark</th>
-                                    <th>Bill No</th>
-                                    <th>Bill Date</th>
                                     <th>Total Amount</th>
 
                                 </tr>
@@ -427,9 +431,10 @@ function PaymentReceived() {
                                                     <button className='edit-btn' onClick={() => {
                                                         setOpenRow(null);
                                                     }}><i className='bi bi-pen'></i></button>
-                                                    <button className='edit-btn' onClick={() =>{
+                                                    <button className='edit-btn' onClick={() => {
                                                         setOpenRow(null);
-                                                         handleDelete(row.BillNo)}}>
+                                                        handleDelete(row.BillNo)
+                                                    }}>
                                                         <i className='bi bi-trash'></i>
                                                     </button>
                                                 </div>
@@ -437,6 +442,8 @@ function PaymentReceived() {
                                             )}
                                         </td>
                                         <td>{index + 1}</td>
+                                        <td>{row.BillNo}</td>
+                                        <td>{row.InvoiceDate}</td>
                                         <td>{row.Customer_Name}</td>
                                         <td>{row.Gst_No}</td>
                                         <td>{row.Booking_Type}</td>
@@ -450,8 +457,6 @@ function PaymentReceived() {
                                         <td>{row.PaymentReceived}</td>
                                         <td>{row.OutstandingAmount}</td>
                                         <td>{row.Remark}</td>
-                                        <td>{row.BillNo}</td>
-                                        <td>{row.InvoiceDate}</td>
                                         <td>{row.TotalAmount}</td>
 
                                     </tr>
