@@ -59,20 +59,20 @@ function CreditPrint() {
             fetchData();
         }
     }, [invoiceNo]);
-        function numberToIndianCurrency(num) {
-      if (!num || isNaN(num)) return "";
-    
-      const [rupees, paise] = num.toFixed(2).split(".");
-    
-      let result = toWords(Number(rupees))
-        .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Rupees";
-    
-      if (Number(paise) > 0) {
-        result += " and " + toWords(Number(paise))
-          .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Paise";
-      }
-    
-      return result + " Only";
+    function numberToIndianCurrency(num) {
+        if (!num || isNaN(num)) return "";
+
+        const [rupees, paise] = num.toFixed(2).split(".");
+
+        let result = toWords(Number(rupees))
+            .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Rupees";
+
+        if (Number(paise) > 0) {
+            result += " and " + toWords(Number(paise))
+                .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Paise";
+        }
+
+        return result + " Only";
     }
     const [totalQty, setTotalQty] = useState(0);
     useEffect(() => {
@@ -82,38 +82,38 @@ function CreditPrint() {
         }
     }, [getItem]); // 
 
-   const generatePDF = async () => {
-  if (!pageRef.current) return;
+    const generatePDF = async () => {
+        if (!pageRef.current) return;
 
-  // 1️⃣ Capture screenshot
-  const canvas = await html2canvas(pageRef.current, {
-    scale: 10, // reduce scale slightly (2 → 1.5)
-    useCORS: true,
-    logging: false,
-  });
+        // 1️⃣ Capture screenshot
+        const canvas = await html2canvas(pageRef.current, {
+            scale: 10, // reduce scale slightly (2 → 1.5)
+            useCORS: true,
+            logging: false,
+        });
 
-  // 2️⃣ Convert to compressed JPEG (not PNG)
-  const imgData = canvas.toDataURL("image/jpeg", 0.6); // quality: 0.6–0.8 recommended
+        // 2️⃣ Convert to compressed JPEG (not PNG)
+        const imgData = canvas.toDataURL("image/jpeg", 0.6); // quality: 0.6–0.8 recommended
 
-  // 3️⃣ Create A4 PDF
-  const pdf = new jsPDF("p", "mm", "a4");
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        // 3️⃣ Create A4 PDF
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-  // 4️⃣ Add compressed image
-  pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+        // 4️⃣ Add compressed image
+        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
 
-  // 5️⃣ Save
-  pdf.save(`Performa_${invoiceNo}.pdf`);
-};
+        // 5️⃣ Save
+        pdf.save(`Performa_${invoiceNo}.pdf`);
+    };
 
 
     // if (loading) return <p>Loading...</p>;
 
     return (
         <>
-<style>
-{`
+            <style>
+                {`
  @media print {
   body {
     -webkit-print-color-adjust: exact !important;
@@ -172,7 +172,7 @@ function CreditPrint() {
 }
 
 `}
-</style>
+            </style>
 
 
             <Header />
@@ -195,7 +195,7 @@ function CreditPrint() {
                             Print
                         </button>
                         <button
-                            onClick={() => navigate(fromPath, { state: { tab:tab } })}
+                            onClick={() => navigate(fromPath, { state: { tab: tab } })}
                             style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Exit
@@ -206,12 +206,12 @@ function CreditPrint() {
                 <div className="container-2" ref={pageRef} id="pdf" style={{
                     borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px"
                     , paddingBottom: "20px", width: "793px", direction: "flex", fontFamily: "Roboto",
-                    flexDirection: "column", gap: "5px", fontSize: "10px", fontWeight: "bold",border:"none"
+                    flexDirection: "column", gap: "5px", fontSize: "10px", fontWeight: "bold", border: "none"
                 }}>
 
                     <div className="container-2" style={{ borderRadius: "0px", border: "none", width: "750px", display: "flex", flexDirection: "column" }}>
                         < div id="printable-section" className="container-3" style={{ padding: "0px", border: "none" }}>
-                        <div className="container-3 px-0 py-0" style={{ border: "2px solid black", height: "815px"}}>
+                            <div className="container-3 px-0 py-0" style={{ border: "2px solid black", height: "815px" }}>
 
                                 <div className="div1" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
                                     <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", gap: "7px" }}>
@@ -317,12 +317,10 @@ function CreditPrint() {
                                 }}>
                                     <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>S.NO</div>
                                     <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>ITEMS</div>
-                                    <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>HSN</div>
-                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>QTY</div>
-                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>RATE</div>
+                                    <div style={{ width: "35%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Remark</div>
                                     <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>AMOUNT</div>
                                 </div>
-                                <div style={{ position: "relative", height: "550px" }}>
+                                <div style={{ position: "relative", height: "500px" }}>
                                     {/* Background Layer */}
                                     <div
                                         style={{
@@ -337,6 +335,7 @@ function CreditPrint() {
                                             right: "50px",
                                             bottom: 0,
                                             zIndex: 0,
+                                            
                                         }}
                                     />
                                     <div
@@ -345,14 +344,14 @@ function CreditPrint() {
                                             zIndex: 1,
                                             display: "flex",
                                             flexDirection: "column",
-                                            height: "100%",
                                         }}
                                     >
                                         <div className="div4" style={{
-                                            height: "532px",
+                                            height: "500px",
                                             textAlign: "center",
                                             display: "flex",
                                             flexDirection: "row",
+                                            borderBottom: "2px solid black"
                                         }}>
                                             {/* S.NO */}
                                             <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
@@ -369,25 +368,12 @@ function CreditPrint() {
                                             </div>
 
                                             {/* HSN */}
-                                            <div style={{ width: "15%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
+                                            <div style={{ width: "35%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
                                                 {getItem.map((item) => (
                                                     <div key={item.DetailID}>{item.HSN}</div>
                                                 ))}
                                             </div>
 
-                                            {/* QTY */}
-                                            <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                                {getItem.map((item) => (
-                                                    <div key={item.DetailID}>{item.QTY}</div>
-                                                ))}
-                                            </div>
-
-                                            {/* RATE */}
-                                            <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                                {getItem.map((item) => (
-                                                    <div key={item.DetailID}>{item.Rate}</div>
-                                                ))}
-                                            </div>
 
                                             {/* AMOUNT */}
                                             <div style={{ width: "15%", display: "flex", flexDirection: "column", gap: "5px", paddingTop: "5px" }}>
@@ -396,120 +382,42 @@ function CreditPrint() {
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="div5" style={{ height: "25px", textAlign: "center", display: "flex", flexDirection: "row", }}>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>IGST {invoiceData.IGST_Per}%</div>
-                                            <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.IGST_Amount}</div>
+                                    </div>
+                                </div>
+                                <div className="div8" style={{ height: "30px", textAlign: "center", display: "flex", flexDirection: "row", backgroundColor: "rgba(255, 192, 203, 0.1)" }}>
+
+                                    <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
+                                    <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>TOTAL</div>
+                                    <div style={{ width: "35%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
+                                    <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.GrandTotal}</div>
+                                </div>
+                            </div>
+                            
+                            <div className="third px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
+                                <div style={{ display: "flex", flexDirection: "column", padding: "5px", borderBottom: "2px solid black" }}>
+                                    <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Total Amount (in words)
+                                    </div>
+                                    <div> {invoiceData?.GrandTotal ? numberToIndianCurrency(Number(invoiceData?.GrandTotal)) : ""}</div>
+                                </div>
+                                <div style={{ display: "flex" }}>
+                                    <div style={{ display: "flex", flexDirection: "column", fontSize: "11px", width: "50%", padding: "5px", borderRight: "2px solid black" }}>
+                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Bank Details</div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Name:</div><div>{invoiceData.Company_Name}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>IFSC Code:</div><div>{invoiceData.IFSC_Code}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div>{invoiceData.AccountNo}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>{invoiceData.Bank_Name}</div></div>
+                                    </div>
+                                    <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent: "end", alignItems: "center", paddingBottom: "5px" }}>
+                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Authorised Signatory For
                                         </div>
-                                        <div className="div6" style={{ height: "25px", textAlign: "center", display: "flex", flexDirection: "row", }}>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>CGST {invoiceData.CGST_Per}%</div>
-                                            <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.CGST_Amount}</div>
-                                        </div>
-                                        <div className="div7" style={{ height: "25px", textAlign: "center", display: "flex", flexDirection: "row", borderBottom: "2px solid black" }}>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                            <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>SGST {invoiceData.SGST_Per}%</div>
-                                            <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.SGST_Amount}</div>
-                                        </div>
+                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}>{invoiceData.Company_Name}</div>
                                     </div>
-                                </div>
-                            <div className="div8" style={{ height: "30px", textAlign: "center", display: "flex", flexDirection: "row", backgroundColor: "rgba(255, 192, 203, 0.1)" }}>
-
-                                <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>TOTAL</div>
-                                <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{totalQty}</div>
-                                <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.GrandTotal}</div>
-                            </div>
-                        </div>
-                        <div className="second px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
-                            <div className="div1" style={{
-                                height: "40px", textAlign: "center", display: "flex", flexDirection: "row",
-                                fontWeight: "bolder", fontSize: "11px", backgroundColor: "rgba(255, 192, 203, 0.1)", borderBottom: "2px solid black"
-                            }}>
-
-                                <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Taxable Value</div>
-                                <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
-                                    <div style={{ borderBottom: "2px solid black" }}>IGST</div>
-                                    <div style={{ display: "flex" ,height:"100%"}}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black", display:"flex",justifyContent:"center", alignItems:"center"}}>Rate</div>
-                                        <div style={{ width: "60%",display:"flex",justifyContent:"center", alignItems:"center" }}>Amount</div>
-                                    </div>
-                                </div>
-                                <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
-                                    <div style={{ borderBottom: "2px solid black" }}>CGST</div>
-                                   <div style={{ display: "flex" ,height:"100%"}}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black", display:"flex",justifyContent:"center", alignItems:"center"}}>Rate</div>
-                                        <div style={{ width: "60%",display:"flex",justifyContent:"center", alignItems:"center" }}>Amount</div>
-                                    </div>
-                                </div>
-                                <div style={{ width: "20%", display: "flex", flexDirection: "column", borderRight: "2px solid black" }}>
-                                    <div style={{ borderBottom: "2px solid black" }}>SGST</div>
-                                    <div style={{ display: "flex" ,height:"100%"}}>
-                                        <div style={{ width: "40%", borderRight: "2px solid black", display:"flex",justifyContent:"center", alignItems:"center"}}>Rate</div>
-                                        <div style={{ width: "60%",display:"flex",justifyContent:"center", alignItems:"center" }}>Amount</div>
-                                    </div>
-                                </div>
-                                <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}> Total Tax Amount</div>
-                            </div>
-                            <div className="div2" style={{ height: "20px", textAlign: "center", display: "flex", flexDirection: "row", }}>
-                                <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{invoiceData.TotalAmount}</div>
-                                <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
-
-                                    <div style={{ width: "40%", borderRight: "2px solid black", paddingTop: "3px" }}> {invoiceData.IGST_Per}%</div>
-                                    <div style={{ width: "60%", paddingTop: "3px" }}> {invoiceData.IGST_Amount}</div>
-
-                                </div>
-                                <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
-
-                                    <div style={{ width: "40%", borderRight: "2px solid black", paddingTop: "3px" }}> {invoiceData.CGST_Per}%</div>
-                                    <div style={{ width: "60%", paddingTop: "3px" }}> {invoiceData.CGST_Amount}</div>
-
-                                </div>
-                                <div style={{ width: "20%", display: "flex", borderRight: "2px solid black" }}>
-
-                                    <div style={{ width: "40%", borderRight: "2px solid black", paddingTop: "3px" }}> {invoiceData.SGST_Per}%</div>
-                                    <div style={{ width: "60%", paddingTop: "3px" }}> {invoiceData.SGST_Amount}</div>
-
-                                </div>
-                                <div style={{ width: "20%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.GrandTotal}</div>
-                            </div>
-                        </div>
-                        <div className="third px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
-                            <div style={{ display: "flex", flexDirection: "column", padding: "5px", borderBottom: "2px solid black" }}>
-                                <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Total Amount (in words)
-                                </div>
-                                <div> {invoiceData?.GrandTotal ? numberToIndianCurrency(Number(invoiceData?.GrandTotal)) : ""}</div>
-                            </div>
-                            <div style={{ display: "flex" }}>
-                                <div style={{ display: "flex", flexDirection: "column", fontSize: "11px", width: "50%", padding: "5px", borderRight: "2px solid black" }}>
-                                    <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Bank Details</div>
-                                    <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Name:</div><div>{invoiceData.Company_Name}</div></div>
-                                    <div style={{ display: "flex" }}><div style={{ width: "30%" }}>IFSC Code:</div><div>{invoiceData.IFSC_Code}</div></div>
-                                    <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div>{invoiceData.AccountNo}</div></div>
-                                    <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>{invoiceData.Bank_Name}</div></div>
-                                </div>
-                                <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent: "end", alignItems: "center", paddingBottom: "5px" }}>
-                                    <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Authorised Signatory For
-                                    </div>
-                                    <div style={{ fontWeight: "bolder", fontSize: "13px" }}>{invoiceData.Company_Name}</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div >
-            </div>
-        </div >
+                    </div >
+                </div>
+            </div >
         </>
     );
 }

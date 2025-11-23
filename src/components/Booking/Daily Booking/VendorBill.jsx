@@ -11,6 +11,9 @@ import DatePicker from 'react-datepicker';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, putApi, deleteApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { useLocation, useNavigate } from 'react-router-dom';
+import Header from "../../../Components-2/Header/Header";
+import Sidebar1 from "../../../Components-2/Sidebar1";
+import Footer from "../../../Components-2/Footer";
 
 function VendorBill() {
     const getTodayDate = () => {
@@ -25,8 +28,8 @@ function VendorBill() {
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
-    const navigate=useNavigate();
-    const location=useLocation();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [data, setData] = useState([]);
     const [openRow, setOpenRow] = useState(null);
     const [getVendor, setGetVendor] = useState([]);
@@ -40,7 +43,7 @@ function VendorBill() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [formData, setFormData] = useState({
-        vendorId:"",
+        vendorId: "",
         vendorCode: "",
         custCode: "",
         orgCode: "",
@@ -210,7 +213,7 @@ function VendorBill() {
         }
         try {
             const payload = {
-                VendorID:formData.vendorId,
+                VendorID: formData.vendorId,
                 BillNo: formData.billNo,
                 BillDate: formData.billDate,
                 BillFrom: formData.billFrom,
@@ -226,7 +229,7 @@ function VendorBill() {
                 Vendor_Code: formData.vendorCode,
                 Origin_Code: formData.orgCode,
                 Destination_Code: formData.destCode,
-                Mode_Code: formData.modeCode
+                Mode_Code: formData.modeCode,
             };
 
             const res = await putApi("/UpdateVendorBillMaster", payload);
@@ -235,7 +238,7 @@ function VendorBill() {
                 Swal.fire("Success", "Vendor Bill Updated Successfully!", "success");
                 await fetchVendorBill();
                 setFormData({
-                    vendorId:"",
+                    vendorId: "",
                     vendorCode: "",
                     custCode: "",
                     orgCode: "",
@@ -259,7 +262,7 @@ function VendorBill() {
             Swal.fire("Error", err.message, "error");
         }
     };
-    
+
 
 
     /**************** function to export table data in excel and pdf ************/
@@ -295,7 +298,7 @@ function VendorBill() {
         saveAs(file, 'VendorBills.xlsx');
     };
     const handleOpenVendorBillPrint = (invNo) => {
-      navigate("/vendorbill",{state:{invoiceNo:invNo,from:location.pathname,tab:"vendorcharge"}})
+        navigate("/vendorbillPrint", { state: { invoiceNo: invNo, from: location.pathname, tab: "vendorcharge" } })
     };
     const handleExportPDF = () => {
         const input = document.getElementById('table-to-pdf');
@@ -335,9 +338,12 @@ function VendorBill() {
     return (
 
         <>
-
+            <Header />
+            <Sidebar1 />
+            <div className="main-body" id='main-body'>
             <div className='body'>
                 <div className="container1">
+                    <header style={{ fontWeight: "bold", fontSize: "15px" }}>Vendor Bill Entry</header>
                     <div className="addNew">
                         <div>
                             <button className='add-btn' onClick={() => {
@@ -438,13 +444,13 @@ function VendorBill() {
                                                     }}
                                                 >
                                                     <button className='edit-btn' onClick={() => handleOpenVendorBillPrint("001")}>
-                                                            <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
-                                                        </button>
+                                                        <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
+                                                    </button>
                                                     <button className='edit-btn' onClick={() => {
                                                         setIsEditMode(true);
                                                         setOpenRow(null);
                                                         setFormData({
-                                                            vendorId:row.VendorID,
+                                                            vendorId: row.VendorID,
                                                             vendorCode: row.Vendor_Code,
                                                             custCode: row.Customer_Code,
                                                             orgCode: row.Origin_Code,
@@ -836,6 +842,8 @@ function VendorBill() {
 
                 </div >
             </div>
+            <Footer />
+        </div >
 
         </>
     );

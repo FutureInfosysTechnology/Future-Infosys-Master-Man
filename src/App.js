@@ -52,6 +52,7 @@ import CreditPrint from './components/Docket Print/CreditPrint';
 import LabelPrintingPdf from './components/Docket Print/LabelPrintingPdf';
 import BoxStickerPdf from './components/Docket Print/BoxStickerPdf';
 import VendorBillPrint from './components/Docket Print/VendorBillPrint';
+import VendorBill from './components/Booking/Daily Booking/VendorBill';
 
 export const refeshPend=createContext();
 function App() {
@@ -93,6 +94,7 @@ function App() {
           <Route path='/podentry' element={<PodEntry />} />
           <Route path='/custquery' element={<CustomerQuery />} />
           <Route path='/internationalbooking' element={<InternationalBooking/>}/>
+          <Route path='/vendorbill' element={<VendorBill/>}/>
 
           <Route path='/docketprint' element={<DocketPrint />} />
           <Route path='/docketpdf' element={<Docketpdf />} />
@@ -108,7 +110,7 @@ function App() {
           <Route path='/newdp' element={<NewDP/>} />
           <Route path='/newdp2' element={<NewDP2/>} />
           <Route path='/creditprint' element={<CreditPrint/>} />
-          <Route path='/vendorbill' element={<VendorBillPrint/>} />
+          <Route path='/vendorbillPrint' element={<VendorBillPrint/>} />
           <Route path='/labelprint' element={<LabelPrintingPdf/>} />
 
           <Route path='/invoice' element={<Invoice />} />

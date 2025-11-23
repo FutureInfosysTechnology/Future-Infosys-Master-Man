@@ -23,6 +23,7 @@ function Booking() {
     const [inputValue1, setInputValue1] = useState("");
     const [getCust, setGetCust] = useState([]);
     const [skipGstCalc, setSkipGstCalc] = useState(false);
+    const [UseInput,setUseInput]=useState(0);
     // Utility function to format date safely
     const formatDate = (inputDate) => {
         if (!inputDate) return null; // if undefined or null
@@ -278,32 +279,7 @@ function Booking() {
         ActualWt: 0,
         ChargeWt: 0
     })
-    useEffect(() => {
-        const found = getCust.find(
-            (c) =>
-                c?.Customer_Code === formData.Customer_Code &&
-                c?.Mode_Code === formData.Mode_Code
-        );
-
-        if (!found) {
-            console.log("not found");
-            setFormData((prev) => ({
-                ...prev,
-                FuelPer: 0,
-                FuelCharges: 0,
-                FovPer: 0,
-                FovChrgs: 0,
-                DocketChrgs: 0,
-                ODAChrgs: 0,
-                DeliveryChrgs: 0,
-                PackingChrgs: 0,
-                GreenChrgs: 0,
-                HamaliChrgs: 0,
-                OtherCharges: 0,
-                InsuranceChrgs: 0,
-            }));
-        }
-    }, [formData.Customer_Code, formData.Mode_Code, getCust]);
+    
     useEffect(() => {
         if (formData.freight) {
             const freight = parseFloat(formData.freight) || 0;
@@ -809,7 +785,7 @@ function Booking() {
 
     const handleSaveShipper = async (e) => {
         e.preventDefault();
-         const errors = [];
+        const errors = [];
         if (!addShipper.shipperCode) errors.push("Shipper Code is required");
         if (!addShipper.shipperName) errors.push("Shipper Name is required");
         if (!addShipper.cityCode) errors.push("City Code is required");
@@ -1149,7 +1125,10 @@ function Booking() {
         }
         setInputValue("");
     };
-
+    useEffect(() => {
+       
+       console.log("input==0");
+    }, [formData.Customer_Code, formData.Mode_Code]);
     useEffect(() => {
         const calculateGstDetails = async () => {
             try {
@@ -1185,7 +1164,8 @@ function Booking() {
                     GreenChrgsInput: GreenChrgs || 0,
                     HamaliChrgsInput: HamaliChrgs || 0,
                     OtherChargesInput: OtherCharges || 0,
-                    InsuranceChrgsInput: InsuranceChrgs || 0
+                    InsuranceChrgsInput: InsuranceChrgs || 0,
+                    UseInput:UseInput
                 };
 
                 const response = await postApi(`/Booking/calculateGST`, body);
@@ -1193,7 +1173,8 @@ function Booking() {
                 if (response?.status === 1) {
                     const gst = response.Data;
                     console.log("✅ GST API Response:", gst);
-
+                    setUseInput(gst?.Success);
+                    console.log(`input==${gst?.Success}`);
                     setGstData({
                         CGSTAMT: gst.CGSTAMT,
                         SGSTAMT: gst.SGSTAMT,
@@ -3435,21 +3416,21 @@ function Booking() {
                                             <label htmlFor="">Shipper Name</label>
                                             <input type="text" value={addShipper.shipperName}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperName: e.target.value })}
-                                                placeholder="Shipper Name"  />
+                                                placeholder="Shipper Name" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addShipper.shipperAdd1}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperAdd1: e.target.value })}
-                                                placeholder="Address"  />
+                                                placeholder="Address" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Address</label>
                                             <input type="text" value={addShipper.shipperAdd2}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperAdd2: e.target.value })}
-                                                placeholder="Address"  />
+                                                placeholder="Address" />
                                         </div>
 
                                         <div className="input-field3">
@@ -3457,7 +3438,7 @@ function Booking() {
                                             <input type="tel" id="pincode" name="pincode" maxLength="6"
                                                 value={addShipper.shipperPin}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperPin: e.target.value })}
-                                                placeholder="Pin Code"  />
+                                                placeholder="Pin Code" />
                                         </div>
 
                                         <div className="input-field3">
@@ -3537,14 +3518,14 @@ function Booking() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={addShipper.shipperMob}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperMob: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No"  />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Mobile No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Email ID</label>
                                             <input type="email" value={addShipper.shipperEmail}
                                                 onChange={(e) => setAddShipper({ ...addShipper, shipperEmail: e.target.value })}
-                                                placeholder="Email Id"  />
+                                                placeholder="Email Id" />
                                         </div>
 
                                         <div className="input-field3">

@@ -36,7 +36,7 @@ function PaymentEntry() {
         billNo: "",
 
     });
-     const ymdToDmy = (dateStr) => {
+    const ymdToDmy = (dateStr) => {
         if (!dateStr) return "";
         const [year, month, day] = dateStr.split("-");
         return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
@@ -68,11 +68,10 @@ function PaymentEntry() {
         }
     };
 
-    useEffect(()=>
-    {
+    useEffect(() => {
         console.log(formData);
-    },[formData])
-   
+    }, [formData])
+
     useEffect(() => {
         fetchData('/Master/getCustomerdata', setGetCustomer);
         fetchData('/Master/GetAllBranchData', setGetBranch);
@@ -200,6 +199,46 @@ function PaymentEntry() {
                     <form action="" style={{ margin: "0px", background: " #f2f4f3" }}>
 
                         <div className="fields2">
+                            <div className="input-field3">
+                                <label htmlFor="">Branch Name</label>
+                                <Select
+                                    options={getBranch.map(b => ({
+                                        value: b.Branch_Code,   // adjust keys from your API
+                                        label: b.Branch_Name
+                                    }))}
+                                    value={
+                                        formData.branch
+                                            ? {
+                                                value: formData.branch,
+                                                label: getBranch.find(c => c.Branch_Code === formData.branch)?.Branch_Name || ""
+                                            }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            branch: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                    placeholder="Select Branch"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                />
+
+                            </div>
+
                             <div className="input-field1">
                                 <label htmlFor="">Customer Name</label>
                                 <Select
@@ -240,44 +279,7 @@ function PaymentEntry() {
 
                             </div>
 
-                            <div className="input-field3">
-                                <label htmlFor="">Branch Name</label>
-                                <Select
-                                    options={getBranch.map(b => ({
-                                        value: b.Branch_Code,   // adjust keys from your API
-                                        label: b.Branch_Name
-                                    }))}
-                                    value={
-                                        formData.branch
-                                            ? {
-                                                value:formData.branch,
-                                                label:getBranch.find(c => c.Branch_Code === formData.branch)?.Branch_Name || ""}
-                                            : null
-                                    }
-                                    onChange={(selectedOption) =>
-                                        setFormData({
-                                            ...formData,
-                                            branch: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
 
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                    placeholder="Select Branch"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                />
-
-                            </div>
 
                             <div className="input-field3">
                                 <label htmlFor="">Bill No</label>
@@ -296,8 +298,8 @@ function PaymentEntry() {
                                 />
                             </div>
 
-                            
-                            <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "10px",width:"80px" }}>
+
+                            <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "10px", width: "80px" }}>
                                 <button className="ok-btn">Submit</button>
                             </div>
 
@@ -337,12 +339,13 @@ function PaymentEntry() {
                                 <tr>
                                     <th>Actions</th>
                                     <th>Sr.No</th>
+                                    <th>Bill No</th>
+                                    <th>Bill Date</th>
                                     <th>Branch Name</th>
                                     <th>Customer Name</th>
                                     <th>GST No</th>
                                     <th>Booking Type</th>
-                                    <th>Bill No</th>
-                                    <th>Bill Date</th>
+                                    
                                     <th>Total Amount</th>
                                     <th>Payment Received</th>
                                     <th>TDS</th>
@@ -353,7 +356,7 @@ function PaymentEntry() {
                                     <th>Receiver Name</th>
                                     <th>Payment Type</th>
                                     <th>Remark</th>
-                                    
+
 
                                 </tr>
                             </thead>
@@ -399,12 +402,12 @@ function PaymentEntry() {
                                             )}
                                         </td>
                                         <td>{index + 1}</td>
+                                        <td>{row.BillNo}</td>
+                                        <td>{row.InvoiceDate}</td>
                                         <td>{getBranch.find(f => f.Branch_Code === row.Branch_Code)?.Branch_Name}</td>
                                         <td>{row.Customer_Name}</td>
                                         <td>{row.Gst_No}</td>
                                         <td>{row.Booking_Type}</td>
-                                        <td>{row.BillNo}</td>
-                                        <td>{row.InvoiceDate}</td>
                                         <td>{row.TotalAmount}</td>
                                         <td>{row.PaymentReceived}</td>
                                         <td>{row.TDS}</td>
