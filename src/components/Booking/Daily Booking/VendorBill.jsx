@@ -51,13 +51,15 @@ function VendorBill() {
         modeCode: "",
         vendorAwbNo: "",
         billNo: "",
+        disc: "",
         billDate: getTodayDate(),
         billFrom: getTodayDate(),
         billTo: getTodayDate(),
         amount: 0,
         fuelChrgs: 0,
-        otherChrgs: 0,
         gst: 0,
+        cgst: 0,
+        sgst: 0,
         totalAmt: 0,
     });
     const fetchData = async (endpoint, setData) => {
@@ -120,6 +122,34 @@ function VendorBill() {
             Swal.fire("Error", err.message, "error");
         }
     };
+    useEffect(() => {
+        if (!formData.amount || formData.amount==0) {
+            setFormData((prev) => (
+                {
+                    ...prev,
+                    gst: 0,
+                    cgst: 0,
+                    sgst: 0,
+                    totalAmt: 0,
+                }
+            ))
+            return;
+        }
+        const sub = Number(formData.fuelChrgs) + Number(formData.amount);
+        const gst = (sub * 18) / 100;
+        const cgst = (sub * 9) / 100;
+        const total = sub + gst;
+        setFormData((prev) => (
+            {
+                ...prev,
+                gst: gst,
+                cgst: cgst,
+                sgst: cgst,
+                totalAmt: total,
+
+            }
+        ))
+    }, [formData.fuelChrgs, formData.amount])
 
 
     const handleDelete = (vendorId) => {
@@ -165,7 +195,7 @@ function VendorBill() {
                 VendorAWBNo: formData.vendorAwbNo,
                 Amount: formData.amount,
                 FuelCharges: formData.fuelChrgs,
-                OtherCharges: formData.otherChrgs,
+                OtherCharges: formData.disc,
                 GST: formData.gst,
                 TotalAmount: formData.totalAmt,
 
@@ -182,6 +212,7 @@ function VendorBill() {
                 Swal.fire("Success", "Vendor Bill Added Successfully!", "success");
                 await fetchVendorBill();
                 setFormData({
+                    vendorId: "",
                     vendorCode: "",
                     custCode: "",
                     orgCode: "",
@@ -189,13 +220,15 @@ function VendorBill() {
                     modeCode: "",
                     vendorAwbNo: "",
                     billNo: "",
+                    disc: "",
                     billDate: getTodayDate(),
                     billFrom: getTodayDate(),
                     billTo: getTodayDate(),
                     amount: 0,
                     fuelChrgs: 0,
-                    otherChrgs: 0,
                     gst: 0,
+                    cgst: 0,
+                    sgst: 0,
                     totalAmt: 0,
                 });
                 setModalIsOpen(false);
@@ -221,7 +254,7 @@ function VendorBill() {
                 VendorAWBNo: formData.vendorAwbNo,
                 Amount: formData.amount,
                 FuelCharges: formData.fuelChrgs,
-                OtherCharges: formData.otherChrgs,
+                OtherCharges: formData.disc,
                 GST: formData.gst,
                 TotalAmount: formData.totalAmt,
 
@@ -246,13 +279,15 @@ function VendorBill() {
                     modeCode: "",
                     vendorAwbNo: "",
                     billNo: "",
+                    disc: "",
                     billDate: getTodayDate(),
                     billFrom: getTodayDate(),
                     billTo: getTodayDate(),
                     amount: 0,
                     fuelChrgs: 0,
-                    otherChrgs: 0,
                     gst: 0,
+                    cgst: 0,
+                    sgst: 0,
                     totalAmt: 0,
                 });
                 setModalIsOpen(false);
@@ -279,9 +314,9 @@ function VendorBill() {
             Origin: row.Origin_Name,
             Destination: row.Destination_Name,
             Mode: row.Mode_Code,
+            Discription: row.OtherCharges,
             Amount: row.Amount,
             FuelCharges: row.FuelCharges,
-            OtherCharges: row.OtherCharges,
             GST: row.GST,
             TotalAmount: row.TotalAmount,
         }));
@@ -297,8 +332,8 @@ function VendorBill() {
 
         saveAs(file, 'VendorBills.xlsx');
     };
-    const handleOpenVendorBillPrint = (invNo) => {
-        navigate("/vendorbillPrint", { state: { invoiceNo: invNo, from: location.pathname, tab: "vendorcharge" } })
+    const handleOpenVendorBillPrint = (data) => {
+        navigate("/vendorbillPrint", { state: { data: data, from: location.pathname, tab: "vendorcharge" } })
     };
     const handleExportPDF = () => {
         const input = document.getElementById('table-to-pdf');
@@ -341,509 +376,534 @@ function VendorBill() {
             <Header />
             <Sidebar1 />
             <div className="main-body" id='main-body'>
-            <div className='body'>
-                <div className="container1">
-                    <header style={{ fontWeight: "bold", fontSize: "15px" }}>Vendor Bill Entry</header>
-                    <div className="addNew">
-                        <div>
-                            <button className='add-btn' onClick={() => {
-                                setModalIsOpen(true);
-                                setFormData({
-                                    vendorCode: "",
-                                    custCode: "",
-                                    orgCode: "",
-                                    destCode: "",
-                                    modeCode: "",
-                                    vendorAwbNo: "",
-                                    billNo: "",
-                                    billDate: getTodayDate(),
-                                    billFrom: getTodayDate(),
-                                    billTo: getTodayDate(),
-                                    amount: 0,
-                                    fuelChrgs: 0,
-                                    otherChrgs: 0,
-                                    gst: 0,
-                                    totalAmt: 0,
-                                });
-                            }}>
-                                <i className="bi bi-plus-lg"></i>
-                                <span>ADD NEW</span>
-                            </button>
+                <div className='body'>
+                    <div className="container1">
+                        <header style={{ fontWeight: "bold", fontSize: "15px" }}>Vendor Bill Entry</header>
+                        <div className="addNew">
+                            <div>
+                                <button className='add-btn' onClick={() => {
+                                    setModalIsOpen(true);
+                                    setFormData({
+                                        vendorCode: "",
+                                        custCode: "",
+                                        orgCode: "",
+                                        destCode: "",
+                                        modeCode: "",
+                                        vendorAwbNo: "",
+                                        billNo: "",
+                                        billDate: getTodayDate(),
+                                        billFrom: getTodayDate(),
+                                        billTo: getTodayDate(),
+                                        amount: 0,
+                                        fuelChrgs: 0,
+                                        otherChrgs: 0,
+                                        gst: 0,
+                                        totalAmt: 0,
+                                    });
+                                }}>
+                                    <i className="bi bi-plus-lg"></i>
+                                    <span>ADD NEW</span>
+                                </button>
 
-                            <div className="dropdown">
-                                <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
-                                <div className="dropdown-content">
-                                    <button onClick={handleExportExcel}>Export to Excel</button>
-                                    <button onClick={handleExportPDF}>Export to PDF</button>
+                                <div className="dropdown">
+                                    <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
+                                    <div className="dropdown-content">
+                                        <button onClick={handleExportExcel}>Export to Excel</button>
+                                        <button onClick={handleExportPDF}>Export to PDF</button>
+                                    </div>
                                 </div>
                             </div>
+
+                            <div className="search-input">
+                                <input
+                                    className="add-input"
+                                    type="text"
+                                    placeholder="Search..."
+                                    value={quary}
+                                    onChange={(e) => setQuary(e.target.value)}
+                                />
+
+                                <button type="submit" title="search">
+                                    <i className="bi bi-search"></i>
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="search-input">
-                            <input
-                                className="add-input"
-                                type="text"
-                                placeholder="Search..."
-                                value={quary}
-                                onChange={(e) => setQuary(e.target.value)}
-                            />
-
-                            <button type="submit" title="search">
-                                <i className="bi bi-search"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className='table-container'>
-                        <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
-                            <thead>
-                                <tr>
-                                    <th>Actions</th>
-                                    <th>Vendor ID</th>
-                                    <th>Bill No</th>
-                                    <th>Bill Date</th>
-                                    <th>Bill From</th>
-                                    <th>Bill To</th>
-                                    <th>Customer Name</th>
-                                    <th>Vendor Name</th>
-                                    <th>Origin</th>
-                                    <th>Destination</th>
-                                    <th>Mode</th>
-                                    <th>Amount</th>
-                                    <th>Fuel Charges</th>
-                                    <th>Other Charges</th>
-                                    <th>GST</th>
-                                    <th>Total Amount</th>
-                                </tr>
-                            </thead>
-
-                            <tbody className='table-body'>
-                                {filterData.map((row, index) => (
-                                    <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
-                                        <td>
-                                            <PiDotsThreeOutlineVerticalFill
-                                                style={{ fontSize: "20px", cursor: "pointer" }}
-                                                onClick={() => setOpenRow(openRow === index ? null : index)}
-                                            />
-                                            {openRow === index && (
-                                                <div
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent: "center",
-                                                        flexDirection: "row",
-                                                        position: "absolute",
-                                                        alignItems: "center",
-                                                        left: "60px",
-                                                        top: "0px",
-                                                        borderRadius: "10px",
-                                                        backgroundColor: "white",
-                                                        zIndex: "999999",
-                                                        height: "30px",
-                                                        width: "50px",
-                                                        padding: "10px",
-                                                    }}
-                                                >
-                                                    <button className='edit-btn' onClick={() => handleOpenVendorBillPrint("001")}>
-                                                        <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
-                                                    </button>
-                                                    <button className='edit-btn' onClick={() => {
-                                                        setIsEditMode(true);
-                                                        setOpenRow(null);
-                                                        setFormData({
-                                                            vendorId: row.VendorID,
-                                                            vendorCode: row.Vendor_Code,
-                                                            custCode: row.Customer_Code,
-                                                            orgCode: row.Origin_Code,
-                                                            destCode: row.Destination_Code,
-                                                            modeCode: row.Mode_Code,
-                                                            vendorAwbNo: row.VendorAWBNo,
-                                                            billNo: row.BillNo,
-
-                                                            billDate: convertToYMD(row.BillDate),
-                                                            billFrom: convertToYMD(row.BillFrom),
-                                                            billTo: convertToYMD(row.BillTo),
-
-                                                            amount: row.Amount,
-                                                            fuelChrgs: row.FuelCharges,
-                                                            otherChrgs: row.OtherCharges,
-                                                            gst: row.GST,
-                                                            totalAmt: row.TotalAmount,
-                                                        });
-
-                                                        setModalIsOpen(true);
-                                                    }}>
-                                                        <i className='bi bi-pen'></i>
-                                                    </button>
-                                                    <button onClick={() => {
-                                                        handleDelete(row.VendorID);
-                                                        setOpenRow(null);
-                                                    }}
-                                                        className='edit-btn'>
-                                                        <i className='bi bi-trash'></i></button>
-                                                </div>
-                                            )}
-                                        </td>
-
-
-
-                                        {/* Sr No */}
-                                        <td>{row.VendorID}</td>
-
-                                        {/* Bill Data */}
-                                        <td>{row.BillNo}</td>
-                                        <td>{row.BillDate}</td>
-                                        <td>{row.BillFrom}</td>
-                                        <td>{row.BillTo}</td>
-
-                                        {/* Customer */}
-                                        <td>{row.Customer_Name}</td>
-
-                                        {/* Vendor */}
-                                        <td>{row.Vendor_Name?.trim()}</td>
-
-                                        {/* Origin / Destination */}
-                                        <td>{row.Origin_Name}</td>
-                                        <td>{row.Destination_Name}</td>
-
-                                        {/* Mode */}
-                                        <td>{row.Mode_Code}</td>
-
-                                        {/* Amount Details */}
-                                        <td>{row.Amount}</td>
-                                        <td>{row.FuelCharges}</td>
-                                        <td>{row.OtherCharges}</td>
-                                        <td>{row.GST}</td>
-                                        <td>{row.TotalAmount}</td>
+                        <div className='table-container'>
+                            <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
+                                <thead>
+                                    <tr>
+                                        <th>Actions</th>
+                                        <th>Vendor ID</th>
+                                        <th>Bill No</th>
+                                        <th>Bill Date</th>
+                                        <th>Bill From</th>
+                                        <th>Bill To</th>
+                                        <th>Customer Name</th>
+                                        <th>Vendor Name</th>
+                                        <th>Origin</th>
+                                        <th>Destination</th>
+                                        <th>Mode</th>
+                                        <th>Discription</th>
+                                        <th>Amount</th>
+                                        <th>Fuel Charges</th>
+                                        <th>GST</th>
+                                        <th>Total Amount</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
 
-                    <div className="row" style={{ whiteSpace: "nowrap" }}>
-                        <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
-                            <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                                {'<'}
-                            </button>
-                            <span style={{ color: "#333", padding: "5px" }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                                {'>'}
-                            </button>
+                                <tbody className='table-body'>
+                                    {filterData.map((row, index) => (
+                                        <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+                                            <td>
+                                                <PiDotsThreeOutlineVerticalFill
+                                                    style={{ fontSize: "20px", cursor: "pointer" }}
+                                                    onClick={() => setOpenRow(openRow === index ? null : index)}
+                                                />
+                                                {openRow === index && (
+                                                    <div
+                                                        style={{
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            flexDirection: "row",
+                                                            position: "absolute",
+                                                            alignItems: "center",
+                                                            left: "75px",
+                                                            top: "0px",
+                                                            borderRadius: "10px",
+                                                            backgroundColor: "white",
+                                                            zIndex: "999999",
+                                                            height: "30px",
+                                                            width: "50px",
+                                                            padding: "10px",
+                                                        }}
+                                                    >
+                                                        <button className='edit-btn' onClick={() => handleOpenVendorBillPrint(row)}>
+                                                            <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
+                                                        </button>
+                                                        <button className='edit-btn' onClick={() => {
+                                                            setIsEditMode(true);
+                                                            setOpenRow(null);
+                                                            setFormData({
+                                                                vendorId: row.VendorID,
+                                                                vendorCode: row.Vendor_Code,
+                                                                custCode: row.Customer_Code,
+                                                                orgCode: row.Origin_Code,
+                                                                destCode: row.Destination_Code,
+                                                                modeCode: row.Mode_Code,
+                                                                vendorAwbNo: row.VendorAWBNo,
+                                                                billNo: row.BillNo,
+
+                                                                billDate: convertToYMD(row.BillDate),
+                                                                billFrom: convertToYMD(row.BillFrom),
+                                                                billTo: convertToYMD(row.BillTo),
+
+                                                                amount: row.Amount,
+                                                                fuelChrgs: row.FuelCharges,
+                                                                disc: row.OtherCharges,
+                                                                gst: row.GST,
+                                                                totalAmt: row.TotalAmount,
+                                                            });
+
+                                                            setModalIsOpen(true);
+                                                        }}>
+                                                            <i className='bi bi-pen'></i>
+                                                        </button>
+                                                        <button onClick={() => {
+                                                            handleDelete(row.VendorID);
+                                                            setOpenRow(null);
+                                                        }}
+                                                            className='edit-btn'>
+                                                            <i className='bi bi-trash'></i></button>
+                                                    </div>
+                                                )}
+                                            </td>
+
+
+
+                                            {/* Sr No */}
+                                            <td>{row.VendorID}</td>
+
+                                            {/* Bill Data */}
+                                            <td>{row.BillNo}</td>
+                                            <td>{row.BillDate}</td>
+                                            <td>{row.BillFrom}</td>
+                                            <td>{row.BillTo}</td>
+
+                                            {/* Customer */}
+                                            <td>{row.Customer_Name}</td>
+
+                                            {/* Vendor */}
+                                            <td>{row.Vendor_Name?.trim()}</td>
+
+                                            {/* Origin / Destination */}
+                                            <td>{row.Origin_Name}</td>
+                                            <td>{row.Destination_Name}</td>
+
+                                            {/* Mode */}
+                                            <td>{row.Mode_Code}</td>
+                                            <td>{row.OtherCharges}</td>
+
+                                            {/* Amount Details */}
+                                            <td>{row.Amount}</td>
+                                            <td>{row.FuelCharges}</td>
+                                            
+                                            <td>{row.GST}</td>
+                                            <td>{row.TotalAmount}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
 
-                        <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
-                            <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
-                            <select
-                                id="rowsPerPage"
-                                value={rowsPerPage}
-                                onChange={(e) => {
-                                    setRowsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                style={{ height: "40px", width: "50px" }}
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
-                    </div>
-
-
-                    <Modal
-                        overlayClassName="custom-overlay"
-                        isOpen={modalIsOpen}
-                        className="custom-modal"
-                        style={{
-                            content: {
-                                width: "90%",
-                                top: "50%",
-                                left: "50%",
-                                whiteSpace: "nowrap",
-                            },
-                        }}
-                        contentLabel="Modal"
-                    >
-                        <div className='custom-modal-content'>
-                            <div className="header-tittle">
-                                <header>Vendor Bill Master</header>
+                        <div className="row" style={{ whiteSpace: "nowrap" }}>
+                            <div className="pagination col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+                                <button className="ok-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                                    {'<'}
+                                </button>
+                                <span style={{ color: "#333", padding: "5px" }}>
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <button className="ok-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                                    {'>'}
+                                </button>
                             </div>
 
-                            <div className='container2'>
-                                <form onSubmit={(e) => { handleSave(e); }}>
-
-                                    <div className="fields2">
-                                        <div className="input-field1">
-                                            <label htmlFor="">Vendor Name</label>
-                                            <Select
-                                                className="blue-selectbooking"
-                                                classNamePrefix="blue-selectbooking"
-                                                options={getVendor.map(v => ({ value: v.Vendor_Code, label: v.Vendor_Name }))}
-                                                value={
-                                                    formData.vendorCode
-                                                        ? { value: formData.vendorCode, label: getVendor.find(opt => opt.Vendor_Code === formData.vendorCode)?.Vendor_Name || "" }
-                                                        : null
-                                                }
-                                                onChange={(selectedOption) => {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        vendorCode: selectedOption.value,
-                                                    }));
-                                                }}
-                                                placeholder="Select Vendor Name"
-                                                isSearchable
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                styles={{
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="input-field1">
-                                            <label htmlFor="">Customer Name</label>
-                                            <Select
-                                                className="blue-selectbooking"
-                                                classNamePrefix="blue-selectbooking"
-                                                options={getCustomerdata.map(c => ({ value: c.Customer_Code, label: c.Customer_Name }))}
-                                                value={
-                                                    formData.custCode
-                                                        ? { value: formData.custCode, label: getCustomerdata.find(opt => opt.Customer_Code === formData.custCode)?.Customer_Name || "" }
-                                                        : null
-                                                }
-                                                onChange={(selectedOption) => {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        custCode: selectedOption.value,
-                                                    }));
-                                                }}
-                                                placeholder="Select Vendor Name"
-                                                isSearchable
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                styles={{
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="input-field1">
-                                            <label>Mode</label>
-                                            <Select
-                                                className="blue-selectbooking"
-                                                classNamePrefix="blue-selectbooking"
-                                                options={getMode.map(m => ({
-                                                    value: m.Mode_Code,
-                                                    label: m.Mode_Name
-                                                }))}
-                                                value={
-                                                    formData.modeCode
-                                                        ? {
-                                                            value: formData.modeCode,
-                                                            label: getMode.find(x => x.Mode_Code === formData.modeCode)?.Mode_Name || ""
-                                                        }
-                                                        : null
-                                                }
-                                                onChange={(selectedOption) => {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        modeCode: selectedOption.value,
-                                                    }));
-                                                }}
-                                                placeholder="Select Mode"
-                                                isSearchable
-                                                menuPortalTarget={document.body}
-                                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                            />
-                                        </div>
-
-                                        <div className="input-field1">
-                                            <label>Origin</label>
-                                            <Select
-                                                className="blue-selectbooking"
-                                                classNamePrefix="blue-selectbooking"
-                                                options={getCity.map(city => ({
-                                                    value: city.City_Code,
-                                                    label: city.City_Name
-                                                }))}
-                                                value={
-                                                    formData.orgCode
-                                                        ? {
-                                                            value: formData.orgCode,
-                                                            label: getCity.find(x => x.City_Code === formData.orgCode)?.City_Name || ""
-                                                        }
-                                                        : null
-                                                }
-                                                onChange={(selectedOption) => {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        orgCode: selectedOption.value,
-                                                    }));
-                                                }}
-                                                placeholder="Select Origin"
-                                                isSearchable
-                                                menuPortalTarget={document.body}
-                                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                            />
-                                        </div>
-                                        <div className="input-field1">
-                                            <label>Destination</label>
-                                            <Select
-                                                className="blue-selectbooking"
-                                                classNamePrefix="blue-selectbooking"
-                                                options={getCity.map(city => ({
-                                                    value: city.City_Code,
-                                                    label: city.City_Name
-                                                }))}
-                                                value={
-                                                    formData.destCode
-                                                        ? {
-                                                            value: formData.destCode,
-                                                            label: getCity.find(x => x.City_Code === formData.destCode)?.City_Name || ""
-                                                        }
-                                                        : null
-                                                }
-                                                onChange={(selectedOption) => {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        destCode: selectedOption.value,
-                                                    }));
-                                                }}
-                                                placeholder="Select Destination"
-                                                isSearchable
-                                                menuPortalTarget={document.body}
-                                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                            />
-                                        </div>
-
-
-                                        {/* 🟩 Bill No */}
-                                        <div className="input-field1">
-                                            <label>Bill No</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter Bill No"
-                                                value={formData.billNo}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, billNo: e.target.value }))}
-                                            />
-                                        </div>
-
-                                        {/* 🟩 Bill Date */}
-                                        <div className="input-field1">
-                                            <label>Bill Date</label>
-                                            <DatePicker
-                                                portalId="root-portal"
-                                                selected={formData.billDate}
-                                                onChange={(date) => handleDateChange(date, "billDate")}
-                                                dateFormat="dd/MM/yyyy"
-                                                className="form-control form-control-sm"
-                                            />
-                                        </div>
-
-                                        {/* 🟩 Bill From */}
-                                        <div className="input-field1">
-                                            <label>Bill From</label>
-                                            <DatePicker
-                                                portalId="root-portal"
-                                                selected={formData.billFrom}
-                                                onChange={(date) => handleDateChange(date, "billFrom")}
-                                                dateFormat="dd/MM/yyyy"
-                                                className="form-control form-control-sm"
-                                            />
-                                        </div>
-
-                                        {/* 🟩 Bill To */}
-                                        <div className="input-field1">
-                                            <label>Bill To</label>
-                                            <DatePicker
-                                                portalId="root-portal"
-                                                selected={formData.billTo}
-                                                onChange={(date) => handleDateChange(date, "billTo")}
-                                                dateFormat="dd/MM/yyyy"
-                                                className="form-control form-control-sm"
-                                            />
-                                        </div>
-
-
-                                        {/* 🟩 Vendor AWB No */}
-                                        <div className="input-field1">
-                                            <label>Vendor AWB No</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter Vendor AWB No"
-                                                value={formData.vendorAwbNo}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, vendorAwbNo: e.target.value }))}
-                                            />
-                                        </div>
-
-                                        {/* 🟩 Amount */}
-                                        <div className="input-field1">
-                                            <label>Amount</label>
-                                            <input
-                                                type="tel"
-                                                placeholder="Enter Amount"
-                                                value={formData.amount}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                                            />
-                                        </div>
-
-                                        {/* 🟩 Fuel Charges */}
-                                        <div className="input-field1">
-                                            <label>Fuel Charges</label>
-                                            <input
-                                                type="tel"
-                                                placeholder="Enter Fuel Charges"
-                                                value={formData.fuelChrgs}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, fuelChrgs: e.target.value }))}
-                                            />
-                                        </div>
-
-                                        {/* 🟩 Other Charges */}
-                                        <div className="input-field1">
-                                            <label>Other Charges</label>
-                                            <input
-                                                type="tel"
-                                                placeholder="Enter Other Charges"
-                                                value={formData.otherChrgs}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, otherChrgs: e.target.value }))}
-                                            />
-                                        </div>
-
-                                        {/* 🟩 GST */}
-                                        <div className="input-field1">
-                                            <label>GST</label>
-                                            <input
-                                                type="tel"
-                                                placeholder="Enter GST"
-                                                value={formData.gst}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, gst: e.target.value }))}
-                                            />
-                                        </div>
-
-                                        {/* 🟩 Total Amount */}
-                                        <div className="input-field1">
-                                            <label>Total Amount</label>
-                                            <input
-                                                type="tel"
-                                                placeholder="Enter Total Amount"
-                                                value={formData.totalAmt}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, totalAmt: e.target.value }))}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className='bottom-buttons'>
-                                        {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
-                                        {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
-                                        <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
-                                    </div>
-                                </form>
+                            <div className="rows-per-page col-12 col-md-6 d-flex justify-content-center justify-content-md-end align-items-center">
+                                <label htmlFor="rowsPerPage" className="me-2">Rows per page: </label>
+                                <select
+                                    id="rowsPerPage"
+                                    value={rowsPerPage}
+                                    onChange={(e) => {
+                                        setRowsPerPage(Number(e.target.value));
+                                        setCurrentPage(1);
+                                    }}
+                                    style={{ height: "40px", width: "50px" }}
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                </select>
                             </div>
                         </div>
-                    </Modal >
 
-                </div >
-            </div>
-            <Footer />
-        </div >
+
+                        <Modal
+                            overlayClassName="custom-overlay"
+                            isOpen={modalIsOpen}
+                            className="custom-modal"
+                            style={{
+                                content: {
+                                    width: "90%",
+                                    top: "50%",
+                                    left: "50%",
+                                    whiteSpace: "nowrap",
+                                },
+                            }}
+                            contentLabel="Modal"
+                        >
+                            <div className='custom-modal-content'>
+                                <div className="header-tittle">
+                                    <header>Vendor Bill Master</header>
+                                </div>
+
+                                <div className='container2'>
+                                    <form onSubmit={(e) => { handleSave(e); }}>
+
+                                        <div className="fields2">
+                                            <div className="input-field1">
+                                                <label htmlFor="">Vendor Name</label>
+                                                <Select
+                                                    className="blue-selectbooking"
+                                                    classNamePrefix="blue-selectbooking"
+                                                    options={getVendor.map(v => ({ value: v.Vendor_Code, label: v.Vendor_Name }))}
+                                                    value={
+                                                        formData.vendorCode
+                                                            ? { value: formData.vendorCode, label: getVendor.find(opt => opt.Vendor_Code === formData.vendorCode)?.Vendor_Name || "" }
+                                                            : null
+                                                    }
+                                                    onChange={(selectedOption) => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            vendorCode: selectedOption.value,
+                                                        }));
+                                                    }}
+                                                    placeholder="Select Vendor Name"
+                                                    isSearchable
+                                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                    styles={{
+                                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="input-field1">
+                                                <label htmlFor="">Customer Name</label>
+                                                <Select
+                                                    className="blue-selectbooking"
+                                                    classNamePrefix="blue-selectbooking"
+                                                    options={getCustomerdata.map(c => ({ value: c.Customer_Code, label: c.Customer_Name }))}
+                                                    value={
+                                                        formData.custCode
+                                                            ? { value: formData.custCode, label: getCustomerdata.find(opt => opt.Customer_Code === formData.custCode)?.Customer_Name || "" }
+                                                            : null
+                                                    }
+                                                    onChange={(selectedOption) => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            custCode: selectedOption.value,
+                                                        }));
+                                                    }}
+                                                    placeholder="Select Vendor Name"
+                                                    isSearchable
+                                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                    styles={{
+                                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="input-field1">
+                                                <label>Mode</label>
+                                                <Select
+                                                    className="blue-selectbooking"
+                                                    classNamePrefix="blue-selectbooking"
+                                                    options={getMode.map(m => ({
+                                                        value: m.Mode_Code,
+                                                        label: m.Mode_Name
+                                                    }))}
+                                                    value={
+                                                        formData.modeCode
+                                                            ? {
+                                                                value: formData.modeCode,
+                                                                label: getMode.find(x => x.Mode_Code === formData.modeCode)?.Mode_Name || ""
+                                                            }
+                                                            : null
+                                                    }
+                                                    onChange={(selectedOption) => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            modeCode: selectedOption.value,
+                                                        }));
+                                                    }}
+                                                    placeholder="Select Mode"
+                                                    isSearchable
+                                                    menuPortalTarget={document.body}
+                                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                />
+                                            </div>
+
+                                            <div className="input-field1">
+                                                <label>Origin</label>
+                                                <Select
+                                                    className="blue-selectbooking"
+                                                    classNamePrefix="blue-selectbooking"
+                                                    options={getCity.map(city => ({
+                                                        value: city.City_Code,
+                                                        label: city.City_Name
+                                                    }))}
+                                                    value={
+                                                        formData.orgCode
+                                                            ? {
+                                                                value: formData.orgCode,
+                                                                label: getCity.find(x => x.City_Code === formData.orgCode)?.City_Name || ""
+                                                            }
+                                                            : null
+                                                    }
+                                                    onChange={(selectedOption) => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            orgCode: selectedOption.value,
+                                                        }));
+                                                    }}
+                                                    placeholder="Select Origin"
+                                                    isSearchable
+                                                    menuPortalTarget={document.body}
+                                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                />
+                                            </div>
+                                            <div className="input-field1">
+                                                <label>Destination</label>
+                                                <Select
+                                                    className="blue-selectbooking"
+                                                    classNamePrefix="blue-selectbooking"
+                                                    options={getCity.map(city => ({
+                                                        value: city.City_Code,
+                                                        label: city.City_Name
+                                                    }))}
+                                                    value={
+                                                        formData.destCode
+                                                            ? {
+                                                                value: formData.destCode,
+                                                                label: getCity.find(x => x.City_Code === formData.destCode)?.City_Name || ""
+                                                            }
+                                                            : null
+                                                    }
+                                                    onChange={(selectedOption) => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            destCode: selectedOption.value,
+                                                        }));
+                                                    }}
+                                                    placeholder="Select Destination"
+                                                    isSearchable
+                                                    menuPortalTarget={document.body}
+                                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                />
+                                            </div>
+
+
+                                            {/* 🟩 Bill No */}
+                                            <div className="input-field1">
+                                                <label>Bill No</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter Bill No"
+                                                    value={formData.billNo}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, billNo: e.target.value }))}
+                                                />
+                                            </div>
+
+                                            {/* 🟩 Bill Date */}
+                                            <div className="input-field1">
+                                                <label>Bill Date</label>
+                                                <DatePicker
+                                                    portalId="root-portal"
+                                                    selected={formData.billDate}
+                                                    onChange={(date) => handleDateChange(date, "billDate")}
+                                                    dateFormat="dd/MM/yyyy"
+                                                    className="form-control form-control-sm"
+                                                />
+                                            </div>
+
+                                            {/* 🟩 Bill From */}
+                                            <div className="input-field1">
+                                                <label>Bill From</label>
+                                                <DatePicker
+                                                    portalId="root-portal"
+                                                    selected={formData.billFrom}
+                                                    onChange={(date) => handleDateChange(date, "billFrom")}
+                                                    dateFormat="dd/MM/yyyy"
+                                                    className="form-control form-control-sm"
+                                                />
+                                            </div>
+
+                                            {/* 🟩 Bill To */}
+                                            <div className="input-field1">
+                                                <label>Bill To</label>
+                                                <DatePicker
+                                                    portalId="root-portal"
+                                                    selected={formData.billTo}
+                                                    onChange={(date) => handleDateChange(date, "billTo")}
+                                                    dateFormat="dd/MM/yyyy"
+                                                    className="form-control form-control-sm"
+                                                />
+                                            </div>
+
+
+                                            {/* 🟩 Vendor AWB No */}
+                                            <div className="input-field1">
+                                                <label>Vendor AWB No</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter Vendor AWB No"
+                                                    value={formData.vendorAwbNo}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, vendorAwbNo: e.target.value }))}
+                                                />
+                                            </div>
+
+                                            {/* 🟩 Discription */}
+                                            <div className="input-field1">
+                                                <label>Discription</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="Enter Discriptions"
+                                                    value={formData.disc}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, disc: e.target.value }))}
+                                                />
+                                            </div>
+
+                                            {/* 🟩 Amount */}
+                                            <div className="input-field1">
+                                                <label>Amount</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="Enter Amount"
+                                                    value={formData.amount}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                                                />
+                                            </div>
+
+                                            {/* 🟩 Fuel Charges */}
+                                            <div className="input-field1">
+                                                <label>Fuel Charges</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="Enter Fuel Charges"
+                                                    value={formData.fuelChrgs}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, fuelChrgs: e.target.value }))}
+                                                />
+                                            </div>
+
+
+
+                                            {/* 🟩 GST */}
+                                            <div className="input-field1">
+                                                <label>GST (18%)</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="Enter GST"
+                                                    value={formData.gst}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, gst: e.target.value }))}
+                                                />
+                                            </div>
+
+                                            <div className="input-field1">
+                                                <label>CGST (9%)</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="Enter CGST"
+                                                    value={formData.cgst}
+                                                    readOnly
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, cgst: e.target.value }))}
+                                                />
+                                            </div>
+                                            <div className="input-field1">
+                                                <label>SGST (9%)</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="Enter SGST"
+                                                    value={formData.sgst}
+                                                    readOnly
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, sgst: e.target.value }))}
+                                                />
+                                            </div>
+
+                                            {/* 🟩 Total Amount */}
+                                            <div className="input-field1">
+                                                <label>Total Amount</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="Enter Total Amount"
+                                                    value={formData.totalAmt}
+                                                    readOnly
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, totalAmt: e.target.value }))}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className='bottom-buttons'>
+                                            {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
+                                            {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}
+                                            <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </Modal >
+
+                    </div >
+                </div>
+                <Footer />
+            </div >
 
         </>
     );

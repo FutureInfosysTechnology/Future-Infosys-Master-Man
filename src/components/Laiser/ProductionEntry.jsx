@@ -217,7 +217,7 @@ function ProductionEntry() {
                     <form onSubmit={handleSave} style={{ margin: "0px", padding: "0px", background: " #f2f4f3" }}>
                         <div className="fields2">
                             <div className="input-field1">
-                                <label>Customer</label>
+                                <label>Customer Name</label>
                                 <Select
                                     options={getCustomer.map((cust) => ({
                                         value: cust.Customer_Code,
@@ -263,10 +263,10 @@ function ProductionEntry() {
                             </div>
 
                             <div className="input-field3">
-                                <label>Note No</label>
+                                <label>Invoice No</label>
                                 <input
                                     type="text"
-                                    placeholder="Enter note no"
+                                    placeholder="Enter invoice no"
                                     name="noteNo"
                                     value={formData.noteNo}
                                     onChange={handleFormChange}
@@ -285,10 +285,10 @@ function ProductionEntry() {
                             </div>
 
                             <div className="input-field3">
-                                <label>Invoice No</label>
+                                <label>Item Name</label>
                                 <input
                                     type="text"
-                                    placeholder="Enter invoice no"
+                                    placeholder="Enter item name"
                                     name="parti"
                                     value={formData.parti}
                                     onChange={handleFormChange}
@@ -361,10 +361,10 @@ function ProductionEntry() {
                                     <th>Actions</th>
                                     <th>ID</th>
                                     <th>Docket No</th>
-                                    <th>Note No</th>
+                                    <th>Invoice No</th>
                                     <th>Note Date</th>
                                     <th>Customer Name</th>
-                                    <th>Invoice No</th>
+                                    <th>Item Name</th>
                                     <th>Remark</th>
                                     <th>Amount</th>
                                 </tr>

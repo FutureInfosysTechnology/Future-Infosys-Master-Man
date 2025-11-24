@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 import Footer from "../../../Components-2/Footer";
-import VendorBill from "./VendorBill";
+import UpdateCustomerRate from "../../Admin Master/Customer Charges/UpdateCustomerRate"
 import EmailBooking from "./EmailBooking";
 import BulkImport from "../Daily Manifest/BulkImport";
 import DailyExpenses from "./DailyExpenses";
@@ -108,7 +108,7 @@ function DailyBooking() {
               Bulk Booking
             </label>
             <label htmlFor="vendorcharge" className="vendorcharge">
-              Vendor Bill Entry
+              Update Customer Rate
             </label>
             <div className="slider"></div>
           </nav>
@@ -121,7 +121,7 @@ function DailyBooking() {
             {activeTab === "vendorfuel" && <EmailBooking />}
             {activeTab === "entry" && <ShortEntry />}
             {activeTab === "excelimport" && <ExcelImportBulk />}
-            {activeTab === "vendorcharge" && <VendorBill />}
+            {activeTab === "vendorcharge" && <UpdateCustomerRate/>}
           </section>
         </div>
         <Footer />

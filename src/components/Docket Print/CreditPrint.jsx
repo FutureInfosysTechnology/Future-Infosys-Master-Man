@@ -14,7 +14,7 @@ function CreditPrint() {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const invoiceNo = location?.state?.invoiceNo || "";
+    const CreditNote_ID = location?.state?.CreditNote_ID || "";
     const fromPath = location?.state?.from || "/";
     const tab = location?.state?.tab || "view";
     const [getBranch, setGetBranch] = useState([]);
@@ -23,7 +23,7 @@ function CreditPrint() {
     console.log(location.state);
     const [loading, setLoading] = useState(true);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
-    console.log(invoiceNo);
+   
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -43,10 +43,8 @@ function CreditPrint() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getApi(`/Smart/GetProformaInvoicesPdf?invoiceNos=${invoiceNo}`);
-                setGetInvoiceData(Array.isArray(response.data) ? response.data[0] : {});
-                setGetItem(response?.data[0]?.Items);
-                console.log(response.data[0].Items);
+                const response = await getApi(`/Smart/GetCreditNoteByID?CreditNote_ID=${CreditNote_ID}`);
+                setGetInvoiceData(response.data);
             } catch (err) {
                 console.error('Fetch Error:', err);
             } finally {
@@ -55,10 +53,9 @@ function CreditPrint() {
                 // generatePDF();
             }
         };
-        if (invoiceNo) {
+       
             fetchData();
-        }
-    }, [invoiceNo]);
+    }, []);
     function numberToIndianCurrency(num) {
         if (!num || isNaN(num)) return "";
 
@@ -104,7 +101,7 @@ function CreditPrint() {
         pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
 
         // 5️⃣ Save
-        pdf.save(`Performa_${invoiceNo}.pdf`);
+        pdf.save(`CreditNote_${CreditNote_ID}.pdf`);
     };
 
 
@@ -211,24 +208,24 @@ function CreditPrint() {
 
                     <div className="container-2" style={{ borderRadius: "0px", border: "none", width: "750px", display: "flex", flexDirection: "column" }}>
                         < div id="printable-section" className="container-3" style={{ padding: "0px", border: "none" }}>
-                            <div className="container-3 px-0 py-0" style={{ border: "2px solid black", height: "815px" }}>
+                            <div className=" px-0 py-0" style={{ border: "2px solid black"}}>
 
                                 <div className="div1" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
                                     <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", gap: "7px" }}>
                                         <div style={{ width: "30%", height: "100%", padding: "10px", paddingTop: "10px", paddingBottom: "10px" }}>
-                                            <img src={invoiceData?.Branch_Logo || logoimg} alt="" style={{ height: "100%", width: "100%", borderRadius: "50%" }} />
+                                            <img src={getBranch?.Branch_Logo || logoimg} alt="" style={{ height: "100%", width: "100%", borderRadius: "50%" }} />
                                         </div>
                                         <div style={{ width: "70%", display: "flex", flexDirection: "column" }}>
-                                            <div style={{ fontWeight: "bolder", fontSize: "18px", marginTop: "12px" }}>{invoiceData.Company_Name}</div>
-                                            <div >{invoiceData.Branch_Add1},{invoiceData.Branch_PIN}</div>
+                                            <div style={{ fontWeight: "bolder", fontSize: "18px", marginTop: "12px" }}>{getBranch.Company_Name}</div>
+                                            <div >{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div>
                                             <div style={{ width: "100%", display: "flex" }}>
                                                 <div style={{ width: "50%", display: "flex", flexDirection: "column" }}>
                                                     <div style={{ fontSize: "12px" }}>GST No:</div>
-                                                    <div>{invoiceData.BranchGSTNo}</div>
+                                                    <div>{getBranch.GSTNo}</div>
                                                 </div>
                                                 <div style={{ width: "50%", display: "flex", flexDirection: "column" }}>
                                                     <div style={{ fontSize: "12px" }}>Mobile No:</div>
-                                                    <div>(+91) {invoiceData.MobileNo}</div>
+                                                    <div>(+91) {getBranch.MobileNo}</div>
                                                 </div>
                                                 {/* <div style={{width:"30%",display:"flex",flexDirection:"column"}}> */}
                                                 {/* <div style={{fontWeight:"bolder"}}>Email:</div> */}
@@ -241,67 +238,42 @@ function CreditPrint() {
                                         <div style={{ display: "flex", width: "80%", height: "40%", justifyContent: "space-between", alignItems: "center", marginTop: "5px" }}>
                                             <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                                                 <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Invoice No:</div>
-                                                <div>{invoiceData.InvoiceNo}</div>
+                                                <div>{invoiceData?.Note_No}</div>
                                             </div>
                                             <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                                                <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Invoice Date:</div>
-                                                <div>{invoiceData.InvoiceDate}</div>
+                                                <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Note Date:</div>
+                                                <div>{invoiceData.Note_Date}</div>
                                             </div>
                                             <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                                                <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Due Date:</div>
-                                                <div>{invoiceData.InvoiceDue}</div>
+                                                <div style={{ fontSize: "12px", fontWeight: "bolder" }}>Dockte No:</div>
+                                                <div>{invoiceData?.Docket_No}</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="div2" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
-                                    <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", paddingBottom: "5px", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
-                                        <div style={{ fontSize: "12px" }}>SHIP TO</div>
-                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ShipperName}</div>
+                                    <div style={{ width: "100%", display: "flex", paddingBottom: "5px", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
+                                        <div style={{ fontSize: "12px" }}>CUSTOMER TO</div>
+                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData?.Customer_Name}</div>
                                         <div style={{ display: "flex", gap: "2px" }}>
-                                            <div style={{ width: "12%" }}> Address:</div>
-                                            <div style={{ width: "80%" }}>{invoiceData.ShipperAddress},{invoiceData.Shipper_Address2},
-                                                {invoiceData.ShipperCity_Name}, {invoiceData.ShipperState_Name}, {invoiceData.ShipperPinCode}</div>
+                                            <div style={{ width: "6%" }}> Address:</div>
+                                            <div style={{ width: "90%" }}>{invoiceData?.Customer_Add1},{invoiceData?.Customer_Add2},
+                                                {invoiceData?.Customer_Add3}, {invoiceData?.State_Name}, {invoiceData?.Pin_Code}</div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}>GST No:</div>
-                                                <div>{invoiceData.ShipperGSTNo} </div>
+                                                <div>{invoiceData?.Gst_No} </div>
                                             </div>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}> State Name:</div>
-                                                <div>{invoiceData.ShipperState_Name}</div>
+                                                <div>{invoiceData?.State_Name}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: "flex", gap: "15px" }}>
                                             <div style={{ display: "flex", gap: "5px" }}>
                                                 <div style={{ fontWeight: "bolder" }}> Mobile No:</div>
-                                                <div> (+91) {invoiceData.ShipperMobileNo}  </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div style={{ width: "50%", paddingBottom: "5px", display: "flex", flexDirection: "column", paddingLeft: "8px", paddingTop: "5px", gap: "2px" }}>
-                                        <div style={{ fontSize: "12px" }}>BILL TO</div>
-                                        <div style={{ fontSize: "13px", fontWeight: "bolder" }}>{invoiceData.ReceiverName}</div>
-                                        <div style={{ display: "flex", gap: "2px" }}>
-                                            <div style={{ width: "12%" }}> Address:</div>
-                                            <div style={{ width: "80%" }}> {invoiceData.ReceiverAddress},{invoiceData.Receiver_Address2},
-                                                {invoiceData.ReceiverCity_Name}, {invoiceData.ReceiverState_Name}, {invoiceData.ReceiverPinCode}</div>
-                                        </div>
-                                        <div style={{ display: "flex", gap: "15px" }}>
-                                            <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}>GST No:</div>
-                                                <div>{invoiceData.ReceiverGSTNo} </div>
-                                            </div>
-                                            <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}> State Name:</div>
-                                                <div>{invoiceData.ReceiverState_Name}</div>
-                                            </div>
-                                        </div>
-                                        <div style={{ display: "flex", gap: "15px" }}>
-                                            <div style={{ display: "flex", gap: "5px" }}>
-                                                <div style={{ fontWeight: "bolder" }}> Mobile No:</div>
-                                                <div> (+91) {invoiceData.ReceiverMobileNo}  </div>
+                                                <div> (+91) {invoiceData.Customer_Mob}  </div>
                                             </div>
                                         </div>
                                     </div>
@@ -320,7 +292,7 @@ function CreditPrint() {
                                     <div style={{ width: "35%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Remark</div>
                                     <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>AMOUNT</div>
                                 </div>
-                                <div style={{ position: "relative", height: "500px" }}>
+                                <div style={{ position: "relative", height: "500px"  }}>
                                     {/* Background Layer */}
                                     <div
                                         style={{
@@ -344,6 +316,7 @@ function CreditPrint() {
                                             zIndex: 1,
                                             display: "flex",
                                             flexDirection: "column",
+                                            height:"100%",
                                         }}
                                     >
                                         <div className="div4" style={{
@@ -351,35 +324,27 @@ function CreditPrint() {
                                             textAlign: "center",
                                             display: "flex",
                                             flexDirection: "row",
-                                            borderBottom: "2px solid black"
+                                            borderBottom: "2px solid black",
                                         }}>
                                             {/* S.NO */}
                                             <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                                {getItem.map((item, ind) => (
-                                                    <div key={item.DetailID}>{ind + 1}</div>
-                                                ))}
+                                               1
                                             </div>
 
                                             {/* ITEMS */}
                                             <div style={{ width: "40%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px", textAlign: "start", paddingLeft: "10px" }}>
-                                                {getItem.map((item) => (
-                                                    <div key={item.DetailID}>{item.Items}</div>
-                                                ))}
+                                                {invoiceData?.Particulars}
                                             </div>
 
                                             {/* HSN */}
                                             <div style={{ width: "35%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                                {getItem.map((item) => (
-                                                    <div key={item.DetailID}>{item.HSN}</div>
-                                                ))}
+                                                {invoiceData?.Remark}
                                             </div>
 
 
                                             {/* AMOUNT */}
                                             <div style={{ width: "15%", display: "flex", flexDirection: "column", gap: "5px", paddingTop: "5px" }}>
-                                                {getItem.map((item) => (
-                                                    <div key={item.DetailID}>{item.Amount}</div>
-                                                ))}
+                                                {invoiceData?.Amount}
                                             </div>
                                         </div>
                                     </div>
@@ -389,7 +354,7 @@ function CreditPrint() {
                                     <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
                                     <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>TOTAL</div>
                                     <div style={{ width: "35%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                    <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData.GrandTotal}</div>
+                                    <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData?.Amount}</div>
                                 </div>
                             </div>
                             
@@ -397,20 +362,20 @@ function CreditPrint() {
                                 <div style={{ display: "flex", flexDirection: "column", padding: "5px", borderBottom: "2px solid black" }}>
                                     <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Total Amount (in words)
                                     </div>
-                                    <div> {invoiceData?.GrandTotal ? numberToIndianCurrency(Number(invoiceData?.GrandTotal)) : ""}</div>
+                                    <div> {invoiceData?.Amount ? numberToIndianCurrency(Number(invoiceData?.Amount)) : ""}</div>
                                 </div>
                                 <div style={{ display: "flex" }}>
                                     <div style={{ display: "flex", flexDirection: "column", fontSize: "11px", width: "50%", padding: "5px", borderRight: "2px solid black" }}>
                                         <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Bank Details</div>
-                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Name:</div><div>{invoiceData.Company_Name}</div></div>
-                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>IFSC Code:</div><div>{invoiceData.IFSC_Code}</div></div>
-                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div>{invoiceData.AccountNo}</div></div>
-                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>{invoiceData.Bank_Name}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Name:</div><div>{getBranch.Company_Name}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>IFSC Code:</div><div>{getBranch.IFSC_Code}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div>{getBranch.AccountNo}</div></div>
+                                        <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>{getBranch.Bank_Name}</div></div>
                                     </div>
-                                    <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent: "end", alignItems: "center", paddingBottom: "5px" }}>
+                                    <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent:"space-around", alignItems: "center", paddingBottom: "5px" }}>
                                         <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Authorised Signatory For
                                         </div>
-                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}>{invoiceData.Company_Name}</div>
+                                        <div style={{ fontWeight: "bolder", fontSize: "13px" }}>{getBranch?.Company_Name}</div>
                                     </div>
                                 </div>
                             </div>

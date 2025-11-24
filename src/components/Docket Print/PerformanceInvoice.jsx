@@ -322,7 +322,7 @@ function PerformanceInvoice() {
                                     <div style={{ width: "10%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>RATE</div>
                                     <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>AMOUNT</div>
                                 </div>
-                                <div style={{ position: "relative", height: "550px" }}>
+                                <div style={{ position: "relative", height: "530px" }}>
                                     {/* Background Layer */}
                                     <div
                                         style={{
@@ -499,7 +499,7 @@ function PerformanceInvoice() {
                                     <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div>{invoiceData.AccountNo}</div></div>
                                     <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>{invoiceData.Bank_Name}</div></div>
                                 </div>
-                                <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent: "end", alignItems: "center", paddingBottom: "5px" }}>
+                                <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent:"space-around", alignItems: "center", paddingBottom: "5px" }}>
                                     <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Authorised Signatory For
                                     </div>
                                     <div style={{ fontWeight: "bolder", fontSize: "13px" }}>{invoiceData.Company_Name}</div>

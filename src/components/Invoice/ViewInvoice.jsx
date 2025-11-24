@@ -51,7 +51,7 @@ function ViewInvoice() {
         fromDate: firstDayOfMonth,
         toDate: today,
         invDate: today,
-        customer: "",
+        customer: "ALL CLIENT DATA",
         invoiceNo: "",
     });
     const [modalData, setModalData] = useState({
@@ -78,6 +78,13 @@ function ViewInvoice() {
     const [term, setTerm] = useState("");
     const [termArr, setTermArr] = useState([]);
     const [editIndex, setEditIndex] = useState(null);
+    const allOptions = [
+    { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
+    ...getCustomer.map((cust) => ({
+      label: cust.Customer_Name,
+      value: cust.Customer_Code,
+    })),
+  ];
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -451,13 +458,10 @@ function ViewInvoice() {
                             <div className="input-field1">
                                 <label htmlFor="">Customer</label>
                                 <Select
-                                    options={getCustomer.map(cust => ({
-                                        value: cust.Customer_Code,   // adjust keys from your API
-                                        label: cust.Customer_Name
-                                    }))}
+                                    options={allOptions}
                                     value={
                                         formData.customer
-                                            ? { value: formData.customer, label: getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name }
+                                            ? allOptions.find(c=>c.value===formData.customer)
                                             : null
                                     }
                                     onChange={(selectedOption) =>

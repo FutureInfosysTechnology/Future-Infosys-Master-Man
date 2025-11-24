@@ -54,6 +54,13 @@ function Sidebar1() {
                         </li>
 
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
+                            <Link to="/customercharges">
+                                <i className="bi bi-cash-coin"></i>
+                                <span>Consignee List</span>
+                            </Link>
+                        </li>
+
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/citymaster" className="link">
                                 <i className="bi bi-buildings-fill"></i>
                                 <span>City Master</span>
@@ -67,12 +74,7 @@ function Sidebar1() {
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
-                            <Link to="/customercharges">
-                                <i className="bi bi-cash-coin"></i>
-                                <span>Customer Charges</span>
-                            </Link>
-                        </li>
+                        
 
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/vendormaster">

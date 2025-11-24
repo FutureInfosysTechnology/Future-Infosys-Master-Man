@@ -1,13 +1,13 @@
 import React, { useState, Suspense } from "react";
-import './customerlist.css';
+
 import './list.css';
 import Footer from "../../../Components-2/Footer";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 
 const CustomerName = React.lazy(() => import("./CustomerName"));
-const ReceiverName = React.lazy(() => import("./ReceiverName"));
-const ShipperName = React.lazy(() => import("./ShipperName"));
+const ProductWiseFuel = React.lazy(() => import("./ProductWiseFuel"));
+const OdaMaster = React.lazy(() => import("../Customer Charges/OdaMaster"));
 const CustomerRate = React.lazy(() => import("./CustomerRate"));
 const CustomerVolumetric = React.lazy(() => import("./CustomerVolumetric"));
 
@@ -25,8 +25,8 @@ function CustomerList() {
                     <nav className="nav">
                         <label onClick={() => setActiveTab('zone')}>Customer Name</label>
                         <label onClick={() => setActiveTab('state')}>Customer Rate</label>
-                        <label onClick={() => setActiveTab('multiple')}>Consignee Name</label>
-                        <label onClick={() => setActiveTab('shipper')}>Shipper Name</label>
+                        <label onClick={() => setActiveTab('multiple')}>Customer Charges</label>
+                        <label onClick={() => setActiveTab('shipper')}>Customer ODA</label>
                         <label onClick={() => setActiveTab('country')}>Customer Volumetric</label>
 
                         {/* Slider */}
@@ -40,8 +40,8 @@ function CustomerList() {
                     <section>
                         <Suspense fallback={<div>Loading...</div>}>
                             {activeTab === 'zone' && <CustomerName />}
-                            {activeTab === 'multiple' && <ReceiverName />}
-                            {activeTab === 'shipper' && <ShipperName />}
+                            {activeTab === 'multiple' &&  <ProductWiseFuel/>}
+                            {activeTab === 'shipper' && <OdaMaster />}
                             {activeTab === 'state' && <CustomerRate />}
                             {activeTab === 'country' && <CustomerVolumetric />}
                         </Suspense>

@@ -111,8 +111,8 @@ function CreditPrint() {
         }
     };
 
-    const handleOpenCreditPrint = (invNo) => {
-        navigate("/creditprint", { state: { invoiceNo: invNo, from: location.pathname, tab: "creditPrint" } })
+    const handleOpenCreditPrint = (CreditNote_ID) => {
+        navigate("/creditprint", { state: { CreditNote_ID: CreditNote_ID, from: location.pathname, tab: "creditPrint" } })
     };
 
     return (
@@ -121,7 +121,7 @@ function CreditPrint() {
                 <form onSubmit={handleSubmit} style={{ background: " #f2f4f3" }}>
                     <div className="fields2">
                         <div className="input-field1">
-                            <label>Customer</label>
+                            <label>Customer Name</label>
                             <Select
                                 options={allCust}  // [{value: "", label: "All Customers"}, ...]
                                 value={
@@ -168,8 +168,8 @@ function CreditPrint() {
 
 
                         <div className="input-field3">
-                            <label htmlFor="">Note No</label>
-                            <input type="text" placeholder="Enter Note no" value={formData.Note_No}
+                            <label htmlFor="">Invoice No</label>
+                            <input type="text" placeholder="Enter invoice no" value={formData.Note_No}
                                 onChange={(e) => setFormData({ ...formData, Note_No: e.target.value })} />
                         </div>
 
@@ -195,10 +195,10 @@ function CreditPrint() {
                                 <th>Actions</th>
                                 <th>ID</th>
                                 <th>Docket No</th>
-                                <th>Note No</th>
+                                <th>Invoice No</th>
                                 <th>Note Date</th>
                                 <th>Customer Name</th>
-                                <th>Invoice No</th>
+                                <th>Item Name</th>
                                 <th>Remark</th>
                                 <th>Amount</th>
                             </tr>
@@ -232,7 +232,7 @@ function CreditPrint() {
                                                 }}
                                             >
                                                 <button className='edit-btn'>
-                                                    <i className='bi bi-file-earmark-pdf-fill' onClick={() => handleOpenCreditPrint("001")} style={{ fontSize: "18px" }} ></i>
+                                                    <i className='bi bi-file-earmark-pdf-fill' onClick={() => handleOpenCreditPrint(note.CreditNote_ID)} style={{ fontSize: "18px" }} ></i>
                                                 </button>
                                                 <button className="edit-btn">
                                                     <i className="bi bi-trash" onClick={() => handleDelete(note?.CreditNote_ID)} style={{ fontSize: "15px" }}></i>

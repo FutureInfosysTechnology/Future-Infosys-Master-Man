@@ -18,7 +18,7 @@ function EmailBooking() {
   const [formData, setFormData] = useState({
     fromdt: firstDayOfMonth,
     todt: today,
-    CustomerName: ""
+    CustomerName: "ALL CLIENT DATA"
   });
   const [rowsPerPage, setRowsPerPage] = useState(15);
   const [EmailData, setEmailData] = useState([]);

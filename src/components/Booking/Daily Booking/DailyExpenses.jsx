@@ -257,11 +257,11 @@ function DailyExpenses() {
             "Credit Type": row.Booking_type,
             "Origin": row.Origin_Name,
             "Destination": row.Destination_Name,
-            "Receiver Name": row.ReceiverName,
-            "Received Date": row.ExpDate,
+            "Total Amount": row.TotalAmount,
             "Received Amount": row.ReceivedAmount,
             "Balance Amount": row.BalanceAmount,
-            "Total Amount": row.TotalAmount,
+            "Receiver Name": row.ReceiverName,
+            "Received Date": row.ExpDate,
             "Bank Name": getBankName.find(b => b.Bank_Code === row.Bank_Code)?.Bank_Name || "",
             "Remark": row.Remark
         }));
@@ -358,11 +358,11 @@ function DailyExpenses() {
                                     <th>Credit Type</th>
                                     <th>Origin</th>
                                     <th>Destination</th>
-                                    <th>Receiver Name</th>
-                                    <th>Received Date</th>
+                                    <th>Total Amount</th>
                                     <th>Received Amount</th>
                                     <th>Balance Amount</th>
-                                    <th>Total Amount</th>
+                                    <th>Receiver Name</th>
+                                    <th>Received Date</th>
                                     <th>Bank Name</th>
                                     <th>Remark</th>
                                 </tr>
@@ -398,11 +398,10 @@ function DailyExpenses() {
                                         {/* Destination */}
                                         <td>{row.Destination_Name}</td>
 
-                                        {/* Receiver Name */}
-                                        <td>{row.ReceiverName}</td>
 
-                                        {/* Received Date */}
-                                        <td>{row.ExpDate}</td>
+                                         {/* Total Amount */}
+                                        <td>{row.TotalAmount}</td>
+
 
                                         {/* Received Amount */}
                                         <td>{row.ReceivedAmount}</td>
@@ -410,8 +409,12 @@ function DailyExpenses() {
                                         {/* Balance Amount */}
                                         <td>{row.BalanceAmount}</td>
 
-                                        {/* Total Amount */}
-                                        <td>{row.TotalAmount}</td>
+
+                                        {/* Receiver Name */}
+                                        <td>{row.ReceiverName}</td>
+
+                                        {/* Received Date */}
+                                        <td>{row.ExpDate}</td>
 
                                         {/* Bank Name */}
                                         <td>{getBankName.find(b => b.Bank_Code === row.Bank_Code)?.Bank_Name || ""}</td>
