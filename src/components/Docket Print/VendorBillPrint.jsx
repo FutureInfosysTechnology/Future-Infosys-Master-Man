@@ -154,7 +154,7 @@ function VendorBillPrint() {
 
                 <div className="container-2" ref={pageRef} id="pdf" style={{
                     borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px"
-                    , paddingBottom: "20px", width: "793px", direction: "flex", fontFamily: "Roboto",
+                    , paddingBottom: "20px", width: "793px", direction: "flex", fontFamily: '"Times New Roman", Times, serif',
                     flexDirection: "column", gap: "5px", fontSize: "10px", fontWeight: "bold",border:"none"
                 }}>
 

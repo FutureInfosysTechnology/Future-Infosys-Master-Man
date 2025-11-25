@@ -56,7 +56,7 @@ function DocketBill() {
                             </button>
                         </div>
                     </div>
-                <div className="container " id='pdf' style={{ alignItems: "center", paddingTop:"0px",margin:"0px"}}>
+                <div className="container " id='pdf' style={{ alignItems: "center", paddingTop:"0px",margin:"0px",fontFamily: '"Times New Roman", Times, serif',}}>
                     <div style={{ textAlign: "center", fontSize: "22px" }}>
                         <b>DOCKET BILL</b>
                     </div>

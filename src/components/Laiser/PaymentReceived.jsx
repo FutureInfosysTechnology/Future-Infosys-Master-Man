@@ -29,14 +29,6 @@ function PaymentReceived() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const [formData, setFormData] = useState({
-        fromDate: firstDayOfMonth,
-        toDate: today,
-        customer: "",
-        branch: "",
-        billNo: "",
-
-    });
     const [addPayment, setAddPayment] = useState({
         Customer_Code: "",
         Branch_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
@@ -45,9 +37,9 @@ function PaymentReceived() {
         Receiver_Name: "",
         Payment_Type: "",
         PayReceivedDate: new Date(),
-        TDS: "",
-        PaymentReceived: "",
-        OutstandingAmount: "",
+        TDS: 0,
+        PaymentReceived: 0,
+        OutstandingAmount: 0,
         Remark: "",
         InvoiceNo: ""
     })
@@ -80,9 +72,6 @@ function PaymentReceived() {
         fetchData('/Master/Getbank', setGetBankName);
         fetchPaymentData();
     }, []);
-    const handleFormChange = (value, key) => {
-        setFormData({ ...formData, [key]: value })
-    }
     const [currentPage, setCurrentPage] = useState(1);
     const [openRow, setOpenRow] = useState(null);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -96,6 +85,9 @@ function PaymentReceived() {
         const [year, month, day] = dateStr.split("-");
         return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
     };
+
+
+
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -180,13 +172,42 @@ function PaymentReceived() {
 
     /**************** function to export table data in excel and pdf ************/
     const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'data');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'zones.xlsx');
-    };
+
+    const excelData = currentRows.map((row) => ({
+        "Bill No": row.BillNo,
+        "Bill Date": row.InvoiceDate,
+        "Customer Name": row.Customer_Name,
+        "GST No": row.Gst_No,
+        "Booking Type": row.Booking_Type,
+        "Branch Name": getBranch.find(f => f.Branch_Code === row.Branch_Code)?.Branch_Name,
+        "Bank Name": getBankName.find(f => f.Bank_Code === row.Bank_Code)?.Bank_Name,
+        "Transaction No": row.Transation_No,
+        "Receiver Name": row.Receiver_Name,
+        "Payment Type": row.Payment_Type,
+        "Pay Received Date": ymdToDmy(row.PayReceivedDate),
+        "TDS": row.TDS,
+        "Payment Received": row.PaymentReceived,
+        "Outstanding Amount": row.OutstandingAmount,
+        "Remark": row.Remark,
+        "Total Amount": row.TotalAmount
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "PaymentData");
+
+    const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array"
+    });
+
+    const file = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+    });
+
+    saveAs(file, "PaymentMode.xlsx");
+};
 
     const handleExportPDF = () => {
         const input = document.getElementById('table-to-pdf');
@@ -227,126 +248,6 @@ function PaymentReceived() {
         <>
             <div className="body">
                 <div className="container1">
-
-                    <form action="" style={{ margin: "0px", background: " #f2f4f3" }}>
-
-                        <div className="fields2">
-
-                            <div className="input-field3">
-                                <label htmlFor="">Branch Name</label>
-                                <Select
-                                    options={getBranch.map(b => ({
-                                        value: b.Branch_Code,   // adjust keys from your API
-                                        label: b.Branch_Name
-                                    }))}
-                                    value={
-                                        formData.branch
-                                            ? {
-                                                value: formData.branch,
-                                                label: getBranch.find(c => c.Branch_Code === formData.branch)?.Branch_Name || ""
-                                            }
-                                            : null
-                                    }
-                                    onChange={(selectedOption) =>
-                                        setFormData({
-                                            ...formData,
-                                            branch: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
-
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                    placeholder="Select Branch"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                />
-
-                            </div>
-
-                            <div className="input-field1">
-                                <label htmlFor="">Customer Name</label>
-                                <Select
-                                    options={getCustomer.map(cust => ({
-                                        value: cust.Customer_Code,   // adjust keys from your API
-                                        label: cust.Customer_Name
-                                    }))}
-                                    value={
-                                        formData.customer
-                                            ? {
-                                                value: formData.customer,
-                                                label: getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name
-                                            }
-                                            : null
-                                    }
-                                    onChange={(selectedOption) =>
-                                        setFormData({
-                                            ...formData,
-                                            customer: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
-
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                    placeholder="Select Customer"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                />
-
-                            </div>
-
-
-
-                            <div className="input-field3">
-                                <label htmlFor="">From Date</label>
-                                <DatePicker
-                                    portalId="root-portal"
-                                    selected={formData.fromDate}
-                                    onChange={(date) => handleFormChange(date, "fromDate")}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="form-control form-control-sm"
-                                />
-                            </div>
-
-                            <div className="input-field3">
-                                <label htmlFor="">To Date</label>
-                                <DatePicker
-                                    portalId="root-portal"
-                                    selected={formData.toDate}
-                                    onChange={(date) => handleFormChange(date, "toDate")}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="form-control form-control-sm"
-                                />
-                            </div>
-
-                            <div className="input-field3">
-                                <label htmlFor="">Bill No</label>
-                                <input type="text" placeholder="Enter Bill no"
-                                    value={formData.billNo} onChange={(e) => setFormData({ ...formData, billNo: e.target.value })} />
-                            </div>
-                            <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "15px" }}>
-                                <button className="ok-btn">Submit</button>
-                            </div>
-
-                        </div>
-                    </form>
 
                     <div className="addNew">
                         <div>
@@ -560,6 +461,36 @@ function PaymentReceived() {
 
                                         </div>
 
+                                          <div className="input-field3">
+                                            <label htmlFor="">Payment Type</label>
+                                            <select value={addPayment.Payment_Type} onChange={(e) => setAddPayment({ ...addPayment, Payment_Type: e.target.value })}>
+                                                <option value="" disabled>Select Payment Type</option>
+                                                <option value="Cash">Cash</option>
+                                                <option value="Credit">Credit</option>
+                                                <option value="To-pay">To-pay</option>
+                                                <option value="Google Pay">Google Pay</option>
+                                                <option value="RTGS">RTGS</option>
+                                                <option value="NEFT">NEFT</option>
+                                            </select>
+                                        </div>
+
+                                         <div className="input-field3">
+                                            <label htmlFor="">Transation / Check No</label>
+                                            <input type="tel" placeholder="Enter Transation No" value={addPayment.Transation_No}
+                                                onChange={(e) => setAddPayment({ ...addPayment, Transation_No: e.target.value })} />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Payment Received Date</label>
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={addPayment.PayReceivedDate}
+                                                onChange={(date) => setAddPayment({ ...addPayment, PayReceivedDate: date })}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
+                                        </div>
+
                                         <div className="input-field3">
                                             <label htmlFor="">Bank Name</label>
                                             <Select
@@ -593,40 +524,6 @@ function PaymentReceived() {
 
                                         </div>
 
-                                        <div className="input-field3">
-                                            <label htmlFor="">Transation No</label>
-                                            <input type="tel" placeholder="Enter Transation No" value={addPayment.Transation_No}
-                                                onChange={(e) => setAddPayment({ ...addPayment, Transation_No: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Receiver Name</label>
-                                            <input type="tel" placeholder="Enter Receiver Name" value={addPayment.Receiver_Name}
-                                                onChange={(e) => setAddPayment({ ...addPayment, Receiver_Name: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Payment Type</label>
-                                            <input type="tel" placeholder="Enter Payment Type" value={addPayment.Payment_Type}
-                                                onChange={(e) => setAddPayment({ ...addPayment, Payment_Type: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Payment Received Date</label>
-                                            <DatePicker
-                                                portalId="root-portal"
-                                                selected={addPayment.PayReceivedDate}
-                                                onChange={(date) => setAddPayment({ ...addPayment, PayReceivedDate: date })}
-                                                dateFormat="dd/MM/yyyy"
-                                                className="form-control form-control-sm"
-                                            />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">TDS</label>
-                                            <input type="tel" placeholder="Enter TDS" value={addPayment.TDS}
-                                                onChange={(e) => setAddPayment({ ...addPayment, TDS: e.target.value })} />
-                                        </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Payment Received</label>
@@ -640,11 +537,33 @@ function PaymentReceived() {
                                                 onChange={(e) => setAddPayment({ ...addPayment, OutstandingAmount: e.target.value })} />
                                         </div>
 
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">TDS</label>
+                                            <input type="tel" placeholder="Enter TDS" value={addPayment.TDS}
+                                                onChange={(e) => setAddPayment({ ...addPayment, TDS: e.target.value })} />
+                                        </div>
+
+                                        
+
                                         <div className="input-field3">
                                             <label htmlFor="">Remark</label>
                                             <input type="tel" placeholder="Enter Remark" value={addPayment.Remark}
                                                 onChange={(e) => setAddPayment({ ...addPayment, Remark: e.target.value })} />
                                         </div>
+
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Receiver Name</label>
+                                            <input type="tel" placeholder="Enter Receiver Name" value={addPayment.Receiver_Name}
+                                                onChange={(e) => setAddPayment({ ...addPayment, Receiver_Name: e.target.value })} />
+                                        </div>
+
+                                      
+
+                                        
+
+                                        
 
                                         <div className="input-field3">
                                             <label htmlFor="">Invoice No</label>

@@ -86,60 +86,55 @@ function MobileReceipt() {
         height:"120px",
     }
 
-    const handleDownloadPDF = async () => {
-        const docketElements = document.querySelectorAll(".docket");
-        if (docketElements.length === 0) return;
+const handleDownloadPDF = async () => {
+    const docketElements = document.querySelectorAll(".docket");
+    if (docketElements.length === 0) return;
 
-        const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm (A4 width)
-        const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm (A4 height)
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
 
-        for (let i = 0; i < docketElements.length; i++) {
-            const element = docketElements[i];
+    for (let i = 0; i < docketElements.length; i++) {
+        const element = docketElements[i];
 
-            // Capture element as high-res image
-            const canvas = await html2canvas(element, {
-                scale:4,
-                useCORS: true,
-                backgroundColor: "#ffffff",
-                scrollY: -window.scrollY,
-                windowWidth: document.documentElement.scrollWidth,
-            });
+        const canvas = await html2canvas(element, {
+            scale: 4,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            scrollY: -window.scrollY
+            // ❌ removed windowWidth — this was breaking right border
+        });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-            // Convert canvas dimensions (pixels) to mm
-            const pxToMm = (px) => (px * 25.4) / 96; // 96dpi ≈ 1 inch
-            const imgWidthMm = pxToMm(canvas.width);
-            const imgHeightMm = pxToMm(canvas.height);
-            const imgRatio = imgWidthMm / imgHeightMm;
+        const pxToMm = (px) => (px * 25.4) / 96;
+        const imgWidthMm = pxToMm(canvas.width);
+        const imgHeightMm = pxToMm(canvas.height);
+        const imgRatio = imgWidthMm / imgHeightMm;
 
-            // 🟩 Smaller left/right padding for more width
-            const leftRightPadding = 2; // mm (previously 5mm)
-            const topPadding = 10;      // mm
+        const leftRightPadding = 0;
+        const topPadding = 10;
 
-            // 🟩 Compute image render size and position
-            let renderWidth = pdfWidth - leftRightPadding * 2;
-            let renderHeight = renderWidth / imgRatio;
-            let xOffset = leftRightPadding;
-            let yOffset = (pdfHeight - renderHeight) / 2 + topPadding;
+        let renderWidth = pdfWidth - leftRightPadding * 2;
+        let renderHeight = renderWidth / imgRatio;
+        let xOffset = leftRightPadding;
+        let yOffset = (pdfHeight - renderHeight) / 2 + topPadding;
 
-            // Prevent overflow if content too tall
-            if (yOffset + renderHeight > pdfHeight) {
-                yOffset = topPadding;
-                renderHeight = pdfHeight - topPadding * 2;
-                renderWidth = renderHeight * imgRatio;
-                xOffset = (pdfWidth - renderWidth) / 2;
-            }
-
-            // 🟩 Add image with minimal padding (nearly full width)
-            pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
-
-            if (i < docketElements.length - 1) pdf.addPage();
+        if (yOffset + renderHeight > pdfHeight) {
+            yOffset = topPadding;
+            renderHeight = pdfHeight - topPadding * 2;
+            renderWidth = renderHeight * imgRatio;
+            xOffset = (pdfWidth - renderWidth) / 2;
         }
 
-        pdf.save("Receipts.pdf");
-    };
+        pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
+
+        if (i < docketElements.length - 1) pdf.addPage();
+    }
+
+    pdf.save("Receipts.pdf");
+};
+
 
 
 
@@ -233,7 +228,7 @@ function MobileReceipt() {
                                 data.map((docket, index) =>
                                 (
                                     <div className="docket" key={index}>
-                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex",border:"none", flexDirection: "column", marginBottom: "10px" }}>
+                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex",border:"none", flexDirection: "column", marginBottom: "50px" }}>
                                             <div className='div1' style={{ width: "100%", height: "150px", border: "2px solid black", display: "flex", color: "black" }}>
                                                 <div className='logo' style={{ width: "24%", height: "100%", padding: "5px" }}> <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
                                                 <div className='heading' style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", alignItems: "start", paddingLeft: "5px" }}>

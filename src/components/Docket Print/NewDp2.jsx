@@ -71,18 +71,7 @@ function NewDP2() {
             year: "numeric"
         });
     };
-    const cellsStyle = {
-        borderStyle: "solid", borderWidth: "2px 0 2px 2px", borderColor: "black",
-        textAlign: "start",
-        whiteSpace: "nowrap",
-        fontSize: "10px",
-        paddingLeft: "10px",
-        paddingRight: "10px",
-    }
-    const tableStyle = {
-        borderCollapse: "collapse",
-        height: "120px",
-    }
+    
 
     const handleDownloadPDF = async () => {
         const docketElements = document.querySelectorAll(".docket");

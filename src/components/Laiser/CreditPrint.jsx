@@ -221,7 +221,7 @@ function CreditPrint() {
                                                     flexDirection: "row",
                                                     position: "absolute",
                                                     alignItems: "center",
-                                                    left: "100px",
+                                                    left: "80px",
                                                     top: "0px",
                                                     borderRadius: "10px",
                                                     backgroundColor: "white",

@@ -207,8 +207,8 @@ function ProductionEntry() {
         setOpenRow(null);
         setIsEditMode(true);
     };
-    const handleOpenCreditPrint = (invNo) => {
-        navigate("/creditprint", { state: { invoiceNo: invNo, from: location.pathname, tab: "creditNote" } })
+    const handleOpenCreditPrint = (CreditNote_ID) => {
+        navigate("/creditprint", { state: { CreditNote_ID: CreditNote_ID, from: location.pathname, tab: "creditNote" } })
     };
     return (
         <>
@@ -388,7 +388,7 @@ function ProductionEntry() {
                                                         flexDirection: "row",
                                                         position: "absolute",
                                                         alignItems: "center",
-                                                        left: "100px",
+                                                        left: "80px",
                                                         top: "0px",
                                                         borderRadius: "10px",
                                                         backgroundColor: "white",
@@ -398,7 +398,7 @@ function ProductionEntry() {
                                                         padding: "10px",
                                                     }}
                                                 >
-                                                    <button className='edit-btn' onClick={() => handleOpenCreditPrint("001")}>
+                                                    <button className='edit-btn' onClick={() => handleOpenCreditPrint(note.CreditNote_ID)} >
                                                         <i className='bi bi-file-earmark-pdf-fill' style={{ fontSize: "18px" }}></i>
                                                     </button>
                                                     <button className="edit-btn">

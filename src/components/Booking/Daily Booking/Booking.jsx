@@ -1165,7 +1165,7 @@ function Booking() {
                     HamaliChrgsInput: HamaliChrgs || 0,
                     OtherChargesInput: OtherCharges || 0,
                     InsuranceChrgsInput: InsuranceChrgs || 0,
-                    UseInput:UseInput
+                    UseInput:1,
                 };
 
                 const response = await postApi(`/Booking/calculateGST`, body);
@@ -1719,12 +1719,13 @@ function Booking() {
 
                 // Show confirmation popup
                 const result = await Swal.fire({
-                    title: 'Saved Successfully!',
+                    title: `Docket Saved Successfully!: ${generatedDocketNo}`,
                     text: "Do you want to print the docket now?",
                     icon: 'success',
                     showCancelButton: true,
+                    cancelButtonText: 'No, print',
+                    reverseButtons: true,  
                     confirmButtonText: 'Yes, print it!',
-                    cancelButtonText: 'No, later'
                 });
 
                 if (result.isConfirmed) {

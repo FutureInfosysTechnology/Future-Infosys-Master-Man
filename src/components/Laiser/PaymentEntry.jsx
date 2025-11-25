@@ -36,6 +36,12 @@ function PaymentEntry() {
         billNo: "",
 
     });
+    const convertToDate = (ddmmyyyy) => {
+        if (!ddmmyyyy) return null;
+        const [day, month, year] = ddmmyyyy.split("/");
+        return new Date(`${year}-${month}-${day}`);
+    };
+
     const ymdToDmy = (dateStr) => {
         if (!dateStr) return "";
         const [year, month, day] = dateStr.split("-");
@@ -46,15 +52,34 @@ function PaymentEntry() {
         Branch_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
         Bank_Code: "",
         Transation_No: "",
-        Receiver_Name: "",
         Payment_Type: "",
         PayReceivedDate: new Date(),
-        TDS: "",
-        PaymentReceived: "",
-        OutstandingAmount: "",
+        billDate: new Date(),
+        billAmount: 0,
+        TDS: 0,
+        PaymentReceived: 0,
+        OutstandingAmount: 0,
+        AdjustAmount: 0,
         Remark: "",
         InvoiceNo: ""
     })
+
+    useEffect(() => {
+        setAddPayment(prev => ({
+            ...prev,
+            OutstandingAmount:
+                (Number(prev.billAmount) || 0) -
+                (Number(prev.PaymentReceived) || 0) -
+                (Number(prev.TDS) || 0) -
+                (Number(prev.AdjustAmount) || 0)
+        }));
+    }, [
+        addPayment.billAmount,
+        addPayment.PaymentReceived,
+        addPayment.TDS,
+        addPayment.AdjustAmount
+    ]);
+
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -147,14 +172,44 @@ function PaymentEntry() {
 
 
     /**************** function to export table data in excel and pdf ************/
-    const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'data');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'zones.xlsx');
-    };
+   const handleExportExcel = () => {
+
+    const excelData = currentRows.map((row) => ({
+        "Bill No": row.BillNo,
+        "Bill Date": row.InvoiceDate,
+        "Branch Name": getBranch.find(b => b.Branch_Code === row.Branch_Code)?.Branch_Name,
+        "Customer Name": row.Customer_Name,
+        "GST No": row.Gst_No,
+        "Booking Type": row.Booking_Type,
+        "Total Amount": row.TotalAmount,
+        "Payment Received": row.PaymentReceived,
+        "TDS": row.TDS,
+        "Outstanding Amount": row.OutstandingAmount,
+        "Pay Received Date": ymdToDmy(row.PayReceivedDate),
+        "Bank Name": getBankName.find(b => b.Bank_Code === row.Bank_Code)?.Bank_Name,
+        "Transaction No": row.Transation_No,
+        "Receiver Name": row.Receiver_Name,
+        "Payment Type": row.Payment_Type,
+        "Remark": row.Remark
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "PaymentData");
+
+    const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+    });
+
+    const file = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+    });
+
+    saveAs(file, "Ledger.xlsx");
+};
+
 
     const handleExportPDF = () => {
         const input = document.getElementById('table-to-pdf');
@@ -308,13 +363,7 @@ function PaymentEntry() {
 
                     <div className="addNew">
                         <div>
-                            <button className='add-btn' onClick={() => {
-                                setModalIsOpen(true); setIsEditMode(false);
-
-                            }}>
-                                <i className="bi bi-plus-lg"></i>
-                                <span>ADD NEW</span>
-                            </button>
+                           
 
                             <div className="dropdown">
                                 <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
@@ -345,7 +394,7 @@ function PaymentEntry() {
                                     <th>Customer Name</th>
                                     <th>GST No</th>
                                     <th>Booking Type</th>
-                                    
+
                                     <th>Total Amount</th>
                                     <th>Payment Received</th>
                                     <th>TDS</th>
@@ -390,6 +439,25 @@ function PaymentEntry() {
 
                                                     <button className='edit-btn' onClick={() => {
                                                         setOpenRow(null);
+                                                        setModalIsOpen(true);
+                                                        setAddPayment((prev) => ({
+                                                            ...prev,
+                                                            Customer_Code: row.Customer_Code,
+                                                            Branch_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
+                                                            Bank_Code: "",
+                                                            Transation_No: "",
+                                                            Payment_Type: "",
+                                                            PayReceivedDate: new Date(),
+                                                            billDate: convertToDate(row.InvoiceDate),
+                                                            billAmount: row.TotalAmount,
+                                                            TDS: 0,
+                                                            PaymentReceived: 0,
+                                                            OutstandingAmount: 0,
+                                                            AdjustAmount: 0,
+                                                            Remark: "",
+                                                            InvoiceNo: row.BillNo
+                                                        }));
+
                                                     }}><i className='bi bi-pen'></i></button>
                                                     <button className='edit-btn' onClick={() => {
                                                         setOpenRow(null);
@@ -520,6 +588,45 @@ function PaymentEntry() {
 
                                         </div>
 
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Bill No</label>
+                                            <input type="tel" placeholder="Enter Bill No" value={addPayment.InvoiceNo} readOnly
+                                                onChange={(e) => setAddPayment({ ...addPayment, InvoiceNo: e.target.value })} />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Bill Date</label>
+                                            <DatePicker
+                                                portalId="root-portal"
+                                                selected={addPayment.billDate}
+                                                onChange={(date) => setAddPayment({ ...addPayment, billDate: date })}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Bill Amount</label>
+                                            <input type="tel" placeholder="Enter Bill Amount" readOnly value={addPayment.billAmount}
+                                                onChange={(e) => setAddPayment({ ...addPayment, billAmount: e.target.value })} />
+                                        </div>
+
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Payment Type</label>
+                                            <select value={addPayment.Payment_Type} onChange={(e) => setAddPayment({ ...addPayment, Payment_Type: e.target.value })}>
+                                                <option value="" disabled>Select Payment Type</option>
+                                                <option value="Cash">Cash</option>
+                                                <option value="Credit">Credit</option>
+                                                <option value="To-pay">To-pay</option>
+                                                <option value="Google Pay">Google Pay</option>
+                                                <option value="RTGS">RTGS</option>
+                                                <option value="NEFT">NEFT</option>
+                                            </select>
+                                        </div>
+
+
                                         <div className="input-field3">
                                             <label htmlFor="">Bank Name</label>
                                             <Select
@@ -554,25 +661,25 @@ function PaymentEntry() {
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Transation No</label>
-                                            <input type="tel" placeholder="Enter Transation No" value={addPayment.Transation_No}
+                                            <label htmlFor="">NEFT No</label>
+                                            <input type="tel" placeholder="Enter NEFT No" value={addPayment.Transation_No}
                                                 onChange={(e) => setAddPayment({ ...addPayment, Transation_No: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Receiver Name</label>
-                                            <input type="tel" placeholder="Enter Receiver Name" value={addPayment.Receiver_Name}
-                                                onChange={(e) => setAddPayment({ ...addPayment, Receiver_Name: e.target.value })} />
+                                            <label htmlFor="">Amount</label>
+                                            <input type="tel" placeholder="Enter Amount" value={addPayment.PaymentReceived}
+                                                onChange={(e) => setAddPayment({ ...addPayment, PaymentReceived: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Payment Type</label>
-                                            <input type="tel" placeholder="Enter Payment Type" value={addPayment.Payment_Type}
-                                                onChange={(e) => setAddPayment({ ...addPayment, Payment_Type: e.target.value })} />
+                                            <label htmlFor="">TDS</label>
+                                            <input type="tel" placeholder="Enter TDS" value={addPayment.TDS}
+                                                onChange={(e) => setAddPayment({ ...addPayment, TDS: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Payment Received Date</label>
+                                            <label htmlFor="">Date</label>
                                             <DatePicker
                                                 portalId="root-portal"
                                                 selected={addPayment.PayReceivedDate}
@@ -583,34 +690,25 @@ function PaymentEntry() {
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">TDS</label>
-                                            <input type="tel" placeholder="Enter TDS" value={addPayment.TDS}
-                                                onChange={(e) => setAddPayment({ ...addPayment, TDS: e.target.value })} />
+                                            <label htmlFor="">Adjust Amt</label>
+                                            <input type="tel" placeholder="Enter Outstanding Amount" value={addPayment.AdjustAmount}
+                                                onChange={(e) => setAddPayment({ ...addPayment, AdjustAmount: e.target.value })} />
                                         </div>
 
                                         <div className="input-field3">
-                                            <label htmlFor="">Payment Received</label>
-                                            <input type="tel" placeholder="Enter Payment Received" value={addPayment.PaymentReceived}
-                                                onChange={(e) => setAddPayment({ ...addPayment, PaymentReceived: e.target.value })} />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">Outstanding Amount</label>
+                                            <label htmlFor="">OutSt Amt</label>
                                             <input type="tel" placeholder="Enter Outstanding Amount" value={addPayment.OutstandingAmount}
                                                 onChange={(e) => setAddPayment({ ...addPayment, OutstandingAmount: e.target.value })} />
                                         </div>
 
+
                                         <div className="input-field3">
-                                            <label htmlFor="">Remark</label>
-                                            <input type="tel" placeholder="Enter Remark" value={addPayment.Remark}
+                                            <label htmlFor="">Narration</label>
+                                            <input type="tel" placeholder="Enter Narration" value={addPayment.Remark}
                                                 onChange={(e) => setAddPayment({ ...addPayment, Remark: e.target.value })} />
                                         </div>
 
-                                        <div className="input-field3">
-                                            <label htmlFor="">Invoice No</label>
-                                            <input type="tel" placeholder="Enter Invoice No" value={addPayment.InvoiceNo}
-                                                onChange={(e) => setAddPayment({ ...addPayment, InvoiceNo: e.target.value })} />
-                                        </div>
+
                                     </div>
                                     <div className='bottom-buttons' style={{ marginTop: "18px", marginLeft: "25px" }}>
                                         <button type='submit' className='ok-btn' >Submit</button>
@@ -621,6 +719,7 @@ function PaymentEntry() {
                             </div>
                         </div>
                     </Modal >
+
 
                 </div>
             </div>

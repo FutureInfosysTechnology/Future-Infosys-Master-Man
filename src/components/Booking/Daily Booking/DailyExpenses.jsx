@@ -783,9 +783,9 @@ function DailyExpenses() {
                                                 </div>
 
                                                 <div className="input-field3">
-                                                    <label htmlFor="">TDS</label>
+                                                    <label htmlFor="">Payment Type</label>
                                                     <select value={formData.tds} onChange={(e) => setFormData({ ...formData, tds: e.target.value })}>
-                                                        <option value="" disabled>Select Booking Mode</option>
+                                                        <option value="" disabled>Select Payment Type</option>
                                                         <option value="Cash">Cash</option>
                                                         <option value="Credit">Credit</option>
                                                         <option value="To-pay">To-pay</option>

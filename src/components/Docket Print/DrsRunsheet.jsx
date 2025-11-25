@@ -169,7 +169,7 @@ function DrsRunsheet() {
 
                 <div className="container-2" id="pdf" style={{
                     borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex",
-                    flexDirection: "column", gap: "5px"
+                    flexDirection: "column", gap: "5px",fontFamily: '"Times New Roman", Times, serif',
                 }}>
 
                     <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>

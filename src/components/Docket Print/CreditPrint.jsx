@@ -23,7 +23,7 @@ function CreditPrint() {
     console.log(location.state);
     const [loading, setLoading] = useState(true);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
-   
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -53,8 +53,8 @@ function CreditPrint() {
                 // generatePDF();
             }
         };
-       
-            fetchData();
+
+        fetchData();
     }, []);
     function numberToIndianCurrency(num) {
         if (!num || isNaN(num)) return "";
@@ -126,7 +126,7 @@ function CreditPrint() {
     left: 0;
     width: 210mm !important;   /* exact A4 width */
     min-height: 297mm !important;
-    margin: 0 auto !important;
+    margin-top:10px!important;
     overflow: hidden !important;
     background: white !important;
     box-sizing: border-box !important;
@@ -202,13 +202,34 @@ function CreditPrint() {
 
                 <div className="container-2" ref={pageRef} id="pdf" style={{
                     borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px"
-                    , paddingBottom: "20px", width: "793px", direction: "flex", fontFamily: "Roboto",
+                    , paddingBottom: "20px", width: "793px", direction: "flex", fontFamily: '"Times New Roman", Times, serif',
                     flexDirection: "column", gap: "5px", fontSize: "10px", fontWeight: "bold", border: "none"
                 }}>
 
                     <div className="container-2" style={{ borderRadius: "0px", border: "none", width: "750px", display: "flex", flexDirection: "column" }}>
                         < div id="printable-section" className="container-3" style={{ padding: "0px", border: "none" }}>
-                            <div className=" px-0 py-0" style={{ border: "2px solid black"}}>
+                            <div
+                                className="px-0 py-0"
+                                style={{
+                                    border: "2px solid black",
+                                    position: "relative",
+                                    paddingTop: "10px"
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: "-10px",           // moves text into the border gap
+                                        left: "50%",
+                                        transform: "translateX(-50%)",
+                                        background: "white",    // hides border behind text
+                                        padding: "0 10px",
+                                        fontSize: "20px",
+                                        fontWeight: "bold"
+                                    }}
+                                >
+                                    Credit Note
+                                </div>
 
                                 <div className="div1" style={{ display: "flex", flexDirection: "row", borderBottom: "2px solid black", }}>
                                     <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", gap: "7px" }}>
@@ -292,7 +313,7 @@ function CreditPrint() {
                                     <div style={{ width: "35%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Remark</div>
                                     <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>AMOUNT</div>
                                 </div>
-                                <div style={{ position: "relative", height: "500px"  }}>
+                                <div style={{ position: "relative", height: "500px" }}>
                                     {/* Background Layer */}
                                     <div
                                         style={{
@@ -307,7 +328,7 @@ function CreditPrint() {
                                             right: "50px",
                                             bottom: 0,
                                             zIndex: 0,
-                                            
+
                                         }}
                                     />
                                     <div
@@ -316,7 +337,7 @@ function CreditPrint() {
                                             zIndex: 1,
                                             display: "flex",
                                             flexDirection: "column",
-                                            height:"100%",
+                                            height: "100%",
                                         }}
                                     >
                                         <div className="div4" style={{
@@ -328,7 +349,7 @@ function CreditPrint() {
                                         }}>
                                             {/* S.NO */}
                                             <div style={{ width: "10%", display: "flex", flexDirection: "column", borderRight: "2px solid black", gap: "5px", paddingTop: "5px" }}>
-                                               1
+                                                1
                                             </div>
 
                                             {/* ITEMS */}
@@ -357,7 +378,7 @@ function CreditPrint() {
                                     <div style={{ width: "15%", display: "flex", justifyContent: "center", alignItems: "center" }}>{invoiceData?.Amount}</div>
                                 </div>
                             </div>
-                            
+
                             <div className="third px-0 py-0 mt-2" style={{ border: "2px solid black" }}>
                                 <div style={{ display: "flex", flexDirection: "column", padding: "5px", borderBottom: "2px solid black" }}>
                                     <div style={{ fontWeight: "bolder", fontSize: "13px" }}> Total Amount (in words)
@@ -372,7 +393,7 @@ function CreditPrint() {
                                         <div style={{ display: "flex" }}><div style={{ width: "30%" }}>Account No:</div><div>{getBranch.AccountNo}</div></div>
                                         <div style={{ display: "flex" }}><div style={{ width: "30%" }}> Bank:</div><div>{getBranch.Bank_Name}</div></div>
                                     </div>
-                                    <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent:"space-around", alignItems: "center", paddingBottom: "5px" }}>
+                                    <div style={{ display: "flex", width: "50%", flexDirection: "column", justifyContent: "space-around", alignItems: "center", paddingBottom: "5px" }}>
                                         <div style={{ fontWeight: "bolder", fontSize: "13px" }}>Authorised Signatory For
                                         </div>
                                         <div style={{ fontWeight: "bolder", fontSize: "13px" }}>{getBranch?.Company_Name}</div>
