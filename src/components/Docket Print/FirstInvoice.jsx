@@ -2,13 +2,15 @@ import React, { useRef, useState, useEffect } from 'react';
 import logoimg from '../../Assets/Images/AceLogo.jpeg';
 import { useLocation, useNavigate } from 'react-router-dom';
 import 'jspdf-autotable';
-import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+import { getApi ,postApi} from '../Admin Master/Area Control/Zonemaster/ServicesApi';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Header from '../../Components-2/Header/Header';
 import Sidebar1 from '../../Components-2/Sidebar1';
 import "./firstinvoice.css"
+import Swal from "sweetalert2";
 import { toWords } from "number-to-words";
+import { MdEmail } from "react-icons/md";
 
 
 function FirstInvoice() {
@@ -54,6 +56,21 @@ function FirstInvoice() {
     const [isActualChecked, setIsActualChecked] = useState(false);
     const [isRateChecked, setIsRateChecked] = useState(false);
     const [isTermChecked, setIsTermChecked] = useState(false);
+    const [getCustomer, setGetCustomer] = useState([]);
+
+     useEffect(() => {
+        const fetchCustomerData = async () => {
+          try {
+            const response = await getApi('/Master/getCustomerdata');
+            if (response?.status === 1 && Array.isArray(response.Data)) {
+              setGetCustomer(response.Data);
+            }
+          } catch (err) {
+            console.error('Error loading customer data:', err);
+          }
+        };
+        fetchCustomerData();
+      }, []);
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("toggelChargs"));
         if (savedState) {
@@ -76,6 +93,7 @@ function FirstInvoice() {
 
         }
     }, []);
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -122,21 +140,118 @@ function FirstInvoice() {
     useEffect(() => {
         console.log("useEffect", invoiceData);
     }, [invoiceData]);
-    const handleDownloadPDF = async () => {
+
+    const sendMail = async () => {
+    try {
+        if (!invoiceData[0]?.CustomerName) {
+            Swal.fire("Warning", "Customer is required.", "warning");
+            return;
+        }
+
+        const customerEmail = getCustomer.find(
+            c => c.Customer_Name === invoiceData[0]?.CustomerName
+        )?.Email;
+
+        if (!customerEmail) {
+            Swal.fire("Warning", "This customer has not provided email. Check in master.", "warning");
+            return;
+        }
+
+        // 1️⃣ Capture HTML as image (high resolution)
         const element = document.querySelector("#pdf");
-        if (!element) return;
+        if (!element) {
+            Swal.fire("Error", "PDF element not found!", "error");
+            return;
+        }
 
-        const canvas = await html2canvas(element, { scale: 4 }); // high resolution
-        const imgData = canvas.toDataURL("image/jpeg", 0.8); // compress to JPEG, quality = 0.8
+        const canvas = await html2canvas(element, { scale: 3 });
+        const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-        const imgWidth = 210; // A4 width in mm
+        // 2️⃣ Proper A4 page PDF (NO CROPPING)
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pageWidth = 210;
+        const pageHeight = 297;
+
+        const imgWidth = pageWidth;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        const pdf = new jsPDF("p", "mm", [imgWidth, imgHeight]);
-        pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+        let heightLeft = imgHeight;
+        let position = 0;
 
-        pdf.save(`Invoice_${invNo}.pdf`);
-    };
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+            pdf.addPage();
+            position = heightLeft - imgHeight;
+            pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
+        const pdfBlob = pdf.output("blob");
+        const pdfFileName = `Booking_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+        // 3️⃣ Send to server
+        const formDataToSend = new FormData();
+        formDataToSend.append("file", pdfBlob, pdfFileName);
+        formDataToSend.append(
+            "customerCode",
+            getCustomer.find(c => c.Customer_Name === invoiceData[0]?.CustomerName)?.Customer_Code || "764"
+        );
+        formDataToSend.append(
+            "locationCode",
+            JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM"
+        );
+        formDataToSend.append("subject", "Booking PDF File");
+        formDataToSend.append("message", "Please find attached the booking PDF.");
+
+        const response = await postApi("/Smart/AutoMailSend", formDataToSend, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        if (response?.success) {
+            Swal.fire("Success", `Email sent successfully to ${response?.to}`, "success");
+        } else {
+            Swal.fire("Error", response?.error || "Email sending failed", "error");
+        }
+    } catch (error) {
+        console.error("Email send failed:", error);
+        Swal.fire("Error", "Failed to send email. Check your network or server.", "error");
+    }
+};
+
+
+    const handleDownloadPDF = async () => {
+    const element = document.querySelector("#pdf");
+    if (!element) return;
+
+    // High resolution screenshot
+    const canvas = await html2canvas(element, { scale: 3 });
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+    const pdf = new jsPDF("p", "mm", "a4"); // Use fixed A4 size
+    const pageWidth = 210;
+    const pageHeight = 297;
+
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+        pdf.addPage();
+        position = heightLeft - imgHeight;
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+    }
+
+    pdf.save(`Invoice_${invNo}.pdf`);
+};
+
 
     const docketTotal = isDocketChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.DocketChrgs || 0), 0) : 0;
     const hamaliTotal = isHamaliChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.HamaliChrgs || 0), 0) : 0;
@@ -239,6 +354,13 @@ function FirstInvoice() {
                         >
                             Download
                         </button>
+
+                        <button
+                            onClick={sendMail}
+                            style={{padding:"1px",  borderRadius: "6px", background: "green",width:"40px", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                            <MdEmail style={{fontSize:"25px"}}/>
+                        </button>
                         <button
                             onClick={() => window.print()}
                             style={{ padding: "5px 10px", borderRadius: "6px", background: "red", color: "white", border: "none", cursor: "pointer" }}
@@ -288,7 +410,7 @@ function FirstInvoice() {
                                     </div>
                                 </div>
 
-                                <div style={{ display: "flex",justifyContent:"space-between", fontSize: "12px", border: "1px solid black", marginBottom: "5px", padding: "10px" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", border: "1px solid black", marginBottom: "5px", padding: "10px" }}>
                                     <div style={{ display: "flex", justifyContent: "start" }}>
                                         <div style={{ display: "flex", flexDirection: "column" }}>
                                             <label htmlFor=""><b>Client Name</b></label>

@@ -108,7 +108,7 @@ function DailyBooking() {
               Bulk Booking
             </label>
             <label htmlFor="vendorcharge" className="vendorcharge">
-              Update Customer Rate
+              Rate Update
             </label>
             <div className="slider"></div>
           </nav>

@@ -72,73 +72,67 @@ function NewDP1() {
             year: "numeric"
         });
     };
-    const cellsStyle = {
-        borderStyle: "solid", borderWidth: "2px 0 2px 2px", borderColor: "black",
-        textAlign: "start",
-        whiteSpace: "nowrap",
-        fontSize: "10px",
-        paddingLeft: "10px",
-        paddingRight: "10px",
-    }
-    const tableStyle = {
-        borderCollapse: "collapse",
-        height: "120px",
-    }
+
 
     const handleDownloadPDF = async () => {
         const docketElements = document.querySelectorAll(".docket");
         if (docketElements.length === 0) return;
 
         const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm (A4 width)
-        const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm (A4 height)
+        const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm
+        const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
         for (let i = 0; i < docketElements.length; i++) {
             const element = docketElements[i];
 
-            // Capture element as high-res image
+            // ✅ Capture full element (including off-screen parts)
             const canvas = await html2canvas(element, {
-                scale: 4,
+                scale: 3,
                 useCORS: true,
                 backgroundColor: "#ffffff",
                 scrollY: -window.scrollY,
                 windowWidth: document.documentElement.scrollWidth,
+                windowHeight: document.documentElement.scrollHeight + 200, // buffer to ensure full capture
             });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.95);
+            const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-            // Convert canvas dimensions (pixels) to mm
-            const pxToMm = (px) => (px * 25.4) / 96; // 96dpi ≈ 1 inch
+            // Convert canvas size (px → mm)
+            const pxToMm = (px) => (px * 25.4) / 96;
             const imgWidthMm = pxToMm(canvas.width);
             const imgHeightMm = pxToMm(canvas.height);
             const imgRatio = imgWidthMm / imgHeightMm;
 
-            // 🟩 Smaller left/right padding for more width
-            const leftRightPadding = 2; // mm (previously 5mm)
-            const topPadding = 10;      // mm
-
-            // 🟩 Compute image render size and position
-            let renderWidth = pdfWidth - leftRightPadding * 2;
-            let renderHeight = renderWidth / imgRatio;
-            let xOffset = leftRightPadding;
-            let yOffset = (pdfHeight - renderHeight) / 2 + topPadding;
-
-            // Prevent overflow if content too tall
-            if (yOffset + renderHeight > pdfHeight) {
-                yOffset = topPadding;
-                renderHeight = pdfHeight - topPadding * 2;
+            // 🟩 Fit docket to A4 width or height (whichever is limiting)
+            let renderWidth, renderHeight;
+            if (imgWidthMm > imgHeightMm) {
+                // Landscape-like docket
+                renderWidth = pdfWidth - 10; // 5mm margin on each side
+                renderHeight = renderWidth / imgRatio;
+            } else {
+                // Portrait-like docket
+                renderHeight = pdfHeight - 20; // top-bottom margin
                 renderWidth = renderHeight * imgRatio;
-                xOffset = (pdfWidth - renderWidth) / 2;
+                if (renderWidth > pdfWidth - 10) {
+                    renderWidth = pdfWidth - 10;
+                    renderHeight = renderWidth / imgRatio;
+                }
             }
 
-            // 🟩 Add image with minimal padding (nearly full width)
+            // Center docket on page
+            const xOffset = (pdfWidth - renderWidth) / 2;
+            const yOffset = (pdfHeight - renderHeight) / 2;
+
+            // 🖼️ Draw image perfectly centered
             pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
 
+            // Add a new page for next docket
             if (i < docketElements.length - 1) pdf.addPage();
         }
 
-        pdf.save("NewDp.pdf");
+        pdf.save("NewDp2.pdf");
     };
+
 
 
 
@@ -192,6 +186,7 @@ function NewDP1() {
     padding: 0;
   }
 }
+  
 `}
             </style>
 
@@ -233,8 +228,8 @@ function NewDP1() {
                                 (
                                     <div className="docket" key={index}>
                                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "50px" }}>
-                                            <div className='div1' style={{ width: "100%", height: "80px", border: "2px solid black", display: "flex", color: "black" }}>
-                                                <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "2px solid black" }}>
+                                            <div className='div1' style={{ width: "100%", height: "80px", border: "1px solid black", display: "flex", color: "black" }}>
+                                                <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "1px solid black" }}>
                                                     <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "75%" }} />
                                                     <div style={{ display: "flex", height: "20%", width: "100%", justifyContent: "space-around" }}>
                                                         <div><b>GST No :</b> {getBranch?.GSTNo}</div>
@@ -242,12 +237,12 @@ function NewDP1() {
                                                     </div>
                                                 </div>
                                                 <div className='heading' style={{ width: "66%", height: "100%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ height: "60%", borderBottom: "2px solid black", display: "flex", flexDirection: "column" }}>
-                                                        <div style={{ height: "50%", borderBottom: "2px solid black", display: "flex", fontWeight: "bold" }}>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                    <div style={{ height: "60%", borderBottom: "1px solid black", display: "flex", flexDirection: "column" }}>
+                                                        <div style={{ height: "50%", borderBottom: "1px solid black", display: "flex", fontWeight: "bold" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 Origin
                                                             </div>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 Destination
                                                             </div>
                                                             <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -255,10 +250,10 @@ function NewDP1() {
                                                             </div>
                                                         </div>
                                                         <div style={{ height: "50%", display: "flex" }}>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 {docket?.Destination_Name}
                                                             </div>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 {docket?.Destination_Name}
                                                             </div>
                                                             <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -267,7 +262,7 @@ function NewDP1() {
                                                         </div>
                                                     </div>
                                                     <div style={{ height: "40%", display: "flex" }}>
-                                                        <div style={{ height: "100%", width: "60%", borderRight: "2px solid black", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
+                                                        <div style={{ height: "100%", width: "60%", borderRight: "1px solid black", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
                                                             <div><b>Crossing :</b> {docket?.Vendor_Name}</div>
                                                         </div>
                                                         <div style={{ height: "100%", width: "40%", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
@@ -276,8 +271,8 @@ function NewDP1() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className='div2' style={{ width: "100%", border: "2px solid black", borderTop: "none", display: "flex", color: "black" }}>
-                                                <div className='Consignor' style={{ width: "50%", height: "100%", padding: "5px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "2px solid black" }}>
+                                            <div className='div2' style={{ width: "100%", border: "1px solid black", borderTop: "none", display: "flex", color: "black" }}>
+                                                <div className='Consignor' style={{ width: "50%", height: "100%", padding: "5px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid black" }}>
                                                     <div><b>Consignor :</b> {docket?.Customer_Name}</div>
                                                     <div><b>Adress :</b> {docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3},{docket?.Pin_Code},{docket?.Customer_State_Name}</div>
                                                 </div>
@@ -286,28 +281,28 @@ function NewDP1() {
                                                     <div><b>Adress :</b> {docket?.Consignee_Add1},{docket?.Consignee_Add2},{docket?.Consignee_Pin},{docket?.Consignee_State_Name}</div>
                                                 </div>
                                             </div>
-                                            <div className='div3' style={{ width: "100%", border: "2px solid black", borderTop: "none", display: "flex", color: "black" }}>
-                                                <div className='barcode' style={{ width: "75%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "2px solid black" }}>
-                                                    <div style={{ height: "55%", width: "100%", borderBottom: "2px solid black", display: "flex" }}>
-                                                        <div style={{ width: "45%", borderRight: "2px solid black" }}>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", fontWeight: "bold", display: "flex" }}>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>PKGS</div>
-                                                                <div style={{ width: "25%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>Packing</div>
+                                            <div className='div3' style={{ width: "100%", borderRight: "1px solid black", borderLeft: "1px solid black", display: "flex", color: "black" }}>
+                                                <div className='barcode' style={{ width: "75%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid black" }}>
+                                                    <div style={{ height: "55%", width: "100%", borderBottom: "1px solid black", display: "flex" }}>
+                                                        <div style={{ width: "45%", borderRight: "1px solid black" }}>
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", fontWeight: "bold", display: "flex" }}>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>PKGS</div>
+                                                                <div style={{ width: "25%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>Packing</div>
                                                                 <div style={{ width: "55%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>Value LXBXH</div>
                                                             </div>
-                                                            <div style={{ width: "100%", height: "30%", borderBottom: "2px solid black", display: "flex" }}>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.Qty}</div>
-                                                                <div style={{ width: "25%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>description</div>
+                                                            <div style={{ width: "100%", height: "30%", borderBottom: "1px solid black", display: "flex" }}>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.Qty}</div>
+                                                                <div style={{ width: "25%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>description</div>
                                                                 <div style={{ width: "55%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>
-                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>10</div>
-                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>20</div>
+                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>10</div>
+                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>20</div>
                                                                     <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center" }}>30</div>
                                                                 </div>
                                                             </div>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex" }}>
-                                                                <div style={{ width: "30%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Actual Wt</div>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ActualWt}</div>
-                                                                <div style={{ width: "30%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Charged Wt</div>
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", display: "flex" }}>
+                                                                <div style={{ width: "30%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Actual Wt</div>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ActualWt}</div>
+                                                                <div style={{ width: "30%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Charged Wt</div>
                                                                 <div style={{ width: "20%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ChargedWt}</div>
                                                             </div>
                                                             <div style={{ width: "100%", height: "40%", display: "flex", padding: "5px" }}>
@@ -316,8 +311,8 @@ function NewDP1() {
                                                             </div>
                                                         </div>
                                                         <div style={{ width: "55%", height: "100%" }}>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
-                                                            <div style={{ display: "flex", justifyContent: "center", borderBottom: "2px solid black", }}>  <BarCode
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
+                                                            <div style={{ display: "flex", justifyContent: "center", borderBottom: "1px solid black", }}>  <BarCode
                                                                 value={docket?.DocketNo}
                                                                 format='CODE128'
                                                                 background='#fff'
@@ -335,11 +330,11 @@ function NewDP1() {
                                                         </div>
                                                     </div>
                                                     <div style={{ height: "46%", width: "100%", display: "flex" }}>
-                                                        <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
+                                                        <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
                                                             <div style={{}}><b>Invoice No :</b>{docket?.InvoiceNo}</div>
                                                             <div style={{ fontWeight: "bold", fontSize: "15px" }}>Uninnsured Shipment</div>
                                                         </div>
-                                                        <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
+                                                        <div style={{ width: "50%", borderRight: "1px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
                                                             <div style={{ display: "flex", flexDirection: "column" }}>
                                                                 <b>CONSIGNEE SIGNATURE & RUBBER STAMP</b>
                                                                 <div style={{ display: "flex", width: "100%" }}>
@@ -364,63 +359,250 @@ function NewDP1() {
                                                     </div>
                                                 </div>
                                                 <div className='Chrgs' style={{ width: "25%" }}>
-                                                    <div style={{ width: "100%", height: "9%", display: "flex", borderBottom: "2px solid black", fontWeight: "bold" }}>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>PAID</div>
+                                                    <div style={{ width: "100%", height: "9%", display: "flex", borderBottom: "1px solid black", fontWeight: "bold" }}>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}></div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>PAID</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>T_Flag</div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Freight</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.Rate}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Freight</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.Rate}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.T_Flag}</div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Fuel</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.FuelCharges}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Fuel</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.FuelCharges}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Fov</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.FuelCharges}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Fov</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.FuelCharges}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Docket</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.DocketChrgs}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Docket</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.DocketChrgs}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Hamali</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.HamaliChrgs}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Hamali</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.HamaliChrgs}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>CGST</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.CGSTPer}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>CGST</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.CGSTPer}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.CGSTAMT}</div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>SGST</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.SGSTPer}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>SGST</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.SGSTPer}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.SGSTAMT}</div>
                                                     </div>
                                                     <div style={{ width: "100%", height: "12%", display: "flex" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Total</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.TotalAmt}</div>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Total</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.TotalAmt}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
 
                                                 </div>
                                             </div>
-                                            <div className='div4' style={{ width: "100%", height: "20px", border: "2px solid black", borderTop: "none", display: "flex", color: "black", display: "flex", justifyContent: "center", gap: "10px" }}>
+                                            <div className='div4' style={{ width: "100%", height: "20px", border: "1px solid black", borderTop: "none", display: "flex", color: "black", display: "flex", justifyContent: "center", gap: "10px" }}>
+                                                <div>{getBranch?.Branch_Add1},{getBranch?.Branch_Add2},{getBranch?.Branch_PIN}</div>
+                                                <div><b>Mob:</b> (+91) {getBranch?.MobileNo}</div>
+                                                <div><b>Email :</b> {getBranch?.Email}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "50px" }}>
+                                            <div className='div1' style={{ width: "100%", height: "80px", border: "1px solid black", display: "flex", color: "black" }}>
+                                                <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "1px solid black" }}>
+                                                    <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "75%" }} />
+                                                    <div style={{ display: "flex", height: "20%", width: "100%", justifyContent: "space-around" }}>
+                                                        <div><b>GST No :</b> {getBranch?.GSTNo}</div>
+                                                        <div><b>Website :</b> {getBranch?.Website}</div>
+                                                    </div>
+                                                </div>
+                                                <div className='heading' style={{ width: "66%", height: "100%", display: "flex", flexDirection: "column" }}>
+                                                    <div style={{ height: "60%", borderBottom: "1px solid black", display: "flex", flexDirection: "column" }}>
+                                                        <div style={{ height: "50%", borderBottom: "1px solid black", display: "flex", fontWeight: "bold" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                Origin
+                                                            </div>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                Destination
+                                                            </div>
+                                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                BKD Date
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ height: "50%", display: "flex" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                {docket?.Destination_Name}
+                                                            </div>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                {docket?.Destination_Name}
+                                                            </div>
+                                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                {docket?.BookDate}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ height: "40%", display: "flex" }}>
+                                                        <div style={{ height: "100%", width: "60%", borderRight: "1px solid black", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
+                                                            <div><b>Crossing :</b> {docket?.Vendor_Name}</div>
+                                                        </div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
+                                                            <div><b>Ref No :</b> {docket?.vendorAwbno} </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className='div2' style={{ width: "100%", border: "1px solid black", borderTop: "none", display: "flex", color: "black" }}>
+                                                <div className='Consignor' style={{ width: "50%", height: "100%", padding: "5px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid black" }}>
+                                                    <div><b>Consignor :</b> {docket?.Customer_Name}</div>
+                                                    <div><b>Adress :</b> {docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3},{docket?.Pin_Code},{docket?.Customer_State_Name}</div>
+                                                </div>
+                                                <div className='Consignee' style={{ width: "50%", height: "100%", padding: "5px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                                                    <div><b>Consignee :</b> {docket?.Consignee_Name}</div>
+                                                    <div><b>Adress :</b> {docket?.Consignee_Add1},{docket?.Consignee_Add2},{docket?.Consignee_Pin},{docket?.Consignee_State_Name}</div>
+                                                </div>
+                                            </div>
+                                            <div className='div3' style={{ width: "100%", borderRight: "1px solid black", borderLeft: "1px solid black", display: "flex", color: "black" }}>
+                                                <div className='barcode' style={{ width: "75%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid black" }}>
+                                                    <div style={{ height: "55%", width: "100%", borderBottom: "1px solid black", display: "flex" }}>
+                                                        <div style={{ width: "45%", borderRight: "1px solid black" }}>
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", fontWeight: "bold", display: "flex" }}>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>PKGS</div>
+                                                                <div style={{ width: "25%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>Packing</div>
+                                                                <div style={{ width: "55%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>Value LXBXH</div>
+                                                            </div>
+                                                            <div style={{ width: "100%", height: "30%", borderBottom: "1px solid black", display: "flex" }}>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.Qty}</div>
+                                                                <div style={{ width: "25%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>description</div>
+                                                                <div style={{ width: "55%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>
+                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>10</div>
+                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>20</div>
+                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center" }}>30</div>
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", display: "flex" }}>
+                                                                <div style={{ width: "30%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Actual Wt</div>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ActualWt}</div>
+                                                                <div style={{ width: "30%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Charged Wt</div>
+                                                                <div style={{ width: "20%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ChargedWt}</div>
+                                                            </div>
+                                                            <div style={{ width: "100%", height: "40%", display: "flex", padding: "5px" }}>
+                                                                <b>Declared value as : </b>
+                                                                {docket?.InvValue}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ width: "55%", height: "100%" }}>
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
+                                                            <div style={{ display: "flex", justifyContent: "center", borderBottom: "1px solid black", }}>  <BarCode
+                                                                value={docket?.DocketNo}
+                                                                format='CODE128'
+                                                                background='#fff'
+                                                                lineColor='#000'
+                                                                width={2}
+                                                                height={30}
+                                                                displayValue={true}
+                                                            /></div>
+
+                                                            <div style={{ width: "100%", height: "75%", padding: "5px" }}> iousogshiohgoih kldkflhflkhd
+                                                                iodsvofihdgihgdiof nlbdfjdlbjldfj
+                                                                kivlidhfdfhbofhidon npofpjfopjdof
+                                                                nvdlihoigshoifdbf
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ height: "46%", width: "100%", display: "flex" }}>
+                                                        <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
+                                                            <div style={{}}><b>Invoice No :</b>{docket?.InvoiceNo}</div>
+                                                            <div style={{ fontWeight: "bold", fontSize: "15px" }}>Uninnsured Shipment</div>
+                                                        </div>
+                                                        <div style={{ width: "50%", borderRight: "1px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
+                                                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                                                <b>CONSIGNEE SIGNATURE & RUBBER STAMP</b>
+                                                                <div style={{ display: "flex", width: "100%" }}>
+                                                                    <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
+                                                                        <b>Name</b>
+                                                                        <div>Arbaz</div>
+                                                                    </div>
+                                                                    <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
+                                                                        <b>Date</b>
+                                                                        <div>01/02/2025</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div >Received in good order and conditional ....A.M./P.M.</div>
+                                                        </div>
+                                                        <div style={{ width: "20%", fontWeight: "bold" }}>
+                                                            <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "40%", textAlign: "center" }}>
+                                                                For {getBranch?.Company_Name}
+                                                            </div>
+                                                            <div style={{ width: "100%", height: "60%", textAlign: "center" }}>Authorised Signature</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className='Chrgs' style={{ width: "25%" }}>
+                                                    <div style={{ width: "100%", height: "9%", display: "flex", borderBottom: "1px solid black", fontWeight: "bold" }}>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}></div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>PAID</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>T_Flag</div>
+                                                    </div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Freight</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.Rate}</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.T_Flag}</div>
+                                                    </div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Fuel</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.FuelCharges}</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
+                                                    </div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Fov</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.FuelCharges}</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
+                                                    </div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Docket</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.DocketChrgs}</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
+                                                    </div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Hamali</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.HamaliChrgs}</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
+                                                    </div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>CGST</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.CGSTPer}</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.CGSTAMT}</div>
+                                                    </div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>SGST</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.SGSTPer}</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.SGSTAMT}</div>
+                                                    </div>
+                                                    <div style={{ width: "100%", height: "12%", display: "flex" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Total</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.TotalAmt}</div>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div className='div4' style={{ width: "100%", height: "20px", border: "1px solid black", borderTop: "none", display: "flex", color: "black", display: "flex", justifyContent: "center", gap: "10px" }}>
                                                 <div>{getBranch?.Branch_Add1},{getBranch?.Branch_Add2},{getBranch?.Branch_PIN}</div>
                                                 <div><b>Mob:</b> (+91) {getBranch?.MobileNo}</div>
                                                 <div><b>Email :</b> {getBranch?.Email}</div>
                                             </div>
                                         </div>
                                         <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "50px" }}>
-                                            <div className='div1' style={{ width: "100%", height: "80px", border: "2px solid black", display: "flex", color: "black" }}>
-                                                <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "2px solid black" }}>
+                                            <div className='div1' style={{ width: "100%", height: "80px", border: "1px solid black", display: "flex", color: "black" }}>
+                                                <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "1px solid black" }}>
                                                     <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "75%" }} />
                                                     <div style={{ display: "flex", height: "20%", width: "100%", justifyContent: "space-around" }}>
                                                         <div><b>GST No :</b> {getBranch?.GSTNo}</div>
@@ -428,12 +610,12 @@ function NewDP1() {
                                                     </div>
                                                 </div>
                                                 <div className='heading' style={{ width: "66%", height: "100%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ height: "60%", borderBottom: "2px solid black", display: "flex", flexDirection: "column" }}>
-                                                        <div style={{ height: "50%", borderBottom: "2px solid black", display: "flex", fontWeight: "bold" }}>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                    <div style={{ height: "60%", borderBottom: "1px solid black", display: "flex", flexDirection: "column" }}>
+                                                        <div style={{ height: "50%", borderBottom: "1px solid black", display: "flex", fontWeight: "bold" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 Origin
                                                             </div>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 Destination
                                                             </div>
                                                             <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -441,10 +623,10 @@ function NewDP1() {
                                                             </div>
                                                         </div>
                                                         <div style={{ height: "50%", display: "flex" }}>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 {docket?.Destination_Name}
                                                             </div>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 {docket?.Destination_Name}
                                                             </div>
                                                             <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -453,7 +635,7 @@ function NewDP1() {
                                                         </div>
                                                     </div>
                                                     <div style={{ height: "40%", display: "flex" }}>
-                                                        <div style={{ height: "100%", width: "60%", borderRight: "2px solid black", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
+                                                        <div style={{ height: "100%", width: "60%", borderRight: "1px solid black", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
                                                             <div><b>Crossing :</b> {docket?.Vendor_Name}</div>
                                                         </div>
                                                         <div style={{ height: "100%", width: "40%", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
@@ -462,8 +644,8 @@ function NewDP1() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className='div2' style={{ width: "100%", border: "2px solid black", borderTop: "none", display: "flex", color: "black" }}>
-                                                <div className='Consignor' style={{ width: "50%", height: "100%", padding: "5px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "2px solid black" }}>
+                                            <div className='div2' style={{ width: "100%", border: "1px solid black", borderTop: "none", display: "flex", color: "black" }}>
+                                                <div className='Consignor' style={{ width: "50%", height: "100%", padding: "5px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid black" }}>
                                                     <div><b>Consignor :</b> {docket?.Customer_Name}</div>
                                                     <div><b>Adress :</b> {docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3},{docket?.Pin_Code},{docket?.Customer_State_Name}</div>
                                                 </div>
@@ -472,28 +654,28 @@ function NewDP1() {
                                                     <div><b>Adress :</b> {docket?.Consignee_Add1},{docket?.Consignee_Add2},{docket?.Consignee_Pin},{docket?.Consignee_State_Name}</div>
                                                 </div>
                                             </div>
-                                            <div className='div3' style={{ width: "100%", border: "2px solid black", borderTop: "none", display: "flex", color: "black" }}>
-                                                <div className='barcode' style={{ width: "75%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "2px solid black" }}>
-                                                    <div style={{ height: "55%", width: "100%", borderBottom: "2px solid black", display: "flex" }}>
-                                                        <div style={{ width: "45%", borderRight: "2px solid black" }}>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", fontWeight: "bold", display: "flex" }}>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>PKGS</div>
-                                                                <div style={{ width: "25%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>Packing</div>
+                                            <div className='div3' style={{ width: "100%", borderRight: "1px solid black", borderLeft: "1px solid black", display: "flex", color: "black" }}>
+                                                <div className='barcode' style={{ width: "75%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "1px solid black" }}>
+                                                    <div style={{ height: "55%", width: "100%", borderBottom: "1px solid black", display: "flex" }}>
+                                                        <div style={{ width: "45%", borderRight: "1px solid black" }}>
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", fontWeight: "bold", display: "flex" }}>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>PKGS</div>
+                                                                <div style={{ width: "25%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>Packing</div>
                                                                 <div style={{ width: "55%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>Value LXBXH</div>
                                                             </div>
-                                                            <div style={{ width: "100%", height: "30%", borderBottom: "2px solid black", display: "flex" }}>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.Qty}</div>
-                                                                <div style={{ width: "25%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>description</div>
+                                                            <div style={{ width: "100%", height: "30%", borderBottom: "1px solid black", display: "flex" }}>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.Qty}</div>
+                                                                <div style={{ width: "25%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>description</div>
                                                                 <div style={{ width: "55%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>
-                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>10</div>
-                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>20</div>
+                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>10</div>
+                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>20</div>
                                                                     <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center" }}>30</div>
                                                                 </div>
                                                             </div>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex" }}>
-                                                                <div style={{ width: "30%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Actual Wt</div>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ActualWt}</div>
-                                                                <div style={{ width: "30%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Charged Wt</div>
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", display: "flex" }}>
+                                                                <div style={{ width: "30%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Actual Wt</div>
+                                                                <div style={{ width: "20%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ActualWt}</div>
+                                                                <div style={{ width: "30%", height: "100%", borderRight: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Charged Wt</div>
                                                                 <div style={{ width: "20%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ChargedWt}</div>
                                                             </div>
                                                             <div style={{ width: "100%", height: "40%", display: "flex", padding: "5px" }}>
@@ -502,8 +684,8 @@ function NewDP1() {
                                                             </div>
                                                         </div>
                                                         <div style={{ width: "55%", height: "100%" }}>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
-                                                            <div style={{ display: "flex", justifyContent: "center", borderBottom: "2px solid black", }}>  <BarCode
+                                                            <div style={{ width: "100%", height: "15%", borderBottom: "1px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
+                                                            <div style={{ display: "flex", justifyContent: "center", borderBottom: "1px solid black", }}>  <BarCode
                                                                 value={docket?.DocketNo}
                                                                 format='CODE128'
                                                                 background='#fff'
@@ -521,11 +703,11 @@ function NewDP1() {
                                                         </div>
                                                     </div>
                                                     <div style={{ height: "46%", width: "100%", display: "flex" }}>
-                                                        <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
+                                                        <div style={{ width: "30%", borderRight: "1px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
                                                             <div style={{}}><b>Invoice No :</b>{docket?.InvoiceNo}</div>
                                                             <div style={{ fontWeight: "bold", fontSize: "15px" }}>Uninnsured Shipment</div>
                                                         </div>
-                                                        <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
+                                                        <div style={{ width: "50%", borderRight: "1px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
                                                             <div style={{ display: "flex", flexDirection: "column" }}>
                                                                 <b>CONSIGNEE SIGNATURE & RUBBER STAMP</b>
                                                                 <div style={{ display: "flex", width: "100%" }}>
@@ -550,247 +732,62 @@ function NewDP1() {
                                                     </div>
                                                 </div>
                                                 <div className='Chrgs' style={{ width: "25%" }}>
-                                                    <div style={{ width: "100%", height: "9%", display: "flex", borderBottom: "2px solid black", fontWeight: "bold" }}>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>PAID</div>
+                                                    <div style={{ width: "100%", height: "9%", display: "flex", borderBottom: "1px solid black", fontWeight: "bold" }}>
+                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}></div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>PAID</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>T_Flag</div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Freight</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.Rate}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Freight</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.Rate}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.T_Flag}</div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Fuel</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.FuelCharges}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Fuel</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.FuelCharges}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Fov</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.FuelCharges}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Fov</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.FuelCharges}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Docket</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.DocketChrgs}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Docket</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.DocketChrgs}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Hamali</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.HamaliChrgs}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Hamali</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.HamaliChrgs}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>CGST</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.CGSTPer}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>CGST</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.CGSTPer}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.CGSTAMT}</div>
                                                     </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>SGST</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.SGSTPer}</div>
+                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "1px solid black" }}>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>SGST</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.SGSTPer}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.SGSTAMT}</div>
                                                     </div>
                                                     <div style={{ width: "100%", height: "12%", display: "flex" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Total</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.TotalAmt}</div>
+                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>Total</div>
+                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid black" }}>{docket?.TotalAmt}</div>
                                                         <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
                                                     </div>
 
                                                 </div>
                                             </div>
-                                            <div className='div4' style={{ width: "100%", height: "20px", border: "2px solid black", borderTop: "none", display: "flex", color: "black", display: "flex", justifyContent: "center", gap: "10px" }}>
+                                            <div className='div4' style={{ width: "100%", height: "20px", border: "1px solid black", borderTop: "none", display: "flex", color: "black", display: "flex", justifyContent: "center", gap: "10px" }}>
                                                 <div>{getBranch?.Branch_Add1},{getBranch?.Branch_Add2},{getBranch?.Branch_PIN}</div>
                                                 <div><b>Mob:</b> (+91) {getBranch?.MobileNo}</div>
                                                 <div><b>Email :</b> {getBranch?.Email}</div>
                                             </div>
                                         </div>
-                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", marginBottom: "50px" }}>
-                                            <div className='div1' style={{ width: "100%", height: "80px", border: "2px solid black", display: "flex", color: "black" }}>
-                                                <div className='logo' style={{ width: "35%", height: "100%", fontSize: "10px", padding: "5px", display: "flex", flexDirection: "column", gap: "5px", borderRight: "2px solid black" }}>
-                                                    <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "75%" }} />
-                                                    <div style={{ display: "flex", height: "20%", width: "100%", justifyContent: "space-around" }}>
-                                                        <div><b>GST No :</b> {getBranch?.GSTNo}</div>
-                                                        <div><b>Website :</b> {getBranch?.Website}</div>
-                                                    </div>
-                                                </div>
-                                                <div className='heading' style={{ width: "66%", height: "100%", display: "flex", flexDirection: "column" }}>
-                                                    <div style={{ height: "60%", borderBottom: "2px solid black", display: "flex", flexDirection: "column" }}>
-                                                        <div style={{ height: "50%", borderBottom: "2px solid black", display: "flex", fontWeight: "bold" }}>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                                Origin
-                                                            </div>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                                Destination
-                                                            </div>
-                                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                                BKD Date
-                                                            </div>
-                                                        </div>
-                                                        <div style={{ height: "50%", display: "flex" }}>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                                {docket?.Destination_Name}
-                                                            </div>
-                                                            <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                                {docket?.Destination_Name}
-                                                            </div>
-                                                            <div style={{ width: "40%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                                {docket?.BookDate}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ height: "40%", display: "flex" }}>
-                                                        <div style={{ height: "100%", width: "60%", borderRight: "2px solid black", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
-                                                            <div><b>Crossing :</b> {docket?.Vendor_Name}</div>
-                                                        </div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", alignItems: "center", paddingLeft: "10px" }}>
-                                                            <div><b>Ref No :</b> {docket?.vendorAwbno} </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className='div2' style={{ width: "100%", border: "2px solid black", borderTop: "none", display: "flex", color: "black" }}>
-                                                <div className='Consignor' style={{ width: "50%", height: "100%", padding: "5px", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "2px solid black" }}>
-                                                    <div><b>Consignor :</b> {docket?.Customer_Name}</div>
-                                                    <div><b>Adress :</b> {docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3},{docket?.Pin_Code},{docket?.Customer_State_Name}</div>
-                                                </div>
-                                                <div className='Consignee' style={{ width: "50%", height: "100%", padding: "5px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                                    <div><b>Consignee :</b> {docket?.Consignee_Name}</div>
-                                                    <div><b>Adress :</b> {docket?.Consignee_Add1},{docket?.Consignee_Add2},{docket?.Consignee_Pin},{docket?.Consignee_State_Name}</div>
-                                                </div>
-                                            </div>
-                                            <div className='div3' style={{ width: "100%", border: "2px solid black", borderTop: "none", display: "flex", color: "black" }}>
-                                                <div className='barcode' style={{ width: "75%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", borderRight: "2px solid black" }}>
-                                                    <div style={{ height: "55%", width: "100%", borderBottom: "2px solid black", display: "flex" }}>
-                                                        <div style={{ width: "45%", borderRight: "2px solid black" }}>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", fontWeight: "bold", display: "flex" }}>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>PKGS</div>
-                                                                <div style={{ width: "25%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>Packing</div>
-                                                                <div style={{ width: "55%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>Value LXBXH</div>
-                                                            </div>
-                                                            <div style={{ width: "100%", height: "30%", borderBottom: "2px solid black", display: "flex" }}>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.Qty}</div>
-                                                                <div style={{ width: "25%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>description</div>
-                                                                <div style={{ width: "55%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>
-                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>10</div>
-                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>20</div>
-                                                                    <div style={{ height: "100%", width: "33%", display: "flex", justifyContent: "center", alignItems: "center" }}>30</div>
-                                                                </div>
-                                                            </div>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex" }}>
-                                                                <div style={{ width: "30%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Actual Wt</div>
-                                                                <div style={{ width: "20%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ActualWt}</div>
-                                                                <div style={{ width: "30%", height: "100%", borderRight: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Charged Wt</div>
-                                                                <div style={{ width: "20%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", }}>{docket?.ChargedWt}</div>
-                                                            </div>
-                                                            <div style={{ width: "100%", height: "40%", display: "flex", padding: "5px" }}>
-                                                                <b>Declared value as : </b>
-                                                                {docket?.InvValue}
-                                                            </div>
-                                                        </div>
-                                                        <div style={{ width: "55%", height: "100%" }}>
-                                                            <div style={{ width: "100%", height: "15%", borderBottom: "2px solid black", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "bold" }}>Consignment Number</div>
-                                                            <div style={{ display: "flex", justifyContent: "center", borderBottom: "2px solid black", }}>  <BarCode
-                                                                value={docket?.DocketNo}
-                                                                format='CODE128'
-                                                                background='#fff'
-                                                                lineColor='#000'
-                                                                width={2}
-                                                                height={30}
-                                                                displayValue={true}
-                                                            /></div>
 
-                                                            <div style={{ width: "100%", height: "75%", padding: "5px" }}> iousogshiohgoih kldkflhflkhd
-                                                                iodsvofihdgihgdiof nlbdfjdlbjldfj
-                                                                kivlidhfdfhbofhidon npofpjfopjdof
-                                                                nvdlihoigshoifdbf
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ height: "46%", width: "100%", display: "flex" }}>
-                                                        <div style={{ width: "30%", borderRight: "2px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
-                                                            <div style={{}}><b>Invoice No :</b>{docket?.InvoiceNo}</div>
-                                                            <div style={{ fontWeight: "bold", fontSize: "15px" }}>Uninnsured Shipment</div>
-                                                        </div>
-                                                        <div style={{ width: "50%", borderRight: "2px solid black", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px" }}>
-                                                            <div style={{ display: "flex", flexDirection: "column" }}>
-                                                                <b>CONSIGNEE SIGNATURE & RUBBER STAMP</b>
-                                                                <div style={{ display: "flex", width: "100%" }}>
-                                                                    <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
-                                                                        <b>Name</b>
-                                                                        <div>Arbaz</div>
-                                                                    </div>
-                                                                    <div style={{ display: "flex", flexDirection: "column", width: "50%" }}>
-                                                                        <b>Date</b>
-                                                                        <div>01/02/2025</div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div >Received in good order and conditional ....A.M./P.M.</div>
-                                                        </div>
-                                                        <div style={{ width: "20%", fontWeight: "bold" }}>
-                                                            <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "40%", textAlign: "center" }}>
-                                                                For {getBranch?.Company_Name}
-                                                            </div>
-                                                            <div style={{ width: "100%", height: "60%", textAlign: "center" }}>Authorised Signature</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className='Chrgs' style={{ width: "25%" }}>
-                                                    <div style={{ width: "100%", height: "9%", display: "flex", borderBottom: "2px solid black", fontWeight: "bold" }}>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}></div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>PAID</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>T_Flag</div>
-                                                    </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Freight</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.Rate}</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.T_Flag}</div>
-                                                    </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Fuel</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.FuelCharges}</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
-                                                    </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Fov</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.FuelCharges}</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
-                                                    </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Docket</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.DocketChrgs}</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
-                                                    </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Hamali</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.HamaliChrgs}</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
-                                                    </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>CGST</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.CGSTPer}</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.CGSTAMT}</div>
-                                                    </div>
-                                                    <div style={{ width: "100%", height: "11.47%", display: "flex", borderBottom: "2px solid black" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>SGST</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.SGSTPer}</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.SGSTAMT}</div>
-                                                    </div>
-                                                    <div style={{ width: "100%", height: "12%", display: "flex" }}>
-                                                        <div style={{ height: "100%", width: "30%", fontWeight: "bold", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>Total</div>
-                                                        <div style={{ height: "100%", width: "40%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "2px solid black" }}>{docket?.TotalAmt}</div>
-                                                        <div style={{ height: "100%", width: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}></div>
-                                                    </div>
 
-                                                </div>
-                                            </div>
-                                            <div className='div4' style={{ width: "100%", height: "20px", border: "2px solid black", borderTop: "none", display: "flex", color: "black", display: "flex", justifyContent: "center", gap: "10px" }}>
-                                                <div>{getBranch?.Branch_Add1},{getBranch?.Branch_Add2},{getBranch?.Branch_PIN}</div>
-                                                <div><b>Mob:</b> (+91) {getBranch?.MobileNo}</div>
-                                                <div><b>Email :</b> {getBranch?.Email}</div>
-                                            </div>
-                                        </div>
-                                       
                                     </div>
                                 ))
                             }

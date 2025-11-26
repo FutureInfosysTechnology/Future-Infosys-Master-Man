@@ -9,15 +9,16 @@ import 'react-toggle/style.css';
 import { refeshPend } from "../../../App";
 
 function CreateManifest() {
-    const {refFun}=useContext(refeshPend)
+    const { refFun } = useContext(refeshPend)
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
+    const [isInput,setInput]=useState("SELF");
     const [getTransport, setGetTransport] = useState([]);
     const [getVehicle, setGetVehicle] = useState([]);
     const [getDriver, setGetDriver] = useState([]);
     const [getVendor, setGetVendor] = useState([]);
     const [getCity, setGetCity] = useState([]);
+    const [getBranch, setGetBranch] = useState([]);
     const [getMode, setGetMode] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -145,6 +146,19 @@ function CreateManifest() {
     };
 
     useEffect(() => {
+        const fetchBranch = async () => {
+            try {
+                const response = await getApi(`/Master/getBranch?Branch_Code=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}`);
+                if (response.status === 1) {
+                    console.log(response.Data);
+                    setGetBranch(response.Data);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        fetchBranch();
         fetchData('/Master/getMode', setGetMode);
         fetchData('/Master/getVendor', setGetVendor);
         fetchData('/Master/getdomestic', setGetCity);
@@ -162,6 +176,9 @@ function CreateManifest() {
             setSelectedRows([]);
         }
     };
+    useEffect(()=>{
+        console.log(isInput);
+    },[isInput])
 
     const handleRowSelect = (index, docketNo) => {
         if (selectedRows.includes(index)) {
@@ -193,13 +210,13 @@ function CreateManifest() {
         }));
         setModalIsOpen(false);
     };
- const formatDate = (date) => {
-    if (!date) return null;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${day}/${month}/${year}`;
-};
+    const formatDate = (date) => {
+        if (!date) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${day}/${month}/${year}`;
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -213,7 +230,7 @@ function CreateManifest() {
         }
         const requestPayload = {
             DocketNo: selectedDocketNos,
-            sessionLocationCode:JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
+            sessionLocationCode: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             fromDest: formData.fromDest,
             toDest: formData.toDest,
             Mode: formData.mode,
@@ -225,7 +242,7 @@ function CreateManifest() {
             VendorAwbNo: formData.vendorAwbNo,
             driverName: formData.driverName,
             driverMobile: formData.driverMobile,
-            ManifestDate:formatDate(formData.maniDate),
+            ManifestDate: formatDate(formData.maniDate),
             DispatchFlag: "1",
         };
         try {
@@ -255,10 +272,10 @@ function CreateManifest() {
             })
             refFun();
 
-           setSelectedManifestRows([]);
-    setSelectedRows([]);
-    setSelectedDocketNos([]);
-    setSelectAll(false);
+            setSelectedManifestRows([]);
+            setSelectedRows([]);
+            setSelectedDocketNos([]);
+            setSelectAll(false);
         } catch (error) {
             console.error("Error submitting manifest: ", error);
             Swal.fire({
@@ -276,12 +293,12 @@ function CreateManifest() {
             <div className="body">
                 <div className="container1" style={{ padding: "0px" }}>
 
-                    <form onSubmit={handleSubmit} style={{background:" #f2f4f3"}}>
+                    <form onSubmit={handleSubmit} style={{ background: " #f2f4f3" }}>
                         <div className="fields2">
                             <div className="input-field3" >
                                 <label htmlFor="">Manifest Date</label>
                                 <DatePicker
-                                    portalId="root-portal"   
+                                    portalId="root-portal"
                                     selected={formData.maniDate}
                                     onChange={(date) => handleDateChange(date, "maniDate")}
                                     dateFormat="dd/MM/yyyy"
@@ -293,22 +310,23 @@ function CreateManifest() {
                             <div className="input-field3" >
                                 <label htmlFor="">From City</label>
                                 <Select
-                                    options={getCity.map(city => ({
-                                        value: city.City_Code,   // adjust keys from your API
-                                        label: city.City_Name
+                                    options={getBranch.map(branch => ({
+                                        value: branch.Branch_Code,   // adjust keys from your API
+                                        label: branch.Branch_Name
                                     }))}
                                     value={
                                         formData.fromDest
-                                            ? { value: formData.fromDest, label: getCity.find(c => c.City_Code === formData.fromDest)?.City_Name || "" }
+                                            ? {
+                                                value: formData.fromDest,
+                                                label: getBranch.find(c => c.Branch_Code === formData.fromDest)?.Branch_Name
+                                            }
                                             : null
                                     }
-                                    onChange={(selectedOption) => {
-                                        console.log(selectedOption);
+                                    onChange={(selectedOption) =>
                                         setFormData({
                                             ...formData,
                                             fromDest: selectedOption ? selectedOption.value : ""
                                         })
-                                    }
                                     }
                                     placeholder="Select City"
                                     isSearchable
@@ -399,7 +417,7 @@ function CreateManifest() {
                             </div>
 
                             <div className="input-field3" >
-                                <label htmlFor="">Transport Type</label>
+                                <label htmlFor="">Vehicle Detail</label>
                                 <Select
                                     options={getTransport.map(tra => ({
                                         value: tra.Transport_Code,   // adjust keys from your API
@@ -410,13 +428,14 @@ function CreateManifest() {
                                             ? { value: formData.transportType, label: getTransport.find(c => c.Transport_Code === formData.transportType)?.Transport_Name || "" }
                                             : null
                                     }
-                                    onChange={(selectedOption) =>
+                                    onChange={(selectedOption) =>{
                                         setFormData({
                                             ...formData,
                                             transportType: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    placeholder="Transport Type"
+                                        });
+                                        setInput(selectedOption.label.trim());
+                                    }}
+                                    placeholder="Vehicle Details"
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
@@ -435,7 +454,13 @@ function CreateManifest() {
 
                             <div className="input-field3" >
                                 <label htmlFor="">Vehicle Type</label>
-                                <Select
+                                {
+                                    isInput==="HIRE"?
+                                    <input type="text" placeholder="Vehicle Type"
+                                    value={formData.vehicleType}
+                                    onChange={(e)=>setFormData({...formData,vehicleType:e.target.value})}/>
+                                    :
+                                    <Select
                                     options={getVehicle.map(vehicle => ({
                                         value: vehicle.vehicle_model,   // adjust keys from your API
                                         label: vehicle.vehicle_model
@@ -466,11 +491,19 @@ function CreateManifest() {
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
+                                }
+                                
                             </div>
 
                             <div className="input-field3" >
                                 <label htmlFor="">Vehicle Number</label>
-                                <Select
+                                {
+                                    isInput==="HIRE"?
+                                    <input type="text" placeholder="Vehicle Number"
+                                    value={formData.vehicleNo}
+                                    onChange={(e)=>setFormData({...formData,vehicleNo:e.target.value})}/>
+                                    :
+                                    <Select
                                     options={getVehicle.map(vehicle => ({
                                         value: vehicle.vehicle_number,   // adjust keys from your API
                                         label: vehicle.vehicle_number
@@ -501,6 +534,8 @@ function CreateManifest() {
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                     }}
                                 />
+                                }
+                                
                             </div>
 
                             <div className="input-field3" >
@@ -593,8 +628,8 @@ function CreateManifest() {
                             </div>
 
                             <div className="input-field3" >
-                                <label htmlFor="">Booking Weight</label>
-                                <input type="text" placeholder="Booking Weight" name="bookingWeight"
+                                <label htmlFor="">Docket No</label>
+                                <input type="text" placeholder="Search..." name="bookingWeight"
                                     value={formData.bookingWeight} onChange={handleFormChange} />
                             </div>
 
@@ -605,18 +640,18 @@ function CreateManifest() {
                             </div>
 
                             <div className="input-field3" >
-                                <label htmlFor="" style={{whiteSpace:"nowrap"}}>Bulk Docket Manifest</label>
-                                <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px" ,lineHeight:"1"}}
+                                <label htmlFor="" style={{ whiteSpace: "nowrap" }}>Bulk Docket Manifest</label>
+                                <button type="button" className="ok-btn" style={{ height: "35px", width: "100%", fontSize: "14px", lineHeight: "1" }}
                                     onClick={() => { setModalIsOpen(true) }}>Bulk Docket Manifest</button>
                             </div>
 
-                            <div className="input-field3" >
-                                <label htmlFor=""></label>
-                                <div style={{ display: "flex", flexDirection: "row", marginTop: "18px" ,justifyContent:"center",alignItems:"center",gap:"10px",width:"150px"}}>
-                                <button type="submit" className="ok-btn" style={{ width: "55%"}}>Generate</button>
-                                <button type="button" className="ok-btn" style={{ width: "45%"}}>Reset</button>
+
+                            <div className="bottom-buttons" style={{ display: "flex", flexDirection: "row", marginTop: "10px",marginLeft:"10px", justifyContent: "center", alignItems: "center",}}>
+                                <button type="button" className="ok-btn" style={{ width:"50px" }}>Find</button>
+                                <button type="submit" className="ok-btn" style={{ }}>Generate</button>
+                                <button type="button" className="ok-btn" style={{ width:"50px" }}>Reset</button>
                             </div>
-                            </div>
+
                         </div>
                     </form>
                     <div className="table-container" style={{ padding: "10px" }}>
