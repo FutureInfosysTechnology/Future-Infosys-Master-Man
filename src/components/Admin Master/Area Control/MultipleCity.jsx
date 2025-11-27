@@ -38,8 +38,8 @@ function MultipleCity() {
 
     const fetchMultipleCityData = async () => {
         try {
-            const response = await getApi('/Master/getMultipleCity');
-            setmultipleCity(Array.isArray(response.Data) ? response.Data : []);
+            const response = await getApi('/Master/GetAllInternatioanlzone');
+            setmultipleCity(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
             console.error('Fetch Error:', err);
             setError(err);
@@ -86,7 +86,7 @@ function MultipleCity() {
         }
 
         try {
-            const response = await postApi('/Master/UpdateMultipleCity', requestBody);
+            const response = await putApi('/Master/UpdateInternatioanlzone', requestBody);
             if (response.status === 1) {
                 setmultipleCity(multipleCity.map((city) => city.City_Code === addCity.CityCode ? response.Data : city));
                 setAddCity({
@@ -112,17 +112,18 @@ function MultipleCity() {
 
     const handleSave = async (e) => {
         e.preventDefault();
-        const payload={
-            VendorCode:addCity.VendorCode,
-            ModeCode:addCity.ModeCode,
-            ZoneCode:addCity.ZoneCode,
-            CountryCode:addCity.CountryCode,
-            StateCode:addCity.StateCode,
-            CityCode:addCity.CityCode,
-            ProductType:addCity.ProductType
+        const payload = {
+            VendorCode: addCity.VendorCode,
+            ModeCode: addCity.ModeCode,
+            ZoneCode: addCity.ZoneCode,
+            CountryCode: addCity.CountryCode,
+            StateCode: addCity.StateCode,
+            CityCode: addCity.CityCode,
+            ProductType: addCity.ProductType
         }
+
         try {
-            const response = await postApi(`/Master/AddMultiplaCity`,payload);
+            const response = await postApi(`/Master/AddInternatioanlzone`, payload);
             if (response.status === 1) {
                 setAddCity({
                     VendorCode: '',
@@ -295,7 +296,7 @@ function MultipleCity() {
                                                 </button>
                                                 <button onClick={() => {
                                                     setOpenRow(null);
-                                                     handleDelete(index);
+                                                    handleDelete(index);
                                                 }} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         )}

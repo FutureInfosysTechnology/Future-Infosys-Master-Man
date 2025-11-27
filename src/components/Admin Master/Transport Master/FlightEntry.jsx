@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { getApi, postApi, deleteApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import 'react-toastify/dist/ReactToastify.css';
 import Modal from 'react-modal';
 import Swal from 'sweetalert2';
@@ -19,6 +20,7 @@ const FlightEntry = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [flightData, setFlightData] = useState({
+    flightId: '',
     flightCode: '',
     flightName: '',
     flightNo: '',
@@ -29,8 +31,8 @@ const FlightEntry = () => {
 
   const fetchData = async () => {
     try {
-      const response = await getApi('/Master/getZone');
-      setData(Array.isArray(response.Data) ? response.Data : []);
+      const response = await getApi('/Master/GetAllFlights');
+      setData(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Fetch Error:', err);
       setError(err);
@@ -38,6 +40,7 @@ const FlightEntry = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -46,93 +49,104 @@ const FlightEntry = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    const requestBody = {
-      ZoneCode: flightData.flightCode,
-      ZoneName: flightData.flightName,
+    const body = {
+      Flight_ID: flightData.flightId,
+      Flight_Code: flightData.flightCode,
+      Flight_Name: flightData.flightName,
+      Flight_No: flightData.flightNo
     };
 
     try {
-      const response = await postApi('/Master/UpdateZone', requestBody, 'POST');
+      const response = await putApi('/Master/UpdateFlightMaster', body);
+
       if (response.status === 1) {
-        setData(data.map((d) => d.Zone_Code === flightData.flightCode ? response.Data : d));
+        Swal.fire("Updated!", response.message, "success");
         setFlightData({
+          flightId: '',
           flightCode: '',
           flightName: '',
           flightNo: '',
         });
-        Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
         setModalIsOpen(false);
-        await fetchData();
+        fetchData();
+      } else {
+        Swal.fire("Error!", response.message, "error");
       }
-      else {
-        Swal.fire('Error!', response.message || 'Failed to update the flight.', 'error');
-      }
+
     } catch (err) {
-      console.error('Error updating zone:', err);
-      Swal.fire('Error', 'Failed to update flight data', 'error');
+      console.error("Update error:", err);
+      Swal.fire("Error", "Failed to update flight", "error");
     }
-  }
+  };
+
 
 
   const handleSave = async (e) => {
     e.preventDefault();
 
+    const body = {
+      Flight_Code: flightData.flightCode,
+      Flight_Name: flightData.flightName,
+      Flight_No: flightData.flightNo
+    };
+
     try {
-      const response = await postApi(`/Master/addZone?ZoneCode=${flightData.flightCode}
-          &ZoneName=${flightData.flightName}`);
+      const response = await postApi(`/Master/AddFlightMaster`, body);
+
       if (response.status === 1) {
-        setData([...data, response.Data]);
+        Swal.fire("Saved!", response.message, "success");
         setFlightData({
+          flightId: '',
           flightCode: '',
           flightName: '',
           flightNo: '',
         });
-        Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
         setModalIsOpen(false);
-        await fetchData();
+        fetchData();
+      } else {
+        Swal.fire("Error!", response.message, "error");
       }
-      else {
-        Swal.fire('Error!', response.message || 'Failed to add the new flight data.', 'error');
-      }
+
     } catch (err) {
-      console.error('Error saving zone:', err);
-      Swal.fire('Error', 'Failed to save flight data', 'error');
+      console.error("Error saving:", err);
+      Swal.fire("Error", "Failed to save flight", "error");
     }
   };
 
 
-  const handleDelete = async (Flight_Code) => {
+
+  const handleDelete = async (flightId) => {
     const confirmDelete = await Swal.fire({
-      title: 'Are you sure?',
-      text: 'Do you really want to delete this flight data?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel'
+      title: "Are you sure?",
+      text: "This will permanently delete the flight.",
+      icon: "warning",
+      showCancelButton: true
     });
 
     if (confirmDelete.isConfirmed) {
       try {
-        await deleteApi(`/Master/DeleteZone?ZoneCode=${Flight_Code}`);
-        setData(data.filter((d) => d.ZoneCode !== Flight_Code));
-        Swal.fire('Deleted!', 'The flight has been deleted.', 'success');
-        await fetchData();
+        await deleteApi(`/Master/DeleteFlightMaster?Flight_ID=${flightId}`);
+
+        Swal.fire("Deleted!", "Flight removed", "success");
+        fetchData();
+
       } catch (err) {
-        console.error('Delete Error:', err);
-        Swal.fire('Error', 'Failed to delete flight data', 'error');
+        console.error("Delete error:", err);
+        Swal.fire("Error!", "Failed to delete", "error");
       }
     }
   };
 
-  const filteredData = data.filter((d) =>
-    (d && d.Zone_Code && d.Zone_Code?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-    (d && d.Zone_Name && d.Zone_Name?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
-  );
-
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const filteredData = currentRows.filter((d) =>
+    (d && d.Flight_Code && d.Flight_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (d && d.Flight_Name && d.Flight_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (d && d.Flight_No && d.Flight_No.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -144,31 +158,56 @@ const FlightEntry = () => {
   const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
 
   const handleExportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const exportData = currentRows.map(flight => ({
+      'Flight ID': flight.Flight_ID,
+      'Flight Code': flight.Flight_Code,
+      'Flight Name': flight.Flight_Name,
+      'Flight No': flight.Flight_No
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Flight');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Flights');
+
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-    saveAs(file, 'flight.xlsx');
+    const file = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+    });
+    saveAs(file, 'flights.xlsx');
   };
 
-  const handleExportcountryPDF = () => {
-    const pdfData = data.map(({ id, Zone_Code, Zone_Name }) => [id, Zone_Code, Zone_Name]);
+
+ const handleExportPDF = () => {
+    if (!currentRows || currentRows.length === 0) {
+        alert("No data to export");
+        return;
+    }
 
     const pdf = new jsPDF();
-
     pdf.setFontSize(18);
-    pdf.text('Zone Master Data', 14, 20);
+    pdf.text("Flight Master Data", 14, 20);
 
-    const headers = [['Sr.No', 'Zone Code', 'Zone Name']];
-    pdf.autoTable({
-      head: headers,
-      body: pdfData,
-      startY: 30,
-      theme: 'grid'
+    const headers = [['Sr.No', 'Flight ID', 'Flight Code', 'Flight Name', 'Flight No']];
+    const pdfData = currentRows.map((flight, index) => [
+        index + 1,
+        flight.Flight_ID,
+        flight.Flight_Code,
+        flight.Flight_Name,
+        flight.Flight_No
+    ]);
+
+    autoTable(pdf, {
+        head: headers,
+        body: pdfData,
+        startY: 30,
+        theme: 'grid',
     });
-    pdf.save('zone.pdf');
-  };
+
+    pdf.save("flights.pdf");
+};
+
+
+
 
 
   if (loading) return <div>Loading...</div>;
@@ -187,6 +226,7 @@ const FlightEntry = () => {
               <button className='add-btn' onClick={() => {
                 setModalIsOpen(true); setIsEditMode(false);
                 setFlightData({
+                  flightId: '',
                   flightCode: '',
                   flightName: '',
                   flightNo: '',
@@ -200,7 +240,7 @@ const FlightEntry = () => {
                 <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
                 <div className="dropdown-content">
                   <button onClick={handleExportExcel}>Export to Excel</button>
-                  <button onClick={handleExportcountryPDF}>Export to PDF</button>
+                  <button onClick={handleExportPDF}>Export to PDF</button>
                 </div>
               </div>
             </div>
@@ -219,22 +259,24 @@ const FlightEntry = () => {
               <thead className='table-sm'>
                 <tr>
                   <th scope="col">Actions</th>
-                  <th scope="col">Sr.No</th>
+                  <th scope="col">Flight ID</th>
                   <th scope="col">Flight Code</th>
                   <th scope="col">Flight Name</th>
                   <th scope="col">Flight No</th>
-
                 </tr>
               </thead>
-              <tbody className='table-body'>
 
-                {currentRows.map((zone, index) => (
-                  <tr key={`${zone.id}-${index}`} style={{ fontSize: "12px", position: "relative" }}>
+              <tbody className='table-body'>
+                {filteredData.map((flight, index) => (
+                  <tr key={`${flight.Flight_ID}-${index}`} style={{ fontSize: "12px", position: "relative" }}>
+
+                    {/* ACTION BUTTON */}
                     <td>
                       <PiDotsThreeOutlineVerticalFill
                         style={{ fontSize: "20px", cursor: "pointer" }}
                         onClick={() => setOpenRow(openRow === index ? null : index)}
                       />
+
                       {openRow === index && (
                         <div
                           style={{
@@ -253,35 +295,49 @@ const FlightEntry = () => {
                             padding: "10px",
                           }}
                         >
-                          <button className='edit-btn' onClick={() => {
-                            setIsEditMode(true);
-                            setOpenRow(null);
-                            setFlightData({
-                              flightCode: zone.Zone_Code?.trim(),
-                              flightName: zone.Zone_Name
-                            });
-                            setModalIsOpen(true);
-                          }}>
+                          {/* EDIT */}
+                          <button
+                            className='edit-btn'
+                            onClick={() => {
+                              setIsEditMode(true);
+                              setOpenRow(null);
+                              setFlightData({
+                                flightId: flight.Flight_ID,
+                                flightCode: flight.Flight_Code,
+                                flightName: flight.Flight_Name,
+                                flightNo: flight.Flight_No
+                              });
+                              setModalIsOpen(true);
+                            }}
+                          >
                             <i className='bi bi-pen'></i>
                           </button>
-                          <button className='edit-btn' onClick={() => {
-                            setOpenRow(null);
-                            handleDelete(zone.Zone_Code);
-                          }}>
-                            <i className='bi bi-trash'></i></button>
+
+                          {/* DELETE */}
+                          <button
+                            className='edit-btn'
+                            onClick={() => {
+                              setOpenRow(null);
+                              handleDelete(flight.Flight_ID);   // FIXED
+                            }}
+                          >
+                            <i className='bi bi-trash'></i>
+                          </button>
                         </div>
                       )}
                     </td>
-                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                    <td>{zone.Zone_Code}</td>
-                    <td>{zone.Zone_Name}</td>
-                    <td>11111</td>
 
+                    {/* FIELDS */}
+                    <td>{flight.Flight_ID}</td>
+                    <td>{flight.Flight_Code}</td>
+                    <td>{flight.Flight_Name}</td>
+                    <td>{flight.Flight_No}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
 
           <div style={{ display: "flex", flexDirection: "row", padding: "10px" }}>
             <div className="pagination">

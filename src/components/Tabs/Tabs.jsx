@@ -44,7 +44,7 @@ function Tabs() {
 
                     <nav>
                         <label htmlFor="zone" className="zone">City Control</label>
-                        <label htmlFor="multiple" className="multiple">Multiple City</label>
+                        <label htmlFor="multiple" className="multiple">International Zone</label>
                         <label htmlFor="state" className="state">State Master</label>
                         <label htmlFor="country" className="country">Country Master</label>
 
