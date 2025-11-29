@@ -5,9 +5,10 @@ import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import { getApi, postApi, putApi } from "./Zonemaster/ServicesApi";
+import autoTable from "jspdf-autotable";
+import { getApi, postApi, putApi, deleteApi } from "./Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Select from "react-select"
 
 
 function MultipleCity() {
@@ -25,7 +26,9 @@ function MultipleCity() {
     const [currentPage, setCurrentPage] = useState(1);
     const [isEditMode, setIsEditMode] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [searchQuery, setSearchQuery] = useState('');
     const [addCity, setAddCity] = useState({
+        ID: '',
         VendorCode: '',
         ModeCode: '',
         ZoneCode: '',
@@ -76,6 +79,7 @@ function MultipleCity() {
         e.preventDefault();
 
         const requestBody = {
+            ID: addCity.ID,
             VendorCode: addCity.VendorCode,
             ModeCode: addCity.ModeCode,
             ZoneCode: addCity.ZoneCode,
@@ -88,25 +92,25 @@ function MultipleCity() {
         try {
             const response = await putApi('/Master/UpdateInternatioanlzone', requestBody);
             if (response.status === 1) {
-                setmultipleCity(multipleCity.map((city) => city.City_Code === addCity.CityCode ? response.Data : city));
                 setAddCity({
+                    ID: '',
                     VendorCode: '',
                     ModeCode: '',
                     ZoneCode: '',
                     CountryCode: '',
                     StateCode: '',
                     CityCode: '',
-                    ProductType: ''
+                    ProductType: '',
                 });
-                Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
+                Swal.fire('Updated!', response.message || 'Zone has been updated.', 'success');
                 setModalIsOpen(false);
                 await fetchMultipleCityData();
             } else {
-                Swal.fire('Error!', response.message || 'Failed to update the Multiple city.', 'error');
+                Swal.fire('Error!', response.message || 'Failed to update the zone.', 'error');
             }
         } catch (error) {
             console.error("Failed to update Multiple City:", error);
-            Swal.fire('Error', 'Failed to update Multiple city data', 'error');
+            Swal.fire('Error', 'Failed to update zone data', 'error');
         }
     }
 
@@ -126,75 +130,142 @@ function MultipleCity() {
             const response = await postApi(`/Master/AddInternatioanlzone`, payload);
             if (response.status === 1) {
                 setAddCity({
+                    ID: '',
                     VendorCode: '',
                     ModeCode: '',
                     ZoneCode: '',
                     CountryCode: '',
                     StateCode: '',
                     CityCode: '',
-                    ProductType: ''
+                    ProductType: '',
                 });
-                Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
+                Swal.fire('Saved!', response.message || 'Zone has been saved.', 'success');
                 setModalIsOpen(false);
+                await fetchMultipleCityData();
             } else {
-                Swal.fire('Error!', response.message || 'Failed to save data.', 'error');
+                Swal.fire('Error!', response.message || 'Failed to save zone.', 'error');
 
             }
         } catch (err) {
             console.error('Save Error:', err);
-            Swal.fire('Error', 'Failed to Save Branch Data', 'error');
+            Swal.fire('Error', 'Failed to Save zone Data', 'error');
         }
     };
 
 
-    const handleDelete = (index) => {
+    const handleDelete = async (ID) => {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'You won’t be able to revert this!',
+            text: 'This action cannot be undone!',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                Swal.fire('Deleted!', 'Your zone has been deleted.', 'success');
+
+                try {
+                    const response = await deleteApi(
+                        `/Master/DeleteInternatioanlzone?ID=${ID}`
+                    );
+
+                    if (response.status === 1) {
+                        Swal.fire('Deleted!', 'Zone deleted successfully.', 'success');
+                        setmultipleCity(multipleCity.filter(c => c.ID !== ID));
+
+                    }
+                    else if (response.data.status === 0) {
+                        Swal.fire('Not Found', 'Record not found.', 'warning');
+                    }
+                    else {
+                        Swal.fire('Error', 'Something went wrong.', 'error');
+                    }
+
+                } catch (error) {
+                    Swal.fire('Error', error.message, 'error');
+                }
             }
         });
     };
+    const handleSearchChange = (e) => { setSearchQuery(e.target.value); setCurrentPage(1); };
 
     const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(multipleCity);
+
+        // Create custom export rows in same order as table
+        const exportData = currentRows.map((row, index) => ({
+            "Mode Name": row.Mode_Name,
+            "Zone Name": row.Zone_Name,
+            "Country Name": row.Country_Name,
+            "State Name": row.State_Name,
+            "City Name": row.City_Name,
+            "Vendor Name": row.Vendor_Name,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'multipleCity');
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'International Zone');
+
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'multipleCity.xlsx');
+
+        const file = new Blob(
+            [excelBuffer],
+            { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' }
+        );
+
+        saveAs(file, 'internationalZone.xlsx');
     };
 
+
     const handleExportzonePDF = () => {
-        const pdfData = multipleCity.map(({ id, vendor, mode, name, country, state, city }) =>
-            [id, vendor, mode, name, country, state, city]);
         const pdf = new jsPDF();
 
         pdf.setFontSize(18);
-        pdf.text('Multiple City Data', 14, 20);
+        pdf.text('International Zone Data', 14, 20);
 
-        const headers = [['Sr.No', 'Vendor Name', 'Mode', 'Name', 'Country', 'State', 'City']];
+        const headers = [['index', 'Vendor Name', 'Mode', 'Zone', 'Country', 'State', 'City']];
 
-        pdf.autoTable({
-            head: headers,
-            body: pdfData,
-            startY: 30,
-            theme: 'grid'
-        });
-        pdf.save('multipleCity.pdf');
+        // Prepare table rows exactly like your table columns
+        const pdfData = currentRows.map((item, index) => [
+            index + 1,           // Sr.No
+            item.Vendor_Name,
+            item.Mode_Name,
+            item.Zone_Name,
+            item.Country_Name,
+            item.State_Name,
+            item.City_Name,
+        ]);
+
+        autoTable(pdf,
+            {
+                head: headers,
+                body: pdfData,
+                startY: 30,
+                theme: 'grid'
+            });
+
+        pdf.save('internationalZone.pdf');
     };
+
 
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = multipleCity.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(multipleCity.length / rowsPerPage);
+    const filteredRows = currentRows.filter((d) => {
+        const q = searchQuery.toLowerCase();
+
+        return (
+            (d.Mode_Name || "").toLowerCase().includes(q) ||
+            (d.Zone_Name || "").toLowerCase().includes(q) ||
+            (d.Country_Name || "").toLowerCase().includes(q) ||
+            (d.State_Name || "").toLowerCase().includes(q) ||
+            (d.City_Name || "").toLowerCase().includes(q) ||
+            (d.Vendor_Name || "").toLowerCase().includes(q)
+        );
+    });
+
 
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
@@ -212,8 +283,14 @@ function MultipleCity() {
                         <button className='add-btn' onClick={() => {
                             setModalIsOpen(true); setIsEditMode(false);
                             setAddCity({
-                                VendorCode: '', ModeCode: '', ZoneCode: '', CountryCode: '',
-                                StateCode: '', CityCode: '', ProductType: '',
+                                ID: '',
+                                VendorCode: '',
+                                ModeCode: '',
+                                ZoneCode: '',
+                                CountryCode: '',
+                                StateCode: '',
+                                CityCode: '',
+                                ProductType: '',
                             })
                         }}>
                             <i className="bi bi-plus-lg"></i>
@@ -230,7 +307,8 @@ function MultipleCity() {
                     </div>
 
                     <div className="search-input">
-                        <input className="add-input" type="text" placeholder="search" />
+                        <input className="add-input" type="text" placeholder="search"
+                            value={searchQuery} onChange={handleSearchChange} />
                         <button type="submit" title="search">
                             <i className="bi bi-search"></i>
                         </button>
@@ -253,7 +331,7 @@ function MultipleCity() {
                             </tr>
                         </thead>
                         <tbody className='table-body'>
-                            {currentRows.map((multiple, index) => (
+                            {filteredRows.map((multiple, index) => (
                                 <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                     <td>
                                         <PiDotsThreeOutlineVerticalFill
@@ -282,6 +360,7 @@ function MultipleCity() {
                                                     setIsEditMode(true);
                                                     setOpenRow(null);
                                                     setAddCity({
+                                                        ID: multiple.ID,
                                                         ModeCode: multiple.Mode_Code,
                                                         ZoneCode: multiple.Zone_Code,
                                                         CountryCode: multiple.Country_Code,
@@ -296,7 +375,7 @@ function MultipleCity() {
                                                 </button>
                                                 <button onClick={() => {
                                                     setOpenRow(null);
-                                                    handleDelete(index);
+                                                    handleDelete(multiple.ID);
                                                 }} className='edit-btn'><i className='bi bi-trash'></i></button>
                                             </div>
                                         )}
@@ -357,85 +436,226 @@ function MultipleCity() {
 
                         <div className='container2'>
                             <form onSubmit={handleSave}>
-                                <div className="fields2">
+                                <div className="fields2" style={{whiteSpace:"nowrap"}}>
+
+                                    {/* City Name */}
                                     <div className="input-field1">
-                                        <label htmlFor="">City Name</label>
-                                        <select value={addCity.CityCode}
-                                            onChange={(e) => setAddCity({ ...addCity, CityCode: e.target.value })}
-                                            required aria-readonly={isEditMode}>
-                                            <option value="" disabled>Select City Name</option>
-                                            {getCity.map((city, index) => (
-                                                <option value={city.City_Code} key={index}>{city.City_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>City Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getCity.map(city => ({
+                                                value: city.City_Code,
+                                                label: city.City_Name,
+                                            }))}
+                                            value={
+                                                addCity.CityCode
+                                                    ? {
+                                                        value: addCity.CityCode,
+                                                        label: getCity.find(c => c.City_Code === addCity.CityCode)?.City_Name,
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddCity({
+                                                    ...addCity,
+                                                    CityCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select City Name"
+                                            isSearchable={true}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
+                                    {/* Zone Name */}
                                     <div className="input-field1">
-                                        <label htmlFor="">Zone Name</label>
-                                        <select value={addCity.ZoneCode}
-                                            onChange={(e) => setAddCity({ ...addCity, ZoneCode: e.target.value })} required>
-                                            <option value="" disabled>Select Zone</option>
-                                            {getZone.map((zone, index) => (
-                                                <option value={zone.Zone_Code} key={index}>{zone.Zone_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>Zone Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getZone.map(zone => ({
+                                                value: zone.Zone_Code,
+                                                label: zone.Zone_Name,
+                                            }))}
+                                            value={
+                                                addCity.ZoneCode
+                                                    ? {
+                                                        value: addCity.ZoneCode,
+                                                        label: getZone.find(z => z.Zone_Code === addCity.ZoneCode)?.Zone_Name,
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddCity({
+                                                    ...addCity,
+                                                    ZoneCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Zone"
+                                            isSearchable={true}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
+                                    {/* Mode Name */}
                                     <div className="input-field1">
-                                        <label className="label">Mode Name</label>
-                                        <select value={addCity.ModeCode}
-                                            onChange={(e) => setAddCity({ ...addCity, ModeCode: e.target.value })} required>
-                                            <option value="" disabled>Select Mode</option>
-                                            {getMode.map((mode, index) => (
-                                                <option value={mode.Mode_Code} key={index}>{mode.Mode_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>Mode Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getMode.map(mode => ({
+                                                value: mode.Mode_Code,
+                                                label: mode.Mode_Name,
+                                            }))}
+                                            value={
+                                                addCity.ModeCode
+                                                    ? {
+                                                        value: addCity.ModeCode,
+                                                        label: getMode.find(m => m.Mode_Code === addCity.ModeCode)?.Mode_Name,
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddCity({
+                                                    ...addCity,
+                                                    ModeCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Mode"
+                                            isSearchable={true}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
+                                    {/* State Name */}
                                     <div className="input-field1">
-                                        <label htmlFor="">State Name</label>
-                                        <select value={addCity.StateCode}
-                                            onChange={(e) => setAddCity({ ...addCity, StateCode: e.target.value })} required>
-                                            <option value="" disabled>Select State</option>
-                                            {getState.map((state, index) => (
-                                                <option value={state.State_Code} key={index}>{state.State_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>State Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getState.map(state => ({
+                                                value: state.State_Code,
+                                                label: state.State_Name,
+                                            }))}
+                                            value={
+                                                addCity.StateCode
+                                                    ? {
+                                                        value: addCity.StateCode,
+                                                        label: getState.find(s => s.State_Code === addCity.StateCode)?.State_Name,
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddCity({
+                                                    ...addCity,
+                                                    StateCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select State"
+                                            isSearchable={true}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
+                                    {/* Vendor Name */}
                                     <div className="input-field1">
-                                        <label htmlFor="">Vendor Name</label>
-                                        <select value={addCity.VendorCode}
-                                            onChange={(e) => setAddCity({ ...addCity, VendorCode: e.target.value })} required>
-                                            <option value="" disabled>Select Vendor</option>
-                                            {getVendor.map((vendor, index) => (
-                                                <option value={vendor.Vendor_Code} key={index}>{vendor.Vendor_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>Vendor Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getVendor.map(vendor => ({
+                                                value: vendor.Vendor_Code,
+                                                label: vendor.Vendor_Name,
+                                            }))}
+                                            value={
+                                                addCity.VendorCode
+                                                    ? {
+                                                        value: addCity.VendorCode,
+                                                        label: getVendor.find(v => v.Vendor_Code === addCity.VendorCode)?.Vendor_Name,
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddCity({
+                                                    ...addCity,
+                                                    VendorCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Vendor"
+                                            isSearchable={true}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
+                                    {/* Country Name */}
                                     <div className="input-field1">
-                                        <label htmlFor="">Country Name</label>
-                                        <select value={addCity.CountryCode}
-                                            onChange={(e) => setAddCity({ ...addCity, CountryCode: e.target.value })} required>
-                                            <option value="" disabled>Select Country</option>
-                                            {getCountry.map((country, index) => (
-                                                <option value={country.Country_Code} key={index}>{country.Country_Name}</option>
-                                            ))}
-                                        </select>
+                                        <label>Country Name</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={getCountry.map(country => ({
+                                                value: country.Country_Code,
+                                                label: country.Country_Name,
+                                            }))}
+                                            value={
+                                                addCity.CountryCode
+                                                    ? {
+                                                        value: addCity.CountryCode,
+                                                        label: getCountry.find(c => c.Country_Code === addCity.CountryCode)?.Country_Name,
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddCity({
+                                                    ...addCity,
+                                                    CountryCode: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Country"
+                                            isSearchable={true}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
 
+                                    {/* Product Type */}
                                     <div className="input-field1">
-                                        <label htmlFor="">Product Type</label>
-                                        <select value={addCity.ProductType}
-                                            onChange={(e) => setAddCity({ ...addCity, ProductType: e.target.value })} required>
-                                            <option value="" disabled>Product Type</option>
-                                            <option value="International">International</option>
-                                            <option value="Domestic">Domestic</option>
-                                        </select>
+                                        <label>Product Type</label>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={[
+                                                { value: "International", label: "International" },
+                                                { value: "Domestic", label: "Domestic" },
+                                            ]}
+                                            value={
+                                                addCity.ProductType
+                                                    ? {
+                                                        value: addCity.ProductType,
+                                                        label: addCity.ProductType,
+                                                    }
+                                                    : null
+                                            }
+                                            onChange={(selected) =>
+                                                setAddCity({
+                                                    ...addCity,
+                                                    ProductType: selected ? selected.value : "",
+                                                })
+                                            }
+                                            placeholder="Select Product Type"
+                                            isSearchable={true}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
                                     </div>
-
                                 </div>
+
                                 <div className='bottom-buttons'>
                                     {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
                                     {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn'>Update</button>)}

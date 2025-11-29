@@ -4,11 +4,8 @@ import '../../Tabs/tabs.css';
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import sms from '../../../Assets/Images/sms-svgrepo-com.png';
-import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
-import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 import Select from 'react-select';
@@ -27,7 +24,7 @@ function VendorName() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [vendorData, setVendorData] = useState({
-        vendorID:'',
+        vendorID: '',
         vendorCode: '',
         vendorName: '',
         contactPerson: '',
@@ -43,21 +40,22 @@ function VendorName() {
 
 
 
-    const filteredVendor = getVendor.filter((vendor) =>
-        (vendor && vendor.Vendor_Code && vendor.Vendor_Code?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Vendor_Name && vendor.Vendor_Name?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
-    );
+
 
 
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = filteredVendor.slice(indexOfFirstRow, indexOfLastRow);
-    const totalPages = Math.ceil(filteredVendor.length / rowsPerPage);
+    const currentRows = getVendor.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.ceil(getVendor.length / rowsPerPage);
 
-    const handleSearchChange = (e) => {
-        setSearchQuery(e.target.value);
-        setCurrentPage(1);
-    };
+    const filteredVendor = currentRows.filter((vendor) =>
+        (vendor?.Vendor_Code?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Vendor_Name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.City_Name?.toLowerCase().includes(searchQuery.toLowerCase()))  ||
+        (vendor?.State_Name?.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    const handleSearchChange = (e) => { setSearchQuery(e.target.value); setCurrentPage(1); };
 
 
 
@@ -116,7 +114,7 @@ function VendorName() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-         const errors = [];
+        const errors = [];
         // if (!formData.DocketNo) errors.push("DocketNo is required");
         if (!vendorData.vendorName) errors.push("Vendor Name is required");
         if (!vendorData.vendorCode) errors.push("Vendor Code is required");
@@ -131,7 +129,7 @@ function VendorName() {
             return;
         }
         const requestBody = {
-            ID:vendorData.vendorID,
+            ID: vendorData.vendorID,
             Vendor_Code: vendorData.vendorCode.trim(),
             Vendor_Name: vendorData.vendorName,
             Contact_Person: vendorData.contactPerson,
@@ -150,7 +148,7 @@ function VendorName() {
             if (response.status === 1) {
                 setGetVendor(getVendor.map((vendor) => vendor.Vendor_Code === vendorData.vendorCode ? response.Data : vendor));
                 setVendorData({
-                    vendorID:'',
+                    vendorID: '',
                     vendorCode: '',
                     vendorName: '',
                     contactPerson: '',
@@ -178,7 +176,7 @@ function VendorName() {
 
     const handleSaveVendor = async (e) => {
         e.preventDefault();
-         const errors = [];
+        const errors = [];
         // if (!formData.DocketNo) errors.push("DocketNo is required");
         if (!vendorData.vendorName) errors.push("Vendor Name is required");
         if (!vendorData.vendorCode) errors.push("Vendor Code is required");
@@ -193,17 +191,18 @@ function VendorName() {
             return;
         }
         const requestBody = {
-            VendorCode: vendorData.vendorCode.trim(),
-            VendorName: vendorData.vendorName,
-            ContactPerson: vendorData.contactPerson,
-            VendorAdr: vendorData.vendAdd,
-            PinCode: vendorData.pinCode,
-            MobileNo: vendorData.vendMob,
-            MobileNo2: vendorData.contMob,
-            StateCode: vendorData.stateCode,
-            Email: vendorData.email,
-            FuelCharges: vendorData.fuelCharge,
-            CityCode: vendorData.cityCode
+            vendorCode: vendorData.vendorCode.trim(),
+            vendorName: vendorData.vendorName,
+            contactPerson: vendorData.contactPerson,
+            vendorAdr: vendorData.vendAdd,
+            pinCode: vendorData.pinCode,
+            mobileNo: vendorData.vendMob,
+            mobileNo2: vendorData.contMob,
+            stateCode: vendorData.stateCode,
+            email: vendorData.email,
+            fuelCharges: vendorData.fuelCharge,
+            cityCode: vendorData.cityCode,
+            VendorWebAgent: vendorData.vendorName,
         }
 
         try {
@@ -211,7 +210,7 @@ function VendorName() {
             if (response.status === 1) {
                 setGetVendor([...getVendor, response.Data]);
                 setVendorData({
-                    vendorID:'',
+                    vendorID: '',
                     vendorCode: '',
                     vendorName: '',
                     contactPerson: '',
@@ -258,39 +257,83 @@ function VendorName() {
         }
     };
 
-    const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(getVendor);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'getVendor');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'getVendor.xlsx');
-    };
-
     const handleExportPDF = () => {
-        const input = document.getElementById('table-to-pdf');
+        const doc = new jsPDF();
 
-        html2canvas(input, { scale: 2 }).then((canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF();
-            const imgWidth = 190;
-            const pageHeight = pdf.internal.pageSize.height;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 10;
+        const tableColumn = [
+            "Vendor ID",
+            "Vendor Code",
+            "Vendor Name",
+            "Mobile No",
+            "Mobile No 2",
+            "Email",
+            "Fuel Charges",
+            "Address",
+            "Pin Code",
+            "Contact Person",
+            "State",
+            "City"
+        ];
 
-            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+        const tableRows = [];
 
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-
-            pdf.save('getVendor.pdf');
+        currentRows.forEach(vendor => {
+            tableRows.push([
+                vendor.ID,
+                vendor.Vendor_Code,
+                vendor.Vendor_Name,
+                vendor.Mobile_No,
+                vendor.Mobile_No_2,
+                vendor.Email,
+                vendor.Fuel_Charges,
+                vendor.Vendor_Adr,
+                vendor.Pin_Code,
+                vendor.Contact_Person,
+                vendor.State_Name,
+                vendor.City_Name,
+            ]);
         });
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 30,
+            theme: 'grid',
+            styles: { fontSize: 7, whiteSpace: "nowarp" }
+        });
+
+        doc.save("Vendor_Data.pdf");
+    };
+    const handleExportExcel = () => {
+        const exportData = currentRows.map((v, index) => ({
+            "Vendor ID": v.ID,
+            "Vendor Code": v.Vendor_Code,
+            "Vendor Name": v.Vendor_Name,
+            "Mobile No": v.Mobile_No,
+            "Mobile No 2": v.Mobile_No_2,
+            "Email": v.Email,
+            "Fuel Charges": v.Fuel_Charges,
+            "Address": v.Vendor_Adr,
+            "Pin Code": v.Pin_Code,
+            "Contact Person": v.Contact_Person,
+            "State": v.State_Name,
+            "City": v.City_Name,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Vendor Data');
+
+        const excelBuffer = XLSX.write(workbook, {
+            bookType: 'xlsx',
+            type: 'array'
+        });
+
+        const file = new Blob([excelBuffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+        });
+
+        saveAs(file, 'Vendor_Data.xlsx');
     };
 
 
@@ -313,7 +356,7 @@ function VendorName() {
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
                                 setVendorData({
-                                    vendorID:'',
+                                    vendorID: '',
                                     vendorCode: '', vendorName: '', contactPerson: '', pinCode: '',
                                     vendAdd: '', vendMob: '', contMob: '', stateCode: '', email: '',
                                     fuelCharge: '', cityCode: ''
@@ -349,7 +392,9 @@ function VendorName() {
                                     <th scope="col">Vendor_Code</th>
                                     <th scope="col">Vendor_Name</th>
                                     <th scope="col">Mobile_No</th>
+                                    <th scope="col">Mobile_No2</th>
                                     <th scope="col">Email_Id</th>
+                                    <th scope="col">Fuel_Charges</th>
                                     <th scope="col">Vendor_Address</th>
                                     <th scope="col">Pin_Code</th>
                                     <th scope="col">Contact_Person</th>
@@ -359,7 +404,7 @@ function VendorName() {
                                 </tr>
                             </thead>
                             <tbody className='table-body'>
-                                {currentRows.map((vendor, index) => (
+                                {filteredVendor.map((vendor, index) => (
                                     <tr key={vendor.ID} style={{ fontSize: "12px", position: "relative" }}>
                                         <td>
                                             <PiDotsThreeOutlineVerticalFill
@@ -386,32 +431,32 @@ function VendorName() {
                                                 >
 
                                                     <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setOpenRow(null);
-                                                    setVendorData({
-                                                        vendorID:vendor.ID,
-                                                        vendorCode: vendor.Vendor_Code.trim(),
-                                                        vendorName: vendor.Vendor_Name,
-                                                        vendAdd: vendor.Vendor_Adr,
-                                                        pinCode: vendor.Pin_Code,
-                                                        contactPerson: vendor.Contact_Person,
-                                                        email: vendor.Email,
-                                                        vendMob: vendor.Mobile_No,
-                                                        contMob: vendor.Mobile_No_2,
-                                                        fuelCharge: vendor.Fuel_Charges,
-                                                        cityCode: vendor.City_Code,
-                                                        stateCode: vendor.State_Code
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button className='edit-btn' onClick={() =>{ 
-                                                    setOpenRow(null);
-                                                    handleDeleteVendor(vendor.Vendor_Code);
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setVendorData({
+                                                            vendorID: vendor.ID,
+                                                            vendorCode: vendor.Vendor_Code.trim(),
+                                                            vendorName: vendor.Vendor_Name,
+                                                            vendAdd: vendor.Vendor_Adr,
+                                                            pinCode: vendor.Pin_Code,
+                                                            contactPerson: vendor.Contact_Person,
+                                                            email: vendor.Email,
+                                                            vendMob: vendor.Mobile_No,
+                                                            contMob: vendor.Mobile_No_2,
+                                                            fuelCharge: vendor.Fuel_Charges,
+                                                            cityCode: vendor.City_Code,
+                                                            stateCode: vendor.State_Code
+                                                        });
+                                                        setModalIsOpen(true);
                                                     }}>
-                                                    <i className='bi bi-trash'></i>
-                                                </button>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setOpenRow(null);
+                                                        handleDeleteVendor(vendor.Vendor_Code);
+                                                    }}>
+                                                        <i className='bi bi-trash'></i>
+                                                    </button>
                                                 </div>
                                             )}
                                         </td>
@@ -419,7 +464,9 @@ function VendorName() {
                                         <td>{vendor.Vendor_Code}</td>
                                         <td>{vendor.Vendor_Name}</td>
                                         <td>{vendor.Mobile_No}</td>
+                                        <td>{vendor.Mobile_No_2}</td>
                                         <td>{vendor.Email}</td>
+                                        <td>{vendor.Fuel_Charges}</td>
                                         <td>{vendor.Vendor_Adr}</td>
                                         <td>{vendor.Pin_Code}</td>
                                         <td>{vendor.Contact_Person}</td>
@@ -466,8 +513,8 @@ function VendorName() {
 
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-vendor" contentLabel="Modal" 
-                         style={{
+                        className="custom-modal-vendor" contentLabel="Modal"
+                        style={{
                             content: {
                                 width: '90%',
                                 top: '50%',             // Center vertically
@@ -536,7 +583,7 @@ function VendorName() {
                                                 placeholder="Enter Pin Code" />
                                         </div>
 
-                                         <div className="input-field3">
+                                        <div className="input-field3">
                                             <label htmlFor="">City Name</label>
                                             <Select
                                                 className="blue-selectbooking"
@@ -620,12 +667,12 @@ function VendorName() {
                                             <input type="tel" maxLength="10" id="mobile"
                                                 value={vendorData.contMob}
                                                 onChange={(e) => setVendorData({ ...vendorData, contMob: e.target.value })}
-                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No"  />
+                                                name="mobile" pattern="[0-9]{10}" placeholder="Enter Mobile No" />
                                         </div>
 
                                         <div className="input-field3">
                                             <label htmlFor="">Fuel %</label>
-                                            <input type="text" placeholder="Enter Client Fuel %" 
+                                            <input type="text" placeholder="Enter Client Fuel %"
                                                 value={vendorData.fuelCharge}
                                                 onChange={(e) => setVendorData({ ...vendorData, fuelCharge: e.target.value })} />
                                         </div>
