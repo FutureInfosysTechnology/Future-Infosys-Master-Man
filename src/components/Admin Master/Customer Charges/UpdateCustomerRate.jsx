@@ -58,7 +58,7 @@ function UpdateCustomerRate() {
         }
     };
 
-    
+
 
 
     useEffect(() => {
@@ -66,9 +66,9 @@ function UpdateCustomerRate() {
         fetchCustChargesData();
     }, [])
 
-    
 
-   
+
+
 
     const filteredgetCharges = getCust.filter((cust) =>
         (cust && cust.Mode_Code && cust.Mode_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '')
@@ -143,35 +143,74 @@ function UpdateCustomerRate() {
         <>
             <div className="body">
                 <div className="container1">
-                    <div className="addNew">
-                        <div>
-                            <button className='add-btn' onClick={() => {
-                                setModalIsOpen(true); setIsEditMode(false);
-                                setAddCust({
-                                    custCode: '', fromDate: firstDayOfMonth, toDate: today
-                                })
-                            }}>
-                                <i className="bi bi-plus-lg"></i>
-                                <span>ADD NEW</span>
-                            </button>
 
-                            <div className="dropdown">
-                                <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
-                                <div className="dropdown-content">
-                                    <button onClick={handleExportExcel}>Export to Excel</button>
-                                    <button onClick={handleExportPDF}>Export to PDF</button>
-                                </div>
+                    <form style={{ background: " #f2f4f3" }}>
+
+
+                        <div className="fields2">
+                            <div className="input-field1">
+                                <label htmlFor="">Customer Name</label>
+                                <Select
+                                    className="blue-selectbooking"
+                                    classNamePrefix="blue-selectbooking"
+                                    options={getCustName.map(cust => ({
+                                        value: cust.Customer_Code,   // adjust keys from your API
+                                        label: cust.Customer_Name
+                                    }))}
+                                    value={
+                                        addCust.custCode
+                                            ? { value: addCust.custCode, label: getCustName.find(cust => cust.Customer_Code === addCust.custCode)?.Customer_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) => {
+                                        setAddCust({
+                                            ...addCust,
+                                            custCode: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }}
+                                    placeholder="Select Customer"
+                                    isSearchable
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                    }}
+                                />
                             </div>
 
+
+                            <div className="input-field3">
+                                <label htmlFor="">From</label>
+                                <DatePicker
+                                    required
+                                    portalId="root-portal"
+                                    selected={addCust.fromDate}
+                                    onChange={(date) => setAddCust({ ...addCust, fromDate: date })}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
+                            </div>
+
+                            <div className="input-field3">
+                                <label htmlFor="">To Date</label>
+                                <DatePicker
+                                    required
+                                    portalId="root-portal"
+                                    selected={addCust.toDate}
+                                    onChange={(date) => setAddCust({ ...addCust, toDate: date })}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                />
+                            </div>
+
+                            <div className='bottom-buttons' style={{ marginTop: "22px", marginLeft: "12px" }}>
+                                {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
+                                {isEditMode && (<button type='button' className='ok-btn'>Update</button>)}
+                                <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
+                            </div>
                         </div>
-                        <div className="search-input">
-                            <input className="add-input" type="text" placeholder="search"
-                                value={searchQuery} onChange={handleSearchChange} />
-                            <button type="submit" title="search">
-                                <i className="bi bi-search"></i>
-                            </button>
-                        </div>
-                    </div>
+
+                    </form>
+
 
                     <div className='table-container'>
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
@@ -275,94 +314,7 @@ function UpdateCustomerRate() {
                     </div>
 
 
-                    <Modal id="modal" overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal"
-                        style={{
-                            content: {
-                                width: '90%',
-                                top: '50%',             // Center vertically
-                                left: '50%',
-                                whiteSpace: "nowrap"
-                            },
-                        }}
-                        contentLabel="Modal">
-                        <div className="custom-modal-content">
-                            <div className="header-tittle">
-                                <header>Update Customer Rate Master</header>
-                            </div>
-
-                            <div className='container2'>
-                                <form >
-
-                                    <div className="form first">
-                                        <div className="details personal">
-
-                                            <div className="fields2">
-                                                <div className="input-field1">
-                                                    <label htmlFor="">Customer Name</label>
-                                                    <Select
-                                                        className="blue-selectbooking"
-                                                        classNamePrefix="blue-selectbooking"
-                                                        options={getCustName.map(cust => ({
-                                                            value: cust.Customer_Code,   // adjust keys from your API
-                                                            label: cust.Customer_Name
-                                                        }))}
-                                                        value={
-                                                            addCust.custCode
-                                                                ? { value: addCust.custCode, label: getCustName.find(cust => cust.Customer_Code === addCust.custCode)?.Customer_Name || "" }
-                                                                : null
-                                                        }
-                                                        onChange={(selectedOption) => {
-                                                            setAddCust({
-                                                                ...addCust,
-                                                                custCode: selectedOption ? selectedOption.value : ""
-                                                            })
-                                                        }}
-                                                        placeholder="Select Customer"
-                                                        isSearchable
-                                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                        styles={{
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                        }}
-                                                    />
-                                                </div>
-
-                                                
-                                                <div className="input-field3">
-                                                    <label htmlFor="">From</label>
-                                                    <DatePicker
-                                                        required
-                                                        portalId="root-portal"
-                                                        selected={addCust.fromDate}
-                                                        onChange={(date) => setAddCust({ ...addCust, fromDate: date })}
-                                                        dateFormat="dd/MM/yyyy"
-                                                        className="form-control form-control-sm"
-                                                    />
-                                                </div>
-
-                                                <div className="input-field3">
-                                                    <label htmlFor="">To Date</label>
-                                                    <DatePicker
-                                                        required
-                                                        portalId="root-portal"
-                                                        selected={addCust.toDate}
-                                                        onChange={(date) => setAddCust({ ...addCust, toDate: date })}
-                                                        dateFormat="dd/MM/yyyy"
-                                                        className="form-control form-control-sm"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className='bottom-buttons' style={{ marginTop: "18px", marginLeft: "25px" }}>
-                                                    {!isEditMode && (<button type='submit' className='ok-btn'>Submit</button>)}
-                                                    {isEditMode && (<button type='button' className='ok-btn'>Update</button>)}
-                                                    <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
-                                                </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </Modal >
+                    
 
                 </div>
             </div>
