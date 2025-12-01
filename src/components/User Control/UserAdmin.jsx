@@ -379,7 +379,7 @@ function UserAdmin() {
             BuilkimportManifest: formData.BuilkimportManifest ? 1 : 0,
             ScanbyDocketNo: formData.ScanbyDocketNo ? 1 : 0,
             InscanProcessView: formData.InscanProcessView ? 1 : 0,
-            DeliveryBooking: formData.DeliveryBooking ? 1 : 0,
+            DeliveryBooking: formData.DeliveryBooking ? 1 : 0 ,
             DrsView: formData.DrsView ? 1 : 0,
             Drsimport: formData.Drsimport ? 1 : 0,
             Statusactivity: formData.Statusactivity ? 1 : 0,

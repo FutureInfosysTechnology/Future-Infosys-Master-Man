@@ -9,13 +9,14 @@ import Modal from 'react-modal';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select, { components } from 'react-select';
-import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import { getApi, putApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 function UpdateCustomerRate() {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const [data, setData] = useState([]);
     const [openRow, setOpenRow] = useState(null);
     const [getCust, setGetCust] = useState([]);                    // to get customer charges data
     const [getCustName, setGetCustName] = useState([]);            // To Get Customer Name Data
@@ -33,7 +34,45 @@ function UpdateCustomerRate() {
         fromDate: firstDayOfMonth,
         toDate: today,
     })
-
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const errors = [];
+        // if (!formData.DocketNo) errors.push("DocketNo is required");
+        if (!addCust.custCode) errors.push("Customer Name is required");
+        if (!addCust.fromDate) errors.push("From Date is required");
+        if (!addCust.toDate) errors.push("To Date is required");
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
+        const payload = {
+            FromDate: addCust.fromDate.toISOString().split("T")[0],
+            ToDate: addCust.toDate.toISOString().split("T")[0],
+            Customer_Code: addCust.custCode,
+        }
+        try {
+            const response = await putApi(`Master/updateAllRateCharges`, payload);
+            if (response.data.length > 0) {
+                console.log(response);
+                console.log(response.data);
+                setData(response.data);
+                Swal.fire("Success", response.message || "Credit Note records are fetched", "success");
+            }
+            else {
+                Swal.fire("Warning", `No Record Found`, "warning");
+                setData([]);
+            }
+        }
+        catch (error) {
+            console.error("API Error:", error);
+        }
+        finally {
+        }
+    }
 
     const fetchCustChargesData = async () => {
         try {
@@ -45,6 +84,11 @@ function UpdateCustomerRate() {
         } finally {
             setLoading(false);
         }
+    };
+    const ymdToDmy = (dateStr) => {
+        if (!dateStr) return "";
+        const [year, month, day] = dateStr.split("-");
+        return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
     };
 
     const fetchCustomerData = async () => {
@@ -70,64 +114,14 @@ function UpdateCustomerRate() {
 
 
 
-    const filteredgetCharges = getCust.filter((cust) =>
-        (cust && cust.Mode_Code && cust.Mode_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '')
-    );
 
 
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentRows = filteredgetCharges.slice(indexOfFirstRow, indexOfLastRow);
-    const totalPages = Math.ceil(filteredgetCharges.length / rowsPerPage);
-
-    const handleSearchChange = (e) => {
-        setSearchQuery(e.target.value);
-        setCurrentPage(1);
-    };
+    const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.ceil(data.length / rowsPerPage);
 
 
-    const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(getCust);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'getCust');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-        saveAs(file, 'getCust.xlsx');
-    };
-
-    const handleExportPDF = () => {
-        const input = document.getElementById('table-to-pdf');
-
-        html2canvas(input, { scale: 2 }).then((canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF();
-            const imgWidth = 190;
-            const pageHeight = pdf.internal.pageSize.height;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 10;
-
-            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-
-            pdf.save('getCust.pdf');
-        });
-    };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const day = ("0" + date.getDate()).slice(-2);
-        const month = ("0" + (date.getMonth() + 1)).slice(-2);
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
 
 
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
@@ -144,7 +138,7 @@ function UpdateCustomerRate() {
             <div className="body">
                 <div className="container1">
 
-                    <form style={{ background: " #f2f4f3" }}>
+                    <form onSubmit={handleSubmit} style={{ background: " #f2f4f3" }}>
 
 
                         <div className="fields2">
@@ -214,70 +208,124 @@ function UpdateCustomerRate() {
 
                     <div className='table-container'>
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
-                            <thead className='table-sm'>
+                            <thead>
                                 <tr>
-                                    <th scope="col">Actions</th>
-                                    <th scope="col">Sr.No</th>
-                                    <th scope="col">Customer_Name</th>
-                                    <th scope="col">From_Date</th>
-                                    <th scope="col">To_Date</th>
-
+                                    <th>Actions</th>
+                                    <th>Sr.No</th>
+                                    <th>Docket No</th>
+                                    <th>Book Date</th>
+                                    <th>Customer Code</th>
+                                    <th>Customer Name</th>
+                                    <th>T_Flag</th>
+                                    <th>Dox/Spx</th>
+                                    <th>Actual Wt</th>
+                                    <th>Volumetric Wt</th>
+                                    <th>Charged Wt</th>
+                                    <th>Rate</th>
+                                    <th>Fuel %</th>
+                                    <th>Fuel Charges</th>
+                                    <th>FOV Charges</th>
+                                    <th>Docket Charges</th>
+                                    <th>Delivery Charges</th>
+                                    <th>Packing Charges</th>
+                                    <th>Green Charges</th>
+                                    <th>Hamali Charges</th>
+                                    <th>Other Charges</th>
+                                    <th>Insurance Charges</th>
+                                    <th>CGST %</th>
+                                    <th>CGST Amt</th>
+                                    <th>SGST %</th>
+                                    <th>SGST Amt</th>
+                                    <th>IGST %</th>
+                                    <th>IGST Amt</th>
+                                    <th>Total Amt</th>
+                                    <th>Origin</th>
+                                    <th>Destination</th>
+                                    <th>Mode</th>
+                                    <th>Origin Zone</th>
+                                    <th>Dest Zone</th>
+                                    <th>Branch</th>
                                 </tr>
                             </thead>
-                            <tbody className='table-body'>
 
+                            <tbody className="table-body">
                                 {currentRows.map((cust, index) => (
                                     <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
+
+                                        {/* ACTIONS */}
                                         <td>
                                             <PiDotsThreeOutlineVerticalFill
                                                 style={{ fontSize: "20px", cursor: "pointer" }}
                                                 onClick={() => setOpenRow(openRow === index ? null : index)}
                                             />
+
                                             {openRow === index && (
                                                 <div
                                                     style={{
                                                         display: "flex",
-                                                        justifyContent: "center",
-                                                        flexDirection: "row",
+                                                        gap: "6px",
                                                         position: "absolute",
-                                                        alignItems: "center",
-                                                        left: "140px",
-                                                        top: "0px",
-                                                        borderRadius: "10px",
-                                                        backgroundColor: "white",
-                                                        zIndex: "999999",
-                                                        height: "30px",
-                                                        width: "50px",
-                                                        padding: "10px",
+                                                        left: "60px",
+                                                        top: "-2px",
+                                                        background: "white",
+                                                        borderRadius: "6px",
+                                                        padding: "5px",
+                                                        zIndex: 9999
                                                     }}
                                                 >
-                                                    <button className='edit-btn' onClick={() => {
-                                                        setIsEditMode(true);
-                                                        setOpenRow(null);
-                                                        setAddCust({
-                                                            custCode: "",
-                                                            fromDate: firstDayOfMonth,
-                                                            toDate: today
-                                                        });
-                                                        setModalIsOpen(true);
-                                                    }}>
-                                                        <i className='bi bi-pen'></i>
+                                                    <button className="edit-btn">
+                                                        <i className="bi bi-pen"></i>
                                                     </button>
-                                                    <button className='edit-btn' onClick={() => {
-                                                        setOpenRow(null);
-                                                    }}>
-                                                        <i className='bi bi-trash'></i></button>
+
+                                                    <button className="edit-btn">
+                                                        <i className="bi bi-trash"></i>
+                                                    </button>
                                                 </div>
                                             )}
                                         </td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+
+                                        {/* SR.NO */}
+                                        <td>{index + 1}</td>
+
+                                        {/* MANUAL COLUMNS */}
+                                        <td>{cust.DocketNo}</td>
+                                        <td>{ymdToDmy(cust.BookDate)}</td>
+                                        <td>{cust.Customer_Code}</td>
+                                        <td>{cust.Customer_Name}</td>
+                                        <td>{cust.T_Flag}</td>
+                                        <td>{cust.DoxSpx}</td>
+                                        <td>{cust.ActualWt}</td>
+                                        <td>{cust.VolumetricWt}</td>
+                                        <td>{cust.ChargedWt}</td>
+                                        <td>{cust.Rate}</td>
+                                        <td>{cust.FuelPer}</td>
+                                        <td>{cust.FuelCharges}</td>
+                                        <td>{cust.Fov_Chrgs}</td>
+                                        <td>{cust.DocketChrgs}</td>
+                                        <td>{cust.DeliveryChrgs}</td>
+                                        <td>{cust.PackingChrgs}</td>
+                                        <td>{cust.GreenChrgs}</td>
+                                        <td>{cust.HamaliChrgs}</td>
+                                        <td>{cust.OtherCharges}</td>
+                                        <td>{cust.InsuranceChrgs}</td>
+                                        <td>{cust.CGSTPer}</td>
+                                        <td>{cust.CGSTAMT}</td>
+                                        <td>{cust.SGSTPer}</td>
+                                        <td>{cust.SGSTAMT}</td>
+                                        <td>{cust.IGSTPer}</td>
+                                        <td>{cust.IGSTAMT}</td>
+                                        <td>{cust.TotalAmt}</td>
+                                        <td>{cust.Origin_Name}</td>
+                                        <td>{cust.Destination_Name}</td>
+                                        <td>{cust.Mode_Name}</td>
+                                        <td>{cust.Origin_Zone_Name}</td>
+                                        <td>{cust.Dest_Zone_Name}</td>
+                                        <td>{cust.Branch_Name}</td>
 
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
                     </div>
 
@@ -314,7 +362,7 @@ function UpdateCustomerRate() {
                     </div>
 
 
-                    
+
 
                 </div>
             </div>

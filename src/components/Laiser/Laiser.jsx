@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../Components-2/Header/Header";
 import Sidebar1 from "../../Components-2/Sidebar1";
 import Footer from "../../Components-2/Footer";
@@ -6,20 +6,34 @@ import OrderEntry from "./OrderEntry";
 import PaymentEntry from "./PaymentEntry";
 import ProductionEntry from "./ProductionEntry";
 import PaymentReceived from "./PaymentReceived";
-import { useLocation } from "react-router-dom";
 import CreditPrint from "./CreditPrint";
+import { useLocation } from "react-router-dom";
 
 function Laiser() {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState(location?.state?.tab || "paymentMode");
 
-  // ✅ Define all tabs in one array for easy management
+  // Get permissions from localStorage
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
+
+  // Define tabs with permissions
   const tabs = [
-    { id: "paymentMode", label: "Payment Mode", component: <PaymentReceived /> },
-    { id: "ledgers", label: "Ledgers", component: <PaymentEntry /> },
-    { id: "creditNote", label: "Credit Note", component: <ProductionEntry /> },
-    { id: "creditPrint", label: "Credit Note Print", component: <CreditPrint /> },
+    { id: "paymentMode", label: "Payment Mode", component: <PaymentReceived />, permission: "PaymentReceivedEntry" },
+    { id: "ledgers", label: "Ledgers", component: <PaymentEntry />, permission: "PayOutStanding" },
+    { id: "creditNote", label: "Credit Note", component: <ProductionEntry />, permission: "CreditBooking" },
+    { id: "creditPrint", label: "Credit Note Print", component: <CreditPrint />, permission: "CreditNoteView" },
   ];
+
+  // Filter tabs based on user permissions
+  const visibleTabs = tabs.filter(tab => has(tab.permission));
+
+  const [activeTab, setActiveTab] = useState(location?.state?.tab || visibleTabs[0]?.id || null);
+
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs, activeTab]);
 
   return (
     <>
@@ -27,30 +41,27 @@ function Laiser() {
       <Sidebar1 />
       <div className="main-body" id="main-body">
         <div className="container">
-          {/* ✅ Tab Navigation */}
-          <nav style={{}}>
-            {tabs.map((tab) => (
-              <label
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-              >
+          {/* Tab Navigation */}
+          <nav>
+            {visibleTabs.map(tab => (
+              <label key={tab.id} onClick={() => setActiveTab(tab.id)}>
                 {tab.label}
               </label>
             ))}
 
-            {/* ✅ Animated Slider */}
+            {/* Slider */}
             <div
               className="slider"
               style={{
-                left: `${tabs.findIndex((t) => t.id === activeTab) * (100 / tabs.length)}%`,
-                width: `${100 / tabs.length}%`,
+                left: `${visibleTabs.findIndex(t => t.id === activeTab) * (100 / visibleTabs.length)}%`,
+                width: `${100 / visibleTabs.length}%`,
               }}
             />
           </nav>
 
-          {/* ✅ Tab Content Section */}
+          {/* Tab Content */}
           <section>
-            {tabs.find((t) => t.id === activeTab)?.component}
+            {visibleTabs.find(t => t.id === activeTab)?.component}
           </section>
         </div>
         <Footer />

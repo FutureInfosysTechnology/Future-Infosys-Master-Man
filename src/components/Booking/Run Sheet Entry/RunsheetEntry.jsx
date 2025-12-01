@@ -1,4 +1,4 @@
-import React , {useState} from "react";
+import React, { useState, useEffect } from "react";
 import Footer from "../../../Components-2/Footer";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
@@ -8,69 +8,85 @@ import ViewDrs from "./ViewDrs";
 import ImportDrs from "./ImportDrs";
 import { useLocation } from "react-router-dom";
 
-
-
 function RunsheetEntry() {
-    const location=useLocation();
-    const [activeTab, setActiveTab] = useState(location?.state?.tab||'zone'); // Default to 'zone'
+  const location = useLocation();
 
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+  // Get user permissions
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
 
+  // Define all tabs with permission keys
+  const tabs = [
+    { id: "zone", label: "Delivery Pending", component: <PendingDrs />, permission: "DeliveryPending" },
+    { id: "multiple", label: "Delivery Entry", component: <CreateDrs />, permission: "DeliveryBooking" },
+    { id: "state", label: "View DRS", component: <ViewDrs />, permission: "DrsView" },
+    { id: "country", label: "Import DRS", component: <ImportDrs />, permission: "Drsimport" },
+  ];
 
-    return (
-        <>
+  // Only show tabs user has permission for
+  const visibleTabs = tabs.filter(tab => has(tab.permission));
 
-        <Header/>
-        <Sidebar1/>
+  const [activeTab, setActiveTab] = useState(location?.state?.tab || visibleTabs[0]?.id || null);
 
-            <div className="main-body" id="main-body">
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs, activeTab]);
 
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                <div className="container">
-                    <input type="radio" name="slider" id="zone" checked={activeTab === 'zone'}
-                        onChange={handleChange}/>
+      <div className="main-body" id="main-body">
+        <div className="container">
 
-                    <input type="radio" name="slider" id="multiple" checked={activeTab === 'multiple'}
-                        onChange={handleChange}/>
+          {/* Tab radios */}
+          {visibleTabs.map(tab => (
+            <input
+              key={tab.id}
+              type="radio"
+              name="slider"
+              id={tab.id}
+              checked={activeTab === tab.id}
+              onChange={() => setActiveTab(tab.id)}
+            />
+          ))}
 
-                    <input type="radio" name="slider" id="state" checked={activeTab === 'state'}
-                        onChange={handleChange}/>
+          {/* Tab labels */}
+          <nav>
+            {visibleTabs.map(tab => (
+              <label key={tab.id} htmlFor={tab.id} className={tab.id}>
+                {tab.label}
+              </label>
+            ))}
 
-                    <input type="radio" name="slider" id="country" checked={activeTab === 'country'}
-                        onChange={handleChange}/>
+            <div className="slider"
+              style={{
+                width: `${100 / visibleTabs.length}%`,
+                left: `${visibleTabs.findIndex(t => t.id === activeTab) * (100 / visibleTabs.length)}%`
+              }}
+            ></div>
+          </nav>
 
-                    <nav>
-                        <label htmlFor="zone" className="zone">Delivery Pending</label>
-                        <label htmlFor="multiple" className="multiple">Delivery Entry</label>
-                        <label htmlFor="state" className="state">View DRS</label>
-                        <label htmlFor="country" className="country">Import DRS</label>
+          {/* Tab content */}
+          <section>
+            {visibleTabs.map(tab => (
+              <div
+                key={tab.id}
+                className={`content content-${tab.id} ${activeTab === tab.id ? 'active' : ''}`}
+              >
+                {tab.component}
+              </div>
+            ))}
+          </section>
 
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <div className={`content content-1 ${activeTab === 'zone' ? 'active' : ''}`}>
-                            <PendingDrs />
-                        </div>
-
-                        <div className={`content content-2 ${activeTab === 'multiple' ? 'active' : ''}`}>
-                            <CreateDrs />
-                        </div>
-
-                        <div className={`content content-3 ${activeTab === 'state' ? 'active' : ''}`}>
-                            <ViewDrs />
-                        </div>
-
-                        <div className={`content content-4 ${activeTab === 'country' ? 'active' : ''}`}>
-                            <ImportDrs />
-                        </div>
-                    </section>
-                </div>
-                <Footer />
-            </div>
-        </>
-    );
-};
+        </div>
+        <Footer />
+      </div>
+    </>
+  );
+}
 
 export default RunsheetEntry;

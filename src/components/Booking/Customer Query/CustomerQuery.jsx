@@ -1,64 +1,89 @@
-import React, {useState} from 'react'
+import React, { useState, useEffect } from 'react';
 import Footer from '../../../Components-2/Footer';
-import Delivered from '../POD Update/Delivered';
 import Sidebar1 from '../../../Components-2/Sidebar1';
 import Header from '../../../Components-2/Header/Header';
+
 import Complaint from './Complaint';
 import ViewQuery from './ViewQuery';
+import Delivered from '../POD Update/Delivered';
 
 function CustomerQuery() {
+  // Get permissions from localStorage
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
 
-    const [activeTab, setActiveTab] = useState('delivered');
+  // Define tabs with permissions
+  const tabs = [
+    { id: 'delivered', label: 'Complaint', component: <Complaint />, permission: 'ComplaintRegister' },
+    { id: 'undelivered', label: 'View Complaint Status', component: <ViewQuery />, permission: 'ViewComplaintStatus' },
+    { id: 'upload', label: 'Query', component: <Delivered />, permission: 'ComplaintQuery' }, // Adjust permission if needed
+  ];
 
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+  // Filter tabs based on permissions
+  const visibleTabs = tabs.filter(tab => has(tab.permission));
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
+  const [activeTab, setActiveTab] = useState(visibleTabs[0]?.id || null);
 
-            <div className="main-body" id="main-body">
-                <div className="container-6">
-                    <input type="radio" name="slider" id="delivered" checked={activeTab === 'delivered'}
-                        onChange={handleChange} />
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs, activeTab]);
 
-                    <input type="radio" name="slider" id="undelivered" checked={activeTab === 'undelivered'}
-                        onChange={handleChange} />
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                    <input type="radio" name="slider" id="upload" checked={activeTab === 'upload'}
-                        onChange={handleChange} />
+      <div className="main-body" id="main-body">
+        <div className="container-6">
 
-                    <nav>
-                        <label htmlFor="delivered" className="delivered">Complaint</label>
-                        <label htmlFor="undelivered" className="undelivered">View Complaint Status</label>
-                        <label htmlFor="upload" className="upload">Querry</label>
+          {/* Tab radios */}
+          {visibleTabs.map(tab => (
+            <input
+              key={tab.id}
+              type="radio"
+              name="slider"
+              id={tab.id}
+              checked={activeTab === tab.id}
+              onChange={() => setActiveTab(tab.id)}
+            />
+          ))}
 
+          {/* Tab labels */}
+          <nav>
+            {visibleTabs.map(tab => (
+              <label key={tab.id} htmlFor={tab.id} className={tab.id}>
+                {tab.label}
+              </label>
+            ))}
 
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <div className={`content content-1 ${activeTab === 'delivered' ? 'active' : ''}`}>
-                            <Complaint />
-                        </div>
+            {/* Slider */}
+            <div className="slider"
+              style={{
+                width: `${100 / visibleTabs.length}%`,
+                left: `${visibleTabs.findIndex(t => t.id === activeTab) * (100 / visibleTabs.length)}%`
+              }}
+            ></div>
+          </nav>
 
-                        <div className={`content content-2 ${activeTab === 'undelivered' ? 'active' : ''}`}>
-                            <ViewQuery />
-                        </div>
+          {/* Tab content */}
+          <section>
+            {visibleTabs.map(tab => (
+              <div
+                key={tab.id}
+                className={`content content-${tab.id} ${activeTab === tab.id ? 'active' : ''}`}
+              >
+                {tab.component}
+              </div>
+            ))}
+          </section>
 
-                        <div className={`content content-3 ${activeTab === 'upload' ? 'active' : ''}`}>
-                            <Delivered />
-                        </div>
-
-                    </section>
-                </div>
-                <Footer />
-            </div>
-
-
-        </>
-    )
+        </div>
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default CustomerQuery;

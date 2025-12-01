@@ -2,24 +2,45 @@ import React, { useState } from "react";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 import Footer from "../../../Components-2/Footer";
-import UpdateCustomerRate from "../../Admin Master/Customer Charges/UpdateCustomerRate"
+import UpdateCustomerRate from "../../Admin Master/Customer Charges/UpdateCustomerRate";
 import EmailBooking from "./EmailBooking";
-import BulkImport from "../Daily Manifest/BulkImport";
 import DailyExpenses from "./DailyExpenses";
 import Booking from "./Booking";
 import ShortEntry from "./ShortEntry";
-import "./DailyBooking.css"
-import ExcelImportBulk from "./ExcelImportBulk"; // ✅ Added import
+import ExcelImportBulk from "./ExcelImportBulk";
 import BookingPrint from "./BookingPrint";
+import "./DailyBooking.css";
 import { useLocation } from "react-router-dom";
-function DailyBooking() {
-  const location=useLocation();
-  const [activeTab, setActiveTab] = useState(location?.state?.tab || "vendor");
 
-  const handleChange = (event) => {
-    setActiveTab(event.target.id);
-    console.log(activeTab);
-  };
+function DailyBooking() {
+  const location = useLocation();
+
+  // 👇 API permissions (Coming from previous page)
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+
+  // Helper: show only if API value = 1
+  const has = (key) => permissions[key] === 1;
+
+  const [activeTab, setActiveTab] = useState(location?.state?.tab || null);
+
+  // ===================== TABS LIST WITH PERMISSIONS =====================
+  const tabs = [
+    { id: "vendor", label: "Docket Booking", component: <Booking />, show: has("DocketBooking") },
+    { id: "print", label: "Docket Print", component: <BookingPrint />, show: has("DocketPrint1") },
+    { id: "vendorrate", label: "Cash To Pay Received", component: <DailyExpenses />, show: has("CoshTopayBooking") },
+    { id: "vendorfuel", label: "Auto Mail", component: <EmailBooking />, show: has("AutoMail") },
+    { id: "entry", label: "Smart Booking", component: <ShortEntry />, show: has("Smartbooking") },
+    { id: "excelimport", label: "Bulk Booking", component: <ExcelImportBulk />, show: has("BulkImportData") },
+    { id: "vendorcharge", label: "Rate Update", component: <UpdateCustomerRate />, show: has("UpdateCustomerRate") },
+  ];
+
+  // Filter only visible tabs
+  const visibleTabs = tabs.filter((t) => t.show);
+
+  // If no default activeTab, set first visible tab
+  if (!activeTab && visibleTabs.length > 0) {
+    setActiveTab(visibleTabs[0].id);
+  }
 
   return (
     <>
@@ -27,102 +48,34 @@ function DailyBooking() {
       <Sidebar1 />
       <div className="main-body" id="main-body">
         <div className="container-vendor">
-          {/* Radio buttons */}
-          <input
-            type="radio" name="slider"
-            id="vendor"
-            checked={activeTab === "vendor"}
-            onChange={handleChange}
-          />
-           <input
-            type="radio"
-            name="slider"
-            id="print"
-            checked={activeTab === "print"}
-            onChange={handleChange}
-          />
-          <input
-            type="radio"
-            name="slider"
-            id="vendorrate"
-            checked={activeTab === "vendorrate"}
-            onChange={handleChange}
-          />
-          <input
-            type="radio"
-            name="slider"
-            id="vendorfuel"
-            checked={activeTab === "vendorfuel"}
-            onChange={handleChange}
-          />
-          <input
-            type="radio"
-            name="slider"
-            id="entry"
-            checked={activeTab === "entry"}
-            onChange={handleChange}
-          />
-          {/*<input
-            type="radio"
-            name="slider"
-            id="vendorgst"
-            checked={activeTab === "vendorgst"}
-            onChange={handleChange}
-          />*/}
-          <input
-            type="radio"
-            name="slider"
-            id="excelimport"
-            checked={activeTab === "excelimport"}
-            onChange={handleChange}
-          />
-          <input
-            type="radio"
-            name="slider"
-            id="vendorcharge"
-            checked={activeTab === "vendorcharge"}
-            onChange={handleChange}
-          />
 
-          {/* Navigation */}
+          {/* ===================== NAVIGATION ===================== */}
           <nav>
-            <label htmlFor="vendor" className="vendor">
-              Docket Booking
-            </label>
-            <label htmlFor="print" className="print">
-              Docket Print
-            </label>
-            <label htmlFor="vendorrate" className="vendorrate">
-              Cash To Pay Received
-            </label>
-            <label htmlFor="vendorfuel" className="vendorfuel">
-              Auto Mail
-            </label>
-            <label htmlFor="entry" className="entry">
-              Smart Booking
-            </label>
-            {/*<label htmlFor="vendorgst" className="vendorgst">
-              Bulk Import Data
-            </label>*/}
-            <label htmlFor="excelimport" className="excelimport">
-              Bulk Booking
-            </label>
-            <label htmlFor="vendorcharge" className="vendorcharge">
-              Rate Update
-            </label>
-            <div className="slider"></div>
+            {visibleTabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={activeTab === tab.id ? "active-tab" : ""}
+              >
+                {tab.label}
+              </label>
+            ))}
+
+            {/* ===================== SLIDER ===================== */}
+            <div
+              className="slider"
+              style={{
+                left: `${visibleTabs.findIndex((t) => t.id === activeTab) * (100 / visibleTabs.length)}%`,
+                width: `${100 / visibleTabs.length}%`,
+              }}
+            />
           </nav>
 
-          {/* Sections */}
+          {/* ===================== TAB CONTENT ===================== */}
           <section>
-            {activeTab === "vendor" && <Booking />}
-            {activeTab === "print" && <BookingPrint />}
-            {activeTab === "vendorrate" && <DailyExpenses />}
-            {activeTab === "vendorfuel" && <EmailBooking />}
-            {activeTab === "entry" && <ShortEntry />}
-            {activeTab === "excelimport" && <ExcelImportBulk />}
-            {activeTab === "vendorcharge" && <UpdateCustomerRate/>}
+            {visibleTabs.find((t) => t.id === activeTab)?.component}
           </section>
+
         </div>
         <Footer />
       </div>

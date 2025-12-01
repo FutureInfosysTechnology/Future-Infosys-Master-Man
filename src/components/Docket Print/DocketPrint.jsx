@@ -1,90 +1,100 @@
-import React , {useState} from "react";
-import BranchName from "../Admin Master/BranchMaster/BranchName";
+import React, { useState, useEffect } from "react";
 import Footer from "../../Components-2/Footer";
 import Sidebar1 from "../../Components-2/Sidebar1";
 import Header from "../../Components-2/Header/Header";
+
 import DockerPrint1 from "./DockerPrint1";
 import DocketPrint2 from "./DocketPrint2";
 import DocketPrint3 from "./DocketPrint3";
 import DocketPrint4 from "./DocketPrint4";
 import LabelPrinting from "./LabelPrinting";
-import "./DocketPrint.css"
-import { useLocation } from "react-router-dom";
 import BoxSticker from "./BoxSticker";
 
+import "./DocketPrint.css";
+import { useLocation } from "react-router-dom";
 
 function DocketPrint() {
-    const location=useLocation();
-    const [activeTab, setActiveTab] = useState(location?.state?.tab||'print1'); // Default to 'zone'
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+  const location = useLocation();
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
-            <div className="main-body" id="main-body">
+  // Get permissions
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
 
+  // Define all tabs with permissions
+  const tabs = [
+    { id: "print1", label: "Docket Print 1", component: <DockerPrint1 />, permission: "DocketPrint1" },
+    { id: "print2", label: "Docket Print 2", component: <DocketPrint2 />, permission: "Docketprint2" },
+    { id: "print3", label: "Docket Print 3", component: <DocketPrint3 />, permission: "Docketprint3" },
+    { id: "print4", label: "Docket Print 4", component: <DocketPrint4 />, permission: "Docketprint4" },
+    { id: "label", label: "Label Printing", component: <LabelPrinting />, permission: "LebelPrintin" },
+    { id: "sticker", label: "Sticker Printing", component: <BoxSticker />, permission: "StickerPrinting" },
+  ];
 
-                <div className="container-vendor">
-                    <input type="radio" name="slider" id="print1" checked={activeTab === 'print1'}
-                        onChange={handleChange}/>
+  // Filter tabs based on permissions
+  const visibleTabs = tabs.filter(tab => has(tab.permission));
 
-                    <input type="radio" name="slider" id="print2" checked={activeTab === 'print2'}
-                        onChange={handleChange}/>
+  const [activeTab, setActiveTab] = useState(location?.state?.tab || visibleTabs[0]?.id || null);
 
-                    <input type="radio" name="slider" id="print3" checked={activeTab === 'print3'}
-                        onChange={handleChange}/>
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs, activeTab]);
 
-                    <input type="radio" name="slider" id="print4" checked={activeTab === 'print4'}
-                        onChange={handleChange}/>
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                    <input type="radio" name="slider" id="label" checked={activeTab === 'label'}
-                        onChange={handleChange}/>
-                    <input type="radio" name="slider" id="sticker" checked={activeTab === 'sticker'}
-                        onChange={handleChange}/>
+      <div className="main-body" id="main-body">
+        <div className="container-vendor">
 
-                    <nav>
-                        <label htmlFor="print1" className="print1">Docket Print 1</label>
-                        <label htmlFor="print2" className="print2">Docket Print 2</label>
-                        <label htmlFor="print3" className="print3">Docket Print 3</label>
-                        <label htmlFor="print4" className="print4">Docket Print 4</label>
-                        <label htmlFor="label" className="label">Label Printing</label>
-                        <label htmlFor="sticker" className="sticker">Sticker Printing</label>
+          {/* Tab radios */}
+          {visibleTabs.map(tab => (
+            <input
+              key={tab.id}
+              type="radio"
+              name="slider"
+              id={tab.id}
+              checked={activeTab === tab.id}
+              onChange={() => setActiveTab(tab.id)}
+            />
+          ))}
 
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <div className={`content content-1 ${activeTab === 'print1' ? 'active' : ''}`}>
-                            <DockerPrint1 />
-                        </div>
+          {/* Tab labels */}
+          <nav>
+            {visibleTabs.map(tab => (
+              <label key={tab.id} htmlFor={tab.id} className={tab.id}>
+                {tab.label}
+              </label>
+            ))}
 
-                        <div className={`content content-2 ${activeTab === 'print2' ? 'active' : ''}`}>
-                            <DocketPrint2 />
-                        </div>
+            {/* Slider */}
+            <div className="slider"
+              style={{
+                width: `${100 / visibleTabs.length}%`,
+                left: `${visibleTabs.findIndex(t => t.id === activeTab) * (100 / visibleTabs.length)}%`
+              }}
+            ></div>
+          </nav>
 
-                        <div className={`content content-3 ${activeTab === 'print3' ? 'active' : ''}`}>
-                            <DocketPrint3 />
-                        </div>
+          {/* Tab content */}
+          <section>
+            {visibleTabs.map(tab => (
+              <div
+                key={tab.id}
+                className={`content content-${tab.id} ${activeTab === tab.id ? 'active' : ''}`}
+              >
+                {tab.component}
+              </div>
+            ))}
+          </section>
 
-                        <div className={`content content-4 ${activeTab === 'print4' ? 'active' : ''}`}>
-                            <DocketPrint4 />
-                        </div>
-
-                        <div className={`content content-5 ${activeTab === 'label' ? 'active' : ''}`}>
-                            <LabelPrinting />
-                        </div>
-
-                        <div className={`content content-6 ${activeTab === 'sticker' ? 'active' : ''}`}>
-                            <BoxSticker />
-                        </div>
-                    </section>
-                </div>
-                <Footer />
-            </div>
-        </>
-    );
-};
+        </div>
+        <Footer />
+      </div>
+    </>
+  );
+}
 
 export default DocketPrint;

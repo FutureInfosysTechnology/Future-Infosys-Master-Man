@@ -1,73 +1,98 @@
-import React, { useState } from "react";
-import '../../Admin Master/Vendor Master/vendormaster.css';
+import React, { useState, useEffect } from "react";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 import Footer from "../../../Components-2/Footer";
+
 import PendingManifest from "./PendingManifest";
 import CreateManifest from "./CreateManifest";
 import ViewManifest from "./ViewManifest";
 import ForwardingManifest from "./ForwardingManifest";
-import SendEmail from "./SendEmail";
 import { useLocation } from "react-router-dom";
-import "./glow.css"
-
-
 
 function DailyManifest() {
-const location=useLocation();
-   const [activeTab, setActiveTab] = useState(location?.state?.tab || "pendingmanifest");
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+    const location = useLocation();
+
+    // Get permissions
+    const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+    const has = (key) => permissions[key] === 1;
+    const [activeTab, setActiveTab] = useState(location?.state?.tab || null);
+
+    const tabs = [
+        {
+            id: "pendingmanifest",
+            label: "Pending Manifest",
+            component: <PendingManifest />,
+            show: has("PendingManifest"),
+        },
+        {
+            id: "createmanifest",
+            label: "Outgoing Manifest",
+            component: <CreateManifest />,
+            show: has("OutgoingManifest"),
+        },
+        {
+            id: "viewmanifest",
+            label: "View Manifest",
+            component: <ViewManifest />,
+            show: has("ViewManifest"),
+        },
+        {
+            id: "forwardingmanifest",
+            label: "Bulk Import Manifest",
+            component: <ForwardingManifest />,
+            show: has("BuilkimportManifest"),
+        },
+    ];
+
+    // Filter visible tabs
+    const visibleTabs = tabs.filter((t) => t.show);
+
+    if (activeTab === null && visibleTabs.length > 0) {
+        setActiveTab(visibleTabs[0].id);
+    }
 
     return (
         <>
-
-        <Header/>
-        <Sidebar1/>
+            <Header />
+            <Sidebar1 />
 
             <div className="main-body" id="main-body">
-                <div className="container-vendor" >
-                    <input type="radio" name="slider" id="pendingmanifest" checked={activeTab === 'pendingmanifest'}
-                        onChange={handleChange}/>
+                <div className="container-vendor">
 
-                    <input type="radio" name="slider" id="createmanifest" checked={activeTab === 'createmanifest'}
-                        onChange={handleChange}/>
-
-                    <input type="radio" name="slider" id="viewmanifest" checked={activeTab === 'viewmanifest'}
-                        onChange={handleChange}/>
-
-                    <input type="radio" name="slider" id="forwardingmanifest" checked={activeTab === 'forwardingmanifest'}
-                        onChange={handleChange}/>
-
-                    {/* <input type="radio" name="slider" id="importmanifest" checked={activeTab === 'importmanifest'}
-                        onChange={handleChange}/> */}
-
+                    {/* TAB HEADERS */}
                     <nav>
-                        <label htmlFor="pendingmanifest" className="pendingmanifest">Pending Manifest</label>
-                        <label htmlFor="createmanifest" className="createmanifest">Outgoing Manifest</label>
-                        <label htmlFor="viewmanifest" className="viewmanifest">View Manifest</label>
-                        <label htmlFor="forwardingmanifest" className="forwardingmanifest">Bulk Import Manifest</label>
-                        {/* <label htmlFor="importmanifest" className="importmanifest">Bulk Import Manifest</label> */}
+                        {visibleTabs.map((tab) => (
+                            <label
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={activeTab === tab.id ? "active-tab" : ""}
+                            >
+                                {tab.label}
+                            </label>
+                        ))}
 
-                        <div className="slider"></div>
+                        {/* SLIDER */}
+                        {activeTab && (
+                            <div
+                                className="slider"
+                                style={{
+                                    left: `${visibleTabs.findIndex((t) => t.id === activeTab) * (100 / visibleTabs.length)}%`,
+                                    width: `${100 / visibleTabs.length}%`,
+                                }}
+                            />
+                        )}
                     </nav>
-                    <section>
-                        {activeTab === 'pendingmanifest' && <PendingManifest />}
-                        {activeTab === 'createmanifest' && <CreateManifest />}
-                        {activeTab === 'viewmanifest' && <ViewManifest /> }
-                        {activeTab === 'forwardingmanifest' && <ForwardingManifest />}
 
-                        {/* <div className={`content content-5 ${activeTab === 'importmanifest' ? 'active' : ''}`}>
-                            <SendEmail />
-                        </div> */}
+                    {/* CONTENT */}
+                    <section>
+                        {visibleTabs.find((t) => t.id === activeTab)?.component}
                     </section>
+
                 </div>
                 <Footer />
             </div>
-
         </>
     );
-};
+}
 
 export default DailyManifest;

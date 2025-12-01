@@ -16,6 +16,7 @@ function Sidebar1() {
     const toggleMenu = (menuId) => {
         setOpenMenu(openMenu === menuId ? null : menuId); // Toggle or close the menu
     };
+    const show=JSON.parse(localStorage.getItem("Login"));
 
 
     return (
@@ -28,6 +29,7 @@ function Sidebar1() {
                     </Link>
                 </li>
 
+                {/* {JSON.parse(localStorage.getItem("Login"))?.UserType=="Admin" &&  */}
                 <li className="nav-item">
                     <a href="#" className="nav-link collapsed"
                         onClick={() => toggleMenu('adminMaster')}>
@@ -106,6 +108,7 @@ function Sidebar1() {
                     </ul>
 
                 </li>
+                {/* } */}
 
                 <li className="nav-item">
                     <a href="#" className="nav-link collapsed"
@@ -167,19 +170,19 @@ function Sidebar1() {
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
+                        { show?.InternationalBooking===1 && <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/internationalbooking">
                                 <i className="bi bi-person-raised-hand"></i>
                                 <span>International Booking</span>
                             </Link>
-                        </li>
+                        </li>}
 
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
+                        { show?.VendorBillEntry===1 && <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/vendorbill">
                                 <i className="bi bi-person-raised-hand"></i>
                                 <span>Vendor Bill Entry</span>
                             </Link>
-                        </li>
+                        </li>}
                     </ul>
 
                 </li>
