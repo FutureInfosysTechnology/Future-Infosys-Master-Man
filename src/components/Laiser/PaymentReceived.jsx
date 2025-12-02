@@ -174,8 +174,6 @@ function PaymentReceived() {
     const handleExportExcel = () => {
 
     const excelData = currentRows.map((row) => ({
-        "Bill No": row.BillNo,
-        "Bill Date": row.InvoiceDate,
         "Customer Name": row.Customer_Name,
         "GST No": row.Gst_No,
         "Booking Type": row.Booking_Type,
@@ -282,8 +280,6 @@ function PaymentReceived() {
                                 <tr>
                                     <th>Actions</th>
                                     <th>Sr.No</th>
-                                    <th>Bill No</th>
-                                    <th>Bill Date</th>
                                     <th>Customer Name</th>
                                     <th>GST No</th>
                                     <th>Booking Type</th>
@@ -343,8 +339,6 @@ function PaymentReceived() {
                                             )}
                                         </td>
                                         <td>{index + 1}</td>
-                                        <td>{row.BillNo}</td>
-                                        <td>{row.InvoiceDate}</td>
                                         <td>{row.Customer_Name}</td>
                                         <td>{row.Gst_No}</td>
                                         <td>{row.Booking_Type}</td>

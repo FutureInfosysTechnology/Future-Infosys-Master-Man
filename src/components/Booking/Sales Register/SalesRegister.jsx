@@ -1,69 +1,102 @@
-import React, { useState } from 'react';
-import Footer from '../../../Components-2/Footer';
-import StatementWiseReport from '../Statement/StatementWiseReport';
-import Sidebar1 from '../../../Components-2/Sidebar1';
-import Header from '../../../Components-2/Header/Header';
-import SalesRegisterWiseReport from './SalesRegisterWiseReport';
-import ChecklistReport from './ChecklistReport';
+import React, { useState, useEffect } from "react";
+import Footer from "../../../Components-2/Footer";
+import Sidebar1 from "../../../Components-2/Sidebar1";
+import Header from "../../../Components-2/Header/Header";
+
+import SalesRegisterWiseReport from "./SalesRegisterWiseReport";
+import ChecklistReport from "./ChecklistReport";
+import StatementWiseReport from "../Statement/StatementWiseReport";
 
 function SalesRegister() {
+  // Get permissions
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1 || permissions[key] === true;
 
-    const [activeTab, setActiveTab] = useState('zone');
+  // Define all tabs with permission rules
+  const tabs = [
+    {
+      id: "invoiceLedger",
+      label: "Invoice Ledger Report",
+      component: <SalesRegisterWiseReport />,
+      show: has("InvoiceLedgerReport"),
+    },
+    {
+      id: "checklist",
+      label: "Checklist Report",
+      component: <ChecklistReport />,
+      show: has("ChecklistReport"),
+    },
+    {
+      id: "unbuild",
+      label: "Unbuild Report",
+      component: <StatementWiseReport />,
+      show: has("UnbuildReport"),
+    },
+    {
+      id: "billView",
+      label: "Bill View Report",
+      component: <StatementWiseReport />,
+      show: has("BillViewReport"),
+    },
+  ];
 
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+  // Filter visible tabs
+  const visibleTabs = tabs.filter((t) => t.show);
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
-            <div className="main-body" id="main-body">
+  const [activeTab, setActiveTab] = useState(null);
 
-                <div className="container">
-                    <input type="radio" name="slider" id="zone" checked={activeTab === 'zone'}
-                        onChange={handleChange} />
+  // Auto-select first allowed tab
+  useEffect(() => {
+    if (activeTab === null && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [activeTab, visibleTabs]);
 
-                    <input type="radio" name="slider" id="multiple" checked={activeTab === 'multiple'}
-                        onChange={handleChange} />
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                    <input type="radio" name="slider" id="state" checked={activeTab === 'state'}
-                        onChange={handleChange} />
+      <div className="main-body" id="main-body">
+        <div className="container">
 
-                    <input type="radio" name="slider" id="country" checked={activeTab === 'country'}
-                        onChange={handleChange} />
+          {/* Tab Navigation */}
+          <nav>
+            {visibleTabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={activeTab === tab.id ? "active-tab" : ""}
+              >
+                {tab.label}
+              </label>
+            ))}
 
-                    <nav>
-                        <label htmlFor="zone" className="zone">Invoice Ledger Report</label>
-                        <label htmlFor="multiple" className="multiple">Checklist Report</label>
-                        <label htmlFor="state" className="state">Unbuild Report</label>
-                        <label htmlFor="country" className="country">Bill View Report</label>
+            {/* Slider */}
+            {activeTab && visibleTabs.length > 0 && (
+              <div
+                className="slider"
+                style={{
+                  left: `${
+                    visibleTabs.findIndex((t) => t.id === activeTab) *
+                    (100 / visibleTabs.length)
+                  }%`,
+                  width: `${100 / visibleTabs.length}%`,
+                }}
+              />
+            )}
+          </nav>
 
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <div className={`content content-1 ${activeTab === 'zone' ? 'active' : ''}`}>
-                            <SalesRegisterWiseReport />
-                        </div>
+          {/* Active Tab Content */}
+          <section>
+            {visibleTabs.find((t) => t.id === activeTab)?.component}
+          </section>
+        </div>
 
-                        <div className={`content content-2 ${activeTab === 'multiple' ? 'active' : ''}`}>
-                            <ChecklistReport />
-                        </div>
-
-                        <div className={`content content-3 ${activeTab === 'state' ? 'active' : ''}`}>
-                            <StatementWiseReport />
-                        </div>
-
-                        <div className={`content content-4 ${activeTab === 'country' ? 'active' : ''}`}>
-                            <StatementWiseReport />
-                        </div>
-                    </section>
-                </div>
-                <Footer />
-            </div>
-
-        </>
-    )
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default SalesRegister;

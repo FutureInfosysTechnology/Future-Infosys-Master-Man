@@ -36,6 +36,8 @@ function VendorFuel() {
         modeCode: "",
         fuelCharges: "",
         fovCharges: "",
+        Fuel_Per: 0,
+        Fov_Per: 0,
         docketCharges: "",
         packingCharges: "",
         greenCharges: "",
@@ -163,6 +165,8 @@ function VendorFuel() {
             ModeCode: addVendorCharges.modeCode,
             FuelCharges: addVendorCharges.fuelCharges,
             FovCharges: addVendorCharges.fovCharges,
+            Fuel_Per: addVendorCharges.Fuel_Per || 10,
+            Fov_Per: addVendorCharges.Fov_Per || 10,
             DocketCharges: addVendorCharges.docketCharges,
             DeliveryCharges: addVendorCharges.deliveryCharges,
             PackingCharges: addVendorCharges.packingCharges,
@@ -183,6 +187,8 @@ function VendorFuel() {
                     modeCode: '',
                     fuelCharges: '',
                     fovCharges: '',
+                    Fuel_Per: "",
+                    Fov_Per: "",
                     docketCharges: '',
                     deliveryCharges: '',
                     packingCharges: '',
@@ -210,28 +216,36 @@ function VendorFuel() {
         e.preventDefault();
 
         try {
-            const response = await postApi(`/Master/AddVendorCharges?vendorCode=${addVendorCharges.vendorCode}
-                &modeCode=${addVendorCharges.modeCode}
-                &fuelCharges=${addVendorCharges.fuelCharges}
-                &fovCharges=${addVendorCharges.fovCharges}
-                &docketCharges=${addVendorCharges.docketCharges}
-                &packingCharges=${addVendorCharges.packingCharges}
-                &greenCharges=${addVendorCharges.greenCharges}
-                &hamaliCharges=${addVendorCharges.hamaliCharges}
-                &otherCharges=${addVendorCharges.otherCharges}
-                &insuranceCharges=${addVendorCharges.insuranceCharges}
-                &fromDate=${addVendorCharges.fromDate}
-                &toDate=${addVendorCharges.toDate}
-                &deliveryCharges=${addVendorCharges.deliveryCharges}`)
+            const payload = {
+                vendorCode: addVendorCharges.vendorCode,
+                modeCode: addVendorCharges.modeCode,
+                fuelCharges: addVendorCharges.fuelCharges,
+                fovCharges: addVendorCharges.fovCharges,
+                docketCharges: addVendorCharges.docketCharges,
+                deliveryCharges: addVendorCharges.deliveryCharges,
+                packingCharges: addVendorCharges.packingCharges,
+                greenCharges: addVendorCharges.greenCharges,
+                hamaliCharges: addVendorCharges.hamaliCharges,
+                otherCharges: addVendorCharges.otherCharges,
+                insuranceCharges: addVendorCharges.insuranceCharges,
+                fromDate: addVendorCharges.fromDate,
+                toDate: addVendorCharges.toDate,
+                Fuel_Per: addVendorCharges.Fuel_Per || 0,
+                Fov_Per: addVendorCharges.Fov_Per || 0,
+            };
+
+            const response = await postApi(`/Master/AddVendorCharges`, payload);
+
             if (response.status === 1) {
-                setGetVendorCharges([...getVendorCharges, response.Data]);
+
+                // Reset state
                 setAddVendorCharges({
                     vendorCode: "",
                     modeCode: "",
                     fuelCharges: "",
                     fovCharges: "",
-                    docketCharges1: "",
                     docketCharges: "",
+                    deliveryCharges: "",
                     packingCharges: "",
                     greenCharges: "",
                     hamaliCharges: "",
@@ -239,19 +253,23 @@ function VendorFuel() {
                     insuranceCharges: "",
                     fromDate: "",
                     toDate: "",
-                    deliveryCharges: ""
+                    Fuel_Per: 0,
+                    Fov_Per: 0,
                 });
-                Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
+
+                Swal.fire("Saved!", response.message, "success");
                 setModalIsOpen(false);
+
                 await fetchVendorChargesData();
             } else {
-                Swal.fire('Error!', response.message || 'Your changes have been saved.', 'error');
+                Swal.fire("Error!", response.message, "error");
             }
         } catch (err) {
-            console.error('Save Error:', err);
-            Swal.fire('Error', 'Failed to add vendor charges data', 'error');
+            console.error("Save Error:", err);
+            Swal.fire("Error", "Failed to add vendor charges data", "error");
         }
     };
+
 
     const handleDeleteVendorCharges = async (Vendor_Code) => {
         try {
@@ -415,34 +433,34 @@ function VendorFuel() {
                                                     }}
                                                 >
 
-                                                     <button className='edit-btn' onClick={() => {
-                                                    setIsEditMode(true);
-                                                    setOpenRow(null);
-                                                    setAddVendorCharges({
-                                                        vendorCode: vendor.Vendor_Code,
-                                                        modeCode: vendor.Mode_Code,
-                                                        fuelCharges: vendor.Fuel_Charges,
-                                                        fovCharges: vendor.Fov_Charges,
-                                                        docketCharges: vendor.Docket_Charges,
-                                                        deliveryCharges: vendor.Dilivery_Charges,
-                                                        packingCharges: vendor.Packing_Charges,
-                                                        greenCharges: vendor.Green_Charges,
-                                                        hamaliCharges: vendor.Hamali_Charges,
-                                                        otherCharges: vendor.Other_Charges,
-                                                        insuranceCharges: vendor.Insurance_Charges,
-                                                        fromDate: vendor.From_Date,
-                                                        toDate: vendor.To_Date
-                                                    });
-                                                    setModalIsOpen(true);
-                                                }}>
-                                                    <i className='bi bi-pen'></i>
-                                                </button>
-                                                <button className='edit-btn' onClick={() => {
-                                                    setOpenRow(null);
-                                                    handleDeleteVendorCharges(vendor.Vendor_Code);
-                                                }}>
-                                                    <i className='bi bi-trash'></i>
-                                                </button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setIsEditMode(true);
+                                                        setOpenRow(null);
+                                                        setAddVendorCharges({
+                                                            vendorCode: vendor.Vendor_Code,
+                                                            modeCode: vendor.Mode_Code,
+                                                            fuelCharges: vendor.Fuel_Charges,
+                                                            fovCharges: vendor.Fov_Charges,
+                                                            docketCharges: vendor.Docket_Charges,
+                                                            deliveryCharges: vendor.Dilivery_Charges,
+                                                            packingCharges: vendor.Packing_Charges,
+                                                            greenCharges: vendor.Green_Charges,
+                                                            hamaliCharges: vendor.Hamali_Charges,
+                                                            otherCharges: vendor.Other_Charges,
+                                                            insuranceCharges: vendor.Insurance_Charges,
+                                                            fromDate: vendor.From_Date,
+                                                            toDate: vendor.To_Date
+                                                        });
+                                                        setModalIsOpen(true);
+                                                    }}>
+                                                        <i className='bi bi-pen'></i>
+                                                    </button>
+                                                    <button className='edit-btn' onClick={() => {
+                                                        setOpenRow(null);
+                                                        handleDeleteVendorCharges(vendor.Vendor_Code);
+                                                    }}>
+                                                        <i className='bi bi-trash'></i>
+                                                    </button>
                                                 </div>
                                             )}
                                         </td>

@@ -455,7 +455,7 @@ function PaymentEntry() {
                                                             OutstandingAmount: 0,
                                                             AdjustAmount: 0,
                                                             Remark: "",
-                                                            InvoiceNo: row.BillNo
+                                                            InvoiceNo: row.InvoiceNo
                                                         }));
 
                                                     }}><i className='bi bi-pen'></i></button>
@@ -470,7 +470,7 @@ function PaymentEntry() {
                                             )}
                                         </td>
                                         <td>{index + 1}</td>
-                                        <td>{row.BillNo}</td>
+                                        <td>{row.InvoiceNo}</td>
                                         <td>{row.InvoiceDate}</td>
                                         <td>{getBranch.find(f => f.Branch_Code === row.Branch_Code)?.Branch_Name}</td>
                                         <td>{row.Customer_Name}</td>
@@ -543,7 +543,7 @@ function PaymentEntry() {
                                 <header>Payment Received Entry</header>
                             </div>
                             <div className='container2'>
-                                <form onSubmit={handleSave}>
+                                <form onSubmit={(e)=>e.preventDefault()}>
                                     <div className="fields2">
 
 

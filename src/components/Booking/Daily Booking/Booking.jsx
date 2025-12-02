@@ -20,6 +20,7 @@ function Booking() {
     const navigate = useNavigate();
     const location = useLocation();
     const [inputValue, setInputValue] = useState("");
+    const [isGstCalculated, setIsGstCalculated] = useState(false);
     const [inputValue1, setInputValue1] = useState("");
     const [skipGstCalc, setSkipGstCalc] = useState(false);
     const [UseInput, setUseInput] = useState(0);
@@ -185,6 +186,7 @@ function Booking() {
         TotalGST: 0,
         totalgstPer: 0,
         Train_Code: "",
+        VendorRatePerkg: 0,
         VendorAmt: 0,
         VendorAwbNo: "",
         VendorWt: 0,
@@ -1202,12 +1204,12 @@ function Booking() {
                     HamaliChrgsInput: HamaliChrgs || 0,
                     OtherChargesInput: OtherCharges || 0,
                     InsuranceChrgsInput: InsuranceChrgs || 0,
-                    UseInput: 1,
+                    UseInput: UseInput,
                 };
 
                 const response = await postApi(`/Booking/calculateGST`, body);
 
-                if (response?.status === 1) {
+                if (response?.status === 0) {
                     const gst = response.Data;
                     console.log("✅ GST API Response:", gst);
                     setUseInput(gst?.Success);
@@ -1223,6 +1225,7 @@ function Booking() {
                         GSTPer: gst.CGSTPer + gst.SGSTPer + gst.IGSTPer,
                     });
 
+                    // setIsGstCalculated(true);
                     setFormData((prev) => ({
                         ...prev,
                         FuelCharges: gst.Fuel_Charges,
@@ -1252,6 +1255,7 @@ function Booking() {
         // Run only when essential fields change
         if (
             !skipGstCalc &&
+            !isGstCalculated &&
             formData.Customer_Code &&
             formData.Mode_Code &&
             formData.Rate &&
@@ -1337,6 +1341,13 @@ function Booking() {
                     }))
 
                 }
+                else
+                {
+                     setVolumetricData((prev) => ({
+                        ...prev,
+                        DivideBy: 0,
+                    }))
+                }
             } catch (error) {
                 console.error("❌ Error in Volumetric:", error);
             }
@@ -1384,6 +1395,13 @@ function Booking() {
                     }))
 
                 }
+                else
+                {
+                    setVendorvolumetric((prev) => ({
+                        ...prev,
+                        DivideBy: 0,
+                    }))
+                }
             } catch (error) {
                 console.error("❌ Error in Volumetric:", error);
             }
@@ -1415,7 +1433,6 @@ function Booking() {
             ))
         }
     }, [vendorVolumetric.Length, vendorVolumetric.Width, vendorVolumetric.Height, vendorVolumetric.Qty])
-    // 📦 Auto calculate freight rate
     useEffect(() => {
         const actual = parseFloat(formData.ActualWt) || 0;
         const volumetric = parseFloat(formData.VolumetricWt) || 0;
@@ -1423,6 +1440,11 @@ function Booking() {
         const ratePerKg = parseFloat(formData.RatePerkg) || 0;
 
         const highestWeight = Math.max(actual, volumetric, manualCharged);
+        setFormData((prev) => ({
+            ...prev,
+            VendorWt: highestWeight,
+
+        }));
         const freightAmount = highestWeight * ratePerKg;
 
         if (freightAmount > 0) {
@@ -1441,6 +1463,20 @@ function Booking() {
             }));
         }
     }, [formData.ActualWt, formData.VolumetricWt, formData.ChargedWt, formData.RatePerkg]);
+
+    
+    useEffect(() => {
+        const wt = parseFloat(formData.VendorWt) || 0;
+        const ratePerKg = parseFloat(formData.VendorRatePerkg) || 0;
+        const Amount = wt * ratePerKg;
+        setFormData((prev) => ({
+            ...prev,
+            VendorAmt: Amount,
+
+        }));
+
+
+    }, [formData.VendorWt, formData.VendorRatePerkg]);
 
 
 
@@ -1518,6 +1554,7 @@ function Booking() {
             TotalGST: 0,
             totalgstPer: 0,
             Train_Code: "",
+            VendorRatePerkg: 0,
             VendorAmt: 0,
             VendorAwbNo: "",
             VendorWt: 0,
@@ -2649,8 +2686,10 @@ function Booking() {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="fields2" style={{ width: "100%" }}>
-                                                <div className="input-field1">
+                                        </div>}
+                                        <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
+                                                <div className="input-field" style={{ flex: "5", position: "relative" }}>
                                                     <label className="form-label">Vendor Docket No</label>
                                                     <input
                                                         type="text"
@@ -2660,6 +2699,44 @@ function Booking() {
                                                         onChange={(e) =>
                                                             setFormData({ ...formData, VendorAwbNo: e.target.value })
                                                         }
+                                                    />
+                                                </div>
+
+                                                <div className="input-field" style={{ flex: "2" }}>
+                                                    <label>&nbsp;</label>
+                                                    <button
+                                                        type="button"
+                                                        className="ok-btn"
+                                                        onClick={() => setModalIsOpen5(true)}
+                                                        style={{ height: "35px", width: "100%", color: "black" }}
+                                                    >
+                                                        <i className="bi bi-calculator" style={{ fontSize: "20px" }}></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
+                                                <div className="input-field1">
+                                                    <label className="form-label">Vendor Weight</label>
+                                                    <input
+                                                        type="tel"
+                                                        className="form-control"
+                                                        placeholder="V_Weight"
+                                                        value={formData.VendorWt}
+                                                        onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
+                                                    />
+                                                </div>
+
+                                                <div className="input-field1">
+                                                    <label className="form-label">Rate Per Kg</label>
+                                                    <input
+                                                        type="tel"
+                                                        placeholder="Rate Per Kg"
+                                                        value={formData.VendorRatePerkg || ''}
+                                                        onChange={(e) => setFormData({ ...formData, VendorRatePerkg: e.target.value })}
                                                     />
                                                 </div>
 
@@ -2676,30 +2753,13 @@ function Booking() {
                                                     />
                                                 </div>
 
-                                                <div className="input-field3">
-                                                    <label className="form-label">Vendor Weight</label>
-                                                    <input
-                                                        type="tel"
-                                                        className="form-control"
-                                                        placeholder="V_Weight"
-                                                        value={formData.VendorWt}
-                                                        onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
-                                                    />
-                                                </div>
 
-                                                <div className="input-field2 mt-2 w-5">
-                                                    <label>&nbsp;</label>
-                                                    <button
-                                                        type="button"
-                                                        className="ok-btn"
-                                                        onClick={() => setModalIsOpen5(true)}
-                                                        style={{ height: "35px", width: "100%", color: "black" }}
-                                                    >
-                                                        <i className="bi bi-calculator" style={{ fontSize: "20px" }}></i>
-                                                    </button>
-                                                </div>
+
+
+
                                             </div>
-                                        </div>}
+                                        </div>
+
 
                                         {isFlightChecked && <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
                                             <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>

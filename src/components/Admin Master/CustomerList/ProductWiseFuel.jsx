@@ -185,6 +185,8 @@ function ProductWiseFuel() {
             ModeCode: addCust.modeCode,
             FuelCharges: addCust.fuelCharge,
             FovCharges: addCust.fovCharge,
+            Fuel_Per: addCust.FuelPer,
+            Fov_Per: addCust.fovper,
             DocketCharges: addCust.docketCharge,
             DeliveryCharges: addCust.deliveryCharge,
             PackingCharges: addCust.packingCharge,

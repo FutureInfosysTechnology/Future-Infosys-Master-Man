@@ -1,10 +1,8 @@
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect } from "react";
 import Footer from "../../../Components-2/Footer";
-import '../../Booking/POD Update/PodEntry';
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
-import "./branch.css"
-
+import "./branch.css";
 
 const BranchName = React.lazy(() => import("./BranchName"));
 const BankName = React.lazy(() => import("./BankName"));
@@ -13,54 +11,86 @@ const ModeMaster = React.lazy(() => import("./ModeMaster"));
 
 function BranchMaster() {
 
-    const [activeTab, setActiveTab] = useState('zone');
+  // Load permissions
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
 
-    const handleChange = (tabId) => {
-        setActiveTab(tabId);
-    };
+  // Tab definitions
+  const allTabs = [
+    { id: "zone", label: "Branch Name", component: <BranchName />, show: has("BranchName") },
+    { id: "multiple", label: "Mode Master", component: <ModeMaster />, show: has("Mode_Master") },
+    { id: "state", label: "Bank Name", component: <BankName />, show: has("BankName") },
+    { id: "country", label: "Delivery Boy's Name", component: <EmployeeName />, show: has("DeliveryMaster") },
+  ];
 
+  // Visible tabs only
+  const visibleTabs = allTabs.filter(t => t.show);
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
-            <div className="main-body" id="main-body">
+  const [activeTab, setActiveTab] = useState(null);
 
-                <div className="container">
-                    <input type="radio" name="slider" id="zone" checked={activeTab === 'zone'}
-                        onChange={() => handleChange('zone')} />
+  // Auto-select the first allowed tab
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs]);
 
-                    <input type="radio" name="slider" id="multiple" checked={activeTab === 'multiple'}
-                        onChange={() => handleChange('multiple')} />
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
+      <div className="main-body" id="main-body">
 
-                    <input type="radio" name="slider" id="state" checked={activeTab === 'state'}
-                        onChange={() => handleChange('state')} />
+        <div className="container">
 
-                    <input type="radio" name="slider" id="country" checked={activeTab === 'country'}
-                        onChange={() => handleChange('country')} />
+          {/* Radio inputs (hidden but required for your CSS) */}
+          {visibleTabs.map(tab => (
+            <input
+              key={tab.id}
+              type="radio"
+              name="slider"
+              id={tab.id}
+              checked={activeTab === tab.id}
+              onChange={() => setActiveTab(tab.id)}
+            />
+          ))}
 
-                    <nav >
-                        <label htmlFor="zone" className="zone">Branch Name</label>
-                        <label htmlFor="multiple" className="multiple">Mode Master</label>
-                        <label htmlFor="state" className="state">Bank Name</label>
-                        <label htmlFor="country" className="country">Delivery Boy's Name</label>
+          {/* Nav Labels */}
+          <nav>
+            {visibleTabs.map((tab, index) => (
+              <label key={tab.id} htmlFor={tab.id}>
+                {tab.label}
+              </label>
+            ))}
 
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <Suspense fallback={<div>Loading...</div>}>
-                            {activeTab === 'zone' && <BranchName />}
-                            {activeTab === 'multiple' && <ModeMaster />}
-                            {activeTab === 'state' && <BankName />}
-                            {activeTab === 'country' && <EmployeeName />}
-                        </Suspense>
-                    </section>
-                </div>
-                <Footer />
-            </div>
+            {/* Slider */}
+            {activeTab && (
+              <div
+                className="slider"
+                style={{
+                  width: `${100 / visibleTabs.length}%`,
+                  left:
+                    `${
+                      visibleTabs.findIndex((t) => t.id === activeTab) *
+                      (100 / visibleTabs.length)
+                    }%`,
+                }}
+              ></div>
+            )}
+          </nav>
 
-        </>
-    )
+          {/* Content */}
+          <section>
+            <Suspense fallback={<div>Loading...</div>}>
+              {visibleTabs.find(t => t.id === activeTab)?.component}
+            </Suspense>
+          </section>
+
+        </div>
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default BranchMaster;

@@ -1,65 +1,95 @@
-import React, { useState } from 'react'
-import Footer from '../../../Components-2/Footer';
-import Complaint from '../Customer Query/Complaint';
-import Header from '../../../Components-2/Header/Header';
-import Sidebar1 from '../../../Components-2/Sidebar1';
-import CustomerWiseReport from './CustomerWiseReport';
-import VendorWiseReport from './VendorWiseReport';
+import React, { useState, useEffect } from "react";
+import Footer from "../../../Components-2/Footer";
+import Complaint from "../Customer Query/Complaint";
+import Header from "../../../Components-2/Header/Header";
+import Sidebar1 from "../../../Components-2/Sidebar1";
+import CustomerWiseReport from "./CustomerWiseReport";
+import VendorWiseReport from "./VendorWiseReport";
 
 function StatusReport() {
+  // Get permissions from localStorage
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1 || permissions[key] === true;
 
-    const [activeTab, setActiveTab] = useState('delivered');
+  // Tabs with permissions
+  const tabs = [
+    {
+      id: "mis",
+      label: "MIS Report",
+      component: <CustomerWiseReport />,
+      show: has("MISReport"),
+    },
+    {
+      id: "vendor",
+      label: "Vendor MIS Report",
+      component: <VendorWiseReport />,
+      show: has("VendorMISReport"),
+    },
+    {
+      id: "booking",
+      label: "Booking Mode Report",
+      component: <Complaint />,
+      show: has("BookingModeReport"),
+    },
+  ];
 
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+  // filter visible tabs
+  const visibleTabs = tabs.filter((t) => t.show);
 
+  const [activeTab, setActiveTab] = useState(null);
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
+  // Auto set first tab
+  useEffect(() => {
+    if (activeTab === null && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs, activeTab]);
 
-            <div className="main-body" id="main-body">
-                <div className="container-6">
-                    <input type="radio" name="slider" id="delivered" checked={activeTab === 'delivered'}
-                        onChange={handleChange} />
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                    <input type="radio" name="slider" id="undelivered" checked={activeTab === 'undelivered'}
-                        onChange={handleChange} />
+      <div className="main-body" id="main-body">
+        <div className="container-6">
 
-                    <input type="radio" name="slider" id="upload" checked={activeTab === 'upload'}
-                        onChange={handleChange} />
+          {/* Tab Navigation */}
+          <nav>
+            {visibleTabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={activeTab === tab.id ? "active-tab" : ""}
+              >
+                {tab.label}
+              </label>
+            ))}
 
-                    <nav>
-                        <label htmlFor="delivered" className="delivered">MIS Report</label>
-                        <label htmlFor="undelivered" className="undelivered">Vendor MIS Report</label>
-                        <label htmlFor="upload" className="upload">Booking Mode Report</label>
+            {/* Slider */}
+            {activeTab && visibleTabs.length > 0 && (
+              <div
+                className="slider"
+                style={{
+                  left: `${
+                    visibleTabs.findIndex((t) => t.id === activeTab) *
+                    (100 / visibleTabs.length)
+                  }%`,
+                  width: `${100 / visibleTabs.length}%`,
+                }}
+              />
+            )}
+          </nav>
 
+          {/* Tab Content */}
+          <section>
+            {visibleTabs.find((t) => t.id === activeTab)?.component}
+          </section>
 
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <div className={`content content-1 ${activeTab === 'delivered' ? 'active' : ''}`}>
-                            <CustomerWiseReport />
-                        </div>
-
-                        <div className={`content content-2 ${activeTab === 'undelivered' ? 'active' : ''}`}>
-                            <VendorWiseReport />
-                        </div>
-
-                        <div className={`content content-3 ${activeTab === 'upload' ? 'active' : ''}`}>
-                            <Complaint />
-                        </div>
-
-                    </section>
-                </div>
-                <Footer />
-            </div>
-
-
-        </>
-    )
+        </div>
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default StatusReport;

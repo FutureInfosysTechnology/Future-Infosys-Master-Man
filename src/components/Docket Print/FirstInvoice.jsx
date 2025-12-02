@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import logoimg from '../../Assets/Images/AceLogo.jpeg';
 import { useLocation, useNavigate } from 'react-router-dom';
 import 'jspdf-autotable';
-import { getApi ,postApi} from '../Admin Master/Area Control/Zonemaster/ServicesApi';
+import { getApi, postApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Header from '../../Components-2/Header/Header';
@@ -58,19 +58,19 @@ function FirstInvoice() {
     const [isTermChecked, setIsTermChecked] = useState(false);
     const [getCustomer, setGetCustomer] = useState([]);
 
-     useEffect(() => {
+    useEffect(() => {
         const fetchCustomerData = async () => {
-          try {
-            const response = await getApi('/Master/getCustomerdata');
-            if (response?.status === 1 && Array.isArray(response.Data)) {
-              setGetCustomer(response.Data);
+            try {
+                const response = await getApi('/Master/getCustomerdata');
+                if (response?.status === 1 && Array.isArray(response.Data)) {
+                    setGetCustomer(response.Data);
+                }
+            } catch (err) {
+                console.error('Error loading customer data:', err);
             }
-          } catch (err) {
-            console.error('Error loading customer data:', err);
-          }
         };
         fetchCustomerData();
-      }, []);
+    }, []);
     useEffect(() => {
         const savedState = JSON.parse(localStorage.getItem("toggelChargs"));
         if (savedState) {
@@ -93,7 +93,7 @@ function FirstInvoice() {
 
         }
     }, []);
-    
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -142,33 +142,94 @@ function FirstInvoice() {
     }, [invoiceData]);
 
     const sendMail = async () => {
-    try {
-        if (!invoiceData[0]?.CustomerName) {
-            Swal.fire("Warning", "Customer is required.", "warning");
-            return;
+        try {
+            if (!invoiceData[0]?.CustomerName) {
+                Swal.fire("Warning", "Customer is required.", "warning");
+                return;
+            }
+
+            const customerEmail = getCustomer.find(
+                c => c.Customer_Name === invoiceData[0]?.CustomerName
+            )?.Email;
+
+            if (!customerEmail) {
+                Swal.fire("Warning", "This customer has not provided email. Check in master.", "warning");
+                return;
+            }
+
+            // 1️⃣ Capture HTML as image (high resolution)
+            const element = document.querySelector("#pdf");
+            if (!element) {
+                Swal.fire("Error", "PDF element not found!", "error");
+                return;
+            }
+
+            const canvas = await html2canvas(element, { scale: 3 });
+            const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+            // 2️⃣ Proper A4 page PDF (NO CROPPING)
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pageWidth = 210;
+            const pageHeight = 297;
+
+            const imgWidth = pageWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft > 0) {
+                pdf.addPage();
+                position = heightLeft - imgHeight;
+                pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            const pdfBlob = pdf.output("blob");
+            const pdfFileName = `Booking_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+            // 3️⃣ Send to server
+            const formDataToSend = new FormData();
+            formDataToSend.append("file", pdfBlob, pdfFileName);
+            formDataToSend.append(
+                "customerCode",
+                getCustomer.find(c => c.Customer_Name === invoiceData[0]?.CustomerName)?.Customer_Code || "764"
+            );
+            formDataToSend.append(
+                "locationCode",
+                JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM"
+            );
+            formDataToSend.append("subject", "Booking PDF File");
+            formDataToSend.append("message", "Please find attached the booking PDF.");
+
+            const response = await postApi("/Smart/AutoMailSend", formDataToSend, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+
+            if (response?.success) {
+                Swal.fire("Success", `Email sent successfully to ${response?.to}`, "success");
+            } else {
+                Swal.fire("Error", response?.error || "Email sending failed", "error");
+            }
+        } catch (error) {
+            console.error("Email send failed:", error);
+            Swal.fire("Error", "Failed to send email. Check your network or server.", "error");
         }
+    };
 
-        const customerEmail = getCustomer.find(
-            c => c.Customer_Name === invoiceData[0]?.CustomerName
-        )?.Email;
 
-        if (!customerEmail) {
-            Swal.fire("Warning", "This customer has not provided email. Check in master.", "warning");
-            return;
-        }
-
-        // 1️⃣ Capture HTML as image (high resolution)
+    const handleDownloadPDF = async () => {
         const element = document.querySelector("#pdf");
-        if (!element) {
-            Swal.fire("Error", "PDF element not found!", "error");
-            return;
-        }
+        if (!element) return;
 
+        // High resolution screenshot
         const canvas = await html2canvas(element, { scale: 3 });
         const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-        // 2️⃣ Proper A4 page PDF (NO CROPPING)
-        const pdf = new jsPDF("p", "mm", "a4");
+        const pdf = new jsPDF("p", "mm", "a4"); // Use fixed A4 size
         const pageWidth = 210;
         const pageHeight = 297;
 
@@ -188,69 +249,8 @@ function FirstInvoice() {
             heightLeft -= pageHeight;
         }
 
-        const pdfBlob = pdf.output("blob");
-        const pdfFileName = `Booking_${new Date().toISOString().slice(0, 10)}.pdf`;
-
-        // 3️⃣ Send to server
-        const formDataToSend = new FormData();
-        formDataToSend.append("file", pdfBlob, pdfFileName);
-        formDataToSend.append(
-            "customerCode",
-            getCustomer.find(c => c.Customer_Name === invoiceData[0]?.CustomerName)?.Customer_Code || "764"
-        );
-        formDataToSend.append(
-            "locationCode",
-            JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "MUM"
-        );
-        formDataToSend.append("subject", "Booking PDF File");
-        formDataToSend.append("message", "Please find attached the booking PDF.");
-
-        const response = await postApi("/Smart/AutoMailSend", formDataToSend, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
-
-        if (response?.success) {
-            Swal.fire("Success", `Email sent successfully to ${response?.to}`, "success");
-        } else {
-            Swal.fire("Error", response?.error || "Email sending failed", "error");
-        }
-    } catch (error) {
-        console.error("Email send failed:", error);
-        Swal.fire("Error", "Failed to send email. Check your network or server.", "error");
-    }
-};
-
-
-    const handleDownloadPDF = async () => {
-    const element = document.querySelector("#pdf");
-    if (!element) return;
-
-    // High resolution screenshot
-    const canvas = await html2canvas(element, { scale: 3 });
-    const imgData = canvas.toDataURL("image/jpeg", 1.0);
-
-    const pdf = new jsPDF("p", "mm", "a4"); // Use fixed A4 size
-    const pageWidth = 210;
-    const pageHeight = 297;
-
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-        pdf.addPage();
-        position = heightLeft - imgHeight;
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-    }
-
-    pdf.save(`Invoice_${invNo}.pdf`);
-};
+        pdf.save(`Invoice_${invNo}.pdf`);
+    };
 
 
     const docketTotal = isDocketChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.DocketChrgs || 0), 0) : 0;
@@ -357,9 +357,9 @@ function FirstInvoice() {
 
                         <button
                             onClick={sendMail}
-                            style={{padding:"1px",  borderRadius: "6px", background: "green",width:"40px", color: "white", border: "none", cursor: "pointer" }}
+                            style={{ padding: "1px", borderRadius: "6px", background: "green", width: "40px", color: "white", border: "none", cursor: "pointer" }}
                         >
-                            <MdEmail style={{fontSize:"25px"}}/>
+                            <MdEmail style={{ fontSize: "25px" }} />
                         </button>
                         <button
                             onClick={() => window.print()}
@@ -385,7 +385,7 @@ function FirstInvoice() {
                     <div className="container-2" style={{ borderRadius: "0px", width: "950px", display: "flex", flexDirection: "column" }}>
 
                         < div id="printable-section" className="container-3" style={{ padding: "0px", minHeight: "500px" }}>
-                            <div className="container-3" style={{ border: "5px double black", minHeight: "500px" }}>
+                            <div className="container-3" style={{ border: "2px solid silver", minHeight: "500px" }}>
 
                                 <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", gap: "50px" }}>
                                     <div style={{ width: "25%" }}>
@@ -620,7 +620,7 @@ function FirstInvoice() {
                                         </div>
 
                                         <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                            <div>IGST@ of 18%</div>
+                                            <div>IGST@ of 0%</div>
                                             <div>{igst.toFixed(2)}</div>
                                         </div>
 

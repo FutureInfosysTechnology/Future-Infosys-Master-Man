@@ -1,65 +1,96 @@
-import React, { useState } from 'react'
-import Footer from '../../../Components-2/Footer';
-import CustomerWiseReport from '../Status Report/CustomerWiseReport';
-import Sidebar1 from '../../../Components-2/Sidebar1';
-import Header from '../../../Components-2/Header/Header';
-import StatementWiseReport from './StatementWiseReport';
-import ChecklistWiseReport from './ChecklistWiseReport';
-import ModeWiseReport from './ModeWiseReport';
+import React, { useState, useEffect } from "react";
+import Footer from "../../../Components-2/Footer";
+import Sidebar1 from "../../../Components-2/Sidebar1";
+import Header from "../../../Components-2/Header/Header";
+
+import StatementWiseReport from "./StatementWiseReport";
+import ChecklistWiseReport from "./ChecklistWiseReport";
+import ModeWiseReport from "./ModeWiseReport";
 
 function Statement() {
+  // Get permissions from localStorage
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1 || permissions[key] === true;
 
-    const [activeTab, setActiveTab] = useState('delivered');
+  // Tabs with permission checks
+  const tabs = [
+    {
+      id: "bookingDetail",
+      label: "Booking Detail",
+      component: <StatementWiseReport />,
+      show: has("BookingDetail"),
+    },
+    {
+      id: "charges",
+      label: "Total Charges Report",
+      component: <ChecklistWiseReport />,
+      show: has("TotalChargesReport"),
+    },
+    {
+      id: "modeWise",
+      label: "Mode Wise Report",
+      component: <ModeWiseReport />,
+      show: has("ModeWiseReport"),
+    },
+  ];
 
-    const handleChange = (event) => {
-        setActiveTab(event.target.id);
-    };
+  // Visible tabs based on permission
+  const visibleTabs = tabs.filter((t) => t.show);
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
+  const [activeTab, setActiveTab] = useState(null);
 
-            <div className="main-body" id="main-body">
-                <div className="container-6">
-                    <input type="radio" name="slider" id="delivered" checked={activeTab === 'delivered'}
-                        onChange={handleChange} />
+  // Auto select first allowed tab
+  useEffect(() => {
+    if (activeTab === null && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [activeTab, visibleTabs]);
 
-                    <input type="radio" name="slider" id="undelivered" checked={activeTab === 'undelivered'}
-                        onChange={handleChange} />
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                    <input type="radio" name="slider" id="upload" checked={activeTab === 'upload'}
-                        onChange={handleChange} />
+      <div className="main-body" id="main-body">
+        <div className="container-6">
 
-                    <nav>
-                        <label htmlFor="delivered" className="delivered">Booking Detail</label>
-                        <label htmlFor="undelivered" className="undelivered">Total Charges Report</label>
-                        <label htmlFor="upload" className="upload">Mode Wise Report</label>
+          {/* Navigation Tabs */}
+          <nav>
+            {visibleTabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={activeTab === tab.id ? "active-tab" : ""}
+              >
+                {tab.label}
+              </label>
+            ))}
 
+            {/* Dynamic slider */}
+            {activeTab && visibleTabs.length > 0 && (
+              <div
+                className="slider"
+                style={{
+                  left: `${
+                    visibleTabs.findIndex((t) => t.id === activeTab) *
+                    (100 / visibleTabs.length)
+                  }%`,
+                  width: `${100 / visibleTabs.length}%`,
+                }}
+              />
+            )}
+          </nav>
 
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <div className={`content content-1 ${activeTab === 'delivered' ? 'active' : ''}`}>
-                            <StatementWiseReport />
-                        </div>
+          {/* Tab Content */}
+          <section>
+            {visibleTabs.find((t) => t.id === activeTab)?.component}
+          </section>
 
-                        <div className={`content content-2 ${activeTab === 'undelivered' ? 'active' : ''}`}>
-                            <ChecklistWiseReport />
-                        </div>
-
-                        <div className={`content content-3 ${activeTab === 'upload' ? 'active' : ''}`}>
-                            <ModeWiseReport />
-                        </div>
-
-                    </section>
-                </div>
-                <Footer />
-            </div>
-
-
-        </>
-    )
+        </div>
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default Statement;

@@ -50,7 +50,7 @@ function ViewInvoice() {
     const [formData, setFormData] = useState({
         fromDate: firstDayOfMonth,
         toDate: today,
-        invDate: today,
+        invDate: null,
         customer: "ALL CLIENT DATA",
         invoiceNo: "",
     });
@@ -508,16 +508,7 @@ function ViewInvoice() {
                                     className="form-control form-control-sm"
                                 />
                             </div>
-                            <div className="input-field3">
-                                <label htmlFor="">Invoice Date</label>
-                                <DatePicker
-                                    portalId="root-portal"
-                                    selected={formData.invDate}
-                                    onChange={(date) => handleFormChange(date, "invDate")}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="form-control form-control-sm"
-                                />
-                            </div>
+                            
                             <div className="input-field3">
                                 <label htmlFor="">Invoice No</label>
                                 <input type="text" placeholder="Invoice No" value={formData.invoiceNo} onChange={(e) => handleFormChange(e.target.value, "invoiceNo")} />
