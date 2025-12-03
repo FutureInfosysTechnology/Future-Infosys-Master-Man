@@ -444,14 +444,20 @@ function BranchAdmin() {
             PayOutStanding: formData.PayOutStanding ? 1 : 0,
             CreditBooking: formData.CreditBooking ? 1 : 0,
             CreditNoteView: formData.CreditNoteView ? 1 : 0,
+
             MISReport: formData.MISReport ? 1 : 0,
             VendorMISReport: formData.VendorMISReport ? 1 : 0,
             BookingModeReport: formData.BookingModeReport ? 1 : 0,
+
             BookingDetail: formData.BookingDetail ? 1 : 0,
             TotalChargesReport: formData.TotalChargesReport ? 1 : 0,
             ModeWiseReport: formData.ModeWiseReport ? 1 : 0,
+
             InvoiceLedgerReport: formData.InvoiceLedgerReport ? 1 : 0,
             ChecklistReport: formData.ChecklistReport ? 1 : 0,
+            UnbuildReport: formData.UnbuildReport ? 1 : 0,
+            BillViewReport: formData.BillViewReport ? 1 : 0,
+
             BranchName: formData.BranchName ? 1 : 0,
             Mode_Master: formData.Mode_Master ? 1 : 0,
             BankName: formData.BankName ? 1 : 0,
@@ -566,6 +572,8 @@ function BranchAdmin() {
             ModeWiseReport: formData.ModeWiseReport ? 1 : 0,
             InvoiceLedgerReport: formData.InvoiceLedgerReport ? 1 : 0,
             ChecklistReport: formData.ChecklistReport ? 1 : 0,
+             UnbuildReport: formData.UnbuildReport ? 1 : 0,
+            BillViewReport: formData.BillViewReport ? 1 : 0,
             BranchName: formData.BranchName ? 1 : 0,
             Mode_Master: formData.Mode_Master ? 1 : 0,
             BankName: formData.BankName ? 1 : 0,

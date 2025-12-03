@@ -29,7 +29,7 @@ function Sidebar1() {
                     </Link>
                 </li>
 
-                {/* {JSON.parse(localStorage.getItem("Login"))?.UserType=="Admin" &&  */}
+                {show?.UserType=="Admin" &&
                 <li className="nav-item">
                     <a href="#" className="nav-link collapsed"
                         onClick={() => toggleMenu('adminMaster')}>
@@ -99,16 +99,16 @@ function Sidebar1() {
                             </Link>
                         </li>
 
-                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
+                        {show?.StatusMaster===1 && <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/regionmaster">
                                 <i className="bi bi-globe-americas"></i>
                                 <span>Status Master</span>
                             </Link>
-                        </li>
+                        </li>}
                     </ul>
 
                 </li>
-                {/* } */}
+                }
 
                 <li className="nav-item">
                     <a href="#" className="nav-link collapsed"

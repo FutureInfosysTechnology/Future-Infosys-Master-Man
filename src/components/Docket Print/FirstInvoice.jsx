@@ -10,7 +10,7 @@ import Sidebar1 from '../../Components-2/Sidebar1';
 import "./firstinvoice.css"
 import Swal from "sweetalert2";
 import { toWords } from "number-to-words";
-import { MdEmail } from "react-icons/md";
+import { TbMailShare } from "react-icons/tb";
 
 
 function FirstInvoice() {
@@ -263,12 +263,12 @@ function FirstInvoice() {
     const packingTotal = isPackingChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.PackingChrgs || 0), 0) : 0;
     const otherTotal = isOtherChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.OtherCharges || 0), 0) : 0;
 
-    const freightTotal = invoiceData.reduce((sum, inv) => sum + Number(inv.TotalAmt || 0), 0);
+    const freightTotal = invoiceData.reduce((sum, inv) => sum + Number(inv.Rate || 0), 0);
 
     const subTotal = docketTotal + hamaliTotal + deliveryTotal + fovTotal + fuelTotal + odaTotal + insuranceTotal + packingTotal + otherTotal + freightTotal;
-    const igst = subTotal * 0.18; // 18%
-    const cgst = subTotal * 0.09; // 9%
-    const sgst = subTotal * 0.09; // 9%
+    const igst = subTotal * invoiceData[0]?.IGSTPer / 100; 
+    const cgst = subTotal * invoiceData[0]?.CGSTPer / 100; 
+    const sgst = subTotal * invoiceData[0]?.SGSTPer / 100; 
     const grossTotal = subTotal + igst + cgst + sgst;
     const headerCellStyle = {
         border: "1px solid black",
@@ -292,50 +292,58 @@ function FirstInvoice() {
         <>
             <style>
                 {`
-    @media print {
-    body * {
-        visibility: hidden;
-    }
+    
+@media print {
 
-    #pdf, #pdf * {
-        visibility: visible;
-    }
+  @page {
+      size: auto; /* Let browser allow orientation change */
+      margin: 0mm;
+  }
 
-    #pdf {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: auto !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-sizing: border-box;
-    }
+  body * {
+      visibility: hidden;
+  }
+  
+  #printable-section, #printable-section * {
+      visibility: visible;
+  }
+  
+  #printable-section {
+      width: 100% !important;
+      margin: 0;
+      padding: 0;
+      position: static !important; /* Important: allow orientation rendering correctly */
+  }
 
-    table {
-        width: 100% !important;  /* Let table auto-expand */
-        border-collapse: collapse;
-        font-size: 10px !important;
-    }
+  .foot {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+  }
 
-    th, td {
-        border: 1px solid black !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
+  table {
+      width: 100% !important;
+      border-collapse: collapse;
+      font-size: 10px !important;
+  }
 
-    .th {
-        background-color: rgba(36, 98, 113, 1) !important;
-        color: white !important;
-    }
+  th, td {
+      border: 1px solid black !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+  }
 
-    button {
-        display: none !important;
-    }
+  .stamp {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important; 
+      background-color: transparent !important;
+  }
 
-    .container-2, .container-3 {
-        height:auto !important;
-    }
+  button {
+      display:none !important;
+  }
 }
+
+
 `}
             </style>
 
@@ -357,9 +365,9 @@ function FirstInvoice() {
 
                         <button
                             onClick={sendMail}
-                            style={{ padding: "1px", borderRadius: "6px", background: "green", width: "40px", color: "white", border: "none", cursor: "pointer" }}
+                            style={{ padding: "1px",borderRadius: "6px", background: "blue", width: "50px", color: "white", border: "none", cursor: "pointer" }}
                         >
-                            <MdEmail style={{ fontSize: "25px" }} />
+                            <TbMailShare size={25} />
                         </button>
                         <button
                             onClick={() => window.print()}
@@ -384,8 +392,8 @@ function FirstInvoice() {
 
                     <div className="container-2" style={{ borderRadius: "0px", width: "950px", display: "flex", flexDirection: "column" }}>
 
-                        < div id="printable-section" className="container-3" style={{ padding: "0px", minHeight: "500px" }}>
-                            <div className="container-3" style={{ border: "2px solid silver", minHeight: "500px" }}>
+                        < div  id="printable-section" style={{ padding: "0px" }}>
+                            <div className='p-4' style={{ border: "2px solid silver" }}>
 
                                 <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", gap: "50px" }}>
                                     <div style={{ width: "25%" }}>
@@ -411,8 +419,8 @@ function FirstInvoice() {
                                 </div>
 
                                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", border: "1px solid black", marginBottom: "5px", padding: "10px" }}>
-                                    <div style={{ display: "flex", justifyContent: "start" }}>
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                    <div style={{ display: "flex", justifyContent: "start"}}>
+                                        <div style={{ display: "flex", flexDirection: "column",width:"10%" }}>
                                             <label htmlFor=""><b>Client Name</b></label>
                                             <label htmlFor=""><b>Address</b></label>
                                             <label htmlFor=""><b>State</b></label>
@@ -485,7 +493,6 @@ function FirstInvoice() {
                                                     {isVolChecked && <th style={headerCellStyle}>Volumetric Wt</th>}
                                                     {isCharedChecked && <th style={headerCellStyle}>Charged Wt</th>}
                                                     {isRateChecked && <th style={headerCellStyle}>Rate Per Kg</th>}
-                                                    <th style={headerCellStyle}>Rate</th>
                                                     {isDocketChecked && <th style={headerCellStyle}>Dkt Chrgs</th>}
                                                     {isHamaliChecked && <th style={headerCellStyle}>Pickup Chrgs</th>}
                                                     {isDeliveryChecked && <th style={headerCellStyle}>Delivery Chrgs</th>}
@@ -495,7 +502,6 @@ function FirstInvoice() {
                                                     {isInsuranceChecked && <th style={headerCellStyle}>Insurance Chrgs</th>}
                                                     {isPackingChecked && <th style={headerCellStyle}>Packing Chrgs</th>}
                                                     {isOtherChecked && <th style={headerCellStyle}>Other Chrgs</th>}
-
                                                     <th style={headerCellStyle}>Freight Amount</th>
                                                 </tr>
                                             </thead>
@@ -516,7 +522,6 @@ function FirstInvoice() {
                                                             {isVolChecked && <td style={cellStyle}>{invoice?.VolumetricWt}</td>}
                                                             {isCharedChecked && <td style={cellStyle}>{invoice?.ChargedWt}</td>}
                                                             {isRateChecked && <td style={cellStyle}>{invoice?.RatePerkg}</td>}
-                                                            <td style={cellStyle}>{invoice?.Rate}</td>
                                                             {isDocketChecked && <td style={cellStyle}>{invoice?.DocketChrgs}</td>}
                                                             {isHamaliChecked && <td style={cellStyle}>{invoice?.HamaliChrgs}</td>}
                                                             {isDeliveryChecked && <td style={cellStyle}>{invoice?.DeliveryChrgs}</td>}
@@ -527,7 +532,7 @@ function FirstInvoice() {
                                                             {isPackingChecked && <td style={cellStyle}>{invoice?.PackingChrgs}</td>}
                                                             {isOtherChecked && <td style={cellStyle}>{invoice?.OtherCharges}</td>}
 
-                                                            <td style={cellStyle}>{invoice?.TotalAmt}</td>
+                                                            <td style={cellStyle}>{invoice?.Rate}</td>
                                                         </tr>
                                                     ))
                                                 ) : (
@@ -539,11 +544,11 @@ function FirstInvoice() {
 
                                     </div>
                                 </div>
-
+                                <div className='foot'>
                                 <div style={{ width: "100%", display: "flex", border: "1px solid black", marginTop: "10px", justifyContent: "space-between", fontSize: "12px" }}>
                                     <div style={{ display: "flex", justifyContent: "end", alignItems: "start", flexDirection: "column", gap: "10px", fontWeight: "bold", margin: "20px" }}>
                                         <div> Tax Payable on Revers charge (Yes/No)</div>
-                                        <div> {toTitleCase(toWords(Number(grossTotal.toFixed(2))))}</div>
+                                        <div> {toTitleCase(toWords(Number(grossTotal || 0).toFixed(2)))}</div>
                                     </div>
                                     <div style={{ display: "flex", width: "20%", justifyContent: "start", alignItems: "start", flexDirection: "column", fontWeight: "bold" }}>
                                         {isDocketChecked && (
@@ -620,17 +625,17 @@ function FirstInvoice() {
                                         </div>
 
                                         <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                            <div>IGST@ of 0%</div>
+                                            <div>IGST@ of {invoiceData[0]?.IGSTPer}%</div>
                                             <div>{igst.toFixed(2)}</div>
                                         </div>
 
                                         <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                            <div>CGST@ of 9%</div>
+                                            <div>CGST@ of {invoiceData[0]?.CGSTPer}%</div>
                                             <div>{cgst.toFixed(2)}</div>
                                         </div>
 
                                         <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px", borderBottom: "1px solid black" }}>
-                                            <div>SGST@ of 9%</div>
+                                            <div>SGST@ of {invoiceData[0]?.SGSTPer}%</div>
                                             <div>{sgst.toFixed(2)}</div>
                                         </div>
 
@@ -661,7 +666,7 @@ function FirstInvoice() {
                                         <div style={{ fontWeight: "bold", fontSize: "11px", marginLeft: "10px", marginTop: "20px", marginBottom: "20px" }}> This is Computerised Generated Bill hence does not require any  signature & Stam</div>
                                     </div>
                                     <div style={{ display: "flex", width: "40%", justifyContent: "center", alignItems: "center" }}>
-                                        <div style={{
+                                        <div className='stamp'  style={{
                                             display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "40%",
                                             gap: "100px", fontWeight: "bold", fontSize: "13px", height: "130px", backgroundImage: `url(${getBranch?.Company_Stamp})`, // 👈 use your stored image
                                             backgroundSize: "contain",
@@ -672,6 +677,7 @@ function FirstInvoice() {
                                             <div> Auth. Signatory</div>
                                         </div>
                                     </div>
+                                </div>
                                 </div>
                             </div>
                         </div >

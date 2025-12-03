@@ -1,70 +1,104 @@
-import React, { useState, Suspense } from "react";
-import '../Tabs/tabs.css';
+import React, { useState, Suspense, useEffect } from "react";
 import Footer from "../../Components-2/Footer";
 import Header from "../../Components-2/Header/Header";
 import Sidebar1 from "../../Components-2/Sidebar1";
-
 
 const ZoneMaster = React.lazy(() => import("../Admin Master/Area Control/Zonemaster/Zonemaster"));
 const Statemast = React.lazy(() => import("../Admin Master/Area Control/StateMast/Statemast"));
 const Countrylist = React.lazy(() => import("../Admin Master/Area Control/CountryMast/Countrylist"));
 const MultipleCity = React.lazy(() => import("../Admin Master/Area Control/MultipleCity"));
 
-
 function Tabs() {
+  // Load permission object
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
 
+  // Define tab config
+  const allTabs = [
+    {
+      id: "zone",
+      label: "City Control",
+      component: <ZoneMaster />,
+      show: has("CityControl"),     // <-- change key as per your API
+    },
+    {
+      id: "multiple",
+      label: "International Zone",
+      component: <MultipleCity />,
+      show: has("MultipleZone"),
+    },
+    {
+      id: "state",
+      label: "State Master",
+      component: <Statemast />,
+      show: has("StateMaster"),
+    },
+    {
+      id: "country",
+      label: "Country Master",
+      component: <Countrylist />,
+      show: has("CountryMaster"),
+    },
+  ];
 
-    const [activeTab, setActiveTab] = useState('zone');
+  // Only tabs that are allowed
+  const visibleTabs = allTabs.filter((t) => t.show);
 
-    const handleChange = (tabId) => {
-        setActiveTab(tabId);
-    };
+  const [activeTab, setActiveTab] = useState(null);
 
+  // Auto-select first allowed tab
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs]);
 
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
-            <div className="main-body" id="main-body">
+      <div className="main-body" id="main-body">
+        <div className="container">
 
+          {/* Navigation */}
+          <nav className="nav">
+            {visibleTabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </label>
+            ))}
 
-                <div className="container">
-                    <input type="radio" name="slider" id="zone" checked={activeTab === 'zone'}
-                        onChange={() => handleChange('zone')} />
+            {/* Slider */}
+            {activeTab && (
+              <div
+                className="slider"
+                style={{
+                  width: `${100 / visibleTabs.length}%`,
+                  left: `${
+                    visibleTabs.findIndex((t) => t.id === activeTab) *
+                    (100 / visibleTabs.length)
+                  }%`,
+                }}
+              ></div>
+            )}
+          </nav>
 
-                    <input type="radio" name="slider" id="multiple" checked={activeTab === 'multiple'}
-                        onChange={() => handleChange('multiple')} />
+          {/* Tab Content */}
+          <section>
+            <Suspense fallback={<div>Loading...</div>}>
+              {visibleTabs.find((t) => t.id === activeTab)?.component}
+            </Suspense>
+          </section>
+        </div>
 
-                    <input type="radio" name="slider" id="state" checked={activeTab === 'state'}
-                        onChange={() => handleChange('state')} />
-
-                    <input type="radio" name="slider" id="country" checked={activeTab === 'country'}
-                        onChange={() => handleChange('country')} />
-
-                    <nav>
-                        <label htmlFor="zone" className="zone">City Control</label>
-                        <label htmlFor="multiple" className="multiple">International Zone</label>
-                        <label htmlFor="state" className="state">State Master</label>
-                        <label htmlFor="country" className="country">Country Master</label>
-
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <Suspense fallback={<div>Loading...</div>}>
-                            {activeTab === 'zone' && <ZoneMaster />}
-                            {activeTab === 'multiple' && <MultipleCity />}
-                            {activeTab === 'state' && <Statemast />}
-                            {activeTab === 'country' && <Countrylist />}
-                        </Suspense>
-                    </section>
-                </div>
-                <Footer />
-            </div>
-
-        </>
-
-    );
-};
+        <Footer />
+      </div>
+    </>
+  );
+}
 
 export default Tabs;

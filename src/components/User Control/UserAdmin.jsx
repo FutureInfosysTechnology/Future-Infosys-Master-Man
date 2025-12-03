@@ -18,7 +18,7 @@ function UserAdmin() {
     const [selectedOption, setSelectedOption] = useState("");
     const [selectedOperation, setSelectedOperation] = useState("");
     const [formData, setFormData] = useState({
-        ID:"",
+        ID: "",
         UserName: "",
         Employee_Code: "",
         Password: "",
@@ -129,69 +129,69 @@ function UserAdmin() {
                 await deleteApi(`/Master/DeleteOperationManagement?ID=${ID}`);
                 setGetData(getData.filter((data) => data.ID !== ID));
                 Swal.fire('Deleted!', 'The User has been deleted.', 'success');
-                 setFormData({
-            ID: "",
-            UserName: "",
-            Employee_Code: "",
-            Password: "",
-            City_Code: "",
-            UserType: "Admin",
-            DocketBooking: 0,
-            CoshTopayBooking: 0,
-            Smartbooking: 0,
-            AutoMail: 0,
-            BulkImportData: 0,
-            VendorBillEntry: 0,
-            PendingManifest: 0,
-            OutgoingManifest: 0,
-            ViewManifest: 0,
-            BuilkimportManifest: 0,
-            ScanbyDocketNo: 0,
-            InscanProcessView: 0,
-            DeliveryPending: 0,
-            DeliveryBooking: 0,
-            DrsView: 0,
-            Drsimport: 0,
-            Statusactivity: 0,
-            StatusactivityimportBulk: 0,
-            StatusactivityTracking: 0,
-            DeliveryEntry: 0,
-            ReturnEntry: 0,
-            BulkUploadExcel: 0,
-            DocketPrint1: 0,
-            Docketprint2: 0,
-            Docketprint3: 0,
-            Docketprint4: 0,
-            LebelPrintin: 0,
-            StickerPrinting: 0,
-            InternationalBooking: 0,
-            ComplaintRegister: 0,
-            ViewComplaintStatus: 0,
-            ComplaintQuery: 0,
-            PendingInvoice: 0,
-            GenerateInvoice: 0,
-            ViewInvoice: 0,
-            InvoiceSummary: 0,
-            Docket_Print: 0,
-            PerformanceInvoice: 0,
-            ViewPerformanceInvoice: 0,
-            PaymentReceivedEntry: 0,
-            PayOutStanding: 0,
-            CreditBooking: 0,
-            CreditNoteView: 0,
-            MISReport: 0,
-            VendorMISReport: 0,
-            BookingModeReport: 0,
-            BookingDetail: 0,
-            TotalChargesReport: 0,
-            ModeWiseReport: 0,
-            InvoiceLedgerReport: 0,
-            ChecklistReport: 0,
-            UnbuildReport: 0,
-            BillViewReport: 0,
-        });
-        setSelectedOperation('');
-        setSelectedOption('');
+                setFormData({
+                    ID: "",
+                    UserName: "",
+                    Employee_Code: "",
+                    Password: "",
+                    City_Code: "",
+                    UserType: "Admin",
+                    DocketBooking: 0,
+                    CoshTopayBooking: 0,
+                    Smartbooking: 0,
+                    AutoMail: 0,
+                    BulkImportData: 0,
+                    VendorBillEntry: 0,
+                    PendingManifest: 0,
+                    OutgoingManifest: 0,
+                    ViewManifest: 0,
+                    BuilkimportManifest: 0,
+                    ScanbyDocketNo: 0,
+                    InscanProcessView: 0,
+                    DeliveryPending: 0,
+                    DeliveryBooking: 0,
+                    DrsView: 0,
+                    Drsimport: 0,
+                    Statusactivity: 0,
+                    StatusactivityimportBulk: 0,
+                    StatusactivityTracking: 0,
+                    DeliveryEntry: 0,
+                    ReturnEntry: 0,
+                    BulkUploadExcel: 0,
+                    DocketPrint1: 0,
+                    Docketprint2: 0,
+                    Docketprint3: 0,
+                    Docketprint4: 0,
+                    LebelPrintin: 0,
+                    StickerPrinting: 0,
+                    InternationalBooking: 0,
+                    ComplaintRegister: 0,
+                    ViewComplaintStatus: 0,
+                    ComplaintQuery: 0,
+                    PendingInvoice: 0,
+                    GenerateInvoice: 0,
+                    ViewInvoice: 0,
+                    InvoiceSummary: 0,
+                    Docket_Print: 0,
+                    PerformanceInvoice: 0,
+                    ViewPerformanceInvoice: 0,
+                    PaymentReceivedEntry: 0,
+                    PayOutStanding: 0,
+                    CreditBooking: 0,
+                    CreditNoteView: 0,
+                    MISReport: 0,
+                    VendorMISReport: 0,
+                    BookingModeReport: 0,
+                    BookingDetail: 0,
+                    TotalChargesReport: 0,
+                    ModeWiseReport: 0,
+                    InvoiceLedgerReport: 0,
+                    ChecklistReport: 0,
+                    UnbuildReport: 0,
+                    BillViewReport: 0,
+                });
+                setSelectedOperation('');
+                setSelectedOption('');
                 await fechUserData();
             } catch (err) {
                 console.error('Delete Error:', err);
@@ -222,7 +222,7 @@ function UserAdmin() {
     const ResetAll = (e) => {
         e.preventDefault();
         setFormData({
-            ID:"",
+            ID: "",
             UserName: "",
             Employee_Code: "",
             Password: "",
@@ -344,6 +344,8 @@ function UserAdmin() {
             ModeWiseReport: formData.ModeWiseReport ? 1 : 0,
             InvoiceLedgerReport: formData.InvoiceLedgerReport ? 1 : 0,
             ChecklistReport: formData.ChecklistReport ? 1 : 0,
+            UnbuildReport: formData.UnbuildReport ? 1 : 0,
+            BillViewReport: formData.BillViewReport ? 1 : 0,
         };
         try {
             const response = await postApi('/Master/addOperationManagement', requestBody, 'POST');
@@ -361,7 +363,7 @@ function UserAdmin() {
         e.preventDefault();
 
         const requestBody = {
-            ID:formData.ID,
+            ID: formData.ID,
             UserName: formData.UserName || "",
             Employee_Code: formData.Employee_Code || "",
             Password: formData.Password || "",
@@ -379,7 +381,7 @@ function UserAdmin() {
             BuilkimportManifest: formData.BuilkimportManifest ? 1 : 0,
             ScanbyDocketNo: formData.ScanbyDocketNo ? 1 : 0,
             InscanProcessView: formData.InscanProcessView ? 1 : 0,
-            DeliveryBooking: formData.DeliveryBooking ? 1 : 0 ,
+            DeliveryBooking: formData.DeliveryBooking ? 1 : 0,
             DrsView: formData.DrsView ? 1 : 0,
             Drsimport: formData.Drsimport ? 1 : 0,
             Statusactivity: formData.Statusactivity ? 1 : 0,
@@ -417,6 +419,8 @@ function UserAdmin() {
             ModeWiseReport: formData.ModeWiseReport ? 1 : 0,
             InvoiceLedgerReport: formData.InvoiceLedgerReport ? 1 : 0,
             ChecklistReport: formData.ChecklistReport ? 1 : 0,
+            UnbuildReport: formData.UnbuildReport ? 1 : 0,
+            BillViewReport: formData.BillViewReport ? 1 : 0,
         };
 
 
@@ -1295,7 +1299,7 @@ function UserAdmin() {
                                     </thead>
                                     <tbody className='table-body'>
                                         {
-                                            getData.filter(data=>data.UserType==="User").map((data, index) => (
+                                            getData.filter(data => data.UserType === "User").map((data, index) => (
                                                 < tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                                     <td>
                                                         <PiDotsThreeOutlineVerticalFill
@@ -1323,7 +1327,7 @@ function UserAdmin() {
                                                                 <button className='edit-btn' onClick={() => {
                                                                     setOpenRow(null);
                                                                     setFormData({
-                                                                        ID:data?.ID,
+                                                                        ID: data?.ID,
                                                                         UserName: data?.UserName || "",
                                                                         Employee_Code: data?.Employee_Code || "",
                                                                         Password: data?.Password || "",
@@ -1390,7 +1394,7 @@ function UserAdmin() {
 
                                                                     if (
                                                                         data?.DocketBooking === 1 ||
-                                                                        data?.DocketPrint ===1 ||
+                                                                        data?.DocketPrint === 1 ||
                                                                         data?.CoshTopayBooking === 1 ||
                                                                         data?.Smartbooking === 1 ||
                                                                         data?.AutoMail === 1 ||
@@ -1415,10 +1419,10 @@ function UserAdmin() {
                                                                         operations.push("Parcel Scan Data");
                                                                     }
 
-                                                                    if (data?.DrsView === 1 || 
+                                                                    if (data?.DrsView === 1 ||
                                                                         data?.Drsimport === 1 ||
-                                                                        data?.DeliveryPending===1 ||
-                                                                        data?.DeliveryBooking===1) {
+                                                                        data?.DeliveryPending === 1 ||
+                                                                        data?.DeliveryBooking === 1) {
                                                                         operations.push("Run Sheet Entry");
                                                                     }
 
@@ -1475,16 +1479,16 @@ function UserAdmin() {
                                                                         operations.push("Invoice Generate");
                                                                     }
 
-                                                                    if  (data?.PaymentReceivedEntry === 1 ||
-                                                                        data?.PayOutStanding===1 ||
-                                                                        data?.CreditBooking===1 ||
-                                                                        data?.CreditNoteView===1 ) {
+                                                                    if (data?.PaymentReceivedEntry === 1 ||
+                                                                        data?.PayOutStanding === 1 ||
+                                                                        data?.CreditBooking === 1 ||
+                                                                        data?.CreditNoteView === 1) {
                                                                         operations.push("Laiser");
                                                                     }
 
                                                                     if (data?.MISReport === 1 ||
                                                                         data?.VendorMISReport === 1 ||
-                                                                        data?.BookingModeReport===1
+                                                                        data?.BookingModeReport === 1
                                                                     ) {
                                                                         operations.push("Status Report");
                                                                     }
@@ -1500,7 +1504,7 @@ function UserAdmin() {
                                                                     if (data?.InvoiceLedgerReport === 1 ||
                                                                         data?.ChecklistReport === 1 ||
                                                                         data?.UnbuildReport === 1 ||
-                                                                        data?.BillViewReport === 1 ) {
+                                                                        data?.BillViewReport === 1) {
                                                                         operations.push("Sales Register Report");
                                                                     }
 

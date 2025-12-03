@@ -47,7 +47,7 @@ function DocketPrint() {
       <Sidebar1 />
 
       <div className="main-body" id="main-body">
-        <div className="container-vendor">
+        <div className="container">
 
           {/* Tab radios */}
           {visibleTabs.map(tab => (

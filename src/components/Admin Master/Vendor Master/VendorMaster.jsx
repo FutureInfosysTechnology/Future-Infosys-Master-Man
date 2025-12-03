@@ -1,66 +1,103 @@
-import React, { useState, Suspense } from "react";
-import './vendormaster.css';
+import React, { useState, Suspense, useEffect } from "react";
 import Footer from "../../../Components-2/Footer";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 
-const VendorName = React.lazy(() => import('./VendorName'));
-const VendorRate = React.lazy(() => import('./VendorRate'));
-const VendorFuel = React.lazy(() => import('./VendorFuel'));
-const VendorGst = React.lazy(() => import('./VendorGst'));
-
+const VendorName = React.lazy(() => import("./VendorName"));
+const VendorRate = React.lazy(() => import("./VendorRate"));
+const VendorFuel = React.lazy(() => import("./VendorFuel"));
+const VendorGst = React.lazy(() => import("./VendorGst"));
 
 function VendorMaster() {
+  // Load permissions
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
 
-    const [activeTab, setActiveTab] = useState('zone');
+  // Define all tabs with permissions
+  const allTabs = [
+    {
+      id: "zone",
+      label: "Vendor Name",
+      component: <VendorName />,
+      show: has("VendorName"),
+    },
+    {
+      id: "multiple",
+      label: "Vendor Rate",
+      component: <VendorRate />,
+      show: has("VendorRate"),
+    },
+    {
+      id: "state",
+      label: "Vendor Charges",
+      component: <VendorFuel />,
+      show: has("VendorFeul"), // permission key in your JSON
+    },
+    {
+      id: "country",
+      label: "Vendor Gst Master",
+      component: <VendorGst />,
+      show: has("VendorGstMaster"),
+    },
+  ];
 
-    const handleChange = (tabId) => {
-        setActiveTab(tabId);
-    };
+  // Visible tabs only
+  const visibleTabs = allTabs.filter((t) => t.show);
 
+  const [activeTab, setActiveTab] = useState(null);
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
-            <div className="main-body" id="main-body">
+  // Auto-select first allowed tab
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs]);
 
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                <div className="container">
-                    <input type="radio" name="slider" id="zone" checked={activeTab === 'zone'}
-                        onChange={() => handleChange('zone')} />
+      <div className="main-body" id="main-body">
+        <div className="container">
+          {/* Navigation */}
+          <nav className="nav">
+            {visibleTabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </label>
+            ))}
 
-                    <input type="radio" name="slider" id="multiple" checked={activeTab === 'multiple'}
-                        onChange={() => handleChange('multiple')} />
+            {/* Slider */}
+            {activeTab && (
+              <div
+                className="slider"
+                style={{
+                  width: `${100 / visibleTabs.length}%`,
+                  left: `${
+                    visibleTabs.findIndex((t) => t.id === activeTab) *
+                    (100 / visibleTabs.length)
+                  }%`,
+                }}
+              ></div>
+            )}
+          </nav>
 
-                    <input type="radio" name="slider" id="state" checked={activeTab === 'state'}
-                        onChange={() => handleChange('state')} />
+          {/* Content */}
+          <section>
+            <Suspense fallback={<div>Loading...</div>}>
+              {visibleTabs.find((t) => t.id === activeTab)?.component}
+            </Suspense>
+          </section>
+        </div>
 
-                    <input type="radio" name="slider" id="country" checked={activeTab === 'country'}
-                        onChange={() => handleChange('country')} />
-
-                    <nav>
-                        <label htmlFor="zone" className="zone">Vendor Name</label>
-                        <label htmlFor="multiple" className="multiple">Vendor Rate</label>
-                        <label htmlFor="state" className="state">Vendor Charges</label>
-                        <label htmlFor="country" className="country">Vendor Gst Master</label>
-
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <Suspense fallback={<div>Loading...</div>}>
-                            {activeTab === 'zone' && <VendorName />}
-                            {activeTab === 'multiple' && <VendorRate />}
-                            {activeTab === 'state' && <VendorFuel />}
-                            {activeTab === 'country' && <VendorGst />}
-                        </Suspense>
-                    </section>
-                </div>
-                <Footer />
-            </div>
-
-        </>
-    )
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default VendorMaster;

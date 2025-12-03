@@ -235,6 +235,32 @@ function Booking() {
         VendorAwbNo2: ""
     });
 
+    const [vendorShow, setVendorShow] = useState({
+        Rate: 0,
+        Fuel_Charges: 0,
+        Fuel_Per: 0,
+        Fov_Charges: 0,
+        Fov_Per: 0,
+        Docket_Charges: 0,
+        ODA_Charges: 0,
+        Delivery_Charges: 0,
+        Packing_Charges: 0,
+        Green_Charges: 0,
+        Hamali_Charges: 0,
+        Other_Charges: 0,
+        Insurance_Charges: 0,
+        Subtotal: 0,
+        CGSTPer: 0,
+        CGSTAmt: 0,
+        SGSTPer: 0,
+        SGSTAmt: 0,
+        IGSTPer: 0,
+        IGSTAmt: 0,
+        TotalGST: 0,
+        TotalAmount: 0
+    });
+
+
     const [gstData, setGstData] = useState({
         CGSTPer: 0,
         CGSTAMT: 0,
@@ -1280,6 +1306,86 @@ function Booking() {
         skipGstCalc
     ]);
     useEffect(() => {
+        const calculateVenGstDetails = async () => {
+            try {
+                const {
+                    Vendor_Code,
+                    Mode_Code,
+                    VendorAmt,
+                } = formData;
+
+                if (!Vendor_Code || !Mode_Code || !VendorAmt) return;
+
+                // Build request body
+                const body = {
+                    Vendor_Code:Vendor_Code,
+                    Mode_Code:Mode_Code,
+                    Rate:VendorAmt,
+                    UseInput: UseInput,
+                };
+
+                const response = await postApi(`/Master/VendorcalculateGST`, body);
+
+                    const gst = response.Data;
+                    console.log("✅ GST API Response:", gst);
+                    setUseInput(gst?.Success);
+                    console.log(`input==${gst?.Success}`);
+
+
+                    // setIsGstCalculated(true);
+                    setVendorShow(prev => ({
+                        ...prev,
+                        Rate: gst.Rate,
+                        Fuel_Charges: gst.Fuel_Charges,
+                        Fuel_Per: gst.Fuel_Per,
+
+                        Fov_Charges: gst.Fov_Charges,
+                        Fov_Per: gst.Fov_Per,
+
+                        Docket_Charges: gst.Docket_Charges,
+                        ODA_Charges: gst.ODA_Charges,
+                        Delivery_Charges: gst.Delivery_Charges,
+                        Packing_Charges: gst.Packing_Charges,
+                        Green_Charges: gst.Green_Charges,
+                        Hamali_Charges: gst.Hamali_Charges,
+                        Other_Charges: gst.Other_Charges,
+                        Insurance_Charges: gst.Insurance_Charges,
+
+                        Subtotal: gst.Subtotal,
+
+                        CGSTPer: gst.CGSTPer,
+                        CGSTAmt: gst.CGSTAmt,
+
+                        SGSTPer: gst.SGSTPer,
+                        SGSTAmt: gst.SGSTAmt,
+
+                        IGSTPer: gst.IGSTPer,
+                        IGSTAmt: gst.IGSTAmt,
+
+                        TotalGST: gst.TotalGST,
+
+                        TotalAmount: gst.TotalAmount,
+                    }));
+
+            } catch (error) {
+                console.error("❌ Error in GST API:", error);
+            }
+        };
+
+        // Run only when essential fields change
+        if (
+            formData.Vendor_Code &&
+            formData.Mode_Code &&
+            formData.VendorAmt
+        ) {
+            calculateVenGstDetails();
+        }
+    }, [
+        formData.Vendor_Code,
+        formData.Mode_Code,
+        formData.VendorAmt,
+    ]);
+    useEffect(() => {
         const handleMakeRate = async () => {
             try {
                 const body = {
@@ -1341,9 +1447,8 @@ function Booking() {
                     }))
 
                 }
-                else
-                {
-                     setVolumetricData((prev) => ({
+                else {
+                    setVolumetricData((prev) => ({
                         ...prev,
                         DivideBy: 0,
                     }))
@@ -1395,8 +1500,7 @@ function Booking() {
                     }))
 
                 }
-                else
-                {
+                else {
                     setVendorvolumetric((prev) => ({
                         ...prev,
                         DivideBy: 0,
@@ -1464,7 +1568,7 @@ function Booking() {
         }
     }, [formData.ActualWt, formData.VolumetricWt, formData.ChargedWt, formData.RatePerkg]);
 
-    
+
     useEffect(() => {
         const wt = parseFloat(formData.VendorWt) || 0;
         const ratePerKg = parseFloat(formData.VendorRatePerkg) || 0;
@@ -1836,7 +1940,6 @@ function Booking() {
                     Mode_Code: mode,
                 }));
                 setSelectedOriginPinCode(Pincode);
-                setModalIsOpen8(false);
             }
 
         } catch (error) {
@@ -2647,7 +2750,7 @@ function Booking() {
                                                 </div>
                                             </div>
                                         </div>
-                                        {isVenChecked && <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                        {isVenChecked && <><div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
                                             <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
                                                 <div className="input-field" style={{ flex: "5", position: "relative" }}>
                                                     <label>Vendor Name</label>
@@ -2686,79 +2789,91 @@ function Booking() {
                                                     />
                                                 </div>
                                             </div>
-                                        </div>}
-                                        <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
-                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
-                                                <div className="input-field" style={{ flex: "5", position: "relative" }}>
-                                                    <label className="form-label">Vendor Docket No</label>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        placeholder="Vendor Docket No"
-                                                        value={formData.VendorAwbNo}
-                                                        onChange={(e) =>
-                                                            setFormData({ ...formData, VendorAwbNo: e.target.value })
-                                                        }
-                                                    />
-                                                </div>
+                                        </div>
+                                            <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                                <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
+                                                    <div className="input-field" style={{ flex: "5", position: "relative" }}>
+                                                        <label className="form-label">Vendor Docket No</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            placeholder="Vendor Docket No"
+                                                            value={formData.VendorAwbNo}
+                                                            onChange={(e) =>
+                                                                setFormData({ ...formData, VendorAwbNo: e.target.value })
+                                                            }
+                                                        />
+                                                    </div>
 
-                                                <div className="input-field" style={{ flex: "2" }}>
-                                                    <label>&nbsp;</label>
-                                                    <button
-                                                        type="button"
-                                                        className="ok-btn"
-                                                        onClick={() => setModalIsOpen5(true)}
-                                                        style={{ height: "35px", width: "100%", color: "black" }}
-                                                    >
-                                                        <i className="bi bi-calculator" style={{ fontSize: "20px" }}></i>
-                                                    </button>
+                                                    <div className="input-field" style={{ flex: "2" }}>
+                                                        <label>&nbsp;</label>
+                                                        <button
+                                                            type="button"
+                                                            className="ok-btn"
+                                                            onClick={() => setModalIsOpen5(true)}
+                                                            style={{ height: "35px", width: "100%", color: "black" }}
+                                                        >
+                                                            <i className="bi bi-calculator" style={{ fontSize: "20px" }}></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
 
-                                        <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
-                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
-                                                <div className="input-field1">
-                                                    <label className="form-label">Vendor Weight</label>
-                                                    <input
-                                                        type="tel"
-                                                        className="form-control"
-                                                        placeholder="V_Weight"
-                                                        value={formData.VendorWt}
-                                                        onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
-                                                    />
+                                            <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                                <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
+                                                    <div className="input-field1">
+                                                        <label className="form-label">Vendor Weight</label>
+                                                        <input
+                                                            type="tel"
+                                                            className="form-control"
+                                                            placeholder="V_Weight"
+                                                            value={formData.VendorWt}
+                                                            onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
+                                                        />
+                                                    </div>
+
+                                                    <div className="input-field1">
+                                                        <label className="form-label">Rate Per Kg</label>
+                                                        <input
+                                                            type="tel"
+                                                            placeholder="Rate Per Kg"
+                                                            value={formData.VendorRatePerkg || ''}
+                                                            onChange={(e) => setFormData({ ...formData, VendorRatePerkg: e.target.value })}
+                                                        />
+                                                    </div>
+
+                                                    <div className="input-field1">
+                                                        <label className="form-label">Vendor Amount</label>
+                                                        <input
+                                                            type="tel"
+                                                            className="form-control"
+                                                            placeholder="Vendor Amount"
+                                                            value={formData.VendorAmt}
+                                                            onChange={(e) =>
+                                                                setFormData({ ...formData, VendorAmt: e.target.value })
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    <div className="input-field1">
+                                                        <label className="form-label">&nbsp;</label>
+                                                        <button
+                                                            type="button"
+                                                            className="ok-btn"
+                                                            onClick={() => setModalIsOpen8(true)}
+                                                            style={{ height: "35px", width: "100%", }}
+                                                        >
+                                                            <i className="bi bi-cash-coin" style={{ fontSize: "24px" }}></i>
+                                                        </button>
+                                                    </div>
+
+
+
+
+
                                                 </div>
-
-                                                <div className="input-field1">
-                                                    <label className="form-label">Rate Per Kg</label>
-                                                    <input
-                                                        type="tel"
-                                                        placeholder="Rate Per Kg"
-                                                        value={formData.VendorRatePerkg || ''}
-                                                        onChange={(e) => setFormData({ ...formData, VendorRatePerkg: e.target.value })}
-                                                    />
-                                                </div>
-
-                                                <div className="input-field1">
-                                                    <label className="form-label">Vendor Amount</label>
-                                                    <input
-                                                        type="tel"
-                                                        className="form-control"
-                                                        placeholder="Vendor Amount"
-                                                        value={formData.VendorAmt}
-                                                        onChange={(e) =>
-                                                            setFormData({ ...formData, VendorAmt: e.target.value })
-                                                        }
-                                                    />
-                                                </div>
-
-
-
-
-
-                                            </div>
-                                        </div>
+                                            </div></>}
 
 
                                         {isFlightChecked && <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
@@ -4838,6 +4953,120 @@ function Booking() {
                             </div>
                         </div>
                     </Modal >
+
+                    <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen8}
+                        className="custom-modal-volumetric" contentLabel="Vendor Charges Modal"
+                        style={{
+                            content: {
+                                height: "auto"
+                            }
+                        }}>
+
+                        <div className="custom-modal-content">
+                            <div className="header-tittle">
+                                <header>Vendor Charges Summary</header>
+                            </div>
+
+                            <div className='container2'>
+                                <form>
+
+                                    {/* Rate */}
+                                    <div className="fields2">
+                                        <div className="input-field1">
+                                            <label>Rate</label>
+                                            <input type="text" value={vendorShow.Rate || 0} readOnly />
+                                        </div>
+                                        <div className="input-field1">
+                                            <label>Fuel Charges ({vendorShow.Fuel_Per}%)</label>
+                                            <input type="text" value={vendorShow.Fuel_Charges || 0} readOnly />
+                                        </div>
+                                        <div className="input-field1">
+                                            <label>FOV Charges ({vendorShow.Fov_Per}%)</label>
+                                            <input type="text" value={vendorShow.Fov_Charges || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Docket Charges</label>
+                                            <input type="text" value={vendorShow.Docket_Charges || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>ODA Charges</label>
+                                            <input type="text" value={vendorShow.ODA_Charges || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Delivery Charges</label>
+                                            <input type="text" value={vendorShow.Delivery_Charges || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Packing Charges</label>
+                                            <input type="text" value={vendorShow.Packing_Charges || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Green Charges</label>
+                                            <input type="text" value={vendorShow.Green_Charges || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Hamali Charges</label>
+                                            <input type="text" value={vendorShow.Hamali_Charges || 0} readOnly />
+                                        </div>
+                                        <div className="input-field1">
+                                            <label>Insurance Charges</label>
+                                            <input type="text" value={vendorShow.Insurance_Charges || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Other Charges</label>
+                                            <input type="text" value={vendorShow.Other_Charges || 0} readOnly />
+                                        </div>
+                                        <div className="input-field1">
+                                            <label>Subtotal</label>
+                                            <input type="text" value={vendorShow.Subtotal || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>CGST Amount ({vendorShow.CGSTPer || 0}%)</label>
+                                            <input type="text" value={vendorShow.CGSTAmt || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>SGST Amount ({vendorShow.SGSTPer || 0}%)</label>
+                                            <input type="text" value={vendorShow.SGSTAmt || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>IGST Amount ({vendorShow.IGSTPer || 0}%)</label>
+                                            <input type="text" value={vendorShow.IGSTAmt || 0} readOnly />
+                                        </div>
+                                        <div className="input-field1">
+                                            <label>Total GST ({vendorShow.SGSTPer+vendorShow.SGSTPer || vendorShow.IGSTPer || 0}%)</label>
+                                            <input type="text" value={vendorShow.TotalGST || 0} readOnly />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Grand Total Amount</label>
+                                            <input type="text" value={vendorShow.TotalAmount || 0} readOnly />
+                                        </div>
+                                    </div>
+
+                                    <div className="bottom-buttons">
+                                        <button
+                                            className="ok-btn"
+                                            type="button"
+                                            onClick={() => setModalIsOpen8(false)}
+                                        >OK</button>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+
+                    </Modal>
+
                 </div >
 
             </div >

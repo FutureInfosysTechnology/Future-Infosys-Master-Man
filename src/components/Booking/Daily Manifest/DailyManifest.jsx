@@ -47,9 +47,12 @@ function DailyManifest() {
     // Filter visible tabs
     const visibleTabs = tabs.filter((t) => t.show);
 
-    if (activeTab === null && visibleTabs.length > 0) {
-        setActiveTab(visibleTabs[0].id);
-    }
+    // Auto-select the first visible tab
+      useEffect(() => {
+        if (activeTab === null && visibleTabs.length > 0) {
+          setActiveTab(visibleTabs[0].id);
+        }
+      }, [visibleTabs, activeTab]);
 
     return (
         <>
@@ -57,7 +60,7 @@ function DailyManifest() {
             <Sidebar1 />
 
             <div className="main-body" id="main-body">
-                <div className="container-vendor">
+                <div className="container">
 
                     {/* TAB HEADERS */}
                     <nav>
@@ -65,14 +68,14 @@ function DailyManifest() {
                             <label
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={activeTab === tab.id ? "active-tab" : ""}
+                                
                             >
                                 {tab.label}
                             </label>
                         ))}
 
                         {/* SLIDER */}
-                        {activeTab && (
+                        {activeTab && visibleTabs.length > 0 &&(
                             <div
                                 className="slider"
                                 style={{

@@ -47,7 +47,7 @@ function DailyBooking() {
       <Header />
       <Sidebar1 />
       <div className="main-body" id="main-body">
-        <div className="container-vendor">
+        <div className="container">
 
           {/* ===================== NAVIGATION ===================== */}
           <nav>
@@ -55,7 +55,7 @@ function DailyBooking() {
               <label
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={activeTab === tab.id ? "active-tab" : ""}
+                
               >
                 {tab.label}
               </label>

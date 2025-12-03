@@ -6,11 +6,16 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import Select, { components } from 'react-select';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function VendorFuel() {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [openRow, setOpenRow] = useState(null);
     const [getVendorCharges, setGetVendorCharges] = useState([]);      // To Get Vendor Charges Data
     const [getVendor, setGetVendor] = useState([]);                    // To Get Vendor Data
@@ -28,25 +33,26 @@ function VendorFuel() {
     const [isHamaliChecked, setIsHamaliChecked] = useState(false);
     const [isOtherChecked, setIsOtherChecked] = useState(false);
     const [isInsuranceChecked, setIsInsuranceChecked] = useState(false);
+    const [isODAChecked, setIsODAChecked] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isEditMode, setIsEditMode] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [addVendorCharges, setAddVendorCharges] = useState({
         vendorCode: "",
-        modeCode: "",
-        fuelCharges: "",
-        fovCharges: "",
+        modeCode: '',
+        fuelCharges: 0,
         Fuel_Per: 0,
         Fov_Per: 0,
-        docketCharges: "",
-        packingCharges: "",
-        greenCharges: "",
-        hamaliCharges: "",
-        otherCharges: "",
-        insuranceCharges: "",
-        fromDate: "",
-        toDate: "",
-        deliveryCharges: ""
+        fovCharges: 0,
+        docketCharges: 0,
+        deliveryCharges: 0,
+        packingCharges: 0,
+        greenCharges: 0,
+        hamaliCharges: 0,
+        otherCharges: 0,
+        insuranceCharges: 0,
+        fromDate: firstDayOfMonth,
+        toDate: today,
     })
 
 
@@ -125,40 +131,93 @@ function VendorFuel() {
 
 
 
+
+    useEffect(() => {
+        const savedState = JSON.parse(localStorage.getItem("VendorChargesState"));
+        if (savedState) {
+            setIsFovChecked(savedState.isFovChecked || false);
+            setIsDocketChecked(savedState.isDocketChecked || false);
+            setIsDeliveryChecked(savedState.isDeliveryChecked || false);
+            setIsPackingChecked(savedState.isPackingChecked || false);
+            setIsGreenChecked(savedState.isGreenChecked || false);
+            setIsHamaliChecked(savedState.isHamaliChecked || false);
+            setIsOtherChecked(savedState.isOtherChecked || false);
+            setIsInsuranceChecked(savedState.isInsuranceChecked || false);
+            setIsODAChecked(savedState.isODAChecked || false);
+        }
+    }, []);
+
+    const handleCheckboxChange = (field, value) => {
+        const newState = {
+            [field]: value
+        };
+        const currentState = JSON.parse(localStorage.getItem("VendorChargesState")) || {};
+        localStorage.setItem("VendorChargesState", JSON.stringify({ ...currentState, ...newState }));
+    };
+
+
     const handleFovChange = (e) => {
         setIsFovChecked(e.target.checked);
+        handleCheckboxChange('isFovChecked', e.target.checked);
     };
 
     const handleDocketChange = (e) => {
         setIsDocketChecked(e.target.checked);
+        handleCheckboxChange('isDocketChecked', e.target.checked);
     };
 
     const handleDeliveryChange = (e) => {
         setIsDeliveryChecked(e.target.checked);
+        handleCheckboxChange('isDeliveryChecked', e.target.checked);
     };
 
     const handlePackingChange = (e) => {
         setIsPackingChecked(e.target.checked);
+        handleCheckboxChange('isPackingChecked', e.target.checked);
     };
 
     const handleGreenChange = (e) => {
         setIsGreenChecked(e.target.checked);
+        handleCheckboxChange('isGreenChecked', e.target.checked);
     };
 
     const handleHamaliChange = (e) => {
         setIsHamaliChecked(e.target.checked);
+        handleCheckboxChange('isHamaliChecked', e.target.checked);
     };
 
     const handleOtherChange = (e) => {
         setIsOtherChecked(e.target.checked);
+        handleCheckboxChange('isOtherChecked', e.target.checked);
+    };
+
+    const handleODAChange = (e) => {
+        setIsODAChecked(e.target.checked);
+        handleCheckboxChange('isODAChecked', e.target.checked);
     };
 
     const handleInsuranceChange = (e) => {
         setIsInsuranceChecked(e.target.checked);
+        handleCheckboxChange('isInsuranceChecked', e.target.checked);
     };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+
+        const errors = [];
+        if (!addVendorCharges.vendorCode) errors.push("Vendor Name is required");
+        if (!addVendorCharges.modeCode) errors.push("Mode is required");
+        if (!addVendorCharges.fromDate) errors.push("From Date is required");
+        if (!addVendorCharges.toDate) errors.push("To Date is required");
+
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
 
         const requestBody = {
             VendorCode: addVendorCharges.vendorCode,
@@ -183,21 +242,21 @@ function VendorFuel() {
             if (resposne.status === 1) {
                 setGetVendorCharges(getVendorCharges.map((vendor) => vendor.Vendor_Code === addVendorCharges.vendorCode ? resposne.Data : vendor));
                 setAddVendorCharges({
-                    vendorCode: '',
+                    vendorCode: "",
                     modeCode: '',
-                    fuelCharges: '',
-                    fovCharges: '',
-                    Fuel_Per: "",
-                    Fov_Per: "",
-                    docketCharges: '',
-                    deliveryCharges: '',
-                    packingCharges: '',
-                    greenCharges: '',
-                    hamaliCharges: '',
-                    otherCharges: '',
-                    insuranceCharges: '',
-                    fromDate: '',
-                    toDate: ''
+                    fuelCharges: 0,
+                    Fuel_Per: 0,
+                    Fov_Per: 0,
+                    fovCharges: 0,
+                    docketCharges: 0,
+                    deliveryCharges: 0,
+                    packingCharges: 0,
+                    greenCharges: 0,
+                    hamaliCharges: 0,
+                    otherCharges: 0,
+                    insuranceCharges: 0,
+                    fromDate: firstDayOfMonth,
+                    toDate: today,
                 });
                 Swal.fire('Updated!', resposne.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -215,24 +274,44 @@ function VendorFuel() {
     const handleSaveVendorCharges = async (e) => {
         e.preventDefault();
 
+
+        const errors = [];
+        if (!addVendorCharges.vendorCode) errors.push("Vendor Name is required");
+        if (!addVendorCharges.modeCode) errors.push("Mode is required");
+        if (!addVendorCharges.fromDate) errors.push("From Date is required");
+        if (!addVendorCharges.toDate) errors.push("To Date is required");
+
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: errors.map(err => `<div>${err}</div>`).join(''),
+            });
+            return;
+        }
+
         try {
-            const payload = {
-                vendorCode: addVendorCharges.vendorCode,
-                modeCode: addVendorCharges.modeCode,
-                fuelCharges: addVendorCharges.fuelCharges,
-                fovCharges: addVendorCharges.fovCharges,
-                docketCharges: addVendorCharges.docketCharges,
-                deliveryCharges: addVendorCharges.deliveryCharges,
-                packingCharges: addVendorCharges.packingCharges,
-                greenCharges: addVendorCharges.greenCharges,
-                hamaliCharges: addVendorCharges.hamaliCharges,
-                otherCharges: addVendorCharges.otherCharges,
-                insuranceCharges: addVendorCharges.insuranceCharges,
-                fromDate: addVendorCharges.fromDate,
-                toDate: addVendorCharges.toDate,
-                Fuel_Per: addVendorCharges.Fuel_Per || 0,
-                Fov_Per: addVendorCharges.Fov_Per || 0,
-            };
+           const payload = {
+    vendorCode: String(addVendorCharges.vendorCode || ""),
+    modeCode: String(addVendorCharges.modeCode || ""),
+
+    fuelCharges: String(addVendorCharges.fuelCharges || "0"),
+    fovCharges: String(addVendorCharges.fovCharges || "0"),
+    docketCharges: String(addVendorCharges.docketCharges || "0"),
+    deliveryCharges: String(addVendorCharges.deliveryCharges || "0"),
+    packingCharges: String(addVendorCharges.packingCharges || "0"),
+    greenCharges: String(addVendorCharges.greenCharges || "0"),
+    hamaliCharges: String(addVendorCharges.hamaliCharges || "0"),
+    otherCharges: String(addVendorCharges.otherCharges || "0"),
+    insuranceCharges: String(addVendorCharges.insuranceCharges || "0"),
+
+    Fuel_Per: String(addVendorCharges.Fuel_Per || "0"),
+    Fov_Per: String(addVendorCharges.Fov_Per || "0"),
+
+    fromDate: addVendorCharges.fromDate,
+    toDate: addVendorCharges.toDate
+};
+
 
             const response = await postApi(`/Master/AddVendorCharges`, payload);
 
@@ -241,20 +320,20 @@ function VendorFuel() {
                 // Reset state
                 setAddVendorCharges({
                     vendorCode: "",
-                    modeCode: "",
-                    fuelCharges: "",
-                    fovCharges: "",
-                    docketCharges: "",
-                    deliveryCharges: "",
-                    packingCharges: "",
-                    greenCharges: "",
-                    hamaliCharges: "",
-                    otherCharges: "",
-                    insuranceCharges: "",
-                    fromDate: "",
-                    toDate: "",
+                    modeCode: '',
+                    fuelCharges: 0,
                     Fuel_Per: 0,
                     Fov_Per: 0,
+                    fovCharges: 0,
+                    docketCharges: 0,
+                    deliveryCharges: 0,
+                    packingCharges: 0,
+                    greenCharges: 0,
+                    hamaliCharges: 0,
+                    otherCharges: 0,
+                    insuranceCharges: 0,
+                    fromDate: firstDayOfMonth,
+                    toDate: today,
                 });
 
                 Swal.fire("Saved!", response.message, "success");
@@ -356,9 +435,21 @@ function VendorFuel() {
                             <button className='add-btn' onClick={() => {
                                 setModalIsOpen(true); setIsEditMode(false);
                                 setAddVendorCharges({
-                                    vendorCode: "", modeCode: "", fuelCharges: "", fovCharges: "", docketCharges: "",
-                                    packingCharges: "", greenCharges: "", hamaliCharges: "", otherCharges: "",
-                                    insuranceCharges: "", fromDate: "", toDate: "", deliveryCharges: ""
+                                    vendorCode: "",
+                                    modeCode: '',
+                                    fuelCharges: 0,
+                                    Fuel_Per: 0,
+                                    Fov_Per: 0,
+                                    fovCharges: 0,
+                                    docketCharges: 0,
+                                    deliveryCharges: 0,
+                                    packingCharges: 0,
+                                    greenCharges: 0,
+                                    hamaliCharges: 0,
+                                    otherCharges: 0,
+                                    insuranceCharges: 0,
+                                    fromDate: firstDayOfMonth,
+                                    toDate: today,
                                 })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -449,7 +540,9 @@ function VendorFuel() {
                                                             otherCharges: vendor.Other_Charges,
                                                             insuranceCharges: vendor.Insurance_Charges,
                                                             fromDate: vendor.From_Date,
-                                                            toDate: vendor.To_Date
+                                                            toDate: vendor.To_Date,
+                                                            Fov_Per:vendor.Fov_Per,
+                                                            Fuel_Per:vendor.Fuel_Per
                                                         });
                                                         setModalIsOpen(true);
                                                     }}>
@@ -520,7 +613,16 @@ function VendorFuel() {
 
 
                     <Modal id="modal" overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-custCharges" contentLabel="Modal">
+                        className="custom-modal-custCharges" contentLabel="Modal"
+                        style={{
+                            content: {
+                                // width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap",
+                                height:"auto"
+                            },
+                        }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Vendor Charges Master</header>
@@ -530,126 +632,227 @@ function VendorFuel() {
                                 <form onSubmit={handleSaveVendorCharges}>
 
                                     <div className="fields2">
-                                        <div className="input-field3">
+                                        <div className="input-field1">
                                             <label htmlFor="">Vendor Name</label>
-                                            <select value={addVendorCharges.vendorCode}
-                                                onChange={(e) => setAddVendorCharges({ ...addVendorCharges, vendorCode: e.target.value })}
-                                                required aria-readonly={isEditMode}>
-                                                <option value="" disabled>Select Vendor Name</option>
-                                                {getVendor.map((vendor, index) => (
-                                                    <option value={vendor.Vendor_Code} key={index}>{vendor.Vendor_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getVendor.map(ven=> ({
+                                                    value: ven.Vendor_Code,   // adjust keys from your API
+                                                    label: ven.Vendor_Name
+                                                }))}
+                                                value={
+                                                    addVendorCharges.vendorCode
+                                                        ? { value: addVendorCharges.vendorCode, label: getVendor.find(ven => ven.Vendor_Code === addVendorCharges.vendorCode)?.Vendor_Name || '' }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setAddVendorCharges({
+                                                        ...addVendorCharges,
+                                                        vendorCode: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }}
+                                                placeholder="Select Vendor"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }} />
                                         </div>
 
-                                        <div className="input-field3">
+                                        <div className="input-field1">
                                             <label htmlFor="">Mode</label>
-                                            <select value={addVendorCharges.modeCode}
-                                                onChange={(e) => setAddVendorCharges({ ...addVendorCharges, modeCode: e.target.value })} required>
-                                                <option disabled value="">Select Mode</option>
-                                                {getMode.map((mode, index) => (
-                                                    <option value={mode.Mode_Code} key={index}>{mode.Mode_Name}</option>
-                                                ))}
-                                            </select>
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getMode.map(mode => ({
+                                                    value: mode.Mode_Code,   // adjust keys from your API
+                                                    label: mode.Mode_Name
+                                                }))}
+                                                value={
+                                                    addVendorCharges.modeCode
+                                                        ? { value: addVendorCharges.modeCode, label: getMode.find(mode => mode.Mode_Code === addVendorCharges.modeCode)?.Mode_Name || '' }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setAddVendorCharges({
+                                                        ...addVendorCharges,
+                                                        modeCode: selectedOption ? selectedOption.value : ""
+                                                    })
+                                                }}
+                                                placeholder="Select Mode"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }} />
                                         </div>
 
-                                        <div className="input-field3">
-                                            <label htmlFor="">Fuel Charges</label>
-                                            <input required type="text"
-                                                placeholder="Enter Fuel Charges"
-                                                value={addVendorCharges.fuelCharges}
-                                                onChange={(e) => setAddVendorCharges({ ...addVendorCharges, fuelCharges: e.target.value })} />
+                                        <div className="input-field1">
+                                            <label>Fuel Charges</label>
+                                            <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                <input style={{
+                                                    width: "70%",
+                                                    borderBottomRightRadius: "0px",
+                                                    borderTopRightRadius: "0px",
+                                                    borderRightColor: "transparent"
+                                                }} placeholder="Enter Fuel Charges"
+                                                    type="text"
+                                                    value={addVendorCharges.fuelCharges}
+                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, fuelCharges: e.target.value })} />
+                                                <input
+                                                    type="tel"
+                                                    placeholder="%"
+                                                    style={{
+                                                        width: "30%",
+                                                        borderLeft: "none",
+                                                        borderRadius: "0 4px 4px 0",
+                                                        padding: "5px",
+                                                        textAlign: "center",
+                                                    }}
+                                                    value={addVendorCharges.Fuel_Per !== "" ? `${addVendorCharges.Fuel_Per}%` : ""}
+                                                    onChange={(e) => {
+                                                        // ✅ Strip non-numeric chars before saving
+                                                        const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                        setAddVendorCharges({ ...addVendorCharges, Fuel_Per: val });
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
 
+
+
+
+                                        {isFovChecked && (
+                                            <div className="input-field1">
+                                                <label htmlFor="">FOV Charges</label>
+                                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                    <input style={{
+                                                        width: "70%",
+                                                        borderBottomRightRadius: "0px",
+                                                        borderTopRightRadius: "0px",
+                                                        borderRightColor: "transparent"
+                                                    }} placeholder="Enter Fuel Charges"
+                                                        type="text"
+                                                        value={addVendorCharges.fovCharges}
+                                                        onChange={(e) => setAddVendorCharges({ ...addVendorCharges, fovCharges: e.target.value })} />
+                                                    <input
+                                                        type="tel"
+                                                        placeholder="%"
+                                                        style={{
+                                                            width: "30%",
+                                                            borderLeft: "none",
+                                                            borderRadius: "0 4px 4px 0",
+                                                            padding: "5px",
+                                                            textAlign: "center",
+                                                        }}
+                                                        value={addVendorCharges.Fov_Per !== "" ? `${addVendorCharges.Fov_Per}%` : ""}
+                                                        onChange={(e) => {
+                                                            // ✅ Strip non-numeric chars before saving
+                                                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                            setAddVendorCharges({ ...addVendorCharges, Fov_Per: val });
+                                                        }}
+                                                    />
+                                                </div>
+
+                                            </div>
+                                        )}
+
+                                        {isDocketChecked && (
+                                            <div className="input-field1">
+                                                <label htmlFor="">Docket Charges</label>
+                                                <input type="text" placeholder="Enter Docket Charges"
+                                                    value={addVendorCharges.docketCharges}
+                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, docketCharges: e.target.value })} />
+                                            </div>)}
+
+                                        {isDeliveryChecked && (
+                                            <div className="input-field1">
+                                                <label htmlFor="">Delivery Charges</label>
+                                                <input type="text" placeholder="Enter Delivery Charges"
+                                                    value={addVendorCharges.deliveryCharges}
+                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, deliveryCharges: e.target.value })} />
+                                            </div>)}
+
+                                        {isPackingChecked && (
+                                            <div className="input-field1">
+                                                <label htmlFor="">Packing Charges</label>
+                                                <input type="text" placeholder="Enter Packing Charges"
+                                                    value={addVendorCharges.packingCharges}
+                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, packingCharges: e.target.value })} />
+                                            </div>)}
+
+                                        {isGreenChecked && (
+                                            <div className="input-field1">
+                                                <label htmlFor="">Green Charges</label>
+                                                <input type="text" placeholder="Enter Green Charges"
+                                                    value={addVendorCharges.greenCharges}
+                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, greenCharges: e.target.value })} />
+                                            </div>)}
+
+                                        {isHamaliChecked && (
+                                            <div className="input-field1">
+                                                <label htmlFor="">Hamali Charges</label>
+                                                <input type="text" placeholder="Enter Hamali Charges"
+                                                    value={addVendorCharges.hamaliCharges}
+                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, hamaliCharges: e.target.value })} />
+                                            </div>)}
+
+                                        {isHamaliChecked && (
+                                            <div className="input-field1">
+                                                <label htmlFor="">Other Charges</label>
+                                                <input type="text" placeholder="Enter Other Charges"
+                                                    value={addVendorCharges.otherCharges}
+                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, otherCharges: e.target.value })} />
+                                            </div>)}
+
+                                        {isInsuranceChecked && (
+                                            <div className="input-field1">
+                                                <label htmlFor="">Insurance Charges</label>
+                                                <input type="text" placeholder="Enter Insurance Charges"
+                                                    value={addVendorCharges.insuranceCharges}
+                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, insuranceCharges: e.target.value })} />
+                                            </div>)}
+
+                                        <div className="input-field1">
+                                            <label htmlFor="">From</label>
+                                            <DatePicker
+                                                required
+                                                portalId="root-portal"
+                                                selected={addVendorCharges.fromDate}
+                                                onChange={(date) => setAddVendorCharges({ ...addVendorCharges, fromDate: date })}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label htmlFor="">To Date</label>
+                                            <DatePicker
+                                                required
+                                                portalId="root-portal"
+                                                selected={addVendorCharges.toDate}
+                                                onChange={(date) => setAddVendorCharges({ ...addVendorCharges, toDate: date })}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                            />
+                                        </div>
                                         <div className="input-field3">
-                                            <button className="ok-btn" style={{ marginTop: "18px", height: "35px" }}
+                                            <button className="ok-btn" style={{
+                                                height: "34px",
+                                                width: "80px",
+                                                marginTop: "17px",
+                                                fontSize: "20px", padding: "5px",
+
+                                            }}
                                                 onClick={(e) => { e.preventDefault(); setModalIsOpen1(true); }}>
                                                 <i className="bi bi-cash-coin"></i>
                                             </button>
                                         </div>
 
-                                        {isFovChecked && (
-                                            <div className="input-field3">
-                                                <label htmlFor="">FOV </label>
-                                                <input type="text" placeholder="Enter FOV "
-                                                    value={addVendorCharges.fovCharges}
-                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, fovCharges: e.target.value })} required />
-                                            </div>
-                                        )}
-
-                                        {isDocketChecked && (
-                                            <div className="input-field3">
-                                                <label htmlFor="">Docket Charges</label>
-                                                <input type="text" placeholder="Enter Docket Charges"
-                                                    value={addVendorCharges.docketCharges}
-                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, docketCharges: e.target.value })} required />
-                                            </div>)}
-
-                                        {isDeliveryChecked && (
-                                            <div className="input-field3">
-                                                <label htmlFor="">Delivery Charges</label>
-                                                <input type="text" placeholder="Enter Delivery Charges"
-                                                    value={addVendorCharges.deliveryCharges}
-                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, deliveryCharges: e.target.value })} required />
-                                            </div>)}
-
-                                        {isPackingChecked && (
-                                            <div className="input-field3">
-                                                <label htmlFor="">Packing Charges</label>
-                                                <input type="text" placeholder="Enter Packing Charges"
-                                                    value={addVendorCharges.packingCharges}
-                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, packingCharges: e.target.value })} required />
-                                            </div>)}
-
-                                        {isGreenChecked && (
-                                            <div className="input-field3">
-                                                <label htmlFor="">Green Charges</label>
-                                                <input type="text" placeholder="Enter Green Charges"
-                                                    value={addVendorCharges.greenCharges}
-                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, greenCharges: e.target.value })} required />
-                                            </div>)}
-
-                                        {isHamaliChecked && (
-                                            <div className="input-field3">
-                                                <label htmlFor="">Hamali Charges</label>
-                                                <input type="text" placeholder="Enter Hamali Charges"
-                                                    value={addVendorCharges.hamaliCharges}
-                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, hamaliCharges: e.target.value })} required />
-                                            </div>)}
-
-                                        {isHamaliChecked && (
-                                            <div className="input-field3">
-                                                <label htmlFor="">Other Charges</label>
-                                                <input type="text" placeholder="Enter Other Charges"
-                                                    value={addVendorCharges.otherCharges}
-                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, otherCharges: e.target.value })} required />
-                                            </div>)}
-
-                                        {isInsuranceChecked && (
-                                            <div className="input-field3">
-                                                <label htmlFor="">Insurance Charges</label>
-                                                <input type="text" placeholder="Enter Insurance Charges"
-                                                    value={addVendorCharges.insuranceCharges}
-                                                    onChange={(e) => setAddVendorCharges({ ...addVendorCharges, insuranceCharges: e.target.value })} required />
-                                            </div>)}
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">From</label>
-                                            <input type="date" placeholder="enter from date"
-                                                value={addVendorCharges.fromDate}
-                                                onChange={(e) => setAddVendorCharges({ ...addVendorCharges, fromDate: e.target.value })} required />
-                                        </div>
-
-                                        <div className="input-field3">
-                                            <label htmlFor="">To Date</label>
-                                            <input type="date" placeholder="enter till date"
-                                                value={addVendorCharges.toDate}
-                                                onChange={(e) => setAddVendorCharges({ ...addVendorCharges, toDate: e.target.value })} required />
-                                        </div>
-
                                     </div>
 
-                                    <div className='bottom-buttons' style={{ marginLeft: "25px" }}>
+                                    <div className='bottom-buttons' style={{ marginTop: "18px", marginLeft: "25px" }}>
                                         {!isEditMode && (<button type='submit' className='ok-btn' >Submit</button>)}
                                         {isEditMode && (<button type='button' onClick={handleUpdate} className='ok-btn' >Update</button>)}
                                         <button onClick={() => setModalIsOpen(false)} className='ok-btn'>close</button>
@@ -661,9 +864,17 @@ function VendorFuel() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen1}
-                        className="custom-modal-charges" contentLabel="Modal">
+                        className="custom-modal"
+                        style={{
+                            content: {
+                                height: "auto",
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap"
+                            },
+                        }}
+                        contentLabel="Modal">
                         <div className="custom-modal-content">
-
                             <div className="header-tittle">
                                 <header>Charges</header>
                             </div>
@@ -672,81 +883,90 @@ function VendorFuel() {
                                 <form>
                                     <div className="fields2">
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isFovChecked}
                                                 onChange={handleFovChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="" id="" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Fov Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isDocketChecked}
                                                 onChange={handleDocketChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="" id="" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="docket" id="docket" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Docket Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isDeliveryChecked}
                                                 onChange={handleDeliveryChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="" id="" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="delivery" id="delivery" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Delivery Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isPackingChecked}
                                                 onChange={handlePackingChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="" id="" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="packing" id="packing" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Packing Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isGreenChecked}
                                                 onChange={handleGreenChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="" id="" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="green" id="green" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Green Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isHamaliChecked}
                                                 onChange={handleHamaliChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="" id="" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="hamali" id="hamali" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Hamali Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isOtherChecked}
                                                 onChange={handleOtherChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="" id="" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="other" id="other" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Other Charges</label>
                                         </div>
 
-                                        <div className="input-field" style={{ display: "flex", flexDirection: "row" }}>
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                checked={isODAChecked}
+                                                onChange={handleODAChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="oda" id="oda" />
+                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                ODA Charges</label>
+                                        </div>
+
+                                        <div className="input-field3" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isInsuranceChecked}
                                                 onChange={handleInsuranceChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="" id="" />
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="insurance" id="insurance" />
                                             <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
                                                 Insurance Charges</label>
                                         </div>
-
-                                        <div className='bottom-buttons' style={{ marginLeft: "25px" }}>
-                                            <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(false) }} className='ok-btn'>close</button>
-                                        </div>
+                                    </div>
+                                    <div className='bottom-buttons' style={{ marginLeft: "25px", marginTop: "18px" }}>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(false) }} className='ok-btn'>Submit</button>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(false) }} className='ok-btn'>close</button>
                                     </div>
                                 </form>
                             </div>

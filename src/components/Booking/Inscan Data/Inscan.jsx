@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 import Footer from "../../../Components-2/Footer";
-
 import ScanbyAirway from "./ScanbyAirway";
 import ScanbyManifest from "./ScanbyManifest";
 import ScanbyDRSNo from "./ScanbyDRSNo";
+import { useLocation } from "react-router-dom";
 
 function Inscan() {
   // Get permissions from localStorage
@@ -16,13 +16,13 @@ function Inscan() {
   const tabs = [
     { id: "airway", label: "Scan by Docket No", component: <ScanbyAirway />, show: has("ScanbyDocketNo") },
     { id: "manifest", label: "Inscan Process View", component: <ScanbyManifest />, show: has("InscanProcessView") },
-    { id: "drs", label: "Inscan by DRS No", component: <ScanbyDRSNo />, show: has("ScanbynDrsNo") },
+    { id: "drs", label: "Inscan by DRS No", component: <ScanbyDRSNo />, show: 1 },
   ];
 
   // Only show tabs the user has access to
   const visibleTabs = tabs.filter((t) => t.show);
-
-  const [activeTab, setActiveTab] = useState(null);
+  const location=useLocation();
+  const [activeTab, setActiveTab] = useState(location?.state?.tab || null);
 
   // Auto-select the first visible tab
   useEffect(() => {
@@ -37,7 +37,7 @@ function Inscan() {
       <Sidebar1 />
 
       <div className="main-body" id="main-body">
-        <div className="container-transport">
+        <div className="container">
 
           {/* Tab Headers */}
           <nav>

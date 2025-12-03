@@ -13,7 +13,8 @@ import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesA
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
-function ProductWiseFuel() {
+function ProductWiseFuel() 
+{
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [openRow, setOpenRow] = useState(null);
@@ -588,10 +589,11 @@ function ProductWiseFuel() {
                         className="custom-modal"
                         style={{
                             content: {
-                                width: '90%',
+                                // width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
-                                whiteSpace: "nowrap"
+                                whiteSpace: "nowrap",
+                                height:"auto"
                             },
                         }}
                         contentLabel="Modal">
@@ -696,7 +698,7 @@ function ProductWiseFuel() {
                                                 </div>
 
                                                 {isFovChecked && (
-                                                    <div className="input-field3">
+                                                    <div className="input-field1">
                                                         <label>Fov Charges</label>
                                                         <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                                                             <input type="text" value={addCust.fovCharge}
@@ -730,7 +732,7 @@ function ProductWiseFuel() {
                                                 )}
 
                                                 {isDocketChecked && (
-                                                    <div className="input-field3">
+                                                    <div className="input-field1">
                                                         <label htmlFor="">Docket Charges</label>
                                                         <input type="text" value={addCust.docketCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, docketCharge: e.target.value })}
@@ -739,7 +741,7 @@ function ProductWiseFuel() {
                                                 )}
 
                                                 {isDeliveryChecked && (
-                                                    <div className="input-field3">
+                                                    <div className="input-field1">
                                                         <label htmlFor="">Delivery Charges</label>
                                                         <input type="text" value={addCust.deliveryCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, deliveryCharge: e.target.value })}
@@ -748,7 +750,7 @@ function ProductWiseFuel() {
                                                 )}
 
                                                 {isPackingChecked && (
-                                                    <div className="input-field3">
+                                                    <div className="input-field1">
                                                         <label htmlFor="">Packing Charges</label>
                                                         <input type="text" value={addCust.packingCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, packingCharge: e.target.value })}
@@ -757,7 +759,7 @@ function ProductWiseFuel() {
                                                 )}
 
                                                 {isGreenChecked && (
-                                                    <div className="input-field3">
+                                                    <div className="input-field1">
                                                         <label htmlFor="">Green Charges</label>
                                                         <input type="text" value={addCust.greenCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, greenCharge: e.target.value })}
@@ -766,7 +768,7 @@ function ProductWiseFuel() {
                                                 )}
 
                                                 {isHamaliChecked && (
-                                                    <div className="input-field3">
+                                                    <div className="input-field1">
                                                         <label htmlFor="">Hamali Charges</label>
                                                         <input type="text" value={addCust.hamaliCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, hamaliCharge: e.target.value })}
@@ -775,7 +777,7 @@ function ProductWiseFuel() {
                                                 )}
 
                                                 {isOtherChecked && (
-                                                    <div className="input-field3">
+                                                    <div className="input-field1">
                                                         <label htmlFor="">Other Charges</label>
                                                         <input type="text" value={addCust.otherCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, otherCharge: e.target.value })}
@@ -784,7 +786,7 @@ function ProductWiseFuel() {
                                                 )}
 
                                                 {isInsuranceChecked && (
-                                                    <div className="input-field3">
+                                                    <div className="input-field1">
                                                         <label htmlFor="">Insurance Charges</label>
                                                         <input type="text" value={addCust.insuranceCharge}
                                                             onChange={(e) => setAddCust({ ...addCust, insuranceCharge: e.target.value })}
@@ -792,7 +794,7 @@ function ProductWiseFuel() {
                                                     </div>
                                                 )}
 
-                                                <div className="input-field3">
+                                                <div className="input-field1">
                                                     <label htmlFor="">From</label>
                                                     <DatePicker
                                                         required
@@ -804,7 +806,7 @@ function ProductWiseFuel() {
                                                     />
                                                 </div>
 
-                                                <div className="input-field3">
+                                                <div className="input-field1">
                                                     <label htmlFor="">To Date</label>
                                                     <DatePicker
                                                         required
@@ -818,12 +820,11 @@ function ProductWiseFuel() {
                                                 <div className="input-field3">
                                                     <button className="ok-btn"
                                                         style={{
-                                                            height: "35px",
-                                                            width: "100px",
-                                                            marginTop: "15px",
+                                                            height: "34px",
+                                                            width: "80px",
+                                                            marginTop: "17px",
                                                             fontSize: "20px", padding: "5px",
-                                                            borderTopLeftRadius: "0px",
-                                                            borderBottomLeftRadius: "0px"
+                                                            
                                                         }} onClick={(e) => { e.preventDefault(); setModalIsOpen1(true); }}><i className="bi bi-cash-coin"></i>
                                                     </button>
                                                 </div>

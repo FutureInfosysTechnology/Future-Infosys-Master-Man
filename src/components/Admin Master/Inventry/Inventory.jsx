@@ -1,62 +1,106 @@
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect } from "react";
+
 import Footer from "../../../Components-2/Footer";
-import '../../Tabs/tabs.css';
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 
-
-const StockEntry = React.lazy(() => import('./StockEntry'));
-const EmployeeStock = React.lazy(() => import('./EmployeeStock'));
-const BranchStock = React.lazy(() => import('./BranchStock'));
-const CustomerStock = React.lazy(() => import('./CustomerStock'));
+const StockEntry = React.lazy(() => import("./StockEntry"));
+const EmployeeStock = React.lazy(() => import("./EmployeeStock"));
+const BranchStock = React.lazy(() => import("./BranchStock"));
+const CustomerStock = React.lazy(() => import("./CustomerStock"));
 
 function Inventory() {
+  // Load user permissions
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
 
-    const [activeTab, setActiveTab] = useState('zone');
+  // Tab definitions
+  const allTabs = [
+    {
+      id: "zone",
+      label: "Stock Details",
+      component: <StockEntry />,
+      show: has("StockDetails"),
+    },
+    {
+      id: "multiple",
+      label: "Branch Stock Details",
+      component: <BranchStock />,
+      show: has("StockIssueBranchWise"),
+    },
+    {
+      id: "state",
+      label: "Customer Stock Details",
+      component: <CustomerStock />,
+      show: has("StockIssueCustomerWise"),
+    },
+    {
+      id: "country",
+      label: "Employee Stock Details",
+      component: <EmployeeStock />,
+      show: has("StockIssueEmployeeWise"),
+    },
+  ];
 
-    const handleChange = (tabId) => {
-        setActiveTab(tabId);
-    };
+  // Visible tabs only
+  const visibleTabs = allTabs.filter((t) => t.show);
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
-            <div className="main-body" id="main-body">
+  const [activeTab, setActiveTab] = useState(null);
 
-                <div className="container">
-                    <input type="radio" name="slider" id="zone" checked={activeTab === 'zone'}
-                        onChange={() => handleChange('zone')} />
+  // Auto-select first visible tab
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs]);
 
-                    <input type="radio" name="slider" id="multiple" checked={activeTab === 'multiple'}
-                        onChange={() => handleChange('multiple')} />
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                    <input type="radio" name="slider" id="state" checked={activeTab === 'state'}
-                        onChange={() => handleChange('state')} />
+      <div className="main-body" id="main-body">
+        <div className="container">
 
-                    <input type="radio" name="slider" id="country" checked={activeTab === 'country'}
-                        onChange={() => handleChange('country')} />
+          {/* Tabs */}
+          <nav className="nav">
+            {visibleTabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                
+              >
+                {tab.label}
+              </label>
+            ))}
 
-                    <nav>
-                        <label htmlFor="zone" className="zone">Stock Details</label>
-                        <label htmlFor="multiple" className="multiple">Branch Stock Details</label>
-                        <label htmlFor="state" className="state">Customer Stock Details</label>
-                        <label htmlFor="country" className="country">Employee Stock Details</label>
-                        <div className="slider"></div>
-                    </nav>
-                    <section>
-                        <Suspense fallback={<div>Loading...</div>}>
-                            {activeTab === 'zone' && <StockEntry />}
-                            {activeTab === 'multiple' && <BranchStock />}
-                            {activeTab === 'state' && <CustomerStock />}
-                            {activeTab === 'country' && <EmployeeStock />}
-                        </Suspense>
-                    </section>
-                </div>
-                <Footer />
-            </div>
-        </>
-    )
+            {/* Slider */}
+            {activeTab && (
+              <div
+                className="slider"
+                style={{
+                  width: `${100 / visibleTabs.length}%`,
+                  left: `${
+                    visibleTabs.findIndex((t) => t.id === activeTab) *
+                    (100 / visibleTabs.length)
+                  }%`,
+                }}
+              ></div>
+            )}
+          </nav>
+
+          {/* Tab Content */}
+          <section>
+            <Suspense fallback={<div>Loading...</div>}>
+              {visibleTabs.find((t) => t.id === activeTab)?.component}
+            </Suspense>
+          </section>
+
+        </div>
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default Inventory;

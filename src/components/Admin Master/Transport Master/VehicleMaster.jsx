@@ -1,66 +1,119 @@
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect } from "react";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 import Footer from "../../../Components-2/Footer";
 
-const VehicleEntry = React.lazy(() => import('./VehicleEntry'));
-const TransportEntry = React.lazy(() => import('./TransportEntry'));
-const DriverEntry = React.lazy(() => import('./DriverEntry'));
-const FlightEntry = React.lazy(() => import('./FlightEntry'));
-const TrainEntry = React.lazy(() => import('./TrainEntry'));
-const ProductEntry = React.lazy(() => import('./ProductEntry'));
+const VehicleEntry = React.lazy(() => import("./VehicleEntry"));
+const TransportEntry = React.lazy(() => import("./TransportEntry"));
+const DriverEntry = React.lazy(() => import("./DriverEntry"));
+const FlightEntry = React.lazy(() => import("./FlightEntry"));
+const TrainEntry = React.lazy(() => import("./TrainEntry"));
+const ProductEntry = React.lazy(() => import("./ProductEntry"));
 
 function VehicleMaster() {
-    const [activeTab, setActiveTab] = useState('vehicle');
+  // Load permissions
+  const permissions = JSON.parse(localStorage.getItem("Login")) || {};
+  const has = (key) => permissions[key] === 1;
 
-    // order of tabs for slider movement
-    const tabs = ['vehicle', 'transport', 'driver', 'flight', 'train', 'product'];
+  // Define all tabs
+  const allTabs = [
+    {
+      id: "vehicle",
+      label: "Vehicle Details",
+      component: <VehicleEntry />,
+      show: has("VehicleDetails"), // ❗ change to actual permission
+    },
+    {
+      id: "transport",
+      label: "Transport Details",
+      component: <TransportEntry />,
+      show: has("TransportDetails"),
+    },
+    {
+      id: "driver",
+      label: "Driver Details",
+      component: <DriverEntry />,
+      show: has("DriverDetails"),
+    },
+    {
+      id: "flight",
+      label: "Flight Details",
+      component: <FlightEntry />,
+      show: 1, // ❗ change to actual permission
+    },
+    {
+      id: "train",
+      label: "Train Details",
+      component: <TrainEntry />,
+      show: 1, // ❗ change to actual permission
+    },
+    {
+      id: "product",
+      label: "Product Details",
+      component: <ProductEntry />,
+      show: 1, // ❗ change to actual permission
+    },
+  ];
 
-    return (
-        <>
-            <Header />
-            <Sidebar1 />
+  // visible tabs only
+  const visibleTabs = allTabs.filter((t) => t.show);
 
-            <div className="main-body" id="main-body">
-                <div className="container">
+  const [activeTab, setActiveTab] = useState(null);
 
-                    {/* Navigation */}
-                    <nav className="nav">
-                        <label onClick={() => setActiveTab('vehicle')}>Vehicle Details</label>
-                        <label onClick={() => setActiveTab('transport')}>Transport Details</label>
-                        <label onClick={() => setActiveTab('driver')}>Driver Details</label>
-                        <label onClick={() => setActiveTab('flight')}>Flight Details</label>
-                        <label onClick={() => setActiveTab('train')}>Train Details</label>
-                        <label onClick={() => setActiveTab('product')}>Product Details</label>
+  // Auto-select first visible tab
+  useEffect(() => {
+    if (!activeTab && visibleTabs.length > 0) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs]);
 
-                        {/* Slider */}
-                        <div
-                            className="slider"
-                            style={{
-                                left: `${tabs.indexOf(activeTab) * (100 / tabs.length)}%`,
-                                width: `${100 / tabs.length}%`
-                            }}
-                        ></div>
-                    </nav>
+  return (
+    <>
+      <Header />
+      <Sidebar1 />
 
-                    {/* Tab Content */}
-                    <section>
-                        <Suspense fallback={<div>Loading...</div>}>
-                            {activeTab === 'vehicle' && <VehicleEntry />}
-                            {activeTab === 'transport' && <TransportEntry />}
-                            {activeTab === 'driver' && <DriverEntry />}
-                            {activeTab === 'flight' && <FlightEntry />}
-                            {activeTab === 'train' && <TrainEntry />}
-                            {activeTab === 'product' && <ProductEntry />}
-                        </Suspense>
-                    </section>
+      <div className="main-body" id="main-body">
+        <div className="container">
 
-                </div>
+          {/* Navigation */}
+          <nav className="nav">
+            {visibleTabs.map((tab) => (
+              <label
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                
+              >
+                {tab.label}
+              </label>
+            ))}
 
-                <Footer />
-            </div>
-        </>
-    );
+            {/* Slider */}
+            {activeTab && (
+              <div
+                className="slider"
+                style={{
+                  width: `${100 / visibleTabs.length}%`,
+                  left: `${
+                    visibleTabs.findIndex((t) => t.id === activeTab) *
+                    (100 / visibleTabs.length)
+                  }%`,
+                }}
+              ></div>
+            )}
+          </nav>
+
+          {/* Tab content */}
+          <section>
+            <Suspense fallback={<div>Loading...</div>}>
+              {visibleTabs.find((t) => t.id === activeTab)?.component}
+            </Suspense>
+          </section>
+
+        </div>
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default VehicleMaster;
