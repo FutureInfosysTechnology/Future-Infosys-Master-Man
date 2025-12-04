@@ -1118,11 +1118,11 @@ function CustomerName() {
                                                 </div>
 
                                                 <div className="input-field3">
-                                                    <label htmlFor="">Contract Amount</label>
+                                                    <label htmlFor="">Wallet Amount</label>
                                                     <div className="dropdown">
                                                         <button onClick={(e) => { e.preventDefault(); setModalIsOpen1(true); }} type="button" className="ok-btn"
                                                             style={{ height: "35px", fontSize: "14px", width: "100%" }}>
-                                                            {contractData.contractAmount ? `Amount: ${contractData.contractAmount}` : 'Contract Amount'}
+                                                            {contractData.contractAmount ? `Amount: ${contractData.contractAmount}` : 'Wallet Amount'}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1314,7 +1314,7 @@ function CustomerName() {
                         }}>
                         <div className="custom-modal-content">
                             <div className="header-tittle">
-                                <header>Contract Details</header>
+                                <header>Wallet Details</header>
                             </div>
 
                             <div className='container2'>
@@ -1344,8 +1344,8 @@ function CustomerName() {
                                         </div>
 
                                         <div className="input-field1">
-                                            <label htmlFor="">Contract Amount</label>
-                                            <input type="text" placeholder="Enter Contract Amount"
+                                            <label htmlFor="">Wallet Amount</label>
+                                            <input type="text" placeholder="Enter Wallet Amount"
                                                 value={contractData.contractAmount}
                                                 onChange={(e) => setContractData({ ...contractData, contractAmount: e.target.value })} />
                                         </div>

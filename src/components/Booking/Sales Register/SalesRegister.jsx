@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import Footer from "../../../Components-2/Footer";
 import Sidebar1 from "../../../Components-2/Sidebar1";
 import Header from "../../../Components-2/Header/Header";
@@ -6,6 +7,7 @@ import Header from "../../../Components-2/Header/Header";
 import SalesRegisterWiseReport from "./SalesRegisterWiseReport";
 import ChecklistReport from "./ChecklistReport";
 import StatementWiseReport from "../Statement/StatementWiseReport";
+import BillView from "./BillView.";
 
 function SalesRegister() {
   // Get permissions
@@ -35,7 +37,7 @@ function SalesRegister() {
     {
       id: "billView",
       label: "Bill View Report",
-      component: <StatementWiseReport />,
+      component: <BillView/>,
       show: has("BillViewReport"),
     },
   ];

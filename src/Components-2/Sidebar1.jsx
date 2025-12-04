@@ -170,12 +170,12 @@ function Sidebar1() {
                             </Link>
                         </li>
 
-                        { show?.InternationalBooking===1 && <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
+                        <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/internationalbooking">
                                 <i className="bi bi-person-raised-hand"></i>
                                 <span>International Booking</span>
                             </Link>
-                        </li>}
+                        </li>
 
                         { show?.VendorBillEntry===1 && <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/vendorbill">

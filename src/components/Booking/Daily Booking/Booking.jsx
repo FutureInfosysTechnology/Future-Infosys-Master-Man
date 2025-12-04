@@ -53,7 +53,6 @@ function Booking() {
     const [modalIsOpen8, setModalIsOpen8] = useState(false);
     const [modalIsOpen9, setModalIsOpen9] = useState(false);
     const [getReceiver, setGetReceiver] = useState([]);
-    const [getShipper, setGetShipper] = useState([]);
     const [getCustomerdata, setgetCustomerdata] = useState([]);
     const [getCountry, setGetCountry] = useState([]);
     const [getVendor, setGetVendor] = useState([]);
@@ -1194,6 +1193,226 @@ function Booking() {
 
         console.log("input==0");
     }, [formData.Customer_Code, formData.Mode_Code]);
+
+    useEffect(() => {
+        const handleMakeRate = async () => {
+            try {
+                const body = {
+                    Client_Code: formData.Customer_Code,
+                    Mode_Codes: formData.Mode_Code,
+                    Origin_Code: formData.OriginCode,
+                    Destination_Codes: formData.DestinationCode,
+                    Zone_Codes: formData.Dest_Zone,
+                    State_Codes: getCity.find(c => c.City_Code === formData.DestinationCode)?.State_Code || "7",
+                    Weight: Math.max(parseFloat(formData.ActualWt) || 0, parseFloat(formData.VolumetricWt) || 0, parseFloat(formData.ChargedWt) || 0),
+                    Method: formData.BookMode,
+                    Dox_Spx: formData.DoxSpx,
+                };
+                const response = await postApi("/Master/GetCustomerFinalRate_CityState", body);
+                console.log(response);
+                // 
+                if (response?.GetDataSuccess === 1 && response.Data.length > 0) {
+                    const rateperKg = response.Data[0].Detail_Rate;
+                    // 
+                    // ✅ Update rate and trigger GST calculation automatically
+                    setFormData((prev) => ({
+                        ...prev,
+                        RatePerkg: rateperKg,
+                    }));
+                }
+                else {
+                    setFormData((prev) => ({
+                        ...prev,
+                        RatePerkg: 0,
+                    }));
+                }
+            } catch (error) {
+                console.error("❌ Error fetching rate:", error);
+            }
+        };
+        // 
+        if (formData.Customer_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode) {
+            handleMakeRate();
+        }
+    },
+        [formData.Customer_Code,
+        formData.Mode_Code,
+        formData.OriginCode,
+        formData.DestinationCode,
+        formData.Dest_Zone,
+        formData.BookMode,
+        formData.DoxSpx,
+        formData.ActualWt,
+        formData.VolumetricWt,
+        formData.ChargedWt]);
+
+
+
+    useEffect(() => {
+        const calculateVenGstDetails = async () => {
+            try {
+                const {
+                    Vendor_Code,
+                    Mode_Code,
+                    VendorAmt,
+                } = formData;
+
+                if (!Vendor_Code || !Mode_Code || !VendorAmt) return;
+
+                const body = {
+                    Vendor_Code: Vendor_Code,
+                    Mode_Code: Mode_Code,
+                    Rate: VendorAmt,
+                    UseInput: UseInput,
+                };
+
+                const response = await postApi(`/Master/VendorcalculateGST`, body);
+
+                const gst = response.Data;
+                console.log("✅ GST API Response:", gst);
+                setUseInput(gst?.Success);
+                console.log(`input==${gst?.Success}`);
+
+                if (gst.Rate == 0) {
+                    gst.Rate = formData.VendorAmt;
+                    gst.Subtotal = formData.VendorAmt;
+                    gst.TotalAmount = formData.VendorAmt;
+                }
+
+                setVendorShow(prev => ({
+                    ...prev,
+                    Rate: gst.Rate,
+                    Fuel_Charges: gst.Fuel_Charges,
+                    Fuel_Per: gst.Fuel_Per,
+                    Fov_Charges: gst.Fov_Charges,
+                    Fov_Per: gst.Fov_Per,
+                    Docket_Charges: gst.Docket_Charges,
+                    ODA_Charges: gst.ODA_Charges,
+                    Delivery_Charges: gst.Delivery_Charges,
+                    Packing_Charges: gst.Packing_Charges,
+                    Green_Charges: gst.Green_Charges,
+                    Hamali_Charges: gst.Hamali_Charges,
+                    Other_Charges: gst.Other_Charges,
+                    Insurance_Charges: gst.Insurance_Charges,
+                    Subtotal: gst.Subtotal,
+                    CGSTPer: gst.CGSTPer,
+                    CGSTAmt: gst.CGSTAmt,
+                    SGSTPer: gst.SGSTPer,
+                    SGSTAmt: gst.SGSTAmt,
+                    IGSTPer: gst.IGSTPer,
+                    IGSTAmt: gst.IGSTAmt,
+                    TotalGST: gst.TotalGST,
+                    TotalAmount: gst.TotalAmount,
+                }));
+
+            } catch (error) {
+                console.error("❌ Error in GST API:", error);
+            }
+        };
+
+        if (
+            formData.Vendor_Code &&
+            formData.Mode_Code &&
+            formData.VendorAmt
+        ) {
+            calculateVenGstDetails();
+        }
+    }, [
+        formData.Vendor_Code,
+        formData.Mode_Code,
+        formData.VendorAmt,
+    ]);
+
+    useEffect(() => {
+        // 🔵 1) FETCH RATE → UPDATE VendorAmt → CALL GST
+        const handleVenMakeRate = async () => {
+            try {
+                const body = {
+                    Vendor_Code: formData.Vendor_Code,
+                    Mode_Codes: formData.Mode_Code,
+                    Origin_Code: formData.OriginCode,
+                    Destination_Codes: formData.DestinationCode,
+                    Zone_Codes: formData.Dest_Zone,
+                    State_Codes: getCity.find(c => c.City_Code === formData.DestinationCode)?.State_Code || "27",
+                    Weight: parseFloat(formData.VendorWt),
+                    Method: "Credit",
+                    Dox_Spx: formData.DoxSpx,
+                };
+
+                const res = await postApi("/Master/VendorRateCalculation", body);
+                if (res.GetDataSuccess === 1 && res.Data.length > 0) {
+                    let rateKg = Number(res?.Data?.[0]?.RatePerKg) || 0;
+                    let amount = rateKg * Number(formData.VendorWt || 0);
+
+                    // 1️⃣ Update both together to avoid stale data
+                    setFormData(prev => ({
+                        ...prev,
+                        VendorRatePerkg: rateKg,
+                        VendorAmt: amount
+                    }));
+
+                    // 2️⃣ Immediately calculate GST using fresh amount (not from state)
+
+                }
+                else {
+                    setFormData(prev => ({
+                        ...prev,
+                        VendorRatePerkg: 0,
+                        VendorAmt: 0
+                    }));
+
+
+                }
+
+            } catch (err) {
+                console.log("❌ Rate API Failed", err);
+
+
+            }
+        };
+
+        // 
+        if (formData.Vendor_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode && formData.VendorWt) {
+            handleVenMakeRate();
+        }
+    },
+        [
+            formData.Vendor_Code,
+            formData.Mode_Code,
+            formData.OriginCode,
+            formData.DestinationCode,
+            formData.Dest_Zone,
+            formData.BookMode,
+            formData.DoxSpx,
+            formData.VendorWt]);
+    useEffect(() => {
+        setVendorShow({
+            Rate: 0,
+            Fuel_Charges: 0,
+            Fuel_Per: 0,
+            Fov_Charges: 0,
+            Fov_Per: 0,
+            Docket_Charges: 0,
+            ODA_Charges: 0,
+            Delivery_Charges: 0,
+            Packing_Charges: 0,
+            Green_Charges: 0,
+            Hamali_Charges: 0,
+            Other_Charges: 0,
+            Insurance_Charges: 0,
+            Subtotal: 0,
+            CGSTPer: 0,
+            CGSTAmt: 0,
+            SGSTPer: 0,
+            SGSTAmt: 0,
+            IGSTPer: 0,
+            IGSTAmt: 0,
+            TotalGST: 0,
+            TotalAmount: 0
+        });
+
+    }, [formData.VendorAmt])
+
     useEffect(() => {
         const calculateGstDetails = async () => {
             try {
@@ -1305,132 +1524,6 @@ function Booking() {
         formData.InsuranceChrgs,
         skipGstCalc
     ]);
-    useEffect(() => {
-        const calculateVenGstDetails = async () => {
-            try {
-                const {
-                    Vendor_Code,
-                    Mode_Code,
-                    VendorAmt,
-                } = formData;
-
-                if (!Vendor_Code || !Mode_Code || !VendorAmt) return;
-
-                // Build request body
-                const body = {
-                    Vendor_Code:Vendor_Code,
-                    Mode_Code:Mode_Code,
-                    Rate:VendorAmt,
-                    UseInput: UseInput,
-                };
-
-                const response = await postApi(`/Master/VendorcalculateGST`, body);
-
-                    const gst = response.Data;
-                    console.log("✅ GST API Response:", gst);
-                    setUseInput(gst?.Success);
-                    console.log(`input==${gst?.Success}`);
-
-
-                    // setIsGstCalculated(true);
-                    setVendorShow(prev => ({
-                        ...prev,
-                        Rate: gst.Rate,
-                        Fuel_Charges: gst.Fuel_Charges,
-                        Fuel_Per: gst.Fuel_Per,
-
-                        Fov_Charges: gst.Fov_Charges,
-                        Fov_Per: gst.Fov_Per,
-
-                        Docket_Charges: gst.Docket_Charges,
-                        ODA_Charges: gst.ODA_Charges,
-                        Delivery_Charges: gst.Delivery_Charges,
-                        Packing_Charges: gst.Packing_Charges,
-                        Green_Charges: gst.Green_Charges,
-                        Hamali_Charges: gst.Hamali_Charges,
-                        Other_Charges: gst.Other_Charges,
-                        Insurance_Charges: gst.Insurance_Charges,
-
-                        Subtotal: gst.Subtotal,
-
-                        CGSTPer: gst.CGSTPer,
-                        CGSTAmt: gst.CGSTAmt,
-
-                        SGSTPer: gst.SGSTPer,
-                        SGSTAmt: gst.SGSTAmt,
-
-                        IGSTPer: gst.IGSTPer,
-                        IGSTAmt: gst.IGSTAmt,
-
-                        TotalGST: gst.TotalGST,
-
-                        TotalAmount: gst.TotalAmount,
-                    }));
-
-            } catch (error) {
-                console.error("❌ Error in GST API:", error);
-            }
-        };
-
-        // Run only when essential fields change
-        if (
-            formData.Vendor_Code &&
-            formData.Mode_Code &&
-            formData.VendorAmt
-        ) {
-            calculateVenGstDetails();
-        }
-    }, [
-        formData.Vendor_Code,
-        formData.Mode_Code,
-        formData.VendorAmt,
-    ]);
-    useEffect(() => {
-        const handleMakeRate = async () => {
-            try {
-                const body = {
-                    Client_Code: formData.Customer_Code,
-                    Mode_Codes: formData.Mode_Code,
-                    Origin_Code: formData.OriginCode,
-                    Destination_Codes: formData.DestinationCode,
-                    Zone_Codes: formData.Dest_Zone,
-                    State_Codes: getCity.find(c => c.City_Code === formData.DestinationCode)?.State_Code || "7",
-                    Weight: Math.max(parseFloat(formData.ActualWt) || 0, parseFloat(formData.VolumetricWt) || 0, parseFloat(formData.ChargedWt) || 0),
-                    Method: formData.BookMode,
-                    Dox_Spx: formData.DoxSpx,
-                };
-                const response = await postApi("/Master/GetCustomerFinalRate_CityState", body);
-                console.log(response);
-                // 
-                if (response?.GetDataSuccess === 1 && response.Data.length > 0) {
-                    const rateperKg = response.Data[0].Detail_Rate;
-                    // 
-                    // ✅ Update rate and trigger GST calculation automatically
-                    setFormData((prev) => ({
-                        ...prev,
-                        RatePerkg: rateperKg,
-                    }));
-                }
-            } catch (error) {
-                console.error("❌ Error fetching rate:", error);
-            }
-        };
-        // 
-        if (formData.Customer_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode) {
-            handleMakeRate();
-        }
-    },
-        [formData.Customer_Code,
-        formData.Mode_Code,
-        formData.OriginCode,
-        formData.DestinationCode,
-        formData.Dest_Zone,
-        formData.BookMode,
-        formData.DoxSpx,
-        formData.ActualWt,
-        formData.VolumetricWt,
-        formData.ChargedWt]);
-
     useEffect(() => {
         const getVolum = async (Customer_Code, Mode_Code) => {
             try {
@@ -2850,6 +2943,7 @@ function Booking() {
                                                             className="form-control"
                                                             placeholder="Vendor Amount"
                                                             value={formData.VendorAmt}
+                                                            readOnly
                                                             onChange={(e) =>
                                                                 setFormData({ ...formData, VendorAmt: e.target.value })
                                                             }
@@ -4222,19 +4316,15 @@ function Booking() {
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen5}
                         style={{
                             content: {
-                                top: '53%',
-                                left: '55%',
-                                right: 'auto',
-                                bottom: 'auto',
-                                marginRight: '-50%',
-                                transform: 'translate(-50%, -50%)',
-                                height: '460px',
-                                width: '85%',
-                                borderRadius: '5px',
-                                padding: "0px"
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                height:"auto",
+                                whiteSpace: "nowrap"
                             },
-                        }}>
-                        <div>
+                        }}
+                        className="custom-modal-mode" contentLabel="Modal">
+                        <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header> Vendor Volumetric</header>
                             </div>
@@ -4384,19 +4474,15 @@ function Booking() {
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen9}
                         style={{
                             content: {
-                                top: '53%',
-                                left: '55%',
-                                right: 'auto',
-                                bottom: 'auto',
-                                marginRight: '-50%',
-                                transform: 'translate(-50%, -50%)',
-                                height: '460px',
-                                width: '85%',
-                                borderRadius: '5px',
-                                padding: "0px"
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                height:"auto",
+                                whiteSpace: "nowrap"
                             },
-                        }}>
-                        <div>
+                        }}
+                        className="custom-modal-mode" contentLabel="Modal">
+                        <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Volumetric Calculate</header>
                             </div>
@@ -4547,21 +4633,17 @@ function Booking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen6}
-                        style={{
+                       style={{
                             content: {
-                                top: '53%',
-                                left: '55%',
-                                right: 'auto',
-                                bottom: 'auto',
-                                marginRight: '-50%',
-                                transform: 'translate(-50%, -50%)',
-                                height: '450px',
-                                width: '85%',
-                                borderRadius: '5px',
-                                padding: "0px"
+                                width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                height:"auto",
+                                whiteSpace: "nowrap"
                             },
-                        }}>
-                        <div>
+                        }}
+                        className="custom-modal-mode" contentLabel="Modal">
+                        <div className="custom-modal-content">
                             <div className="header-tittle">
                                 <header>Invoice Details</header>
                             </div>
@@ -5043,7 +5125,7 @@ function Booking() {
                                             <input type="text" value={vendorShow.IGSTAmt || 0} readOnly />
                                         </div>
                                         <div className="input-field1">
-                                            <label>Total GST ({vendorShow.SGSTPer+vendorShow.SGSTPer || vendorShow.IGSTPer || 0}%)</label>
+                                            <label>Total GST ({vendorShow.SGSTPer + vendorShow.SGSTPer || vendorShow.IGSTPer || 0}%)</label>
                                             <input type="text" value={vendorShow.TotalGST || 0} readOnly />
                                         </div>
 

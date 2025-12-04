@@ -8,7 +8,7 @@ import Select from 'react-select';
 import 'react-toggle/style.css';
 import { refeshPend } from "../../../App";
 
-function CreateManifest() {
+function InternationalManifest() {
     const { refFun } = useContext(refeshPend)
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -48,6 +48,9 @@ function CreateManifest() {
         driverMobile: '',
         vendorCode: '',
         vendorAwbNo: '',
+        MAwbNo: '',
+        bagNo: '',
+        DoxSpx: '',
         remark: '',
         bookingWeight: '',
         manifestWeight: '',
@@ -294,6 +297,9 @@ function CreateManifest() {
                 driverMobile: '',
                 vendorCode: '',
                 vendorAwbNo: '',
+                MAwbNo: '',
+                bagNo: '',
+                DoxSpx: '',
                 remark: '',
                 bookingWeight: '',
                 manifestWeight: '',
@@ -714,6 +720,28 @@ function CreateManifest() {
                                     onChange={(e) => setFormData({ ...formData, remark: e.target.value })} />
                             </div>
 
+                            <div className="input-field3" >
+                                <label htmlFor="">Master Awb No</label>
+                                <input type="text" placeholder="Master Awb No" maxLength={10}
+                                    value={formData.MAwbNo} onChange={(e) => setFormData({ ...formData, MAwbNo: e.target.value })} />
+                            </div>
+
+                            <div className="input-field3" >
+                                <label htmlFor="">Dox / Spx </label>
+                                <select
+                                    value={formData.DoxSpx} onChange={(e) => setFormData({ ...formData, DoxSpx: e.target.value })} >
+                                    <option value="">Select Dox/Spx</option>
+                                    <option value="Dox">Dox</option>
+                                    <option value="Box">Box</option>
+                                </select>
+                            </div>
+
+                            <div className="input-field3" >
+                                <label htmlFor="">Bag No</label>
+                                <input type="text" placeholder="Bag No" maxLength={10}
+                                    value={formData.bagNo} onChange={(e) => setFormData({ ...formData, bagNo: e.target.value })} />
+                            </div>
+
 
                             <div className="input-field3" >
                                 <label htmlFor="">Manifest Weight</label>
@@ -919,4 +947,4 @@ function CreateManifest() {
 };
 
 
-export default CreateManifest;
+export default InternationalManifest;

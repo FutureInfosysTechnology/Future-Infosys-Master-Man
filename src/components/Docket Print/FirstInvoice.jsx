@@ -266,9 +266,9 @@ function FirstInvoice() {
     const freightTotal = invoiceData.reduce((sum, inv) => sum + Number(inv.Rate || 0), 0);
 
     const subTotal = docketTotal + hamaliTotal + deliveryTotal + fovTotal + fuelTotal + odaTotal + insuranceTotal + packingTotal + otherTotal + freightTotal;
-    const igst = subTotal * invoiceData[0]?.IGSTPer / 100; 
-    const cgst = subTotal * invoiceData[0]?.CGSTPer / 100; 
-    const sgst = subTotal * invoiceData[0]?.SGSTPer / 100; 
+    const igst = subTotal * invoiceData[0]?.IGSTPer / 100;
+    const cgst = subTotal * invoiceData[0]?.CGSTPer / 100;
+    const sgst = subTotal * invoiceData[0]?.SGSTPer / 100;
     const grossTotal = subTotal + igst + cgst + sgst;
     const headerCellStyle = {
         border: "1px solid black",
@@ -365,7 +365,7 @@ function FirstInvoice() {
 
                         <button
                             onClick={sendMail}
-                            style={{ padding: "1px",borderRadius: "6px", background: "blue", width: "50px", color: "white", border: "none", cursor: "pointer" }}
+                            style={{ padding: "1px", borderRadius: "6px", background: "blue", width: "50px", color: "white", border: "none", cursor: "pointer" }}
                         >
                             <TbMailShare size={25} />
                         </button>
@@ -392,7 +392,7 @@ function FirstInvoice() {
 
                     <div className="container-2" style={{ borderRadius: "0px", width: "950px", display: "flex", flexDirection: "column" }}>
 
-                        < div  id="printable-section" style={{ padding: "0px" }}>
+                        < div id="printable-section" style={{ padding: "0px" }}>
                             <div className='p-4' style={{ border: "2px solid silver" }}>
 
                                 <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", gap: "50px" }}>
@@ -419,8 +419,8 @@ function FirstInvoice() {
                                 </div>
 
                                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", border: "1px solid black", marginBottom: "5px", padding: "10px" }}>
-                                    <div style={{ display: "flex", justifyContent: "start"}}>
-                                        <div style={{ display: "flex", flexDirection: "column",width:"10%" }}>
+                                    <div style={{ display: "flex", justifyContent: "start" }}>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "10%" }}>
                                             <label htmlFor=""><b>Client Name</b></label>
                                             <label htmlFor=""><b>Address</b></label>
                                             <label htmlFor=""><b>State</b></label>
@@ -545,139 +545,140 @@ function FirstInvoice() {
                                     </div>
                                 </div>
                                 <div className='foot'>
-                                <div style={{ width: "100%", display: "flex", border: "1px solid black", marginTop: "10px", justifyContent: "space-between", fontSize: "12px" }}>
-                                    <div style={{ display: "flex", justifyContent: "end", alignItems: "start", flexDirection: "column", gap: "10px", fontWeight: "bold", margin: "20px" }}>
-                                        <div> Tax Payable on Revers charge (Yes/No)</div>
-                                        <div> {toTitleCase(toWords(Number(grossTotal || 0).toFixed(2)))}</div>
-                                    </div>
-                                    <div style={{ display: "flex", width: "20%", justifyContent: "start", alignItems: "start", flexDirection: "column", fontWeight: "bold" }}>
-                                        {isDocketChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Docket Charges</div>
-                                                <div>{docketTotal.toFixed(2)}</div>
+                                    <div style={{ width: "100%", display: "flex", border: "1px solid black", marginTop: "10px", justifyContent: "space-between", fontSize: "12px" }}>
+                                        <div style={{ display: "flex", justifyContent:"space-between", alignItems: "start", flexDirection: "column", gap: "10px" ,padding:"10px"}}>
+                                            <div style={{fontWeight:"bold"}}> Tax Payable on Revers charge (Yes/No)</div>
+                                            <div style={{fontWeight:"bold"}}> {toTitleCase(toWords(Number(grossTotal || 0).toFixed(2)))}</div>
+                                            <div style={{display: "flex", whiteSpace: "nowrap", flexDirection: "column", borderTop: "none", justifyContent: "end", fontSize: "13px" }}>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Bank Name :</div>    <div style={{ textAlign: "start" }}>{getBranch?.Bank_Name}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Branch :</div>  <div style={{ textAlign: "start" }}>{getBranch?.Company_Name}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>A/C No :</div> <div style={{ textAlign: "start" }}>{getBranch?.AccountNo}</div></div>
+                                                <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>IFSC Code :</div> <div style={{ textAlign: "start" }}>{getBranch?.IFSC_Code}</div></div>
                                             </div>
-                                        )}
-
-                                        {isHamaliChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Pickup Charges</div>
-                                                <div>{hamaliTotal.toFixed(2)}</div>
-                                            </div>
-                                        )}
-
-                                        {isDeliveryChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Delivery Charges</div>
-                                                <div>{deliveryTotal.toFixed(2)}</div>
-                                            </div>
-                                        )}
-
-                                        {isFovChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>FOV Charges</div>
-                                                <div>{fovTotal.toFixed(2)}</div>
-                                            </div>
-                                        )}
-
-                                        {isFuelChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Fuel Charges</div>
-                                                <div>{fuelTotal.toFixed(2)}</div>
-                                            </div>
-                                        )}
-
-                                        {isODAChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>ODA Charges</div>
-                                                <div>{odaTotal.toFixed(2)}</div>
-                                            </div>
-                                        )}
-
-                                        {isInsuranceChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Insurance Charges</div>
-                                                <div>{insuranceTotal.toFixed(2)}</div>
-                                            </div>
-                                        )}
-
-                                        {isPackingChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Packing Charges</div>
-                                                <div>{packingTotal.toFixed(2)}</div>
-                                            </div>
-                                        )}
-
-                                        {isOtherChecked && (
-                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                <div>Other Charges</div>
-                                                <div>{otherTotal.toFixed(2)}</div>
-                                            </div>
-                                        )}
-
-                                        <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px", borderBottom: "1px solid black" }}>
-                                            <div>Freight Amount</div>
-                                            <div>{freightTotal.toFixed(2)}</div>
                                         </div>
+                                        <div style={{ display: "flex", width: "20%", justifyContent: "start", alignItems: "start", flexDirection: "column", fontWeight: "bold" }}>
+                                            {isDocketChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>Docket Charges</div>
+                                                    <div>{docketTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
 
-                                        <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px", borderBottom: "1px solid black" }}>
-                                            <div>Sub Total</div>
-                                            <div>{subTotal.toFixed(2)}</div>
-                                        </div>
+                                            {isHamaliChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>Pickup Charges</div>
+                                                    <div>{hamaliTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
 
-                                        <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                            <div>IGST@ of {invoiceData[0]?.IGSTPer}%</div>
-                                            <div>{igst.toFixed(2)}</div>
-                                        </div>
+                                            {isDeliveryChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>Delivery Charges</div>
+                                                    <div>{deliveryTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
 
-                                        <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                            <div>CGST@ of {invoiceData[0]?.CGSTPer}%</div>
-                                            <div>{cgst.toFixed(2)}</div>
-                                        </div>
+                                            {isFovChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>FOV Charges</div>
+                                                    <div>{fovTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
 
-                                        <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px", borderBottom: "1px solid black" }}>
-                                            <div>SGST@ of {invoiceData[0]?.SGSTPer}%</div>
-                                            <div>{sgst.toFixed(2)}</div>
-                                        </div>
+                                            {isFuelChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>Fuel Charges</div>
+                                                    <div>{fuelTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
 
-                                        <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                            <div>Gross Total</div>
-                                            <div>{grossTotal.toFixed(2)}</div>
-                                        </div>
+                                            {isODAChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>ODA Charges</div>
+                                                    <div>{odaTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
+
+                                            {isInsuranceChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>Insurance Charges</div>
+                                                    <div>{insuranceTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
+
+                                            {isPackingChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>Packing Charges</div>
+                                                    <div>{packingTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
+
+                                            {isOtherChecked && (
+                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                    <div>Other Charges</div>
+                                                    <div>{otherTotal.toFixed(2)}</div>
+                                                </div>
+                                            )}
+
+                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px", borderBottom: "1px solid black" }}>
+                                                <div>Freight Amount</div>
+                                                <div>{freightTotal.toFixed(2)}</div>
+                                            </div>
+
+                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px", borderBottom: "1px solid black" }}>
+                                                <div>Sub Total</div>
+                                                <div>{subTotal.toFixed(2)}</div>
+                                            </div>
+
+                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                <div>IGST@ of {invoiceData[0]?.IGSTPer}%</div>
+                                                <div>{igst.toFixed(2)}</div>
+                                            </div>
+
+                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                <div>CGST@ of {invoiceData[0]?.CGSTPer}%</div>
+                                                <div>{cgst.toFixed(2)}</div>
+                                            </div>
+
+                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px", borderBottom: "1px solid black" }}>
+                                                <div>SGST@ of {invoiceData[0]?.SGSTPer}%</div>
+                                                <div>{sgst.toFixed(2)}</div>
+                                            </div>
+
+                                            <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                <div>Gross Total</div>
+                                                <div>{grossTotal.toFixed(2)}</div>
+                                            </div>
 
 
-                                    </div>
-                                </div>
-
-                                <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", justifyContent: "space-around", fontSize: "15px" }}>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Bank Name :</div>    <div style={{ textAlign: "start" }}>{getBranch?.Bank_Name}</div></div>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Branch :</div>  <div style={{ textAlign: "start" }}>{getBranch?.Company_Name}</div></div>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>A/C No :</div> <div style={{ textAlign: "start" }}>{getBranch?.AccountNo}</div></div>
-                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>IFSC Code :</div> <div style={{ textAlign: "start" }}>{getBranch?.IFSC_Code}</div></div>
-                                </div>
-                                <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", padding: "5px", fontSize: "10px" }}>
-                                    <div style={{ display: "flex", width: "60%", gap: "2px", flexDirection: "column" }}>
-                                        <div style={{ fontWeight: "bold", fontSize: "11px" }}> TERMS :</div>
-                                        {
-                                            isTermChecked && termArr.length > 0 && termArr.map((data, index) => (
-                                                <div style={{ marginLeft: "5px" }}> {index + 1}. {data}.</div>
-                                            ))
-
-                                        }
-                                        <div style={{ fontWeight: "bold", fontSize: "11px", marginLeft: "10px", marginTop: "20px", marginBottom: "20px" }}> This is Computerised Generated Bill hence does not require any  signature & Stam</div>
-                                    </div>
-                                    <div style={{ display: "flex", width: "40%", justifyContent: "center", alignItems: "center" }}>
-                                        <div className='stamp'  style={{
-                                            display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "40%",
-                                            gap: "100px", fontWeight: "bold", fontSize: "13px", height: "130px", backgroundImage: `url(${getBranch?.Company_Stamp})`, // 👈 use your stored image
-                                            backgroundSize: "contain",
-                                            backgroundPosition: "center",
-                                            backgroundRepeat: "no-repeat",
-                                        }}>
-                                            <div style={{}}>For <b style={{ marginLeft: "5px", fontWeight: "bold", fontSize: "11px" }}>{getBranch?.Company_Name}</b></div>
-                                            <div> Auth. Signatory</div>
                                         </div>
                                     </div>
-                                </div>
+
+
+                                    <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", padding: "5px", fontSize: "10px" }}>
+                                        <div style={{ display: "flex", width: "60%", gap: "2px", flexDirection: "column" }}>
+                                            <div style={{ fontWeight: "bold", fontSize: "11px" }}> TERMS :</div>
+                                            {
+                                                isTermChecked && termArr.length > 0 && termArr.map((data, index) => (
+                                                    <div style={{ marginLeft: "5px" }}> {index + 1}. {data}.</div>
+                                                ))
+
+                                            }
+                                            <div style={{ fontWeight: "bold", fontSize: "11px", marginLeft: "10px", marginTop: "20px", marginBottom: "20px" }}> This is Computerised Generated Bill hence does not require any  signature & Stam</div>
+                                        </div>
+                                        <div style={{ display: "flex", width: "40%", justifyContent: "center", alignItems: "center" }}>
+                                            <div className='stamp' style={{
+                                                display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "40%",
+                                                gap: "100px", fontWeight: "bold", fontSize: "13px", height: "130px", backgroundImage: `url(${getBranch?.Company_Stamp})`, // 👈 use your stored image
+                                                backgroundSize: "contain",
+                                                backgroundPosition: "center",
+                                                backgroundRepeat: "no-repeat",
+                                            }}>
+                                                <div style={{}}>For <b style={{ marginLeft: "5px", fontWeight: "bold", fontSize: "11px" }}>{getBranch?.Company_Name}</b></div>
+                                                <div> Auth. Signatory</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div >

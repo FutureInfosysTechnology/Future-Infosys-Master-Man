@@ -3,17 +3,18 @@ import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
-import { getApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
+import { getApi, putApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 
 
 
-function UpdateCustomerRate() {
+function CustRateUpload() {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [data, setData] = useState([]);                   // to get customer charges data
     const [getCustName, setGetCustName] = useState([]);            // To Get Customer Name Data                // To Get Mode Data
     const [loading, setLoading] = useState(true);
+    const [getProduct, setGetProduct] = useState([]);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -21,6 +22,9 @@ function UpdateCustomerRate() {
         custCode: 'ALL CUSTOMER DATA',
         fromDate: firstDayOfMonth,
         toDate: today,
+        DoxSpx: '',
+        product: '',
+        rateMode: '',
     })
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -79,12 +83,28 @@ function UpdateCustomerRate() {
         }
     };
 
+    const fetchProductData = async () => {
+        try {
+            const response = await getApi('/Master/GetAllProducts');
+            setGetProduct(Array.isArray(response.data) ? response.data : []);
+        } catch (err) {
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
 
     useEffect(() => {
         fetchCustomerData();
+        fetchProductData();
     }, [])
+
+    const allProductOptions = getProduct.map(p => ({
+        value: p.Product_Code,   // what you store
+        label: p.Product_Name, // visible in dropdown
+    }));
 
 
 
@@ -158,6 +178,53 @@ function UpdateCustomerRate() {
                                 />
                             </div>
 
+                            <div className="input-field1">
+                                <label>Product Name</label>
+
+                                <Select
+                                    className="blue-selectbooking"
+                                    classNamePrefix="blue-selectbooking"
+                                    options={allProductOptions}
+                                    value={
+                                        addCust.product
+                                            ? allProductOptions.find(opt => opt.value === addCust.product)
+                                            : null
+                                    }
+                                    onChange={(selectedOption) => {
+                                        setAddCust(prev => ({
+                                            ...prev,
+                                            product: selectedOption.value,
+                                        }));
+                                    }}
+                                    placeholder="Select Product"
+                                    isSearchable
+                                    menuPortalTarget={document.body}
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 })
+                                    }}
+                                />
+                            </div>
+
+                            <div className="input-field3" >
+                                <label htmlFor="">Dox / Spx </label>
+                                <select
+                                    value={addCust.DoxSpx} onChange={(e) => setAddCust({ ...addCust, DoxSpx: e.target.value })} >
+                                    <option value="">Select Dox/Spx</option>
+                                    <option value="Dox">Dox</option>
+                                    <option value="Box">Box</option>
+                                </select>
+                            </div>
+
+                            <div className="input-field3" >
+                                <label htmlFor="">Rate Mode </label>
+                                <select
+                                    value={addCust.rateMode} onChange={(e) => setAddCust({ ...addCust, rateMode: e.target.value })} >
+                                    <option value="">Select rate mode</option>
+                                    <option value="Addition">Addition</option>
+                                </select>
+                            </div>
+
+
 
                             <div className="input-field3">
                                 <label htmlFor="">From</label>
@@ -191,6 +258,9 @@ function UpdateCustomerRate() {
                                         custCode: 'ALL CUSTOMER DATA',
                                         fromDate: firstDayOfMonth,
                                         toDate: today,
+                                        DoxSpx: '',
+                                        product: '',
+                                        rateMode: '',
                                     })
                                 }} className='ok-btn'>close</button>
                             </div>
@@ -203,7 +273,7 @@ function UpdateCustomerRate() {
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead>
                                 <tr>
-                                    
+
                                     <th>Sr.No</th>
                                     <th>Docket No</th>
                                     <th>Book Date</th>
@@ -245,7 +315,7 @@ function UpdateCustomerRate() {
                                 {currentRows.map((cust, index) => (
                                     <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
 
-                                       
+
 
                                         {/* SR.NO */}
                                         <td>{index + 1}</td>
@@ -334,4 +404,4 @@ function UpdateCustomerRate() {
     )
 }
 
-export default UpdateCustomerRate;
+export default CustRateUpload;

@@ -45,7 +45,7 @@ import BranchAdmin from './components/User Control/BranchAdmin';
 import PerformanceInvoice from './components/Docket Print/PerformanceInvoice';
 import DocketBill from './components/Docket Print/DocketBill';
 import VendorBoxLabel from './components/Docket Print/VendorBoxLabel';
-import InternationalBooking from './components/Booking/Daily Booking/InternationalBooking';
+import InternationalBooking from './components/Booking/InternationalBooking/International';
 import NewDP from './components/Docket Print/NewDp1';
 import NewDP2 from './components/Docket Print/NewDp2';
 import CreditPrint from './components/Docket Print/CreditPrint';

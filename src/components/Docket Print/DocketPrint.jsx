@@ -22,10 +22,10 @@ function DocketPrint() {
 
   // Define all tabs with permissions
   const tabs = [
-    { id: "print1", label: "Docket Print 1", component: <DockerPrint1 />, permission: "DocketPrint1" },
-    { id: "print2", label: "Docket Print 2", component: <DocketPrint2 />, permission: "Docketprint2" },
-    { id: "print3", label: "Docket Print 3", component: <DocketPrint3 />, permission: "Docketprint3" },
-    { id: "print4", label: "Docket Print 4", component: <DocketPrint4 />, permission: "Docketprint4" },
+    { id: "print1", label: "Delivery Print 1", component: <DockerPrint1 />, permission: "DocketPrint1" },
+    { id: "print2", label: "Delivery Print 2", component: <DocketPrint2 />, permission: "Docketprint2" },
+    { id: "print3", label: "Delivery Print 3", component: <DocketPrint3 />, permission: "Docketprint3" },
+    { id: "print4", label: "Delivery Print 4", component: <DocketPrint4 />, permission: "Docketprint4" },
     { id: "label", label: "Label Printing", component: <LabelPrinting />, permission: "LebelPrintin" },
     { id: "sticker", label: "Sticker Printing", component: <BoxSticker />, permission: "StickerPrinting" },
   ];

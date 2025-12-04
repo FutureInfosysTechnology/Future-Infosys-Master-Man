@@ -3,24 +3,30 @@ import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
-import { getApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
+import { getApi, putApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 
 
 
-function UpdateCustomerRate() {
+function VenRateUpload() {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [data, setData] = useState([]);                   // to get customer charges data
     const [getCustName, setGetCustName] = useState([]);            // To Get Customer Name Data                // To Get Mode Data
     const [loading, setLoading] = useState(true);
+    const [getProduct, setGetProduct] = useState([]);
+    const [getVendor, setGetVendor] = useState([]);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [addCust, setAddCust] = useState({
         custCode: 'ALL CUSTOMER DATA',
+        VendorCode: "",
         fromDate: firstDayOfMonth,
         toDate: today,
+        DoxSpx: '',
+        product: '',
+        rateMode: '',
     })
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -53,6 +59,7 @@ function UpdateCustomerRate() {
             else {
                 Swal.fire("Warning", `No Record Found`, "warning");
                 setData([]);
+
             }
         }
         catch (error) {
@@ -79,13 +86,44 @@ function UpdateCustomerRate() {
         }
     };
 
+    const fetchVendorData = async () => {
+        try {
+            const response = await getApi('/Master/getVendor');
+            setGetVendor(Array.isArray(response.Data) ? response.Data : []);
+        } catch (err) {
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchProductData = async () => {
+        try {
+            const response = await getApi('/Master/GetAllProducts');
+            setGetProduct(Array.isArray(response.data) ? response.data : []);
+        } catch (err) {
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
 
     useEffect(() => {
         fetchCustomerData();
+        fetchProductData();
+        fetchVendorData();
     }, [])
 
+    const allProductOptions = getProduct.map(p => ({
+        value: p.Product_Code,   // what you store
+        label: p.Product_Name, // visible in dropdown
+    }));
+
+    const allVendorOption = getVendor.map(Vendr =>
+        ({ label: Vendr.Vendor_Name, value: Vendr.Vendor_Code }))
+        ;
 
 
 
@@ -157,6 +195,78 @@ function UpdateCustomerRate() {
                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                 />
                             </div>
+                            <div className="input-field1">
+                                <label htmlFor="">Vendor Name</label>
+                                <Select
+                                    className="blue-selectbooking"
+                                    classNamePrefix="blue-selectbooking"
+                                    options={allVendorOption}
+                                    value={
+                                        addCust.Vendor_Code
+                                            ? allVendorOption.find(opt => opt.value === addCust.Vendor_Code)
+                                            : null
+                                    }
+                                    onChange={(selectedOption) => {
+                                        setAddCust(prev => ({
+                                            ...prev,
+                                            Vendor_Code: selectedOption.value,
+                                        }));
+                                    }}
+                                    placeholder="Select Vendor Name"
+                                    isSearchable
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                    }}
+                                />
+                            </div>
+
+                            <div className="input-field1">
+                                <label>Product Name</label>
+
+                                <Select
+                                    className="blue-selectbooking"
+                                    classNamePrefix="blue-selectbooking"
+                                    options={allProductOptions}
+                                    value={
+                                        addCust.product
+                                            ? allProductOptions.find(opt => opt.value === addCust.product)
+                                            : null
+                                    }
+                                    onChange={(selectedOption) => {
+                                        setAddCust(prev => ({
+                                            ...prev,
+                                            product: selectedOption.value,
+                                        }));
+                                    }}
+                                    placeholder="Select Product"
+                                    isSearchable
+                                    menuPortalTarget={document.body}
+                                    styles={{
+                                        menuPortal: base => ({ ...base, zIndex: 9999 })
+                                    }}
+                                />
+                            </div>
+
+                            <div className="input-field3" >
+                                <label htmlFor="">Dox / Spx </label>
+                                <select
+                                    value={addCust.DoxSpx} onChange={(e) => setAddCust({ ...addCust, DoxSpx: e.target.value })} >
+                                    <option value="">Select Dox/Spx</option>
+                                    <option value="Dox">Dox</option>
+                                    <option value="Box">Box</option>
+                                </select>
+                            </div>
+
+                            <div className="input-field3" >
+                                <label htmlFor="">Rate Mode </label>
+                                <select
+                                    value={addCust.rateMode} onChange={(e) => setAddCust({ ...addCust, rateMode: e.target.value })} >
+                                    <option value="">Select rate mode</option>
+                                    <option value="Addition">Addition</option>
+                                </select>
+                            </div>
+
 
 
                             <div className="input-field3">
@@ -189,8 +299,12 @@ function UpdateCustomerRate() {
                                     setData([]);
                                     setAddCust({
                                         custCode: 'ALL CUSTOMER DATA',
+                                        VendorCode: "",
                                         fromDate: firstDayOfMonth,
                                         toDate: today,
+                                        DoxSpx: '',
+                                        product: '',
+                                        rateMode: '',
                                     })
                                 }} className='ok-btn'>close</button>
                             </div>
@@ -203,7 +317,7 @@ function UpdateCustomerRate() {
                         <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                             <thead>
                                 <tr>
-                                    
+
                                     <th>Sr.No</th>
                                     <th>Docket No</th>
                                     <th>Book Date</th>
@@ -245,7 +359,7 @@ function UpdateCustomerRate() {
                                 {currentRows.map((cust, index) => (
                                     <tr key={index} style={{ fontSize: "12px", position: "relative" }}>
 
-                                       
+
 
                                         {/* SR.NO */}
                                         <td>{index + 1}</td>
@@ -334,4 +448,4 @@ function UpdateCustomerRate() {
     )
 }
 
-export default UpdateCustomerRate;
+export default VenRateUpload;

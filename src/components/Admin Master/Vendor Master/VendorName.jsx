@@ -35,7 +35,8 @@ function VendorName() {
         stateCode: '',
         email: '',
         fuelCharge: '',
-        cityCode: ''
+        cityCode: '',
+        VendorWebAgent: '',
     })                                                         // to add vendor data
 
 
@@ -108,6 +109,8 @@ function VendorName() {
 
 
     const handleGenerateCode = () => {
+        if(vendorData.vendorCode!='')
+            return;
         const newCode = `${Math.floor(Math.random() * 1000)}`;
         setVendorData({ ...vendorData, vendorCode: newCode });
     };
@@ -140,7 +143,8 @@ function VendorName() {
             State_Code: vendorData.stateCode,
             Email: vendorData.email,
             Fuel_Charges: vendorData.fuelCharge,
-            City_Code: vendorData.cityCode
+            City_Code: vendorData.cityCode,
+            VendorWebAgent:vendorData.VendorWebAgent,
         }
 
         try {
@@ -159,7 +163,8 @@ function VendorName() {
                     stateCode: '',
                     email: '',
                     fuelCharge: '',
-                    cityCode: ''
+                    cityCode: '',
+                    VendorWebAgent: '',
                 });
                 Swal.fire('Updated!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -202,7 +207,7 @@ function VendorName() {
             email: vendorData.email,
             fuelCharges: vendorData.fuelCharge,
             cityCode: vendorData.cityCode,
-            VendorWebAgent: vendorData.vendorName,
+            VendorWebAgent: vendorData.VendorWebAgent,
         }
 
         try {
@@ -221,7 +226,8 @@ function VendorName() {
                     stateCode: '',
                     email: '',
                     fuelCharge: '',
-                    cityCode: ''
+                    cityCode: '',
+                    VendorWebAgent: '',
                 });
                 Swal.fire('Saved!', response.message || 'Your changes have been saved.', 'success');
                 setModalIsOpen(false);
@@ -359,7 +365,7 @@ function VendorName() {
                                     vendorID: '',
                                     vendorCode: '', vendorName: '', contactPerson: '', pinCode: '',
                                     vendAdd: '', vendMob: '', contMob: '', stateCode: '', email: '',
-                                    fuelCharge: '', cityCode: ''
+                                    fuelCharge: '', cityCode: '',VendorWebAgent: '',
                                 })
                             }}>
                                 <i className="bi bi-plus-lg"></i>
@@ -400,6 +406,7 @@ function VendorName() {
                                     <th scope="col">Contact_Person</th>
                                     <th scope="col">State_Name</th>
                                     <th scope="col">City_Name</th>
+                                    <th scope="col">Web Link</th>
 
                                 </tr>
                             </thead>
@@ -445,7 +452,8 @@ function VendorName() {
                                                             contMob: vendor.Mobile_No_2,
                                                             fuelCharge: vendor.Fuel_Charges,
                                                             cityCode: vendor.City_Code,
-                                                            stateCode: vendor.State_Code
+                                                            stateCode: vendor.State_Code,
+                                                            VendorWebAgent:vendor.VendorWebAgent
                                                         });
                                                         setModalIsOpen(true);
                                                     }}>
@@ -472,6 +480,7 @@ function VendorName() {
                                         <td>{vendor.Contact_Person}</td>
                                         <td>{vendor.State_Name}</td>
                                         <td>{vendor.City_Name}</td>
+                                        <td>{vendor.VendorWebAgent}</td>
 
                                     </tr>
                                 ))}
@@ -675,6 +684,13 @@ function VendorName() {
                                             <input type="text" placeholder="Enter Client Fuel %"
                                                 value={vendorData.fuelCharge}
                                                 onChange={(e) => setVendorData({ ...vendorData, fuelCharge: e.target.value })} />
+                                        </div>
+
+                                        <div className="input-field3">
+                                            <label htmlFor="">Web Link</label>
+                                            <input type="text" placeholder="Enter Web Link"
+                                                value={vendorData.VendorWebAgent}
+                                                onChange={(e) => setVendorData({ ...vendorData, VendorWebAgent: e.target.value })} />
                                         </div>
 
                                     </div>

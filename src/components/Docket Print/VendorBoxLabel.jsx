@@ -74,55 +74,49 @@ function VendorBoxLabel() {
 
 
     const handleDownloadPDF = async () => {
-        // Select all container elements (each label)
-        const containerElements = document.querySelectorAll(".download");
+    const containerElements = document.querySelectorAll(".download");
+    if (containerElements.length === 0) return;
 
-        if (containerElements.length === 0) return;
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm
+    const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
-        const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm
-        const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
+    let itemCount = 0; // Counter for elements on page
 
-        for (let i = 0; i < containerElements.length; i++) {
-            const element = containerElements[i];
+    for (let i = 0; i < containerElements.length; i++) {
+        const element = containerElements[i];
 
-            // Capture one container as a high-quality image
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: "#ffffff",
-                scrollY: -window.scrollY,
-                windowWidth: document.documentElement.scrollWidth,
-            });
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            scrollY: -window.scrollY,
+            windowWidth: document.documentElement.scrollWidth,
+        });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-            // Convert px to mm
-            const pxToMm = (px) => (px * 25.4) / 96;
-            const imgWidthMm = pxToMm(canvas.width);
-            const imgHeightMm = pxToMm(canvas.height);
-            const imgRatio = imgWidthMm / imgHeightMm;
+        // Size of half page
+        const imgHeight = pdfHeight / 2 - 10;  // margin
+        const imgWidth = pdfWidth - 10;
 
-            // Fit to A4 page with small margins
-            let renderWidth = pdfWidth - 10; // 5mm margin each side
-            let renderHeight = renderWidth / imgRatio;
+        const x = 5;   // margin left
+        const y = itemCount === 0 ? 5 : pdfHeight / 2 + 5; // top for 1st, half-page for 2nd
 
-            if (renderHeight > pdfHeight - 10) {
-                renderHeight = pdfHeight - 10;
-                renderWidth = renderHeight * imgRatio;
-            }
+        pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
 
-            const xOffset = (pdfWidth - renderWidth) / 2;
-            const yOffset = (pdfHeight - renderHeight) / 2;
+        itemCount++;
 
-            pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
-
-            // Add new page except after the last one
-            if (i < containerElements.length - 1) pdf.addPage();
+        // If 2 added → new page
+        if (itemCount === 2 && i < containerElements.length - 1) {
+            pdf.addPage();
+            itemCount = 0;
         }
+    }
 
-        pdf.save("VendorBoxLabel.pdf");
-    };
+    pdf.save("VendorBoxLabel.pdf");
+};
+
 
 
     const docket = data;
@@ -184,9 +178,9 @@ function VendorBoxLabel() {
     break-inside: avoid;   
     margin: 0 !important;
   }
-    @page:first {
-    size: A4 portrait;
-    margin: 0in; /* removes browser default margins */
+    @page {
+    size: A4 auto;
+    
   }  
 }
 
