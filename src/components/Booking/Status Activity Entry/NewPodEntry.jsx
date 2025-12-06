@@ -19,7 +19,7 @@ import "./table.css"
 function NewPodEntry() {
 
     const [status, setStatus] = useState([]);
-    const [fetched,setFetched]=useState('');
+    const [fetched, setFetched] = useState('');
     const [editIndex, setEditIndex] = useState(null);
     const today = new Date();
     const time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");
@@ -36,10 +36,9 @@ function NewPodEntry() {
         time: time,
         status: "",
     });
-    useEffect(()=>
-    {
+    useEffect(() => {
         console.log(formData);
-    },[formData])
+    }, [formData])
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
@@ -107,139 +106,137 @@ function NewPodEntry() {
 
         }))
     }
- const formatTimeAMPM = (timeStr) => {
-    if (!timeStr) return "";
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const hours12 = hours % 12 || 12;
-    return `${hours12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
-};
-   
- const formatExcelDateForBackend = (value) => {
-  if (!value) return "";
-  if (value instanceof Date && !isNaN(value)) {
-    return `${String(value.getDate()).padStart(2,'0')}/${String(value.getMonth()+1).padStart(2,'0')}/${value.getFullYear()}`;
-  }
-  return "";
-};
+    const formatTimeAMPM = (timeStr) => {
+        if (!timeStr) return "";
+        const [hours, minutes] = timeStr.split(":").map(Number);
+        const ampm = hours >= 12 ? "PM" : "AM";
+        const hours12 = hours % 12 || 12;
+        return `${hours12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
+    };
+
+    const formatExcelDateForBackend = (value) => {
+        if (!value) return "";
+        if (value instanceof Date && !isNaN(value)) {
+            return `${String(value.getDate()).padStart(2, '0')}/${String(value.getMonth() + 1).padStart(2, '0')}/${value.getFullYear()}`;
+        }
+        return "";
+    };
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    if(docket===fetched)
-    {
-        return Swal.fire(
-            {
-                icon:"warning",
-                title:"Status already here",
-                text:`Docket ${docket}' status already fetched`,
-            }
-        )
-    }
-    try {
-    const res = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
-    if (res.status === 1 && Array.isArray(res.data) && res.data.length > 0) {
-        setStatus(res.data);
-        setFetched(docket);
-        console.log(res.data);
-        Swal.fire({
-            icon: 'success',
-            title: 'Status Found',
-            text: res.message,
-        });
-    } else {
-        setStatus([]);
-        Swal.fire({
-            icon: 'warning',
-            title: 'No Status Found',
-            text: 'No status available for this Docket.',
-            showConfirmButton: true,
-        });
-    }
-} catch (error) {
-    console.log(error);
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'API failed or server error occurred.',
-    });
-}
-
-    }
-  const AddStatus = async (e) => {
-  if(!docket)
-    {
-        return Swal.fire({
-                        icon: 'warning',
-                        title: 'Missing Docket No',
-                        text: 'Please fill docket No.',
-                        confirmButtonText: 'OK',
-                    });
-    }  
-  e.preventDefault();
-  try {
-    const queryParams = new URLSearchParams({
-      docketNo: docket,
-      delvDt: formatExcelDateForBackend(formData.toDate),
-      delvTime: formatTimeAMPM(formData.time),
-      destinationCode: formData.fromDest,
-      destinationName: formData.toDest?getCity.find((city)=>city.City_Code===formData.toDest)?.City_Name:"",
-      status: formData.status
-    });
-
-    const res = await postApi(`/DocketBooking/StatusEntry?${queryParams.toString()}`, {}); // empty body
-    console.log("POST response", res);
-
-    if (res.status === 1) {
-      Swal.fire({ icon: 'success', title: 'Status Added', text: res.message });
-      resetForm();
-      const getRes = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
-      if (getRes.status === 1) setStatus(getRes.data);
-    } else {
-      Swal.fire({ icon: 'warning', title: 'Failed', text: res.message });
-    }
-
-  } catch (error) {
-    console.log(error);
-    Swal.fire({ icon: 'error', title: 'Error', text: 'API failed' });
-  }
-};
-const delStatus = async (id) => {
-    console.log(id);
-
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to delete this status entry? This action cannot be undone.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            try {
-                const res = await deleteApi(`/DocketBooking/StatusEntryDelete?id=${id}`);
-                if (res.success) {
-                    Swal.fire('Deleted!', res.message, 'success');
-                    const newList = status.filter((data) => data.ID !== id);
-                    setStatus(newList);
-                    resetForm();
-                } else {
-                    Swal.fire('Error', res.message, 'error');
+        e.preventDefault();
+        if (docket === fetched) {
+            return Swal.fire(
+                {
+                    icon: "warning",
+                    title: "Status already here",
+                    text: `Docket ${docket}' status already fetched`,
                 }
-            } catch (err) {
-                Swal.fire('Error', 'Failed to delete status.', 'error');
-            }
+            )
         }
-    });
-};
+        try {
+            const res = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
+            if (res.status === 1 && Array.isArray(res.data) && res.data.length > 0) {
+                setStatus(res.data);
+                setFetched(docket);
+                console.log(res.data);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Status Found',
+                    text: res.message,
+                });
+            } else {
+                setStatus([]);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Status Found',
+                    text: 'No status available for this Docket.',
+                    showConfirmButton: true,
+                });
+            }
+        } catch (error) {
+            console.log(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'API failed or server error occurred.',
+            });
+        }
+
+    }
+    const AddStatus = async (e) => {
+        if (!docket) {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Missing Docket No',
+                text: 'Please fill docket No.',
+                confirmButtonText: 'OK',
+            });
+        }
+        e.preventDefault();
+        try {
+            const queryParams = new URLSearchParams({
+                docketNo: docket,
+                delvDt: formatExcelDateForBackend(formData.toDate),
+                delvTime: formatTimeAMPM(formData.time),
+                destinationCode: formData.fromDest,
+                destinationName: formData.toDest ? getCity.find((city) => city.City_Code === formData.toDest)?.City_Name : "",
+                status: formData.status
+            });
+
+            const res = await postApi(`/DocketBooking/StatusEntry?${queryParams.toString()}`, {}); // empty body
+            console.log("POST response", res);
+
+            if (res.status === 1) {
+                Swal.fire({ icon: 'success', title: 'Status Added', text: res.message });
+                resetForm();
+                const getRes = await getApi(`/DocketBooking/GetStatusDetails?DocketNo=${docket}`);
+                if (getRes.status === 1) setStatus(getRes.data);
+            } else {
+                Swal.fire({ icon: 'warning', title: 'Failed', text: res.message });
+            }
+
+        } catch (error) {
+            console.log(error);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'API failed' });
+        }
+    };
+    const delStatus = async (id) => {
+        console.log(id);
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to delete this status entry? This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await deleteApi(`/DocketBooking/StatusEntryDelete?id=${id}`);
+                    if (res.success) {
+                        Swal.fire('Deleted!', res.message, 'success');
+                        const newList = status.filter((data) => data.ID !== id);
+                        setStatus(newList);
+                        resetForm();
+                    } else {
+                        Swal.fire('Error', res.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'Failed to delete status.', 'error');
+                }
+            }
+        });
+    };
 
 
     return (
         <>
 
             <div className="container1">
-                <form className="order-form" onSubmit={handleSubmit} style={{backgroundColor:"#f2f4f3"}}>
+                <form className="order-form" onSubmit={handleSubmit} style={{ backgroundColor: "#f2f4f3" }}>
                     <div className="order-fields" style={{ display: "flex", justifyContent: "start", alignItems: "center" }}>
                         <div className="input-field" style={{ width: "180px" }}>
                             <label htmlFor="">Docket No</label>
@@ -289,14 +286,14 @@ const delStatus = async (id) => {
                         <tbody className='table-body'>
                             <tr>
                                 <td>1</td>
-                                <td style={{width:"130px"}}><DatePicker
+                                <td style={{ width: "130px" }}><DatePicker
                                     portalId="root-portal"
                                     selected={formData.toDate}
                                     onChange={(date) => handleDateChange(date, "toDate")}
                                     dateFormat="dd/MM/yyyy"
                                     className="form-control form-control-sm custom-datepicker"
                                 /></td>
-                                <td style={{width:"130px"}}>
+                                <td style={{ width: "130px" }}>
                                     <input className="form-control"
                                         style={{ height: "35px" }}
                                         type="time" value={formData.time} onChange={(e) => { setFormData({ ...formData, time: e.target.value }) }} />
@@ -330,12 +327,12 @@ const delStatus = async (id) => {
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
-                                             width: '100px'  
+                                            width: '100px'
                                         }),
-                                        input:(base)=>
+                                        input: (base) =>
                                         ({
                                             ...base,
-                                            width:"100px",
+                                            width: "100px",
                                         })
                                         ,
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
@@ -362,18 +359,18 @@ const delStatus = async (id) => {
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
                                     menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                     styles={{
+                                    styles={{
                                         placeholder: (base) => ({
                                             ...base,
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
-                                             width: '100px'  
+                                            width: '100px'
                                         }),
-                                        input:(base)=>
+                                        input: (base) =>
                                         ({
                                             ...base,
-                                            width:"100px",
+                                            width: "100px",
                                         })
                                         ,
                                         menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
@@ -393,8 +390,8 @@ const delStatus = async (id) => {
                                     <td>{st.Destination_name}</td>
                                     <td>{st.status}</td>
                                     <td>
-                                        <button className='edit-btn' onClick={()=>delStatus(st.ID)}>
-                                            <i className='bi bi-trash'  style={{fontSize:"18px"}}></i></button>
+                                        <button className='edit-btn' onClick={() => delStatus(st.ID)}>
+                                            <i className='bi bi-trash' style={{ fontSize: "18px" }}></i></button>
                                     </td>
 
                                 </tr>

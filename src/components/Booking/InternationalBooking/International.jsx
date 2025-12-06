@@ -7,6 +7,7 @@ import { useLocation } from "react-router-dom";
 import InternationalManifest from "./InternationalManifest";
 import CustRateUpload from "./CustRateUpload";
 import VenRateUpload from "./VenRateUpload";
+import ActivityUpload from "./ActivityUpload";
 
 function DailyBooking() {
   const location = useLocation();
@@ -21,12 +22,12 @@ function DailyBooking() {
 
   // ===================== TABS LIST WITH PERMISSIONS =====================
   const tabs = [
-    { id: "Booking", label: "Intl Booking", component: <InternationalBooking/>, show: has("InternationalBooking") },
-    { id: "Manifest", label: "Intl Manifest", component: <InternationalManifest />, show:1 },
-    { id: "CRate", label: "Customer Rate Upload", component: <CustRateUpload />, show: 1 },
-    { id: "CVRate", label: "Vendor Rate Upload", component: <VenRateUpload />, show: 1 },
-    { id: "Status", label: "Intl Status Upload", component: <InternationalBooking />, show: 1},
-    { id: "Print", label: "Intl Manifest Print", component: <InternationalBooking />, show: 1 },
+    { id: "Booking", label: "International Booking", component: <InternationalBooking/>, show: has("InternationalBooking") },
+    { id: "Manifest", label: "International Manifest", component: <InternationalManifest />, show:1 },
+    { id: "CRate", label: "International Rate Upload", component: <CustRateUpload />, show: 1 },
+    { id: "CVRate", label: " International Vendor Rate Upload", component: <VenRateUpload />, show: 1 },
+    { id: "Status", label: "International Activity Upload", component: <ActivityUpload />, show: 1},
+    { id: "Print", label: "International Manifest Print", component: <InternationalBooking />, show: 1 },
    
   ];
 
@@ -46,9 +47,10 @@ function DailyBooking() {
         <div className="container">
 
           {/* ===================== NAVIGATION ===================== */}
-          <nav>
+          <nav style={{ height: "38px" }}>
             {visibleTabs.map((tab) => (
               <label
+              style={{lineHeight:"1"}}
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 

@@ -52,6 +52,7 @@ function InternationalBooking() {
     const [modalIsOpen7, setModalIsOpen7] = useState(false);
     const [modalIsOpen8, setModalIsOpen8] = useState(false);
     const [modalIsOpen9, setModalIsOpen9] = useState(false);
+    const [modalIsOpen10, setModalIsOpen10] = useState(false);
     const [getReceiver, setGetReceiver] = useState([]);
     const [getShipper, setGetShipper] = useState([]);
     const [getCustomerdata, setgetCustomerdata] = useState([]);
@@ -70,14 +71,21 @@ function InternationalBooking() {
     const [isFovChecked, setIsFovChecked] = useState(false);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [isDocketChecked, setIsDocketChecked] = useState(false);
-    const [isDeliveryChecked, setIsDeliveryChecked] = useState(false);
-    const [isPackingChecked, setIsPackingChecked] = useState(false);
-    const [isGreenChecked, setIsGreenChecked] = useState(false);
-    const [isHamaliChecked, setIsHamaliChecked] = useState(false);
-    const [isOtherChecked, setIsOtherChecked] = useState(false);
-    const [isInsuranceChecked, setIsInsuranceChecked] = useState(false);
-    const [isODAChecked, setIsODAChecked] = useState(false);
     const [isFuelChecked, setIsFuelChecked] = useState(false);
+    const [isChecked, setIsChecked] = useState({
+        charge1: false,  // Clearance Charges
+        charge2: false,  // Security Surcharge
+        charge3: false,  // D G R Charges
+        charge4: false,  // Packing Charges
+        charge5: false,  // Ad Code Reg.
+        charge6: false,  // ADC Charges
+        charge7: false,  // AWB Charges
+        charge8: false,  // Large Size Charges
+        charge9: false,  // Transportation Charges
+        charge10: false, // Loading / Unloading
+        charge11: false, // DHL Risk Charges
+    });
+
     const [isRemarkChecked, setIsRemarkChecked] = useState(false);
     const [isEWayChecked, setIsEWayChecked] = useState(false);
     const [isInvoiceValue, setIsInvoiceValue] = useState(false);
@@ -121,6 +129,30 @@ function InternationalBooking() {
         console.log(selectedDestPinCode);
     }
         , [selectedDestPinCode])
+
+
+    const [label, setLabel] = useState({
+        charge1: 'Clearance Charges',
+        charge2: 'Security Surcharge',
+        charge3: 'D G R Charges',
+        charge4: 'Packing Charges',
+        charge5: 'Ad Code Reg.',
+        charge6: 'ADC Charges',
+        charge7: 'AWB Charges',
+        charge8: 'Large Size Charges',
+        charge9: 'Transportation Charges',
+        charge10: 'Loading / Unloading',
+        charge11: 'DHL Risk Charges'
+    });
+     useEffect(() => {
+        setLabel(JSON.parse(localStorage.getItem("IntLabels")));
+    },[]);
+
+     useEffect(() => {
+        localStorage.setItem("IntLabels", JSON.stringify(label));
+    }, [label]);
+
+
     const [formData, setFormData] = useState({
         ActualShipper: "",
         ActualWt: 0,
@@ -519,18 +551,11 @@ function InternationalBooking() {
 
     const onToggle = () => setToggleActive(!toggleActive);
     useEffect(() => {
-        const savedState = JSON.parse(localStorage.getItem("bookingState"));
+        const savedState = JSON.parse(localStorage.getItem("IntChrgs"));
         if (savedState) {
             setIsAllChecked(savedState.isAllChecked || false);
             setIsFovChecked(savedState.isFovChecked || false);
             setIsDocketChecked(savedState.isDocketChecked || false);
-            setIsDeliveryChecked(savedState.isDeliveryChecked || false);
-            setIsPackingChecked(savedState.isPackingChecked || false);
-            setIsGreenChecked(savedState.isGreenChecked || false);
-            setIsHamaliChecked(savedState.isHamaliChecked || false);
-            setIsOtherChecked(savedState.isOtherChecked || false);
-            setIsInsuranceChecked(savedState.isInsuranceChecked || false);
-            setIsODAChecked(savedState.isODAChecked || false);
             setIsFuelChecked(savedState.isFuelChecked || false);
             setIsRemarkChecked(savedState.isRemarkChecked || false);
             setIsEWayChecked(savedState.isEWayChecked || false);
@@ -543,6 +568,12 @@ function InternationalBooking() {
             setIsFlightChecked(savedState.isFlightChecked || false);
             setIsTrainChecked(savedState.isTrainChecked || false);
             setIsProChecked(savedState.isProChecked || false);
+            const newIsChecked = {};
+            Object.keys(isChecked).forEach((key) => {
+                newIsChecked[key] = savedState[key] || false;
+            });
+            setIsChecked(newIsChecked);
+
         }
         fetchReceiverData();
         fetchShipper();
@@ -552,49 +583,16 @@ function InternationalBooking() {
         const newState = {
             [field]: value
         };
-        const currentState = JSON.parse(localStorage.getItem("bookingState")) || {};
-        localStorage.setItem("bookingState", JSON.stringify({ ...currentState, ...newState }));
+        const currentState = JSON.parse(localStorage.getItem("IntChrgs")) || {};
+        localStorage.setItem("IntChrgs", JSON.stringify({ ...currentState, ...newState }));
     };
     const handleAllChange = () => {
         const newValue = !isAllChecked;
-
         setIsAllChecked(newValue);
 
-        const allFields = {
-            isFovChecked: newValue,
-            isDocketChecked: newValue,
-            isDeliveryChecked: newValue,
-            isPackingChecked: newValue,
-            isGreenChecked: newValue,
-            isHamaliChecked: newValue,
-            isOtherChecked: newValue,
-            isInsuranceChecked: newValue,
-            isODAChecked: newValue,
-            isFuelChecked: newValue,
-            isRemarkChecked: newValue,
-            isEWayChecked: newValue,
-            isInvoiceValue: newValue,
-            isInvoiceNo: newValue,
-            dispatchDate: newValue,
-            isAllChecked: newValue,
-            isShipChecked: newValue,
-            isReceChecked: newValue,
-            isVenChecked: newValue,
-            isFlightChecked: newValue,
-            isTrainChecked: newValue,
-            isProChecked: newValue
-        };
-
-        // Update React states
+        // Update individual checkbox states
         setIsFovChecked(newValue);
         setIsDocketChecked(newValue);
-        setIsDeliveryChecked(newValue);
-        setIsPackingChecked(newValue);
-        setIsGreenChecked(newValue);
-        setIsHamaliChecked(newValue);
-        setIsOtherChecked(newValue);
-        setIsInsuranceChecked(newValue);
-        setIsODAChecked(newValue);
         setIsFuelChecked(newValue);
         setIsRemarkChecked(newValue);
         setIsEWayChecked(newValue);
@@ -608,20 +606,39 @@ function InternationalBooking() {
         setIsTrainChecked(newValue);
         setIsProChecked(newValue);
 
-        // Save to localStorage
-        localStorage.setItem("bookingState", JSON.stringify(allFields));
+        // Update dynamic isChecked fields
+        const newIsChecked = {};
+        Object.keys(isChecked).forEach((key) => {
+            newIsChecked[key] = newValue;
+        });
+        setIsChecked(newIsChecked);
+
+        // Save everything to localStorage including dynamic fields
+        const allFields = {
+            isAllChecked: newValue,
+            isFovChecked: newValue,
+            isDocketChecked: newValue,
+            isFuelChecked: newValue,
+            isRemarkChecked: newValue,
+            isEWayChecked: newValue,
+            isInvoiceValue: newValue,
+            isInvoiceNo: newValue,
+            dispatchDate: newValue,
+            isShipChecked: newValue,
+            isReceChecked: newValue,
+            isVenChecked: newValue,
+            isFlightChecked: newValue,
+            isTrainChecked: newValue,
+            isProChecked: newValue,
+            ...newIsChecked  // add all dynamic chars fields here
+        };
+
+        localStorage.setItem("IntChrgs", JSON.stringify(allFields));
     };
     useEffect(() => {
         const allFields = {
             isFovChecked,
             isDocketChecked,
-            isDeliveryChecked,
-            isPackingChecked,
-            isGreenChecked,
-            isHamaliChecked,
-            isOtherChecked,
-            isInsuranceChecked,
-            isODAChecked,
             isFuelChecked,
             isReceChecked,
             isShipChecked,
@@ -637,19 +654,12 @@ function InternationalBooking() {
         };
 
         // Check if all are true
-        const allChecked = Object.values(allFields).every(Boolean);
+        const allChecked = Object.values(allFields).every(Boolean) && Object.values(isChecked).every(Boolean);
         setIsAllChecked(allChecked);
         handleCheckboxChange('isAllChecked', allChecked)
     }, [
         isFovChecked,
         isDocketChecked,
-        isDeliveryChecked,
-        isPackingChecked,
-        isGreenChecked,
-        isHamaliChecked,
-        isOtherChecked,
-        isInsuranceChecked,
-        isODAChecked,
         isFuelChecked,
         isReceChecked,
         isShipChecked,
@@ -662,6 +672,7 @@ function InternationalBooking() {
         isInvoiceNo,
         isInvoiceValue,
         dispatchDate,
+        isChecked
     ]);
     const handleFovChange = (e) => {
         setIsFovChecked(e.target.checked);
@@ -685,40 +696,6 @@ function InternationalBooking() {
         handleCheckboxChange('isDocketChecked', e.target.checked);
     }
 
-    const handleDeliveryChange = (e) => {
-        setIsDeliveryChecked(e.target.checked);
-        handleCheckboxChange('isDeliveryChecked', e.target.checked);
-    }
-
-    const handlePackingChange = (e) => {
-        setIsPackingChecked(e.target.checked);
-        handleCheckboxChange('isPackingChecked', e.target.checked);
-    }
-
-    const handleGreenChange = (e) => {
-        setIsGreenChecked(e.target.checked);
-        handleCheckboxChange('isGreenChecked', e.target.checked);
-    }
-
-    const handleHamaliChange = (e) => {
-        setIsHamaliChecked(e.target.checked);
-        handleCheckboxChange('isHamaliChecked', e.target.checked);
-    }
-
-    const handleOtherChange = (e) => {
-        setIsOtherChecked(e.target.checked);
-        handleCheckboxChange('isOtherChecked', e.target.checked);
-    }
-
-    const handleInsuranceChange = (e) => {
-        setIsInsuranceChecked(e.target.checked);
-        handleCheckboxChange('isInsuranceChecked', e.target.checked);
-    }
-
-    const handleODAChange = (e) => {
-        setIsODAChecked(e.target.checked);
-        handleCheckboxChange('isODAChecked', e.target.checked);
-    }
 
     const handleFuelChange = (e) => {
         setIsFuelChecked(e.target.checked);
@@ -1693,78 +1670,78 @@ function InternationalBooking() {
         console.log("reset");
         setFormData({
             ActualShipper: "",
-        ActualWt: 0,
-        BillParty: "Client-wise Bill",
-        BookDate: getTodayDate(),
-        BookMode: "",
-        ChargedWt: 0,
-        ConsigneeAdd1: "",
-        ConsigneeAdhaar: "",
-        ConsigneeGST: "",
-        ConsigneePin: "",
-        ConsigneeState: "",
-        Consignee_City: "",
-        ConsigneeEmail: "",
-        ConsigneeMob: "",
-        ConsigneeName: "",
-        ConsigneeCountry: "",
-        Customer_Code: "",
-        DeliveryChrgs: 0,
-        Dest_Zone: "",
-        DestinationCode: "",
-        DocketChrgs: 0,
-        DocketNo: "",
-        DoxSpx: "Box",
-        DispatchDate: getTodayDate(),
-        EwayBill: "",
-        ExptDateOfDelvDt: "",
-        Flight_Code: "",
-        FovChrgs: 0,
-        FovPer: 0,
-        FuelCharges: 0,
-        FuelPer: 0,
-        GreenChrgs: 0,
-        HamaliChrgs: 0,
-        InsuranceChrgs: 0,
-        InvDate: getTodayDate(),
-        InvValue: 0,
-        InvoiceNo: "",
-        Location_Code: "",
-        Mode_Code: "",
-        ODAChrgs: 0,
-        OriginCode: "",
-        Origin_Zone: "",
-        OtherCharges: 0,
-        PackingChrgs: 0,
-        QtyOrderEntry: "",
-        Rate: 0,
-        RatePerkg: 0,
-        RateType: "Weight",
-        Receiver_Code: "",
-        ShipperAdd: "",
-        ShipperAdhaar: "",
-        ShipperAdd3: "",
-        ShipperCity: "",
-        ShipperEmail: "",
-        ShipperPhone: "",
-        ShipperPin: "",
-        Shipper_GstNo: "",
-        Shipper_Name: "",
-        Shipper_StateCode: "",
-        Status: "",
-        TotalAmt: 0,
-        TotalGST: 0,
-        totalgstPer: 0,
-        Train_Code: "",
-        VendorRatePerkg: 0,
-        VendorAmt: 0,
-        VendorAwbNo: "",
-        VendorWt: 0,
-        Vendor_Code: "",
-        VolumetricWt: 0,
-        WebAgent: "",
-        destZoneName: "",
-        orgZoneName: ""
+            ActualWt: 0,
+            BillParty: "Client-wise Bill",
+            BookDate: getTodayDate(),
+            BookMode: "",
+            ChargedWt: 0,
+            ConsigneeAdd1: "",
+            ConsigneeAdhaar: "",
+            ConsigneeGST: "",
+            ConsigneePin: "",
+            ConsigneeState: "",
+            Consignee_City: "",
+            ConsigneeEmail: "",
+            ConsigneeMob: "",
+            ConsigneeName: "",
+            ConsigneeCountry: "",
+            Customer_Code: "",
+            DeliveryChrgs: 0,
+            Dest_Zone: "",
+            DestinationCode: "",
+            DocketChrgs: 0,
+            DocketNo: "",
+            DoxSpx: "Box",
+            DispatchDate: getTodayDate(),
+            EwayBill: "",
+            ExptDateOfDelvDt: "",
+            Flight_Code: "",
+            FovChrgs: 0,
+            FovPer: 0,
+            FuelCharges: 0,
+            FuelPer: 0,
+            GreenChrgs: 0,
+            HamaliChrgs: 0,
+            InsuranceChrgs: 0,
+            InvDate: getTodayDate(),
+            InvValue: 0,
+            InvoiceNo: "",
+            Location_Code: "",
+            Mode_Code: "",
+            ODAChrgs: 0,
+            OriginCode: "",
+            Origin_Zone: "",
+            OtherCharges: 0,
+            PackingChrgs: 0,
+            QtyOrderEntry: "",
+            Rate: 0,
+            RatePerkg: 0,
+            RateType: "Weight",
+            Receiver_Code: "",
+            ShipperAdd: "",
+            ShipperAdhaar: "",
+            ShipperAdd3: "",
+            ShipperCity: "",
+            ShipperEmail: "",
+            ShipperPhone: "",
+            ShipperPin: "",
+            Shipper_GstNo: "",
+            Shipper_Name: "",
+            Shipper_StateCode: "",
+            Status: "",
+            TotalAmt: 0,
+            TotalGST: 0,
+            totalgstPer: 0,
+            Train_Code: "",
+            VendorRatePerkg: 0,
+            VendorAmt: 0,
+            VendorAwbNo: "",
+            VendorWt: 0,
+            Vendor_Code: "",
+            VolumetricWt: 0,
+            WebAgent: "",
+            destZoneName: "",
+            orgZoneName: ""
 
         });
 
@@ -2623,7 +2600,7 @@ function InternationalBooking() {
 
                                 <div className="fields2">
                                     {isShipChecked && <>
-                                    <div className="input-field">
+                                        <div className="input-field">
                                             <label htmlFor="shipper-adhaar">Shipper Adhaar No</label>
                                             <input
                                                 type="text"
@@ -3191,7 +3168,7 @@ function InternationalBooking() {
                                 <div className="fields2">
                                     {isReceChecked && <>
 
-                                        
+
                                         <div className="input-field">
                                             <label>Consignee Adhaar</label>
                                             <input
@@ -3212,7 +3189,7 @@ function InternationalBooking() {
                                             />
                                         </div>
 
-                                         <div className="input-field">
+                                        <div className="input-field">
                                             <label htmlFor="">State Name</label>
                                             <Select
                                                 className="blue-selectbooking"
@@ -3259,7 +3236,7 @@ function InternationalBooking() {
                                             />
                                         </div>
 
-                                        
+
                                         <div className="input-field">
                                             <label>Pin Code</label>
                                             <input
@@ -3272,7 +3249,7 @@ function InternationalBooking() {
                                             />
                                         </div>
 
-                                       
+
                                         <div className="input-field">
                                             <label>Country</label>
                                             <input
@@ -3574,89 +3551,29 @@ function InternationalBooking() {
                                             </div>
                                         )}
 
-                                        {isDeliveryChecked && (
-                                            <div className="input-field1">
-                                                <label>Delivery Charges</label>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="Delivery Charges"
-                                                    value={formData.DeliveryChrgs}
-                                                    onChange={(e) => setFormData({ ...formData, DeliveryChrgs: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
+                                        {Object.keys(label).map((key, index) => (
+                                            isChecked[key] && (
+                                                <div className="input-field1" key={index}>
+                                                    {/* Dynamic Label */}
+                                                    <label>{label[key]}</label>
 
-                                        {isPackingChecked && (
-                                            <div className="input-field1">
-                                                <label>Packing Charges</label>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="Packing Charges"
-                                                    value={formData.PackingChrgs}
-                                                    onChange={(e) => setFormData({ ...formData, PackingChrgs: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
+                                                    {/* Input for entering Charges */}
+                                                    <input
+                                                        type="tel"
+                                                        placeholder={label[key]}
+                                                        value={formData[`charge${index + 1}`] || ""}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                [`charge${index + 1}`]: e.target.value
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            )
+                                        ))}
 
-                                        {isGreenChecked && (
-                                            <div className="input-field1">
-                                                <label>Green Charges</label>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="Green Charges"
-                                                    value={formData.GreenChrgs}
-                                                    onChange={(e) => setFormData({ ...formData, GreenChrgs: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
 
-                                        {isHamaliChecked && (
-                                            <div className="input-field1">
-                                                <label>Hamali Charges</label>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="Hamali Charges"
-                                                    value={formData.HamaliChrgs}
-                                                    onChange={(e) => setFormData({ ...formData, HamaliChrgs: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
-
-                                        {isOtherChecked && (
-                                            <div className="input-field1">
-                                                <label>Other Charges</label>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="Other Charges"
-                                                    value={formData.OtherCharges}
-                                                    onChange={(e) => setFormData({ ...formData, OtherCharges: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
-
-                                        {isInsuranceChecked && (
-                                            <div className="input-field1">
-                                                <label>Insurance Charges</label>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="Insurance Charges"
-                                                    value={formData.InsuranceChrgs}
-                                                    onChange={(e) => setFormData({ ...formData, InsuranceChrgs: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
-
-                                        {isODAChecked && (
-                                            <div className="input-field1">
-                                                <label>ODA Charges</label>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="ODA Charges"
-                                                    value={formData.ODAChrgs}
-                                                    onChange={(e) => setFormData({ ...formData, ODAChrgs: e.target.value })}
-                                                />
-                                            </div>
-                                        )}
 
                                         {isFuelChecked && (
                                             <div className="input-field1">
@@ -3795,10 +3712,17 @@ function InternationalBooking() {
                                         zIndex: 9999,
                                         display: "flex",
                                         flexDirection: "column",
-                                        gap: "2px",
+                                        gap: "5px",
                                         padding: "4px"
                                     }}
                                 >
+                                    <button
+                                        className="btn btn-dark"
+                                        style={{ width: "100%" }}
+                                        onClick={() => { setModalIsOpen10(true); setOpen(false) }}
+                                    >
+                                        Label
+                                    </button>
                                     <button
                                         className="btn btn-info"
                                         style={{ width: "100%" }}
@@ -4343,7 +4267,7 @@ function InternationalBooking() {
                                 width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
-                                height:"auto",
+                                height: "auto",
                                 whiteSpace: "nowrap"
                             },
                         }}
@@ -4501,7 +4425,7 @@ function InternationalBooking() {
                                 width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
-                                height:"auto",
+                                height: "auto",
                                 whiteSpace: "nowrap"
                             },
                         }}
@@ -4657,12 +4581,12 @@ function InternationalBooking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen6}
-                         style={{
+                        style={{
                             content: {
                                 width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
-                                height:"auto",
+                                height: "auto",
                                 whiteSpace: "nowrap"
                             },
                         }}
@@ -4795,7 +4719,7 @@ function InternationalBooking() {
                                                                         InvoiceValue: data.InvoiceValue,
                                                                         Description: data.Description,
                                                                         Qty: data.Qty,
-                                                                        EwayBillDate:data.EwayBillDate,
+                                                                        EwayBillDate: data.EwayBillDate,
                                                                         EWayBillNo: data.EWayBillNo,
                                                                         Remark: data.Remark,
                                                                         InvoiceImg: data.InvoiceImg,
@@ -4858,17 +4782,14 @@ function InternationalBooking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen7}
-                        className="custom-modal-setup" contentLabel="Modal"
+                        className="custom-modal-custCharges" contentLabel="Modal"
                         style={{
                             content: {
-                                width: '80%',
+                                // width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
                                 whiteSpace: "nowrap",
-                                minHeight: "60%",
-                                display: "flex",
-                                justifyContent: "center",
-
+                                height:"auto"
                             },
                         }}>
                         <div className="custom modal-content">
@@ -4961,68 +4882,35 @@ function InternationalBooking() {
                                                 Docket Charges</label>
                                         </div>
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isDeliveryChecked}
-                                                onChange={handleDeliveryChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="delivery" id="delivery" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Delivery Charges</label>
-                                        </div>
+                                        {Object.keys(label).map((key, index) => (
+                                            <div className="input-field1" style={{ display: "flex", flexDirection: "row" }} key={index}>
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isPackingChecked}
-                                                onChange={handlePackingChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="packing" id="packing" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Packing Charges</label>
-                                        </div>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked[key]}
+                                                    onChange={(e) => {
+                                                        const checked = e.target.checked;
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isGreenChecked}
-                                                onChange={handleGreenChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="green" id="green" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Green Charges</label>
-                                        </div>
+                                                        // Update UI state
+                                                        setIsChecked(prev => ({
+                                                            ...prev,
+                                                            [key]: checked
+                                                        }));
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isHamaliChecked}
-                                                onChange={handleHamaliChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="hamali" id="hamali" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Hamali Charges</label>
-                                        </div>
+                                                        // Also update localStorage like before
+                                                        handleCheckboxChange(`${key}`, checked);
+                                                    }}
+                                                    style={{ width: "12px", height: "12px", marginTop: "5px" }}
+                                                />
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isOtherChecked}
-                                                onChange={handleOtherChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="other" id="other" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Other Charges</label>
-                                        </div>
+                                                <label style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                    {label[key]}
+                                                </label>
+                                            </div>
+                                        ))}
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isInsuranceChecked}
-                                                onChange={handleInsuranceChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="insurance" id="insurance" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Insurance Charges</label>
-                                        </div>
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isODAChecked}
-                                                onChange={handleODAChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="oda" id="oda" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                ODA Charges</label>
-                                        </div>
+
 
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
@@ -5198,6 +5086,59 @@ function InternationalBooking() {
                         </div>
 
                     </Modal>
+
+                    <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen10}
+                        className="custom-modal-custCharges" contentLabel="Modal"
+                        style={{
+                            content: {
+                                // width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap",
+                                height:"auto",
+                                display: "flex",
+                                justifyContent: "center",
+
+                            },
+                        }}>
+                        <div className="custom modal-content">
+                            <div className="header-tittle">
+                                <header>Charges Label</header>
+                            </div>
+
+                            <div className='container2'>
+                                <form>
+                                    <div className="fields2">
+                                        {Object.keys(label).map((key, index) => (
+                                            isChecked[key] && (
+                                                <div className="input-field1" key={index}>
+                                                    {/* Dynamic Label */}
+                                                    <label>{label[key]}</label>
+
+                                                    {/* Input for entering Charges */}
+                                                    <input
+                                                        type="tel"
+                                                        placeholder={label[key]}
+                                                        value={label[key]}
+                                                        onChange={(e) =>
+                                                            setLabel({
+                                                                ...label,
+                                                                [key]: e.target.value
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                    <div className='bottom-buttons'>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen10(false) }} className='ok-btn'>Submit</button>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen10(false) }} className='ok-btn'>close</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </Modal >
 
                 </div >
 

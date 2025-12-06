@@ -4808,17 +4808,14 @@ function Booking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen7}
-                        className="custom-modal-setup" contentLabel="Modal"
+                        className="custom-modal-custCharges" contentLabel="Modal"
                         style={{
                             content: {
-                                width: '80%',
+                                // width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
                                 whiteSpace: "nowrap",
-                                minHeight: "60%",
-                                display: "flex",
-                                justifyContent: "center",
-
+                                height:"auto"
                             },
                         }}>
                         <div className="custom modal-content">
