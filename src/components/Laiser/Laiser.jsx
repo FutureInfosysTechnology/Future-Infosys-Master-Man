@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Header from "../../Components-2/Header/Header";
 import Sidebar1 from "../../Components-2/Sidebar1";
 import Footer from "../../Components-2/Footer";
-import OrderEntry from "./OrderEntry";
 import PaymentEntry from "./PaymentEntry";
 import ProductionEntry from "./ProductionEntry";
 import PaymentReceived from "./PaymentReceived";

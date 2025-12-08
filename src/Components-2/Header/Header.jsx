@@ -11,10 +11,14 @@ import Nav from "./Nav";
 
 function Header() {
     return (
-        <header id="header" className="header fixed-top d-flex align-items-center">
-            <Logo/>
-            <Searchbar/>
-            <Nav/>
+        <header id="header" className="header fixed-top d-flex align-items-center justify-content-between g-10">
+            <Logo />
+            <div className="credit-box" style={{display:"flex",gap:"20px",justifyContent:"center",fontSize:"15px",fontWeight:"bold"}}>
+                <span style={{background:"red",padding:"5px"}}>Available Credit Limit : 100000</span>
+                <span style={{background:"red",padding:"5px"}}>Balance : 100000</span>
+            </div>
+            <Searchbar />
+            <Nav />
         </header>
     )
 };

@@ -42,9 +42,7 @@ function DomesticCity() {
     const filteredgetCIty = getCIty.filter((city) =>
         (city && city.City_Code && city.City_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (city && city.City_Name && city.City_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (city && city.Zone_Name && city.Zone_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (city && city.State_Name && city.State_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (city && city.Country_Name && city.Country_Name.toLowerCase().includes(searchQuery.toLowerCase()))
+        (city && city.Zone_Name && city.Zone_Name.toLowerCase().includes(searchQuery.toLowerCase())) 
     );
 
     const indexOfLastRow = currentPage * rowsPerPage;

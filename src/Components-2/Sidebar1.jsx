@@ -173,7 +173,7 @@ function Sidebar1() {
                         <li className="compo-tab" id="compo-tab" onClick={sideToggle}>
                             <Link to="/internationalbooking">
                                 <i className="bi bi-person-raised-hand"></i>
-                                <span>International Booking</span>
+                                <span>International Rate</span>
                             </Link>
                         </li>
 

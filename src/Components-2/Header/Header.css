@@ -27,4 +27,13 @@
     .header{
         width: auto;
     }
+    .credit-box{
+        visibility: hidden;
+        opacity: 0;
+    }
+}
+@media (min-width:1024px){
+    .credit-box{
+       font-size: 5px;
+    }
 }

@@ -129,17 +129,7 @@ function Manifest() {
         width: auto !important;
     }
 }
-   th, td {
-        white-space: nowrap !important;
-        border: 1px solid black !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .th {
-        background-color: rgba(36, 98, 113, 1) !important;
-        color: white !important;
-    }
+   
  
 `}
             </style>
@@ -148,9 +138,9 @@ function Manifest() {
             <Sidebar1 />
             <div className="main-body" id="main-body">
 
-                <div className="container-2" style={{ borderRadius: "0px", width: "840px", height: "40px", border: "none" }}>
+                <div className="container-2" style={{ borderRadius: "0px", width: "892px", height: "40px", border: "none" }}>
 
-                    <div className="container-2" style={{ borderRadius: "0px", width: "840px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px", alignItems: "center" }}>
+                    <div className="container-2" style={{ borderRadius: "0px", width: "892px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px", alignItems: "center" }}>
                         <button
                             onClick={generatePDF}
                             style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
@@ -173,22 +163,22 @@ function Manifest() {
                 </div>
 
                 <div className="container-2" ref={pageRef} id="pdf" style={{
-                    borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex",
+                    borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "892px", direction: "flex",
                     flexDirection: "column", gap: "5px",fontFamily: '"Times New Roman", Times, serif',
                 }}>
 
-                    <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex", flexDirection: "column" }}>
+                    <div className="container-2" style={{ borderRadius: "0px", width: "850px", display: "flex", flexDirection: "column" }}>
 
                         < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
                             <div className="container-3" style={{ border: "5px double black" }}>
 
-                                <div style={{ height: "130px", display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px" }}>
-                                    <div style={{ width: "40%" }}>
-                                        <img src={getBranch.Branch_Logo} alt="" style={{ height: "120px" }} />
+                                <div style={{ display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px",gap:"30px" }}>
+                                    <div style={{ width: "35%" }}>
+                                        <img src={getBranch.Branch_Logo} alt="" style={{ height: "100px",width: "100%" }} />
                                     </div>
-                                    <div style={{ width: "60%", display: "flex", flexDirection: "column" }}>
-                                        <div style={{ textAlign: "center", height: "40%" }}>
-                                            <p><b style={{ fontSize: "24px" }}>{getBranch.Company_Name}manifest</b></p>
+                                    <div style={{ width: "60%", display: "flex", flexDirection: "column",gap:"10px" }}>
+                                        <div style={{fontSize: "20px" ,lineHeight:"1",fontWeight:"bold"}}>
+                                            {getBranch.Company_Name}
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "10px", textAlign: "start" }}>
                                             <div style={{ display: "flex",gap:"5px"}}><div style={{ fontWeight: "bold",width:"12%"}}>Address :</div><div style={{width:"100%",textAlign:"start"}}>{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div></div>
@@ -267,8 +257,9 @@ function Manifest() {
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Sr.No</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Date</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Docket.No</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Customer.Name</th>
-                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Consignee.Name</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Customer Name</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Book Mode</th>
+                                                <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>Consignee Name</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>From</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>To</th>
                                                 <th scope="col" className='th' style={{ backgroundColor: "rgba(36, 98, 113, 1)" }}>MODE</th>
@@ -285,6 +276,7 @@ function Manifest() {
                                                         <td className='td'>{manifest.bookDate}</td>
                                                         <td className='td'>{manifest.DocketNo}</td>
                                                         <td className='td'>{manifest.customerName}</td>
+                                                        <td className='td'>{manifest.T_Flag}</td>
                                                         <td className='td'>{manifest.Consignee}</td>
                                                         <td className='td'>{manifest.fromDestName}</td>
                                                         <td className='td'>{manifest.toDestName}</td>

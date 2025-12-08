@@ -52,9 +52,9 @@ function Booking() {
     const [modalIsOpen7, setModalIsOpen7] = useState(false);
     const [modalIsOpen8, setModalIsOpen8] = useState(false);
     const [modalIsOpen9, setModalIsOpen9] = useState(false);
+    const [modalIsOpen10, setModalIsOpen10] = useState(false);
     const [getReceiver, setGetReceiver] = useState([]);
     const [getCustomerdata, setgetCustomerdata] = useState([]);
-    const [getCountry, setGetCountry] = useState([]);
     const [getVendor, setGetVendor] = useState([]);
     const [getState, setGetState] = useState([]);
     const [getCity, setGetCity] = useState([]);
@@ -63,8 +63,7 @@ function Booking() {
     const [getTrain, setGetTrain] = useState([]);
     const [getProduct, setGetProduct] = useState([]);
     const [selectedModeName, setSelectedModeName] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [getKyc, setGetKyc] = useState([]);
     const [toggleActive, setToggleActive] = useState(false);
     const [isFovChecked, setIsFovChecked] = useState(false);
     const [isAllChecked, setIsAllChecked] = useState(false);
@@ -99,27 +98,41 @@ function Booking() {
     const [selectedOriginPinCode, setSelectedOriginPinCode] = useState("");
     const [selectedDestPinCode, setSelectedDestPinCode] = useState("");
     const [open, setOpen] = useState(false);
-    const [allReceiverOption, setAllReceiverOption] = useState([])
-    const [allShipperOption, setAllShipperOption] = useState([])
-    const handleDateChange = (date, field) => {
-        setFormData({ ...formData, [field]: date });
-    };
-
+    const [allReceiverOption, setAllReceiverOption] = useState([]);
+    const [allShipperOption, setAllShipperOption] = useState([]);
     const getTodayDate = () => {
         const today = new Date();
         return today;
     };
-    // ===============================Enter Block =============================
-    const handleKeyDown = (e) => {
-        // Prevent Enter key from submitting or opening anything unintentionally
-        if (e.key === 'Enter') {
-            e.preventDefault();
-        }
-    };
-    useEffect(() => {
-        console.log(selectedDestPinCode);
-    }
-        , [selectedDestPinCode])
+    const [isChecked, setIsChecked] = useState({
+        charge1: false,  // Clearance Charges
+        charge2: false,  // Security Surcharge
+        charge3: false,  // D G R Charges
+        charge4: false,  // Packing Charges
+        charge5: false,  // Ad Code Reg.
+        charge6: false,  // ADC Charges
+        charge7: false,  // AWB Charges
+        charge8: false,  // Large Size Charges
+        charge9: false,  // Transportation Charges
+        charge10: false, // Loading / Unloading
+        charge11: false, // DHL Risk Charges
+    });
+    const [label, setLabel] = useState({
+        charge1: 'Clearance Charges',
+        charge2: 'Security Surcharge',
+        charge3: 'D G R Charges',
+        charge4: 'Packing Charges',
+        charge5: 'Ad Code Reg.',
+        charge6: 'ADC Charges',
+        charge7: 'AWB Charges',
+        charge8: 'Large Size Charges',
+        charge9: 'Transportation Charges',
+        charge10: 'Loading / Unloading',
+        charge11: 'DHL Risk Charges'
+    });
+
+
+
     const [formData, setFormData] = useState({
         ActualShipper: "",
         ActualWt: 0,
@@ -138,6 +151,17 @@ function Booking() {
         ConsigneeName: "",
         ConsigneeCountry: "",
         Customer_Code: "",
+        charge1: 0,
+        charge2: 0,
+        charge3: 0,
+        charge4: 0,
+        charge5: 0,
+        charge6: 0,
+        charge7: 0,
+        charge8: 0,
+        charge9: 0,
+        charge10: 0,
+        charge11: 0,
         DeliveryChrgs: 0,
         Dest_Zone: "",
         DestinationCode: "",
@@ -158,6 +182,10 @@ function Booking() {
         InvDate: getTodayDate(),
         InvValue: 0,
         InvoiceNo: "",
+        SkycType: "",
+        SkycNo: "",
+        CkycType: "",
+        CkycNo: "",
         Location_Code: "",
         Mode_Code: "",
         ODAChrgs: 0,
@@ -313,6 +341,52 @@ function Booking() {
         ChargeWt: 0
     })
 
+
+    // ===============================Enter Block =============================
+    const handleKeyDown = (e) => {
+        // Prevent Enter key from submitting or opening anything unintentionally
+        if (e.key === 'Enter') {
+            e.preventDefault();
+        }
+    };
+    useEffect(() => {
+        console.log(selectedDestPinCode);
+    }
+        , [selectedDestPinCode])
+
+    useEffect(() => {
+        const fetchData = async (setData, Product_Type) => {
+
+
+            try {
+                const response = await getApi(`/Master/GetInterDomestic?Product_Type=${Product_Type}`);
+                const data = response.Data || response.data
+                // Check if the response contains data, then update the corresponding state
+                if (data) {
+                    setData(Array.isArray(data) ? data : []);
+                } else {
+                    setData([]);
+                }
+            } catch (err) {
+                console.error(`Error fetching data from /Master/GetInterDomestic:`, err);
+
+            }
+
+        };
+        const Product_Type = getMode.find(m => m.Mode_Code === formData.Mode_Code)?.Mode_Type == "INTERNATIONAL" ? "International" : "Domestic"
+        fetchData(setGetCity, Product_Type);
+    }, [formData.Mode_Code])
+    useEffect(() => {
+        setLabel(JSON.parse(localStorage.getItem("IntLabels")));
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("IntLabels", JSON.stringify(label));
+    }, [label]);
+    const handleDateChange = (date, field) => {
+        setFormData({ ...formData, [field]: date });
+    };
+
     useEffect(() => {
         if (formData.freight) {
             const freight = parseFloat(formData.freight) || 0;
@@ -325,10 +399,6 @@ function Booking() {
             }));
         }
     }, [formData.freight])
-    const handleClick = () => {
-        console.log("Button clicked aaakkkka");
-    };
-    <button onClick={handleClick}>Click me</button>
 
 
     const handleOriginPinCodeChange = async (e) => {
@@ -540,6 +610,11 @@ function Booking() {
             setIsFlightChecked(savedState.isFlightChecked || false);
             setIsTrainChecked(savedState.isTrainChecked || false);
             setIsProChecked(savedState.isProChecked || false);
+            const newIsChecked = {};
+            Object.keys(isChecked).forEach((key) => {
+                newIsChecked[key] = savedState[key] || false;
+            });
+            setIsChecked(newIsChecked);
         }
         fetchReceiverData();
         fetchShipper();
@@ -556,6 +631,34 @@ function Booking() {
         const newValue = !isAllChecked;
 
         setIsAllChecked(newValue);
+        // Update React states
+        setIsFovChecked(newValue);
+        setIsDocketChecked(newValue);
+        setIsDeliveryChecked(newValue);
+        setIsPackingChecked(newValue);
+        setIsGreenChecked(newValue);
+        setIsHamaliChecked(newValue);
+        setIsOtherChecked(newValue);
+        setIsInsuranceChecked(newValue);
+        setIsODAChecked(newValue);
+        setIsFuelChecked(newValue);
+        setIsRemarkChecked(newValue);
+        setIsEWayChecked(newValue);
+        setIsInvoiceValue(newValue);
+        setIsInvoiceNo(newValue);
+        setDispatchDate(newValue);
+        setIsShipChecked(newValue);
+        setIsReceChecked(newValue);
+        setIsVenChecked(newValue);
+        setIsFlightChecked(newValue);
+        setIsTrainChecked(newValue);
+        setIsProChecked(newValue);
+        // Update dynamic isChecked fields
+        const newIsChecked = {};
+        Object.keys(isChecked).forEach((key) => {
+            newIsChecked[key] = newValue;
+        });
+        setIsChecked(newIsChecked);
 
         const allFields = {
             isFovChecked: newValue,
@@ -579,31 +682,9 @@ function Booking() {
             isVenChecked: newValue,
             isFlightChecked: newValue,
             isTrainChecked: newValue,
-            isProChecked: newValue
+            isProChecked: newValue,
+            ...newIsChecked
         };
-
-        // Update React states
-        setIsFovChecked(newValue);
-        setIsDocketChecked(newValue);
-        setIsDeliveryChecked(newValue);
-        setIsPackingChecked(newValue);
-        setIsGreenChecked(newValue);
-        setIsHamaliChecked(newValue);
-        setIsOtherChecked(newValue);
-        setIsInsuranceChecked(newValue);
-        setIsODAChecked(newValue);
-        setIsFuelChecked(newValue);
-        setIsRemarkChecked(newValue);
-        setIsEWayChecked(newValue);
-        setIsInvoiceValue(newValue);
-        setIsInvoiceNo(newValue);
-        setDispatchDate(newValue);
-        setIsShipChecked(newValue);
-        setIsReceChecked(newValue);
-        setIsVenChecked(newValue);
-        setIsFlightChecked(newValue);
-        setIsTrainChecked(newValue);
-        setIsProChecked(newValue);
 
         // Save to localStorage
         localStorage.setItem("bookingState", JSON.stringify(allFields));
@@ -634,7 +715,7 @@ function Booking() {
         };
 
         // Check if all are true
-        const allChecked = Object.values(allFields).every(Boolean);
+        const allChecked = Object.values(allFields).every(Boolean) && Object.values(isChecked).every(Boolean);
         setIsAllChecked(allChecked);
         handleCheckboxChange('isAllChecked', allChecked)
     }, [
@@ -659,6 +740,7 @@ function Booking() {
         isInvoiceNo,
         isInvoiceValue,
         dispatchDate,
+        isChecked
     ]);
     const handleFovChange = (e) => {
         setIsFovChecked(e.target.checked);
@@ -762,7 +844,6 @@ function Booking() {
         handleCheckboxChange('isVenChecked', e.target.checked);
     }
     const fetchData = async (endpoint, setData) => {
-        setLoading(true); // Set loading state to true
 
         try {
             const response = await getApi(endpoint);
@@ -775,9 +856,7 @@ function Booking() {
             }
         } catch (err) {
             console.error(`Error fetching data from ${endpoint}:`, err);
-            setError(err);
-        } finally {
-            setLoading(false); // Set loading state to false after fetching
+
         }
     };
     const handleSaveReceiver = async (e) => {
@@ -907,15 +986,13 @@ function Booking() {
     useEffect(() => {
         fetchData('/Master/getCustomerdata', setgetCustomerdata);
         fetchData('/Master/GetReceiver', setGetReceiver);
-        // fetchData('/Master/AllCustomers', setAllCustomers);
-        fetchData('/Master/getCountry', setGetCountry);
         fetchData('/Master/getVendor', setGetVendor);
         fetchData('/Master/GetState', setGetState);
-        fetchData('/Master/getdomestic', setGetCity);
         fetchData('/Master/getMode', setGetMode);
         fetchData('/Master/GetAllFlights', setGetFlight);
         fetchData('/Master/GetAllTrains', setGetTrain);
         fetchData('/Master/GetAllProducts', setGetProduct);
+        fetchData('/Master/GetKYCDetails', setGetKyc);
 
     }, []);
 
@@ -1273,15 +1350,13 @@ function Booking() {
                 setUseInput(gst?.Success);
                 console.log(`input==${gst?.Success}`);
 
-                if (gst.Rate == 0) {
-                    gst.Rate = formData.VendorAmt;
-                    gst.Subtotal = formData.VendorAmt;
-                    gst.TotalAmount = formData.VendorAmt;
-                }
+                const Rate = gst.Rate == 0 ? formData.VendorAmt : gst.Rate;
+                const Subtotal = gst.Rate == 0 ? formData.VendorAmt : gst.Rate;
+                const TotalAmount = gst.Rate == 0 ? formData.VendorAmt : gst.Rate;
 
                 setVendorShow(prev => ({
                     ...prev,
-                    Rate: gst.Rate,
+                    Rate: Rate,
                     Fuel_Charges: gst.Fuel_Charges,
                     Fuel_Per: gst.Fuel_Per,
                     Fov_Charges: gst.Fov_Charges,
@@ -1294,7 +1369,7 @@ function Booking() {
                     Hamali_Charges: gst.Hamali_Charges,
                     Other_Charges: gst.Other_Charges,
                     Insurance_Charges: gst.Insurance_Charges,
-                    Subtotal: gst.Subtotal,
+                    Subtotal: Subtotal,
                     CGSTPer: gst.CGSTPer,
                     CGSTAmt: gst.CGSTAmt,
                     SGSTPer: gst.SGSTPer,
@@ -1302,7 +1377,7 @@ function Booking() {
                     IGSTPer: gst.IGSTPer,
                     IGSTAmt: gst.IGSTAmt,
                     TotalGST: gst.TotalGST,
-                    TotalAmount: gst.TotalAmount,
+                    TotalAmount: TotalAmount,
                 }));
 
             } catch (error) {
@@ -1358,7 +1433,6 @@ function Booking() {
                     setFormData(prev => ({
                         ...prev,
                         VendorRatePerkg: 0,
-                        VendorAmt: 0
                     }));
 
 
@@ -1385,8 +1459,12 @@ function Booking() {
             formData.BookMode,
             formData.DoxSpx,
             formData.VendorWt]);
+
     useEffect(() => {
-        setVendorShow({
+
+        if(!formData.VendorAmt || formData.VendorAmt==0)
+        {
+            setVendorShow({
             Rate: 0,
             Fuel_Charges: 0,
             Fuel_Per: 0,
@@ -1410,7 +1488,7 @@ function Booking() {
             TotalGST: 0,
             TotalAmount: 0
         });
-
+        }
     }, [formData.VendorAmt])
 
     useEffect(() => {
@@ -1663,13 +1741,14 @@ function Booking() {
 
 
     useEffect(() => {
+        if(!formData.VendorRatePerkg || formData.VendorRatePerkg==0)
+        return;
         const wt = parseFloat(formData.VendorWt) || 0;
         const ratePerKg = parseFloat(formData.VendorRatePerkg) || 0;
         const Amount = wt * ratePerKg;
         setFormData((prev) => ({
             ...prev,
             VendorAmt: Amount,
-
         }));
 
 
@@ -1704,6 +1783,17 @@ function Booking() {
             ConsigneeName: "",
             ConsigneeCountry: "",
             Customer_Code: "",
+            charge1: 0,
+            charge2: 0,
+            charge3: 0,
+            charge4: 0,
+            charge5: 0,
+            charge6: 0,
+            charge7: 0,
+            charge8: 0,
+            charge9: 0,
+            charge10: 0,
+            charge11: 0,
             DeliveryChrgs: 0,
             Dest_Zone: "",
             DestinationCode: "",
@@ -1724,6 +1814,10 @@ function Booking() {
             InvDate: getTodayDate(),
             InvValue: 0,
             InvoiceNo: "",
+            SkycType: "",
+            SkycNo: "",
+            CkycType: "",
+            CkycNo: "",
             Location_Code: "",
             Mode_Code: "",
             ODAChrgs: 0,
@@ -1858,15 +1952,18 @@ function Booking() {
         }
         // Step 3: Continue if no errors
         const requestBody = {
+            // BASIC
             Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             DocketNo: formData.DocketNo,
             BookDate: formatDate(formData.BookDate),
             Customer_Code: formData.Customer_Code,
-            // ✅ Consignee
-            Receiver_Code: formData.ConsigneeName, // Code or Value from select
-            Consignee_Name:
-                allReceiverOption.find(opt => opt.value === formData.ConsigneeName)?.label ||
-                formData.ConsigneeName, // Label or text entered
+            BookMode: formData.BookMode,
+            T_Flag: formData.BookMode,
+            UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
+
+            // CONSIGNEE
+            Receiver_Code: formData.ConsigneeName,
+            Consignee_Name: allReceiverOption.find(x => x.value === formData.ConsigneeName)?.label,
             Consignee_Add1: formData.ConsigneeAdd1,
             Consignee_Add2: formData.ConsigneeAdd2,
             Consignee_State: formData.ConsigneeState,
@@ -1877,11 +1974,9 @@ function Booking() {
             Consignee_GST: formData.ConsigneeGST,
             Consignee_Country: formData.ConsigneeCountry,
 
-            // ✅ Shipper
-            Shipper_Code: formData.Shipper_Name, // value from dropdown
-            Shipper_Name:
-                allShipperOption.find(opt => opt.value === formData.Shipper_Name)?.label ||
-                formData.Shipper_Name, // label or text entered
+            // SHIPPER
+            Shipper_Code: formData.Shipper_Name,
+            Shipper_Name: allShipperOption.find(x => x.value === formData.Shipper_Name)?.label,
             ActualShipper: formData.ActualShipper,
             ShipperAdd: formData.ShipperAdd,
             ShipperAdd2: formData.ShipperAdd2,
@@ -1893,6 +1988,7 @@ function Booking() {
             ShipperPhone: formData.ShipperPhone,
             ShipperEmail: formData.ShipperEmail,
 
+            // ROUTING + MODE
             Mode_Code: formData.Mode_Code,
             Origin_code: formData.OriginCode,
             Origin_Zone: formData.Origin_Zone,
@@ -1900,18 +1996,19 @@ function Booking() {
             Destination_Code: formData.DestinationCode,
             Dest_Zone: formData.Dest_Zone,
             Dest_PinCode: selectedDestPinCode,
+            DestName: formData.DestName,
             BillParty: formData.BillParty,
-            DispatchDate: formatDate(formData.DispatchDate),
-            DoxSpx: formData.DoxSpx,
-            RateType: formData.RateType,
+
+            // CHARGES
             Qty: formData.QtyOrderEntry,
-            ActualWt: formData.ActualWt,
-            VendorWt: formData.VendorWt,
-            VendorAmt: formData.VendorAmt,
-            VolumetricWt: formData.VolumetricWt,
-            ChargedWt: formData.ChargedWt,
-            RatePerkg: formData.RatePerkg,
+            RateType: formData.RateType,
+            DoxSpx: formData.DoxSpx,
+            DispatchDate: formatDate(formData.DispatchDate),
             Rate: formData.Rate,
+            RatePerkg: formData.RatePerkg,
+            ActualWt: formData.ActualWt,
+            ChargedWt: formData.ChargedWt,
+            VolumetricWt: formData.VolumetricWt,
             FuelPer: formData.FuelPer,
             FuelCharges: formData.FuelCharges,
             FovChrgs: formData.FovChrgs,
@@ -1923,6 +2020,21 @@ function Booking() {
             HamaliChrgs: formData.HamaliChrgs,
             OtherCharges: formData.OtherCharges,
             InsuranceChrgs: formData.InsuranceChrgs,
+
+            // ⭐ Add All (Charges1–Charges11) Here ⭐
+            Charges1: formData.charge1,
+            Charges2: formData.charge2,
+            Charges3: formData.charge3,
+            Charges4: formData.charge4,
+            Charges5: formData.charge5,
+            Charges6: formData.charge6,
+            Charges7: formData.charge7,
+            Charges8: formData.charge8,
+            Charges9: formData.charge9,
+            Charges10: formData.charge10,
+            Charges11: formData.charge11,
+
+            // GST
             IGSTPer: gstData.IGSTPer,
             IGSTAMT: gstData.IGSTAMT,
             CGSTPer: gstData.CGSTPer,
@@ -1930,55 +2042,37 @@ function Booking() {
             SGSTPer: gstData.SGSTPer,
             SGSTAMT: gstData.SGSTAMT,
             TotalAmt: formData.TotalAmt,
-            Status: formData.Status,
+
+            // VENDOR
             Vendor_Code: formData.Vendor_Code,
             Vendor_Code1: vendorData.Vendor_Code1,
             Vendor_Code2: vendorData.Vendor_Code2,
+            VendorWt: formData.VendorWt,
+            VendorAmt: formData.VendorAmt,
             VendorAwbNo: formData.VendorAwbNo,
             VendorAwbNo1: vendorData.VendorAwbNo1,
             VendorAwbNo2: vendorData.VendorAwbNo2,
-            ActualShipper: formData.ActualShipper,
 
+            // KYC / FLIGHT / TRAIN
+            KYC_Type: formData.SkycType,
+            KYC_No: formData.SkycNo,
+            C_KYC_Type: formData.CkycType,
+            C_KYC_No: formData.CkycNo,
+            Flight_Code: formData.Flight_Code,
+            Train_Code: formData.Train_Code,
+
+            // INVOICE
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
-            EwayBill: formData.EwayBill,
             InvDate: formatDate(formData.InvDate),
+            EwayBill: formData.EwayBill,
             Remark: remarkData.Remark,
             MHWNo: remarkData.MHWNo,
-            DestName: formData.DestName,
-            T_Flag: formData.BookMode,
-            UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
-            MultiInvoice: InvoicesubmittedData.map((invoice) => ({
-                PoNo: invoice.PoNo,
-                PoDate: formatDate(invoice.PoDate),
-                InvoiceNo: invoice.InvoiceNo,
-                InvoiceValue: invoice.InvoiceValue,
-                Description: invoice.Description,
-                Qty: invoice.Qty,
-                EWayBillNo: invoice.EWayBillNo,
-                Remark: invoice.Remark,
-                InvoiceImg: invoice.InvoiceImg
-            })),
-            Volumetric: submittedData.map((volumetric) => ({
-                Length: volumetric.Length,
-                Width: volumetric.Width,
-                Height: volumetric.Height,
-                Qty: volumetric.Qty,
-                DivideBy: volumetric.DivideBy,
-                VolmetricWt: volumetric.VolmetricWt,
-                ActualWt: volumetric.ActualWt,
-                ChargeWt: volumetric.ChargeWt
-            })),
-            Vendorvolumetric: vendorsubmittedData.map((vendor) => ({
-                Length: vendor.Length,
-                Width: vendor.Width,
-                Height: vendor.Height,
-                Qty: vendor.Qty,
-                DivideBy: vendor.DivideBy,
-                VolmetricWt: vendor.VolmetricWt,
-                ActualWt: vendor.ActualWt,
-                ChargeWt: vendor.ChargeWt
-            }))
+
+            // MULTIPLE JSON DATA
+            MultiInvoice: InvoicesubmittedData,
+            Volumetric: submittedData,
+            Vendorvolumetric: vendorsubmittedData,
         };
 
         // Step 4: Submit
@@ -2044,16 +2138,28 @@ function Booking() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+        const errors = [];
+        // if (!formData.DocketNo) errors.push("DocketNo is required");
+        if (!formData.BookDate) errors.push("Booking Date is required");
+        if (!formData.Customer_Code) errors.push("Customer is required");
+        if (!formData.ActualWt) errors.push("ActualWt is required");
+        if (!formData.DestinationCode) errors.push("Destination_Name is required");
+        if (!formData.Mode_Code) errors.push("Mode_Name is required");
+        if (!formData.OriginCode) errors.push("Origin_Name is required");
+        if (!formData.QtyOrderEntry || parseFloat(formData.QtyOrderEntry) <= 0) errors.push("Quantity must be greater than 0");
         const requestBody = {
+            // BASIC
             Location_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             DocketNo: formData.DocketNo,
             BookDate: formatDate(formData.BookDate),
             Customer_Code: formData.Customer_Code,
-            // ✅ Consignee
-            Receiver_Code: formData.ConsigneeName, // Code or Value from select
-            Consignee_Name:
-                allReceiverOption.find(opt => opt.value === formData.ConsigneeName)?.label ||
-                formData.ConsigneeName, // Label or text entered
+            BookMode: formData.BookMode,
+            T_Flag: formData.BookMode,
+            UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
+
+            // CONSIGNEE
+            Receiver_Code: formData.ConsigneeName,
+            Consignee_Name: allReceiverOption.find(x => x.value === formData.ConsigneeName)?.label,
             Consignee_Add1: formData.ConsigneeAdd1,
             Consignee_Add2: formData.ConsigneeAdd2,
             Consignee_State: formData.ConsigneeState,
@@ -2064,11 +2170,9 @@ function Booking() {
             Consignee_GST: formData.ConsigneeGST,
             Consignee_Country: formData.ConsigneeCountry,
 
-            // ✅ Shipper
-            Shipper_Code: formData.Shipper_Name, // value from dropdown
-            Shipper_Name:
-                allShipperOption.find(opt => opt.value === formData.Shipper_Name)?.label ||
-                formData.Shipper_Name, // label or text entered
+            // SHIPPER
+            Shipper_Code: formData.Shipper_Name,
+            Shipper_Name: allShipperOption.find(x => x.value === formData.Shipper_Name)?.label,
             ActualShipper: formData.ActualShipper,
             ShipperAdd: formData.ShipperAdd,
             ShipperAdd2: formData.ShipperAdd2,
@@ -2080,6 +2184,7 @@ function Booking() {
             ShipperPhone: formData.ShipperPhone,
             ShipperEmail: formData.ShipperEmail,
 
+            // ROUTING + MODE
             Mode_Code: formData.Mode_Code,
             Origin_code: formData.OriginCode,
             Origin_Zone: formData.Origin_Zone,
@@ -2087,29 +2192,45 @@ function Booking() {
             Destination_Code: formData.DestinationCode,
             Dest_Zone: formData.Dest_Zone,
             Dest_PinCode: selectedDestPinCode,
+            DestName: formData.DestName,
             BillParty: formData.BillParty,
-            DispatchDate: formatDate(formData.DispatchDate),
-            DoxSpx: formData.DoxSpx,
-            RateType: formData.RateType,
+
+            // CHARGES
             Qty: formData.QtyOrderEntry,
-            ActualWt: formData.ActualWt,
-            VendorWt: formData.VendorWt,
-            VendorAmt: formData.VendorAmt,
-            VolumetricWt: formData.VolumetricWt,
-            ChargedWt: formData.ChargedWt,
-            RatePerKg: formData.RatePerkg,
+            RateType: formData.RateType,
+            DoxSpx: formData.DoxSpx,
+            DispatchDate: formatDate(formData.DispatchDate),
             Rate: formData.Rate,
+            RatePerkg: formData.RatePerkg,
+            ActualWt: formData.ActualWt,
+            ChargedWt: formData.ChargedWt,
+            VolumetricWt: formData.VolumetricWt,
             FuelPer: formData.FuelPer,
             FuelCharges: formData.FuelCharges,
-            Fov_Chrgs: formData.FovChrgs,
+            FovChrgs: formData.FovChrgs,
             DocketChrgs: formData.DocketChrgs,
-            ODA_Chrgs: formData.ODAChrgs,
+            ODAChrgs: formData.ODAChrgs,
             DeliveryChrgs: formData.DeliveryChrgs,
             PackingChrgs: formData.PackingChrgs,
             GreenChrgs: formData.GreenChrgs,
             HamaliChrgs: formData.HamaliChrgs,
             OtherCharges: formData.OtherCharges,
             InsuranceChrgs: formData.InsuranceChrgs,
+
+            // ⭐ Add All (Charges1–Charges11) Here ⭐
+            Charges1: formData.charge1,
+            Charges2: formData.charge2,
+            Charges3: formData.charge3,
+            Charges4: formData.charge4,
+            Charges5: formData.charge5,
+            Charges6: formData.charge6,
+            Charges7: formData.charge7,
+            Charges8: formData.charge8,
+            Charges9: formData.charge9,
+            Charges10: formData.charge10,
+            Charges11: formData.charge11,
+
+            // GST
             IGSTPer: gstData.IGSTPer,
             IGSTAMT: gstData.IGSTAMT,
             CGSTPer: gstData.CGSTPer,
@@ -2117,55 +2238,37 @@ function Booking() {
             SGSTPer: gstData.SGSTPer,
             SGSTAMT: gstData.SGSTAMT,
             TotalAmt: formData.TotalAmt,
-            Status: formData.Status,
+
+            // VENDOR
             Vendor_Code: formData.Vendor_Code,
             Vendor_Code1: vendorData.Vendor_Code1,
             Vendor_Code2: vendorData.Vendor_Code2,
+            VendorWt: formData.VendorWt,
+            VendorAmt: formData.VendorAmt,
             VendorAwbNo: formData.VendorAwbNo,
             VendorAwbNo1: vendorData.VendorAwbNo1,
             VendorAwbNo2: vendorData.VendorAwbNo2,
 
+            // KYC / FLIGHT / TRAIN
+            KYC_Type: formData.SkycType,
+            KYC_No: formData.SkycNo,
+            C_KYC_Type: formData.CkycType,
+            C_KYC_No: formData.CkycNo,
+            Flight_Code: formData.Flight_Code,
+            Train_Code: formData.Train_Code,
 
-            UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
+            // INVOICE
             InvoiceNo: formData.InvoiceNo,
             InvValue: formData.InvValue,
-            EwayBill: formData.EwayBill,
             InvDate: formatDate(formData.InvDate),
+            EwayBill: formData.EwayBill,
             Remark: remarkData.Remark,
             MHWNo: remarkData.MHWNo,
-            DestName: formData.DestName,
-            T_Flag: formData.BookMode,
-            MultiInvoice: InvoicesubmittedData.map((invoice) => ({
-                PoNo: invoice.PoNo,
-                PoDate: formatDate(invoice.PoDate),
-                InvoiceNo: invoice.InvoiceNo,
-                InvoiceValue: invoice.InvoiceValue,
-                Description: invoice.Description,
-                Qty: invoice.Qty,
-                EWayBillNo: invoice.EWayBillNo,
-                Remark: invoice.Remark,
-                InvoiceImg: invoice.InvoiceImg
-            })),
-            Volumetric: submittedData.map((volumetric) => ({
-                Length: volumetric.Length,
-                Width: volumetric.Width,
-                Height: volumetric.Height,
-                Qty: volumetric.Qty,
-                DivideBy: volumetric.DivideBy,
-                VolmetricWt: volumetric.VolmetricWt,
-                ActualWt: volumetric.ActualWt,
-                ChargeWt: volumetric.ChargeWt
-            })),
-            Vendorvolumetric: vendorsubmittedData.map((vendor) => ({
-                Length: vendor.Length,
-                Width: vendor.Width,
-                Height: vendor.Height,
-                Qty: vendor.Qty,
-                DivideBy: vendor.DivideBy,
-                VolmetricWt: vendor.VolmetricWt,
-                ActualWt: vendor.ActualWt,
-                ChargeWt: vendor.ChargeWt
-            }))
+
+            // MULTIPLE JSON DATA
+            MultiInvoice: InvoicesubmittedData,
+            Volumetric: submittedData,
+            Vendorvolumetric: vendorsubmittedData,
         };
         try {
             const res = await putApi(`/Booking/OrderEntryUpdate`, requestBody);
@@ -2272,7 +2375,27 @@ function Booking() {
                         HamaliChrgs: data.HamaliChrgs,        // ✅ matches API
                         OtherCharges: data.OtherCharges,      // ✅ matches API
                         InsuranceChrgs: data.InsuranceChrgs,  // ✅ matches API
+
+                        Charges1: data.Charges1,
+                        Charges2: data.Charges2,
+                        Charges3: data.Charges3,
+                        Charges4: data.Charges4,
+                        Charges5: data.Charges5,
+                        Charges6: data.Charges6,
+                        Charges7: data.Charges7,
+                        Charges8: data.Charges8,
+                        Charges9: data.Charges9,
+                        Charges10: data.Charges10,
+                        Charges11: data.Charges11,
                         TotalAmt: data.TotalAmt,
+
+                        Train_Code: data.Train_Code,
+                        Flight_Code: data.Flight_Code,
+                        SkycType: data.KYC_Type,
+                        SkycNo: data.KYC_No,
+                        CkycType: data.KYC_Type,
+                        CkycNo: data.KYC_No,
+
                         Status: data.Remark,
                         Vendor_Code: data.Vendor_Code,
                         VendorAwbNo: data.VendorAwbNo,
@@ -2662,6 +2785,51 @@ function Booking() {
 
                                         </div>
 
+                                        <div className="input-field">
+                                            <label>KYC Type</label>
+
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getKyc.map(kyc => ({
+                                                    value: kyc.KYC_Code,
+                                                    label: kyc.KYC_Name
+                                                }))}
+                                                value={
+                                                    formData.SkycType
+                                                        ? {
+                                                            value: formData.SkycType,
+                                                            label: getKyc.find(kyc => kyc.KYC_Code === formData.SkycType)?.KYC_Name || ""
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        SkycType: selectedOption.value
+                                                    }));
+                                                }}
+                                                placeholder="Select KYC Type"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className="input-field">
+                                            <label htmlFor="kyc-no">KYC No</label>
+                                            <input
+                                                type="text"
+                                                id="shipper-adhaar"
+                                                placeholder="KYC No"
+                                                value={formData.SkycNo}
+                                                onChange={(e) => setFormData({ ...formData, SkycNo: e.target.value })}
+                                                className="form-control custom-input"
+                                            />
+                                        </div>
+
                                         <div className="input-field1">
                                             <label htmlFor="">Shipper Mobile No</label>
                                             <input
@@ -2674,15 +2842,17 @@ function Booking() {
                                         </div>
 
                                         <div className="input-field1">
-                                            <label htmlFor="">Pin_Code</label>
+                                            <label htmlFor="">Post / Zip Code</label>
                                             <input
                                                 type="text"
-                                                placeholder="Pin Code"
+                                                placeholder="Post / Zip Code"
                                                 maxLength={6}
                                                 value={formData.ShipperPin}
                                                 onChange={(e) => setFormData({ ...formData, ShipperPin: e.target.value })}
                                             />
                                         </div>
+
+
                                     </>}
                                     <div className="input-field1">
                                         <label htmlFor="">Booking Mode</label>
@@ -2695,6 +2865,46 @@ function Booking() {
                                             <option value="RTGS">RTGS</option>
                                             <option value="NEFT">NEFT</option>
                                         </select>
+                                    </div>
+
+                                    <div className="fields2" style={{ width: "100%", whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
+                                        <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
+                                            <div className="input-field" style={{ flex: "4", position: "relative" }}>
+                                                <label>Mode Name</label>
+
+                                                <Select
+                                                    className="blue-selectbooking"
+                                                    classNamePrefix="blue-selectbooking"
+                                                    options={allModeOptions}
+                                                    value={
+                                                        formData.Mode_Code
+                                                            ? allModeOptions.find(opt => opt.value === formData.Mode_Code)
+                                                            : null
+                                                    }
+                                                    onChange={(selectedOption) => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            Mode_Code: selectedOption.value
+                                                        }));
+                                                    }}
+                                                    placeholder="Select Mode Name"
+                                                    isSearchable
+                                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                    styles={{
+                                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="input-field" style={{ flex: "2" }}>
+                                                <label>Code</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="Code"
+                                                    value={formData.Mode_Code || ''}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Origin Row */}
@@ -2804,45 +3014,7 @@ function Booking() {
                                     <div className="card border p-1 mx-0" style={{ overflowX: "hidden", width: "100%" }}>
                                         <div className="section-title">Vendor Information</div>
 
-                                        <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
-                                            <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
-                                                <div className="input-field" style={{ flex: "5", position: "relative" }}>
-                                                    <label>Mode Name</label>
 
-                                                    <Select
-                                                        className="blue-selectbooking"
-                                                        classNamePrefix="blue-selectbooking"
-                                                        options={allModeOptions}
-                                                        value={
-                                                            formData.Mode_Code
-                                                                ? allModeOptions.find(opt => opt.value === formData.Mode_Code)
-                                                                : null
-                                                        }
-                                                        onChange={(selectedOption) => {
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                Mode_Code: selectedOption.value
-                                                            }));
-                                                        }}
-                                                        placeholder="Select Mode Name"
-                                                        isSearchable
-                                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                        styles={{
-                                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div className="input-field" style={{ flex: "2" }}>
-                                                    <label>Code</label>
-                                                    <input
-                                                        type="tel"
-                                                        placeholder="Code"
-                                                        value={formData.Mode_Code || ''}
-                                                        readOnly
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
                                         {isVenChecked && <><div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
                                             <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
                                                 <div className="input-field" style={{ flex: "5", position: "relative" }}>
@@ -2914,59 +3086,58 @@ function Booking() {
 
 
                                             <div className="fields2" style={{ whiteSpace: "nowrap", paddingRight: "0.5rem" }}>
-                                                <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "5px" }}>
-                                                    <div className="input-field1">
-                                                        <label className="form-label">Vendor Weight</label>
-                                                        <input
-                                                            type="tel"
-                                                            className="form-control"
-                                                            placeholder="V_Weight"
-                                                            value={formData.VendorWt}
-                                                            onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
-                                                        />
-                                                    </div>
-
-                                                    <div className="input-field1">
-                                                        <label className="form-label">Rate Per Kg</label>
-                                                        <input
-                                                            type="tel"
-                                                            placeholder="Rate Per Kg"
-                                                            value={formData.VendorRatePerkg || ''}
-                                                            onChange={(e) => setFormData({ ...formData, VendorRatePerkg: e.target.value })}
-                                                        />
-                                                    </div>
-
-                                                    <div className="input-field1">
-                                                        <label className="form-label">Vendor Amount</label>
-                                                        <input
-                                                            type="tel"
-                                                            className="form-control"
-                                                            placeholder="Vendor Amount"
-                                                            value={formData.VendorAmt}
-                                                            readOnly
-                                                            onChange={(e) =>
-                                                                setFormData({ ...formData, VendorAmt: e.target.value })
-                                                            }
-                                                        />
-                                                    </div>
-
-                                                    <div className="input-field1">
-                                                        <label className="form-label">&nbsp;</label>
-                                                        <button
-                                                            type="button"
-                                                            className="ok-btn"
-                                                            onClick={() => setModalIsOpen8(true)}
-                                                            style={{ height: "35px", width: "100%", }}
-                                                        >
-                                                            <i className="bi bi-cash-coin" style={{ fontSize: "24px" }}></i>
-                                                        </button>
-                                                    </div>
-
-
-
-
-
+                                                <div className="input-field1">
+                                                    <label className="form-label">Vendor Weight</label>
+                                                    <input
+                                                        type="tel"
+                                                        className="form-control"
+                                                        placeholder="V_Weight"
+                                                        value={formData.VendorWt}
+                                                        onChange={(e) => setFormData({ ...formData, VendorWt: e.target.value })}
+                                                    />
                                                 </div>
+
+                                                <div className="input-field3">
+                                                    <label className="form-label">Rate Per Kg</label>
+                                                    <input
+                                                        type="tel"
+                                                        placeholder="Rate Per Kg"
+                                                        value={formData.VendorRatePerkg || ''}
+                                                        onChange={(e) => setFormData({ ...formData, VendorRatePerkg: e.target.value })}
+                                                    />
+                                                </div>
+
+                                                <div className="input-field1">
+                                                    <label className="form-label">Vendor Amount</label>
+                                                    <input
+                                                        type="tel"
+                                                        className="form-control"
+                                                        placeholder="Vendor Amount"
+                                                        value={formData.VendorAmt}
+                                                        readOnly
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, VendorAmt: e.target.value })
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="input-field2">
+                                                    <label className="form-label">&nbsp;</label>
+                                                    <button
+                                                        type="button"
+                                                        className="ok-btn"
+                                                        onClick={() => setModalIsOpen8(true)}
+                                                        style={{ height: "35px", width: "100%", }}
+                                                    >
+                                                        <i className="bi bi-cash-coin" style={{ fontSize: "24px" }}></i>
+                                                    </button>
+                                                </div>
+
+
+
+
+
+
                                             </div></>}
 
 
@@ -3171,16 +3342,7 @@ function Booking() {
                                 {/* Other Receiver Fields */}
                                 <div className="fields2">
                                     {isReceChecked && <>
-                                        <div className="input-field">
-                                            <label>Mobile No</label>
-                                            <input
-                                                type="tel"
-                                                placeholder="Mobile No"
-                                                maxLength={10}
-                                                value={formData.ConsigneeMob}
-                                                onChange={(e) => setFormData({ ...formData, ConsigneeMob: e.target.value })}
-                                            />
-                                        </div>
+
 
                                         <div className="input-field">
                                             <label>Consignee Address</label>
@@ -3202,17 +3364,6 @@ function Booking() {
                                             />
                                         </div>
 
-                                        <div className="input-field">
-                                            <label>Pin Code</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Pin Code"
-                                                value={formData.ConsigneePin}
-                                                maxLength={6}
-                                                pattern="[0-9]{6}"
-                                                onChange={(e) => setFormData({ ...formData, ConsigneePin: e.target.value })}
-                                            />
-                                        </div>
 
                                         <div className="input-field">
                                             <label htmlFor="">State Name</label>
@@ -3249,6 +3400,7 @@ function Booking() {
                                             />
 
                                         </div>
+
                                         <div className="input-field">
                                             <label>Country</label>
                                             <input
@@ -3260,6 +3412,76 @@ function Booking() {
                                         </div>
 
                                         <div className="input-field">
+                                            <label>KYC Type</label>
+
+                                            <Select
+                                                className="blue-selectbooking"
+                                                classNamePrefix="blue-selectbooking"
+                                                options={getKyc.map(kyc => ({
+                                                    value: kyc.KYC_Code,
+                                                    label: kyc.KYC_Name
+                                                }))}
+                                                value={
+                                                    formData.CkycType
+                                                        ? {
+                                                            value: formData.CkycType,
+                                                            label: getKyc.find(kyc => kyc.KYC_Code === formData.CkycType)?.KYC_Name || ""
+                                                        }
+                                                        : null
+                                                }
+                                                onChange={(selectedOption) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        CkycType: selectedOption.value
+                                                    }));
+                                                }}
+                                                placeholder="Select KYC Type"
+                                                isSearchable
+                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
+                                                styles={{
+                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className="input-field">
+                                            <label htmlFor="kyc-no">KYC No</label>
+                                            <input
+                                                type="text"
+                                                id="shipper-adhaar"
+                                                placeholder="KYC No"
+                                                value={formData.CkycNo}
+                                                onChange={(e) => setFormData({ ...formData, CkycNo: e.target.value })}
+                                                className="form-control custom-input"
+                                            />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Mobile No</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="Mobile No"
+                                                maxLength={10}
+                                                value={formData.ConsigneeMob}
+                                                onChange={(e) => setFormData({ ...formData, ConsigneeMob: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="input-field1">
+                                            <label>Post / Zip Code</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Post / Zip Code"
+                                                value={formData.ConsigneePin}
+                                                maxLength={6}
+                                                pattern="[0-9]{6}"
+                                                onChange={(e) => setFormData({ ...formData, ConsigneePin: e.target.value })}
+                                            />
+                                        </div>
+
+
+
+                                        <div className="input-field1">
                                             <label>GST No</label>
                                             <input
                                                 type="text"
@@ -3269,7 +3491,7 @@ function Booking() {
                                             />
                                         </div>
 
-                                        <div className="input-field">
+                                        <div className="input-field1">
                                             <label>Email ID</label>
                                             <div>
                                                 <input
@@ -3286,6 +3508,9 @@ function Booking() {
                                         <button className="btn btn-success" style={{}}>Save</button>
                                     </div>
 
+
+                                </div>
+                                <div className="fields2">
                                     {/* Conditional Sections */}
                                     {isInvoiceValue && (
                                         <>
@@ -3374,6 +3599,7 @@ function Booking() {
                                         </div>
                                     )}
                                 </div>
+
                             </form>
 
 
@@ -3390,7 +3616,7 @@ function Booking() {
                                     }}
                                 >
                                     <div className="fields2">
-                                        {isProChecked && <div className="input-field1">
+                                        {isProChecked && <div className="input-field" style={{ whiteSpace: "nowrap" }}>
                                             <label>Package Type</label>
 
                                             <Select
@@ -3417,17 +3643,17 @@ function Booking() {
                                             />
                                         </div>}
 
-                                        <div className="input-field1">
-                                            <label>Quantity</label>
+                                        <div className="input-field3">
+                                            <label>Qty</label>
                                             <input
                                                 type="tel"
-                                                placeholder="Quantity"
+                                                placeholder="Qty"
                                                 value={formData.QtyOrderEntry}
                                                 onChange={(e) => setFormData({ ...formData, QtyOrderEntry: e.target.value })}
                                             />
                                         </div>
 
-                                        <div className="input-field1">
+                                        <div className="input-field3">
                                             <label>Wt.Fixed</label>
                                             <select
                                                 value={formData.RateType}
@@ -3673,6 +3899,28 @@ function Booking() {
 
                                         )}
 
+                                        {Object.keys(label).map((key, index) => (
+                                            isChecked[key] && (
+                                                <div className="input-field1" key={index}>
+                                                    {/* Dynamic Label */}
+                                                    <label>{label[key]}</label>
+
+                                                    {/* Input for entering Charges */}
+                                                    <input
+                                                        type="tel"
+                                                        placeholder={label[key]}
+                                                        value={formData[key]}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                [`charge${index + 1}`]: e.target.value
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            )
+                                        ))}
+
                                         {String(formData.State_Code || '').trim() === '27' ? (
                                             <>
                                                 <div className="input-field1">
@@ -3747,52 +3995,47 @@ function Booking() {
                     <div className="bottom-card row"
                         style={{ width: "100%", display: 'flex', marginTop: "0.5rem", gap: '0.5rem', alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0.5rem" }}>
 
-                        <button className="btn btn-success col-4" style={{ width: "90px" }} onClick={handleSubmit} type="button">Save</button>
-                        <button className="btn btn-primary col-4" style={{ width: "90px" }} onClick={handleUpdate} type="button">Update</button>
-                        <button className="btn btn-warning col-4" style={{ width: "90px" }} onClick={handleSearch} type="button">Search</button>
+                        {!open ? <>
+                            <button className="btn btn-success col-4" style={{ width: "90px" }} onClick={handleSubmit} type="button">Save</button>
+                            <button className="btn btn-primary col-4" style={{ width: "90px" }} onClick={handleUpdate} type="button">Update</button>
+                            <button className="btn btn-warning col-4" style={{ width: "90px" }} onClick={handleSearch} type="button">Search</button>
+                        </>
+                            :
+                            <
+                                >
+                                <button
+                                    className="btn btn-dark"
+                                    style={{ width: "90px" }}
+                                    onClick={() => { setModalIsOpen10(true); setOpen(false) }}
+                                >
+                                    Label
+                                </button>
+                                <button
+                                    className="btn btn-info"
+                                    style={{ width: "90px" }}
+                                    onClick={() => { setModalIsOpen7(true); setOpen(false) }}
+                                >
+                                    Setup
+                                </button>
+
+                                <button
+                                    className="btn btn-danger"
+                                    style={{ width: "90px" }}
+                                    onClick={() => { setOpen(false); handleDelete(formData.DocketNo) }}
+                                    type="button"
+                                >
+                                    Delete
+                                </button>
+                            </>
+                        }
 
                         {/* three dots wrapper */}
                         <div className="btn btn-light col-4"
-                            style={{ position: "relative", height: "38px", width: "90px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                            style={{ height: "38px", width: "90px", display: "flex", alignItems: "center", justifyContent: "center" }}
                             onClick={() => setOpen(!open)}>
                             <PiDotsThreeOutlineVerticalFill
                                 style={{ fontSize: "30px", cursor: "pointer" }}
                             />
-
-                            {/* dropdown must be inside this div ✅ */}
-                            {open && (
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        bottom: "41px",   // just below button
-                                        width: "98px",
-                                        backgroundColor: "transparent",
-                                        borderRadius: "5px",
-                                        zIndex: 9999,
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: "2px",
-                                        padding: "4px"
-                                    }}
-                                >
-                                    <button
-                                        className="btn btn-info"
-                                        style={{ width: "100%" }}
-                                        onClick={() => { setModalIsOpen7(true); setOpen(false) }}
-                                    >
-                                        Setup
-                                    </button>
-
-                                    <button
-                                        className="btn btn-danger"
-                                        style={{ width: "100%" }}
-                                        onClick={() => { setOpen(false); handleDelete(formData.DocketNo) }}
-                                        type="button"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            )}
                         </div>
                     </div>
 
@@ -4319,7 +4562,7 @@ function Booking() {
                                 width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
-                                height:"auto",
+                                height: "auto",
                                 whiteSpace: "nowrap"
                             },
                         }}
@@ -4477,7 +4720,7 @@ function Booking() {
                                 width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
-                                height:"auto",
+                                height: "auto",
                                 whiteSpace: "nowrap"
                             },
                         }}
@@ -4633,12 +4876,12 @@ function Booking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen6}
-                       style={{
+                        style={{
                             content: {
                                 width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
-                                height:"auto",
+                                height: "auto",
                                 whiteSpace: "nowrap"
                             },
                         }}
@@ -4815,7 +5058,7 @@ function Booking() {
                                 top: '50%',             // Center vertically
                                 left: '50%',
                                 whiteSpace: "nowrap",
-                                height:"auto"
+                                height: "auto"
                             },
                         }}>
                         <div className="custom modal-content">
@@ -4980,6 +5223,33 @@ function Booking() {
                                                 Fuel Charges</label>
                                         </div>
 
+                                        {Object.keys(label).map((key, index) => (
+                                            <div className="input-field1" style={{ display: "flex", flexDirection: "row" }} key={index}>
+
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked[key]}
+                                                    onChange={(e) => {
+                                                        const checked = e.target.checked;
+
+                                                        // Update UI state
+                                                        setIsChecked(prev => ({
+                                                            ...prev,
+                                                            [key]: checked
+                                                        }));
+
+                                                        // Also update localStorage like before
+                                                        handleCheckboxChange(`${key}`, checked);
+                                                    }}
+                                                    style={{ width: "12px", height: "12px", marginTop: "5px" }}
+                                                />
+
+                                                <label style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                    {label[key]}
+                                                </label>
+                                            </div>
+                                        ))}
+
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
                                             <input type="checkbox"
                                                 checked={isRemarkChecked}
@@ -5034,14 +5304,20 @@ function Booking() {
                     </Modal >
 
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen8}
-                        className="custom-modal-volumetric" contentLabel="Vendor Charges Modal"
+                        className="custom-modal-custCharges" contentLabel="Modal"
                         style={{
                             content: {
-                                height: "auto"
-                            }
-                        }}>
+                                // width: '90%',
 
-                        <div className="custom-modal-content">
+                                whiteSpace: "nowrap",
+                                height: "80%",
+                                top: '50%',             // Center vertically
+                                left: '50%',
+
+
+                            },
+                        }}>
+                        <div className="custom modal-content">
                             <div className="header-tittle">
                                 <header>Vendor Charges Summary</header>
                             </div>
@@ -5145,6 +5421,56 @@ function Booking() {
                         </div>
 
                     </Modal>
+
+                    <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen10}
+                        className="custom-modal-custCharges" contentLabel="Modal"
+                        style={{
+                            content: {
+                                // width: '90%',
+                                top: '50%',             // Center vertically
+                                left: '50%',
+                                whiteSpace: "nowrap",
+
+                            },
+                        }}>
+                        <div className="custom modal-content">
+                            <div className="header-tittle">
+                                <header>Charges Label</header>
+                            </div>
+
+                            <div className='container2'>
+                                <form>
+                                    <div className="fields2">
+                                        {Object.keys(label).map((key, index) => (
+                                            isChecked[key] && (
+                                                <div className="input-field1" key={index}>
+                                                    {/* Dynamic Label */}
+                                                    <label>{label[key]}</label>
+
+                                                    {/* Input for entering Charges */}
+                                                    <input
+                                                        type="tel"
+                                                        placeholder={label[key]}
+                                                        value={label[key]}
+                                                        onChange={(e) =>
+                                                            setLabel({
+                                                                ...label,
+                                                                [key]: e.target.value
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                    <div className='bottom-buttons'>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen10(false) }} className='ok-btn'>Submit</button>
+                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen10(false) }} className='ok-btn'>close</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </Modal >
 
                 </div >
 

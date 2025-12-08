@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, postApi, putApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
@@ -23,6 +23,7 @@ function CreateManifest() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalIsOpen2, setModalIsOpen2] = useState(false);
     const [getManifest, setGetManifest] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -48,6 +49,9 @@ function CreateManifest() {
         driverMobile: '',
         vendorCode: '',
         vendorAwbNo: '',
+        MAwbNo: '',
+        bagNo: '',
+        DoxSpx: '',
         remark: '',
         bookingWeight: '',
         manifestWeight: '',
@@ -55,9 +59,57 @@ function CreateManifest() {
         Flight_Code: '',
         docketNo: []
     });
+
+
+    const [isChecked, setIsChecked] = useState(
+        {
+            Vehicle_Detail: false,
+            Vehicle_Type: false,
+            Driver_Name: false,
+            Train_Name: false,
+            Flight_Name: false,
+            Vendor_Name: false,
+            Vendor_Awb_No: false,
+            Remark: false,
+            Manifest_Weight: false,
+            MasterAwbNo: false,
+            Dox_Spx: false,
+            BagNo: false,
+        })
+    const [isAllChecked, setIsAllChecked] = useState(false);
     const handleDateChange = (date, field) => {
         setFormData({ ...formData, [field]: date });
     };
+
+
+
+    const handleCheckChange = (e) => {
+        const { name, checked } = e.target;
+
+        // If ALL checkbox is toggled
+        if (name === "all") {
+            setIsAllChecked(checked); // update main checkbox
+
+            const updated = Object.fromEntries(
+                Object.keys(isChecked).map(k => [k, checked])
+            );
+
+            setIsChecked(updated);
+            return;
+        }
+
+        // Individual Checkbox
+        setIsChecked(prev => {
+            const updated = { ...prev, [name]: checked };
+
+            // If all single checkboxes are true -> selectAll = true
+            const allSelected = Object.values(updated).every(v => v === true);
+            setIsAllChecked(allSelected);
+
+            return updated;
+        });
+    };
+
 
     const fetchDataM = async () => {
         setLoading(true);
@@ -84,27 +136,29 @@ function CreateManifest() {
     }, [currentPage, rowsPerPage]);
 
     const filteredgetManifestData = getManifest.filter((manifest) => {
-        const isDocketNoMatch =
-            manifest?.DocketNo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            manifest?.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            manifest?.fromDest?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            manifest?.toDest?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            manifest?.BookDate?.toLowerCase().includes(searchQuery.toLowerCase());
+        const lower = searchQuery.toLowerCase();
 
-        let manifestDate = null;
-        if (manifest?.BookDate) {
-            const [day, month, year] = manifest.BookDate.split("/");
-            manifestDate = new Date(year, month - 1, day);
-        }
+        const isMatch =
+            manifest?.DocketNo?.toLowerCase().includes(lower) ||
+            manifest?.customerName?.toLowerCase().includes(lower) ||
+            manifest?.fromDest?.toLowerCase().includes(lower) ||
+            manifest?.toDest?.toLowerCase().includes(lower) ||
+            manifest?.BookDate?.toLowerCase().includes(lower);
 
-        const from = fromDate ? new Date(fromDate.setHours(0, 0, 0, 0)) : null;
-        const to = toDate ? new Date(toDate.setHours(23, 59, 59, 999)) : null;
+        let manifestDate = manifest?.BookDate ? new Date(manifest.BookDate) : null;
+
+        const from = formData.fromDate
+            ? new Date(formData.fromDate.setHours(0, 0, 0, 0))
+            : null;
+        const to = formData.toDate
+            ? new Date(formData.toDate.setHours(23, 59, 59, 999))
+            : null;
 
         const isDateInRange =
             (!from || (manifestDate && manifestDate >= from)) &&
             (!to || (manifestDate && manifestDate <= to));
 
-        return isDocketNoMatch && isDateInRange;
+        return isMatch && isDateInRange;
     });
     const convertDateFormat = (dateStr) => {
         const [day, month, year] = dateStr.split('-');
@@ -171,6 +225,41 @@ function CreateManifest() {
             }
         }
         fetchBranch();
+        const fetchSetup = async () => {
+            try {
+                const response = await getApi(`/Master/getManifestSetup`);
+
+                if (response.status === 1) {
+                    const setup = response.data[0];
+
+                    const updatedChecks = {
+                        Vehicle_Detail: setup.Vehicle_Detail,
+                        Vehicle_Type: setup.Vehicle_Type,
+                        Driver_Name: setup.Driver_Name,
+                        Train_Name: setup.Train_Name,
+                        Flight_Name: setup.Flight_Name,
+                        Vendor_Name: setup.Vendor_Name,
+                        Vendor_Awb_No: setup.Vendor_Awb_No,
+                        Remark: setup.Remark,
+                        Manifest_Weight: setup.Manifest_Weight,
+                        MasterAwbNo: setup.MasterAwbNo,
+                        Dox_Spx: setup.Dox_Spx,
+                        BagNo: setup.BagNo,
+                    };
+
+                    // set all checkbox state
+                    setIsChecked(updatedChecks);
+
+                    // auto enable Select All if all values true
+                    const allSelected = Object.values(updatedChecks).every(v => v === true);
+                    setIsAllChecked(allSelected);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchSetup();
+
         fetchData('/Master/getMode', setGetMode);
         fetchData('/Master/getVendor', setGetVendor);
         fetchData('/Master/getdomestic', setGetCity);
@@ -294,6 +383,9 @@ function CreateManifest() {
                 driverMobile: '',
                 vendorCode: '',
                 vendorAwbNo: '',
+                MAwbNo: '',
+                bagNo: '',
+                DoxSpx: '',
                 remark: '',
                 bookingWeight: '',
                 manifestWeight: '',
@@ -307,6 +399,36 @@ function CreateManifest() {
             setSelectedRows([]);
             setSelectedDocketNos([]);
             setSelectAll(false);
+        } catch (error) {
+            console.error("Error submitting manifest: ", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Something went wrong while generating data. Please try again.',
+            });
+        }
+    };
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+
+        const requestPayload = {
+            Manifest_ID: 1,
+            Vehicle_Detail: isChecked.Vehicle_Detail,
+            Vehicle_Type: isChecked.Vehicle_Type,
+            Driver_Name: isChecked.Driver_Name,
+            Train_Name: isChecked.Train_Name,
+            Flight_Name: isChecked.Flight_Name,
+            Vendor_Name: isChecked.Vendor_Name,
+            Vendor_Awb_No: isChecked.Vendor_Awb_No,
+            Remark: isChecked.Remark,
+            Manifest_Weight: isChecked.Manifest_Weight,
+            MasterAwbNo: isChecked.MasterAwbNo,
+            Dox_Spx: isChecked.Dox_Spx,
+            BagNo: isChecked.BagNo,
+        };
+        try {
+            const response = await putApi('/Master/updateManifestSetup', requestPayload);
+            setModalIsOpen2(false);
         } catch (error) {
             console.error("Error submitting manifest: ", error);
             Swal.fire({
@@ -447,67 +569,123 @@ function CreateManifest() {
 
                             </div>
 
-                            <div className="input-field3" >
-                                <label htmlFor="">Vehicle Detail</label>
-                                <Select
-                                    options={getTransport.map(tra => ({
-                                        value: tra.Transport_Code,   // adjust keys from your API
-                                        label: tra.Transport_Name
-                                    }))}
-                                    value={
-                                        formData.transportType
-                                            ? { value: formData.transportType, label: getTransport.find(c => c.Transport_Code === formData.transportType)?.Transport_Name || "" }
-                                            : null
-                                    }
-                                    onChange={(selectedOption) => {
-                                        setFormData({
-                                            ...formData,
-                                            transportType: selectedOption ? selectedOption.value : ""
-                                        });
-                                        setInput(selectedOption.label.trim());
-                                    }}
-                                    placeholder="Vehicle Details"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                />
-                            </div>
 
-                            <div className="input-field3" >
-                                <label htmlFor="">Vehicle Type</label>
-                                {
-                                    isInput === "HIRE" ?
-                                        <input type="text" placeholder="Vehicle Type"
-                                            value={formData.vehicleType}
-                                            onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })} />
-                                        :
+                            {isChecked.Vehicle_Detail &&
+                                <div className="input-field3" >
+                                    <label htmlFor="">Vehicle Detail</label>
+                                    <Select
+                                        options={getTransport.map(tra => ({
+                                            value: tra.Transport_Code,   // adjust keys from your API
+                                            label: tra.Transport_Name
+                                        }))}
+                                        value={
+                                            formData.transportType
+                                                ? { value: formData.transportType, label: getTransport.find(c => c.Transport_Code === formData.transportType)?.Transport_Name || "" }
+                                                : null
+                                        }
+                                        onChange={(selectedOption) => {
+                                            setFormData({
+                                                ...formData,
+                                                transportType: selectedOption ? selectedOption.value : ""
+                                            });
+                                            setInput(selectedOption.label.trim());
+                                        }}
+                                        placeholder="Vehicle Details"
+                                        isSearchable
+                                        classNamePrefix="blue-selectbooking"
+                                        className="blue-selectbooking"
+                                        menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                        styles={{
+                                            placeholder: (base) => ({
+                                                ...base,
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis"
+                                            }),
+                                            menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                        }}
+                                    />
+                                </div>}
+
+                            {isChecked.Vehicle_Type &&
+                                <>
+                                    <div className="input-field3" >
+                                        <label htmlFor="">Vehicle Type</label>
+                                        {
+                                            isInput === "HIRE" ?
+                                                <input type="text" placeholder="Vehicle Type"
+                                                    value={formData.vehicleType}
+                                                    onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })} />
+                                                :
+                                                <Select
+                                                    options={getVehicle.map(vehicle => ({
+                                                        value: vehicle.vehicle_model,   // adjust keys from your API
+                                                        label: vehicle.vehicle_model
+                                                    }))}
+                                                    value={
+                                                        formData.vehicleType
+                                                            ? { value: formData.vehicleType, label: getVehicle.find(c => c.vehicle_model === formData.vehicleType)?.vehicle_model || "" }
+                                                            : null
+                                                    }
+                                                    onChange={(selectedOption) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            vehicleType: selectedOption ? selectedOption.value : ""
+                                                        })
+                                                    }
+                                                    placeholder="Vehicle Type"
+                                                    isSearchable
+                                                    classNamePrefix="blue-selectbooking"
+                                                    className="blue-selectbooking"
+                                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                                    styles={{
+                                                        placeholder: (base) => ({
+                                                            ...base,
+                                                            whiteSpace: "nowrap",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis"
+                                                        }),
+                                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                                    }}
+                                                />
+                                        }
+
+                                    </div>
+                                    <div className="input-field3" >
+                                        <label htmlFor="">Vehicle Number</label>
+                                        {
+
+                                            <input type="text" placeholder="Vehicle Number"
+                                                value={formData.vehicleNo}
+                                                onChange={(e) => setFormData({ ...formData, vehicleNo: e.target.value })} />
+
+
+
+                                        }
+
+                                    </div>
+                                </>}
+                            {isChecked.Driver_Name &&
+                                <>
+                                    <div className="input-field3" >
+                                        <label htmlFor="">Driver Name</label>
                                         <Select
-                                            options={getVehicle.map(vehicle => ({
-                                                value: vehicle.vehicle_model,   // adjust keys from your API
-                                                label: vehicle.vehicle_model
+                                            options={getDriver.map(driver => ({
+                                                value: driver.Driver_Code,   // adjust keys from your API
+                                                label: driver.Driver_Name
                                             }))}
                                             value={
-                                                formData.vehicleType
-                                                    ? { value: formData.vehicleType, label: getVehicle.find(c => c.vehicle_model === formData.vehicleType)?.vehicle_model || "" }
+                                                formData.driverName
+                                                    ? { value: formData.driverName, label: getDriver.find(c => c.Driver_Code === formData.driverName)?.Driver_Name || "" }
                                                     : null
                                             }
                                             onChange={(selectedOption) =>
                                                 setFormData({
                                                     ...formData,
-                                                    vehicleType: selectedOption ? selectedOption.value : ""
+                                                    driverName: selectedOption ? selectedOption.value : ""
                                                 })
                                             }
-                                            placeholder="Vehicle Type"
+                                            placeholder="Driver Name"
                                             isSearchable
                                             classNamePrefix="blue-selectbooking"
                                             className="blue-selectbooking"
@@ -522,39 +700,37 @@ function CreateManifest() {
                                                 menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                             }}
                                         />
-                                }
+                                    </div>
+                                    <div className="input-field3" >
+                                        <label htmlFor="">Driver Number</label>
+                                        <input type="tel" placeholder="Driver Number" maxLength={10}
+                                            value={formData.driverMobile} onChange={(e) => setFormData({ ...formData, driverMobile: e.target.value })} />
+                                    </div>
+                                </>}
 
-                            </div>
+                            {isChecked.Train_Name &&
+                                <>
+                                    <div className="input-field3">
+                                        <label>Train Name</label>
 
-                            <div className="input-field3" >
-                                <label htmlFor="">Vehicle Number</label>
-                                {
-                                    isInput === "HIRE" ?
-                                        <input type="text" placeholder="Vehicle Number"
-                                            value={formData.vehicleNo}
-                                            onChange={(e) => setFormData({ ...formData, vehicleNo: e.target.value })} />
-                                        :
                                         <Select
-                                            options={getVehicle.map(vehicle => ({
-                                                value: vehicle.vehicle_number,   // adjust keys from your API
-                                                label: vehicle.vehicle_number
-                                            }))}
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={allTrainOptions}
                                             value={
-                                                formData.vehicleNo
-                                                    ? { value: formData.vehicleNo, label: getVehicle.find(c => c.vehicle_number === formData.vehicleNo)?.vehicle_number || "" }
+                                                formData.Train_Code
+                                                    ? allTrainOptions.find(opt => opt.value === formData.Train_Code)
                                                     : null
                                             }
-                                            onChange={(selectedOption) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    vehicleNo: selectedOption ? selectedOption.value : ""
-                                                })
-                                            }
-                                            placeholder="Vehicle Number"
+                                            onChange={(selectedOption) => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    Train_Code: selectedOption.value,
+                                                }));
+                                            }}
+                                            placeholder="Select Train Name"
                                             isSearchable
-                                            classNamePrefix="blue-selectbooking"
-                                            className="blue-selectbooking"
-                                            menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                            menuPortalTarget={document.body}
                                             styles={{
                                                 placeholder: (base) => ({
                                                     ...base,
@@ -565,108 +741,59 @@ function CreateManifest() {
                                                 menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                             }}
                                         />
-                                }
 
-                            </div>
+                                    </div>
+                                    <div className="input-field3" >
+                                        <label htmlFor="">Train Number</label>
+                                        <input type="tel" placeholder="Train Number"
+                                            value={formData.driverMobile} onChange={(e) => setFormData({ ...formData, driverMobile: e.target.value })} />
+                                    </div>
+                                </>}
 
-                            <div className="input-field3" >
-                                <label htmlFor="">Driver Name</label>
-                                <Select
-                                    options={getDriver.map(driver => ({
-                                        value: driver.Driver_Code,   // adjust keys from your API
-                                        label: driver.Driver_Name
-                                    }))}
-                                    value={
-                                        formData.driverName
-                                            ? { value: formData.driverName, label: getDriver.find(c => c.Driver_Code === formData.driverName)?.Driver_Name || "" }
-                                            : null
-                                    }
-                                    onChange={(selectedOption) =>
-                                        setFormData({
-                                            ...formData,
-                                            driverName: selectedOption ? selectedOption.value : ""
-                                        })
-                                    }
-                                    placeholder="Driver Name"
-                                    isSearchable
-                                    classNamePrefix="blue-selectbooking"
-                                    className="blue-selectbooking"
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
-                                    styles={{
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis"
-                                        }),
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
-                                    }}
-                                />
-                            </div>
+                            {isChecked.Flight_Name &&
+                                <>
+                                    <div className="input-field3" >
+                                        <label>Flight Name</label>
 
-                            <div className="input-field3" >
-                                <label htmlFor="">Driver Number</label>
-                                <input type="tel" placeholder="Driver Number" maxLength={10}
-                                    value={formData.driverMobile} onChange={(e) => setFormData({ ...formData, driverMobile: e.target.value })} />
-                            </div>
+                                        <Select
+                                            className="blue-selectbooking"
+                                            classNamePrefix="blue-selectbooking"
+                                            options={allFlightOptions}
+                                            value={
+                                                formData.Flight_Code
+                                                    ? allFlightOptions.find(opt => opt.value === formData.Flight_Code)
+                                                    : null
+                                            }
+                                            onChange={(selectedOption) => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    Flight_Code: selectedOption.value,
+                                                }));
+                                            }}
+                                            placeholder="Select Flight Name"
+                                            isSearchable
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                placeholder: (base) => ({
+                                                    ...base,
+                                                    whiteSpace: "nowrap",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis"
+                                                }),
+                                                menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                            }}
+                                        />
 
-                            <div className="input-field3">
-                                <label>Train Name</label>
+                                    </div>
+                                    <div className="input-field3" >
+                                        <label htmlFor="">Flight Number</label>
+                                        <input type="tel" placeholder="Flight Number"
+                                            value={formData.driverMobile} onChange={(e) => setFormData({ ...formData, driverMobile: e.target.value })} />
+                                    </div>
+                                </>}
 
-                                <Select
-                                    className="blue-selectbooking"
-                                    classNamePrefix="blue-selectbooking"
-                                    options={allTrainOptions}
-                                    value={
-                                        formData.Train_Code
-                                            ? allTrainOptions.find(opt => opt.value === formData.Train_Code)
-                                            : null
-                                    }
-                                    onChange={(selectedOption) => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            Train_Code: selectedOption.value,
-                                        }));
-                                    }}
-                                    placeholder="Select Train Name"
-                                    isSearchable
-                                    menuPortalTarget={document.body}
-                                    styles={{
-                                        menuPortal: base => ({ ...base, zIndex: 9999 })
-                                    }}
-                                />
 
-                            </div>
-
-                            <div className="input-field3" >
-                                <label>Flight Name</label>
-
-                                <Select
-                                    className="blue-selectbooking"
-                                    classNamePrefix="blue-selectbooking"
-                                    options={allFlightOptions}
-                                    value={
-                                        formData.Flight_Code
-                                            ? allFlightOptions.find(opt => opt.value === formData.Flight_Code)
-                                            : null
-                                    }
-                                    onChange={(selectedOption) => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            Flight_Code: selectedOption.value,
-                                        }));
-                                    }}
-                                    placeholder="Select Flight Name"
-                                    isSearchable
-                                    menuPortalTarget={document.body}
-                                    styles={{
-                                        menuPortal: base => ({ ...base, zIndex: 9999 })
-                                    }}
-                                />
-
-                            </div>
-
-                            <div className="input-field3" >
+                            {isChecked.Vendor_Name && <div className="input-field3" >
                                 <label htmlFor="">Vendor Name</label>
                                 <Select
                                     options={getVendor.map(vendor => ({
@@ -700,26 +827,48 @@ function CreateManifest() {
                                     }}
                                 />
 
-                            </div>
+                            </div>}
 
-                            <div className="input-field3" >
+                            {isChecked.Vendor_Awb_No && <div className="input-field3" >
                                 <label htmlFor="">Vendor Awb No</label>
                                 <input type="text" placeholder="Vendor Awb No" maxLength={10}
                                     value={formData.vendorAwbNo} onChange={(e) => setFormData({ ...formData, vendorAwbNo: e.target.value })} />
-                            </div>
+                            </div>}
 
-                            <div className="input-field3" >
+                            {isChecked.Remark && <div className="input-field3" >
                                 <label htmlFor="">Remark</label>
                                 <input type="text" placeholder="Remark" value={formData.remark}
                                     onChange={(e) => setFormData({ ...formData, remark: e.target.value })} />
-                            </div>
+                            </div>}
+
+                            {isChecked.MasterAwbNo && <div className="input-field3" >
+                                <label htmlFor="">Master Awb No</label>
+                                <input type="text" placeholder="Master Awb No" maxLength={10}
+                                    value={formData.MAwbNo} onChange={(e) => setFormData({ ...formData, MAwbNo: e.target.value })} />
+                            </div>}
+
+                            {isChecked.Dox_Spx && <div className="input-field3" >
+                                <label htmlFor="">Dox / Spx </label>
+                                <select
+                                    value={formData.DoxSpx} onChange={(e) => setFormData({ ...formData, DoxSpx: e.target.value })} >
+                                    <option value="">Select Dox/Spx</option>
+                                    <option value="Dox">Dox</option>
+                                    <option value="Box">Box</option>
+                                </select>
+                            </div>}
+
+                            {isChecked.BagNo && <div className="input-field3" >
+                                <label htmlFor="">Bag No</label>
+                                <input type="text" placeholder="Bag No" maxLength={10}
+                                    value={formData.bagNo} onChange={(e) => setFormData({ ...formData, bagNo: e.target.value })} />
+                            </div>}
 
 
-                            <div className="input-field3" >
+                            {isChecked.Manifest_Weight && <div className="input-field3" >
                                 <label htmlFor="">Manifest Weight</label>
                                 <input type="text" placeholder="Manifest Weight" value={formData.manifestWeight}
                                     onChange={(e) => setFormData({ ...formData, manifestWeight: e.target.value })} />
-                            </div>
+                            </div>}
 
                             <div className="input-field3" >
                                 <label htmlFor="" style={{ whiteSpace: "nowrap" }}>Bulk Docket Manifest</label>
@@ -738,11 +887,12 @@ function CreateManifest() {
                                 <button type="button" className="ok-btn" style={{ width: "50px" }}>Find</button>
                                 <button type="submit" className="ok-btn" style={{}}>Generate</button>
                                 <button type="button" className="ok-btn" style={{ width: "50px" }}>Reset</button>
+                                <button type="button" className="ok-btn" onClick={() => { setModalIsOpen2(true) }}>Setup</button>
                             </div>
 
                         </div>
                     </form>
-                    <div className="table-container" style={{ padding: "10px" }}>
+                    <div className="table-container" style={{ padding: "10px", whiteSpace: "nowrap" }}>
                         <table className="table table-bordered table-sm">
                             <thead>
                                 <tr>
@@ -834,7 +984,7 @@ function CreateManifest() {
                                     </div>
                                 </div>
                                 <div className='table-container'>
-                                    <table className='table table-bordered table-sm'>
+                                    <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                                         <thead className='table-sm'>
                                             <tr>
                                                 <th scope="col">
@@ -912,6 +1062,63 @@ function CreateManifest() {
                             </div>
                         </div>
                     </Modal >
+
+                    <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen2}
+                        className="custom-modal-custCharges" contentLabel="Modal"
+                        style={{
+                            content: {
+                                top: '50%',
+                                left: '50%',
+                                whiteSpace: "nowrap",
+                                height: "auto"
+                            },
+                        }}>
+
+                        <div className="custom modal-content">
+                            <div className="header-tittle"><header>Charges</header></div>
+
+                            <div className='container2'>
+                                <form onSubmit={handleUpdate}>
+                                    <div className="fields2">
+
+                                        {/* 🔘 All Select */}
+                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
+                                            <input type="checkbox"
+                                                name="all"
+                                                checked={isAllChecked}
+                                                onChange={handleCheckChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} />
+                                            <label style={{ marginLeft: "10px", fontSize: "12px" }}>All Select</label>
+                                        </div>
+
+                                        {[
+                                            "Vehicle_Detail", "Vehicle_Type", "Driver_Name", "Train_Name",
+                                            "Flight_Name", "Vendor_Name", "Vendor_Awb_No", "Remark",
+                                            "Manifest_Weight", "MasterAwbNo", "Dox_Spx", "BagNo"
+                                        ].map((item, i) => (
+                                            <div className="input-field1" style={{ display: "flex", flexDirection: "row" }} key={i}>
+                                                <input type="checkbox"
+                                                    name={item}
+                                                    checked={isChecked[item] || false}
+                                                    onChange={handleCheckChange}
+                                                    style={{ width: "12px", height: "12px", marginTop: "5px" }} />
+                                                <label style={{ marginLeft: "10px", fontSize: "12px" }}>{item}</label>
+                                            </div>
+                                        ))}
+
+                                    </div>
+
+                                    <div className='bottom-buttons'>
+                                        <button className='ok-btn'>Submit</button>
+                                        <button type="button" onClick={() => setModalIsOpen2(false)} className='ok-btn'>close</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </Modal>
+
+
+
                 </div>
             </div>
         </>

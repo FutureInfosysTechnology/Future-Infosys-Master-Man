@@ -650,7 +650,7 @@ function ViewInvoice() {
                                 top: '50%',             // Center vertically
                                 left: '50%',
                                 whiteSpace: "nowrap",
-                                minHeight: "60%",
+                                height:"auto",
                                 display: "flex",
                                 justifyContent: "center",
 
@@ -822,7 +822,7 @@ function ViewInvoice() {
                                         {/* <div className="header-tittle"> */}
                                         {/* <header>Terms & Conditions</header> */}
                                         {/* </div> */}
-                                        <div className='container2' style={{ borderRadius: "0px" }}>
+                                        <div className='container2' style={{ borderRadius: "0px",padding:"10px" }}>
                                             <div className="table-container" style={{ borderRadius: "0px" }}>
                                                 <table className="table table-bordered table-sm">
                                                     <thead className="table-info">

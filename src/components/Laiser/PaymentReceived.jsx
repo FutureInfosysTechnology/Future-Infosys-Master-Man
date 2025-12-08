@@ -22,13 +22,9 @@ function PaymentReceived() {
     const [getCustomer, setGetCustomer] = useState([]);
     const [getBranch, setGetBranch] = useState([]);
     const [getBankName, setGetBankName] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [data, setData] = useState([]);
-    const [isEditMode, setIsEditMode] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [addPayment, setAddPayment] = useState({
         Customer_Code: "",
         Branch_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
@@ -50,10 +46,7 @@ function PaymentReceived() {
             setData(extrectArray(response));
         } catch (err) {
             console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
+        } 
     };
 
     const fetchPaymentData = async () => {
@@ -78,7 +71,6 @@ function PaymentReceived() {
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
-
     const totalPages = Math.ceil(data.length / rowsPerPage);
     const ymdToDmy = (dateStr) => {
         if (!dateStr) return "";
@@ -250,7 +242,7 @@ function PaymentReceived() {
                     <div className="addNew">
                         <div>
                             <button className='add-btn' onClick={() => {
-                                setModalIsOpen(true); setIsEditMode(false);
+                                setModalIsOpen(true);
 
                             }}>
                                 <i className="bi bi-plus-lg"></i>

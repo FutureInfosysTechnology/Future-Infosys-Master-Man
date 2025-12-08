@@ -24,13 +24,10 @@ function ProductionEntry() {
         parti: "",
         remark: "",
         amount: "",
-        docketNo: "",
     });
 
     const [getCustomer, setGetCustomer] = useState([]);
     const [creditNotes, setCreditNotes] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [openRow, setOpenRow] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
 
@@ -63,10 +60,7 @@ function ProductionEntry() {
             setData(extractArray(response));
         } catch (err) {
             console.error("Fetch Error:", err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
+        } 
     };
 
     // 🧠 Load Customers and Credit Notes

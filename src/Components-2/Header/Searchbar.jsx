@@ -125,6 +125,7 @@ function Searchbar() {
                 <button type="submit" title="search" onClick={(e) => fetchData(e)}>
                     <i className="bi bi-search"></i>
                 </button>
+                
             </form>
 
             <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
@@ -249,7 +250,7 @@ function Searchbar() {
                             </div>
                         </div>
 
-                        <Tabs defaultActiveKey="details" style={{ width: '100%'}}>
+                        <Tabs defaultActiveKey="details" style={{ width: '100%' }}>
                             <Tab eventKey="details" title="Shipment Details">
                                 {trackingData.length > 0 ? (
                                     trackingData.map((record, index) => (
@@ -324,12 +325,12 @@ function Searchbar() {
                                                 width: '100%',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                padding:"10px",
+                                                padding: "10px",
                                                 margin: 0,
-                                                backgroundColor:"white"
+                                                backgroundColor: "white"
                                             }}
                                         >
-                                            <b style={{color:"black", paddingLeft: '10px' }}>Status and Scans</b>
+                                            <b style={{ color: "black", paddingLeft: '10px' }}>Status and Scans</b>
                                             <div
                                                 className="scrollable-table"
                                                 style={{

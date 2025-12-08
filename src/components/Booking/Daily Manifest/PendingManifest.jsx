@@ -6,14 +6,13 @@ import "react-datepicker/dist/react-datepicker.css";
 import { refeshPend } from "../../../App";
 
 function PendingManifest() {
-    const {ref} =useContext(refeshPend)
+    const { ref } = useContext(refeshPend)
     const [getManifest, setGetManifest] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [loading, setLoading] = useState(false);
     const [totalRecords, setTotalRecords] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
-
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -27,53 +26,63 @@ function PendingManifest() {
         setCurrentPage(1);
     };
     const fetchData = async () => {
-    setLoading(true);
-    try {
-        // Current page data
-        const response = await getApi(`/Manifest/getPendingManifest?${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
-        const currentPageData = response?.Data || [];  // <-- remove extra .Data
-        setGetManifest(currentPageData);
+        setLoading(true);
+        try {
+            // Current page data
+            const response = await getApi(`/Manifest/getPendingManifest?branchCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
+            const currentPageData = response?.Data || [];  // <-- remove extra .Data
+            setGetManifest(currentPageData);
 
-        // Total records for pagination
-        const allDataResponse = await getApi(`/Manifest/getPendingManifest?branchCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=1&pageSize=10000`);
-        const allData = allDataResponse?.Data || [];   // <-- remove extra .Data
-        setTotalRecords(allData.length);
+            // Total records for pagination
+            const allDataResponse = await getApi(`/Manifest/getPendingManifest?branchCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=1&pageSize=10000`);
+            const allData = allDataResponse?.Data || [];   // <-- remove extra .Data
+            setTotalRecords(allData.length);
 
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    } finally {
-        setLoading(false);
-    }
-};
-  useEffect(() => {
-        fetchData();
-    }, [currentPage, rowsPerPage,ref]);
-    const refreshPendingData = async () => {
-    await fetchData(); // your existing fetch function
-};
-    const filteredgetManifestData = getManifest.filter((manifest) => {
-        const isDocketNoMatch =
-            manifest?.DocketNo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            manifest?.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            manifest?.fromDest?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            manifest?.toDest?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            manifest?.BookDate?.toLowerCase().includes(searchQuery.toLowerCase());
-            
-        let manifestDate = null;
-        if (manifest?.BookDate) {
-            const [day, month, year] = manifest.BookDate.split("/");
-            manifestDate = new Date(year, month - 1, day);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
         }
+    };
+    useEffect(() => {
+        fetchData();
+    }, [currentPage, rowsPerPage, ref]);
+    const ymdToDmy = (dateStr) => {
+        if (!dateStr) return "";
+        const [year, month, day] = dateStr.split("-");
+        return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+    };
+    const refreshPendingData = async () => {
+        await fetchData(); // your existing fetch function
+    };
+    const filteredgetManifestData = getManifest.filter((manifest) => {
+        const lower = searchQuery.toLowerCase();
 
-        const from = formDate.fromDate ? new Date(formDate.fromDate.setHours(0, 0, 0, 0)) : null;
-        const to = formDate.toDate ? new Date(formDate.toDate.setHours(23, 59, 59, 999)) : null;
+        const isMatch =
+            manifest?.DocketNo?.toLowerCase().includes(lower) ||
+            manifest?.customerName?.toLowerCase().includes(lower) ||
+            manifest?.fromDest?.toLowerCase().includes(lower) ||
+            manifest?.toDest?.toLowerCase().includes(lower) ||
+            manifest?.BookDate?.toLowerCase().includes(lower);
+
+        let manifestDate = manifest?.BookDate ? new Date(manifest.BookDate) : null;
+
+        const from = formDate.fromDate
+            ? new Date(formDate.fromDate.setHours(0, 0, 0, 0))
+            : null;
+        const to = formDate.toDate
+            ? new Date(formDate.toDate.setHours(23, 59, 59, 999))
+            : null;
 
         const isDateInRange =
             (!from || (manifestDate && manifestDate >= from)) &&
             (!to || (manifestDate && manifestDate <= to));
 
-        return isDocketNoMatch && isDateInRange;
+        return isMatch && isDateInRange;
     });
+    // -------------------- END FIX --------------------
+
+    console.log(filteredgetManifestData);
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
@@ -107,7 +116,7 @@ function PendingManifest() {
                     <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
                         <label style={{ marginTop: "8px", textAlign: "end" }}>From Date</label>
                         <DatePicker
-                        portalId="root-portal"   
+                            portalId="root-portal"
                             selected={formDate.fromDate}
                             onChange={(date) => handleDateChange(date, "fromDate")}
                             dateFormat="dd/MM/yyyy"
@@ -119,12 +128,12 @@ function PendingManifest() {
                     <div className="input-field" style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
                         <label style={{ marginTop: "8px", textAlign: "end" }}>To Date</label>
                         <DatePicker
-                        portalId="root-portal"   
+                            portalId="root-portal"
                             selected={formDate.toDate}
                             onChange={(date) => handleDateChange(date, "toDate")}
                             dateFormat="dd/MM/yyyy"
                             className="form-control form-control-sm"
-                             style={{ width: "120px", marginLeft: "10px" }}
+                            style={{ width: "120px", marginLeft: "10px" }}
                         />
                     </div>
 
@@ -144,7 +153,7 @@ function PendingManifest() {
                 </div>
 
                 <div className="table-container">
-                    <table className="table table-bordered table-sm">
+                    <table className="table table-bordered table-sm" style={{whiteSpace:"nowrap"}}>
                         <thead className="table-sm">
                             <tr>
                                 <th>Sr.No</th>
@@ -166,7 +175,7 @@ function PendingManifest() {
                                 <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>{manifest.DocketNo}</td>
-                                    <td>{manifest.BookDate}</td>
+                                    <td>{ymdToDmy(manifest.BookDate)}</td>
                                     <td>{manifest.customerName}</td>
                                     <td>{manifest.consigneeName}</td>
                                     <td>{manifest.fromDest}</td>

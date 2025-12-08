@@ -9,10 +9,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import { getApi, postApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
-
-
-
+import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 function PaymentEntry() {
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
@@ -22,13 +19,9 @@ function PaymentEntry() {
     const [getCustomer, setGetCustomer] = useState([]);
     const [getBranch, setGetBranch] = useState([]);
     const [getBankName, setGetBankName] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [data, setData] = useState([]);
-    const [isEditMode, setIsEditMode] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
         billDate: today,
         customer: "",
@@ -86,11 +79,9 @@ function PaymentEntry() {
             console.log("API Response for", endpoint, response);  // 👀 Check here
             setData(extrectArray(response));
         } catch (err) {
-            console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
+            console.error('Fetch Error:', err);}
+            
+        
     };
 
     useEffect(() => {
@@ -111,7 +102,6 @@ function PaymentEntry() {
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
-
     const totalPages = Math.ceil(data.length / rowsPerPage);
 
     const handleSave = async (e) => {

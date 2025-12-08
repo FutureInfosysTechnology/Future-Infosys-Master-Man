@@ -28,7 +28,7 @@ function DailyBooking() {
     { id: "vendor", label: "Docket Booking", component: <Booking />, show: has("DocketBooking") },
     { id: "print", label: "Docket Print", component: <BookingPrint />, show: has("DocketPrint1") },
     { id: "vendorrate", label: "Cash To Pay Received", component: <DailyExpenses />, show: has("CoshTopayBooking") },
-    { id: "vendorfuel", label: "Auto Mail", component: <EmailBooking />, show: has("AutoMail") },
+    { id: "vendorfuel", label: "Send Bulk Email", component: <EmailBooking />, show: has("AutoMail") },
     { id: "entry", label: "Smart Booking", component: <ShortEntry />, show: has("Smartbooking") },
     { id: "excelimport", label: "Bulk Booking", component: <ExcelImportBulk />, show: has("BulkImportData") },
     { id: "vendorcharge", label: "Rate Update", component: <UpdateCustomerRate />, show: has("UpdateCustomerRate") },
