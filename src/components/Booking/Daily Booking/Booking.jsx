@@ -320,11 +320,13 @@ function Booking() {
     const [invoiceData, setInvoiceData] = useState({
         PoNo: "",
         PoDate: getTodayDate(),
+        Currency: "INR",
         InvoiceNo: "",
         InvoiceValue: 0,
         Description: "",
         Qty: 0,
         EWayBillNo: "",
+        EwayBillDate: getTodayDate(),
         Remark: "",
         InvoiceImg: ""
     });
@@ -1196,11 +1198,13 @@ function Booking() {
         setInvoiceData({
             PoNo: "",
             PoDate: getTodayDate(),
+            Currency: "INR",
             InvoiceNo: "",
-            InvoiceValue: "",
+            InvoiceValue: 0,
             Description: "",
             Qty: 0,
             EWayBillNo: "",
+            EwayBillDate: getTodayDate(),
             Remark: "",
             InvoiceImg: ""
         });
@@ -1462,32 +1466,31 @@ function Booking() {
 
     useEffect(() => {
 
-        if(!formData.VendorAmt || formData.VendorAmt==0)
-        {
+        if (!formData.VendorAmt || formData.VendorAmt == 0) {
             setVendorShow({
-            Rate: 0,
-            Fuel_Charges: 0,
-            Fuel_Per: 0,
-            Fov_Charges: 0,
-            Fov_Per: 0,
-            Docket_Charges: 0,
-            ODA_Charges: 0,
-            Delivery_Charges: 0,
-            Packing_Charges: 0,
-            Green_Charges: 0,
-            Hamali_Charges: 0,
-            Other_Charges: 0,
-            Insurance_Charges: 0,
-            Subtotal: 0,
-            CGSTPer: 0,
-            CGSTAmt: 0,
-            SGSTPer: 0,
-            SGSTAmt: 0,
-            IGSTPer: 0,
-            IGSTAmt: 0,
-            TotalGST: 0,
-            TotalAmount: 0
-        });
+                Rate: 0,
+                Fuel_Charges: 0,
+                Fuel_Per: 0,
+                Fov_Charges: 0,
+                Fov_Per: 0,
+                Docket_Charges: 0,
+                ODA_Charges: 0,
+                Delivery_Charges: 0,
+                Packing_Charges: 0,
+                Green_Charges: 0,
+                Hamali_Charges: 0,
+                Other_Charges: 0,
+                Insurance_Charges: 0,
+                Subtotal: 0,
+                CGSTPer: 0,
+                CGSTAmt: 0,
+                SGSTPer: 0,
+                SGSTAmt: 0,
+                IGSTPer: 0,
+                IGSTAmt: 0,
+                TotalGST: 0,
+                TotalAmount: 0
+            });
         }
     }, [formData.VendorAmt])
 
@@ -1741,8 +1744,8 @@ function Booking() {
 
 
     useEffect(() => {
-        if(!formData.VendorRatePerkg || formData.VendorRatePerkg==0)
-        return;
+        if (!formData.VendorRatePerkg || formData.VendorRatePerkg == 0)
+            return;
         const wt = parseFloat(formData.VendorWt) || 0;
         const ratePerKg = parseFloat(formData.VendorRatePerkg) || 0;
         const Amount = wt * ratePerKg;
@@ -1910,11 +1913,13 @@ function Booking() {
         setInvoiceData({
             PoNo: "",
             PoDate: getTodayDate(),
+            Currency: "INR",
             InvoiceNo: "",
             InvoiceValue: 0,
             Description: "",
             Qty: 0,
             EWayBillNo: "",
+            EwayBillDate: getTodayDate(),
             Remark: "",
             InvoiceImg: ""
         });
@@ -4897,10 +4902,12 @@ function Booking() {
                                             <tr>
                                                 <th>PO No</th>
                                                 <th>PO Date</th>
+                                                <th>Currency</th>
                                                 <th>Invoice No</th>
                                                 <th>Invoice Value</th>
                                                 <th>Description</th>
                                                 <th>QTY</th>
+                                                <th>E-Way Date</th>
                                                 <th>E-Way Bill No</th>
                                                 <th>Remark</th>
                                                 <th>Invoice Img</th>
@@ -4916,6 +4923,7 @@ function Booking() {
                                                 </td>
                                                 <td>
                                                     <DatePicker
+                                                        portalId="root-portal"
                                                         selected={invoiceData.PoDate ? new Date(invoiceData.PoDate) : null}
                                                         onChange={(date) =>
                                                             setInvoiceData({ ...invoiceData, PoDate: date })
@@ -4923,6 +4931,14 @@ function Booking() {
                                                         dateFormat="dd/MM/yyyy"
                                                         placeholderText="dd/mm/yyyy"
                                                     />
+                                                </td>
+                                                <td>
+                                                    <select name="Currency" id="Currency"
+                                                     value={invoiceData.Currency} onChange={handleInvoiceDetailChange}>
+                                                        <option value="INR">INR</option>
+                                                        <option value="USD">USD</option>
+                                                        <option value="EURO">EURO</option>
+                                                     </select>
                                                 </td>
                                                 <td>
                                                     <input type="tel" placeholder="Invoice No" name="InvoiceNo"
@@ -4943,6 +4959,17 @@ function Booking() {
                                                     <input type="tel" placeholder="QTY" name="Qty"
                                                         style={{ textAlign: "center" }} value={invoiceData.Qty}
                                                         onChange={handleInvoiceDetailChange} />
+                                                </td>
+                                                <td>
+                                                    <DatePicker
+                                                        portalId="root-portal"
+                                                        selected={invoiceData.EwayBillDate ? new Date(invoiceData.EwayBillDate) : null}
+                                                        onChange={(date) =>
+                                                            setInvoiceData({ ...invoiceData, EwayBillDate: date })
+                                                        }
+                                                        dateFormat="dd/MM/yyyy"
+                                                        placeholderText="dd/mm/yyyy"
+                                                    />
                                                 </td>
                                                 <td>
                                                     <input type="tel" placeholder="E-Way Bill No" name="EWayBillNo"
@@ -4971,10 +4998,12 @@ function Booking() {
                                                 <tr key={index}>
                                                     <td>{data.PoNo}</td>
                                                     <td>{data.PoDate ? (data.PoDate).toLocaleDateString("en-GB") : ""}</td>
+                                                    <td>{data.Currency}</td>
                                                     <td>{data.InvoiceNo}</td>
                                                     <td>{data.InvoiceValue}</td>
                                                     <td>{data.Description}</td>
                                                     <td>{data.Qty}</td>
+                                                    <td>{data.EwayBillDate ? (data.EwayBillDate).toLocaleDateString("en-GB") : ""}</td>
                                                     <td>{data.EWayBillNo}</td>
                                                     <td>{data.Remark}</td>
                                                     <td>{data.InvoiceImg}</td>
@@ -4985,11 +5014,13 @@ function Booking() {
                                                                     setInvoiceData({
                                                                         PoNo: data.PoNo,
                                                                         PoDate: data.PoDate,
+                                                                        Currency: data.Currency,
                                                                         InvoiceNo: data.InvoiceNo,
                                                                         InvoiceValue: data.InvoiceValue,
                                                                         Description: data.Description,
                                                                         Qty: data.Qty,
                                                                         EWayBillNo: data.EWayBillNo,
+                                                                        EwayBillDate: data.EwayBillDate,
                                                                         Remark: data.Remark,
                                                                         InvoiceImg: data.InvoiceImg,
                                                                     });
@@ -5007,6 +5038,8 @@ function Booking() {
                                                                     InvoiceValue: 0,
                                                                     Description: "",
                                                                     Qty: 0,
+                                                                    Currency:"",
+                                                                    EwayBillDate: getTodayDate(),
                                                                     EWayBillNo: "",
                                                                     Remark: "",
                                                                     InvoiceImg: ""

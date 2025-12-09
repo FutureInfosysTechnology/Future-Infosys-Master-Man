@@ -39,20 +39,20 @@ function MobileReceipt() {
         fetchData();
     }, [])
     function numberToIndianCurrency(num) {
-  if (!num || isNaN(num)) return "";
+        if (!num || isNaN(num)) return "";
 
-  const [rupees, paise] = num.toFixed(2).split(".");
+        const [rupees, paise] = num.toFixed(2).split(".");
 
-  let result = toWords(Number(rupees))
-    .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Rupees";
+        let result = toWords(Number(rupees))
+            .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Rupees";
 
-  if (Number(paise) > 0) {
-    result += " and " + toWords(Number(paise))
-      .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Paise";
-  }
+        if (Number(paise) > 0) {
+            result += " and " + toWords(Number(paise))
+                .replace(/\b\w/g, (txt) => txt.toUpperCase()) + " Paise";
+        }
 
-  return result + " Only";
-}
+        return result + " Only";
+    }
     useEffect(() => {
         const totalCharges =
             (Number(data[0]?.Rate) || 0) +
@@ -79,61 +79,61 @@ function MobileReceipt() {
         whiteSpace: "nowrap",
         fontSize: "10px",
         paddingLeft: "10px",
-        paddingRight:"10px",
+        paddingRight: "10px",
     }
     const tableStyle = {
         borderCollapse: "collapse",
-        height:"120px",
+        height: "120px",
     }
 
-const handleDownloadPDF = async () => {
-    const docketElements = document.querySelectorAll(".docket");
-    if (docketElements.length === 0) return;
+    const handleDownloadPDF = async () => {
+        const docketElements = document.querySelectorAll(".docket");
+        if (docketElements.length === 0) return;
 
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    for (let i = 0; i < docketElements.length; i++) {
-        const element = docketElements[i];
+        for (let i = 0; i < docketElements.length; i++) {
+            const element = docketElements[i];
 
-        const canvas = await html2canvas(element, {
-            scale: 4,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            scrollY: -window.scrollY
-            // ❌ removed windowWidth — this was breaking right border
-        });
+            const canvas = await html2canvas(element, {
+                scale: 4,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                scrollY: -window.scrollY
+                // ❌ removed windowWidth — this was breaking right border
+            });
 
-        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+            const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-        const pxToMm = (px) => (px * 25.4) / 96;
-        const imgWidthMm = pxToMm(canvas.width);
-        const imgHeightMm = pxToMm(canvas.height);
-        const imgRatio = imgWidthMm / imgHeightMm;
+            const pxToMm = (px) => (px * 25.4) / 96;
+            const imgWidthMm = pxToMm(canvas.width);
+            const imgHeightMm = pxToMm(canvas.height);
+            const imgRatio = imgWidthMm / imgHeightMm;
 
-        const leftRightPadding = 0;
-        const topPadding = 10;
+            const leftRightPadding = 0;
+            const topPadding = 10;
 
-        let renderWidth = pdfWidth - leftRightPadding * 2;
-        let renderHeight = renderWidth / imgRatio;
-        let xOffset = leftRightPadding;
-        let yOffset = (pdfHeight - renderHeight) / 2 + topPadding;
+            let renderWidth = pdfWidth - leftRightPadding * 2;
+            let renderHeight = renderWidth / imgRatio;
+            let xOffset = leftRightPadding;
+            let yOffset = (pdfHeight - renderHeight) / 2 + topPadding;
 
-        if (yOffset + renderHeight > pdfHeight) {
-            yOffset = topPadding;
-            renderHeight = pdfHeight - topPadding * 2;
-            renderWidth = renderHeight * imgRatio;
-            xOffset = (pdfWidth - renderWidth) / 2;
+            if (yOffset + renderHeight > pdfHeight) {
+                yOffset = topPadding;
+                renderHeight = pdfHeight - topPadding * 2;
+                renderWidth = renderHeight * imgRatio;
+                xOffset = (pdfWidth - renderWidth) / 2;
+            }
+
+            pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
+
+            if (i < docketElements.length - 1) pdf.addPage();
         }
 
-        pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
-
-        if (i < docketElements.length - 1) pdf.addPage();
-    }
-
-    pdf.save("Receipts.pdf");
-};
+        pdf.save("Receipts.pdf");
+    };
 
 
 
@@ -147,47 +147,42 @@ const handleDownloadPDF = async () => {
         <>
             <style>
                 {`
-@media print {
-  /* Hide everything except docket container */
+                @media print {
+
+  /* Hide everything */
   body * {
-    visibility: hidden;
+    visibility: hidden !important;
   }
 
-  #pdf, #pdf * {
-    visibility: visible;
+  /* Show only docket */
+  .docket, .docket * {
+    visibility: visible !important;
   }
 
-  #pdf {
-    position: absolute;
-    top: 0;
-    width: auto !important;
-    height: auto !important;
+  /* Force docket to start at top full width */
+  .docket {
+    position: absolute !important;
+    top: 0 !important;
+    left: 3% !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    border: none !important;
-    overflow: hidden;
-  }
-
-  .docket {
-    margin: 0;
-    padding: 0;
+    background: white !important;
     page-break-after: always;
   }
 
-  body {
-    margin: 0;
-    padding: 0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    background: white;
+  /* Avoid breaking middle content */
+  .foot {
+    page-break-inside: avoid !important;
   }
 
+  /* A4 Setup */
   @page {
-    size: A4 portrait;
-    margin: 0; /* removes browser default margins */
-    padding: 0;
+    size: A4 auto;
   }
+
 }
+
 `}
             </style>
 
@@ -228,7 +223,7 @@ const handleDownloadPDF = async () => {
                                 data.map((docket, index) =>
                                 (
                                     <div className="docket" key={index}>
-                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex",border:"none", flexDirection: "column", marginBottom: "50px" }}>
+                                        <div className="container-2 foot" style={{ borderRadius: "0px", width: "800px", display: "flex", border: "none", flexDirection: "column", marginBottom: "50px" }}>
                                             <div className='div1' style={{ width: "100%", height: "150px", border: "2px solid black", display: "flex", color: "black" }}>
                                                 <div className='logo' style={{ width: "24%", height: "100%", padding: "5px" }}> <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
                                                 <div className='heading' style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", alignItems: "start", paddingLeft: "5px" }}>
@@ -238,7 +233,7 @@ const handleDownloadPDF = async () => {
                                                     <div style={{ fontSize: "12px" }}><b>Mobile No :</b> (+91) {getBranch?.MobileNo}</div>
                                                     <div style={{ fontSize: "12px" }}><b>Email :</b> {getBranch?.Email}</div>
                                                 </div>
-                                                <div className='booking' style={{ width: "26%", display: "flex", justifyContent: "end" ,alignItems:"center"}}>
+                                                <div className='booking' style={{ width: "26%", display: "flex", justifyContent: "end", alignItems: "center" }}>
                                                     <table style={tableStyle}>
                                                         <tbody >
                                                             <tr>
@@ -257,8 +252,8 @@ const handleDownloadPDF = async () => {
                                                                 <td style={cellsStyle}>Origin:</td>
                                                                 <td style={cellsStyle}>{docket?.Origin_Name}</td>
                                                             </tr>
-                                                           
-                                                             <tr>
+
+                                                            <tr>
                                                                 <td style={cellsStyle}>Destination:</td>
                                                                 <td style={cellsStyle}>{docket?.Destination_Name}</td>
                                                             </tr>
@@ -266,7 +261,7 @@ const handleDownloadPDF = async () => {
                                                                 <td style={cellsStyle}>Booking Date:</td>
                                                                 <td style={cellsStyle}>{docket?.BookDate}</td>
                                                             </tr>
-                                                            
+
                                                             <tr>
                                                                 <td style={cellsStyle}>Booking Branch:</td>
                                                                 <td style={cellsStyle}>{docket?.Branch_Name}</td>
@@ -291,18 +286,18 @@ const handleDownloadPDF = async () => {
                                             </div>
                                             <div className='div3' style={{ width: "100%", fontSize: "10px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
                                                 <div className='consignor px-2' style={{ width: "50%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
-                                                    { docket?.Shipper_Name && <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Shipper Name : </div> <span>{docket?.Shipper_Name}</span></div>}
+                                                    {docket?.Shipper_Name && <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Shipper Name : </div> <span>{docket?.Shipper_Name}</span></div>}
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Address : </div><span>{docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3},{docket?.Pin_Code}</span></div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
                                                         <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Shipper_Name ? docket?.ShipperPhone : docket?.Customer_Mob}</span></div>
                                                         <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Shipper_Name ? docket?.ShipperEmail : docket?.Email_Id}</span></div>
                                                     </div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.Shipper_Name ? docket?.ShipperCity  :docket?.City}</span></div>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>State : </div><span>{docket?.Shipper_Name ? docket?.Shipper_State_Name :docket?.Customer_State_Name}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.Shipper_Name ? docket?.ShipperCity : docket?.City}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>State : </div><span>{docket?.Shipper_Name ? docket?.Shipper_State_Name : docket?.Customer_State_Name}</span></div>
                                                     </div>
 
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Shipper_Name ? docket?.ShipperGST  :docket?.Gst_No}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Shipper_Name ? docket?.ShipperGST : docket?.Gst_No}</span></div>
 
                                                 </div>
                                                 <div className='consignee px-2' style={{ width: "50%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
@@ -480,7 +475,7 @@ const handleDownloadPDF = async () => {
                                                     </div>
                                                 </div>
                                                 <div className='payment' style={{ width: "30%" }}>
-                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center"}}>
+                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                                                         <div style={{ fontWeight: "bold", }}>  DOCKET NO : </div>
                                                         <div style={{}}>
                                                             <BarCode
@@ -512,10 +507,10 @@ const handleDownloadPDF = async () => {
                                                     </div>
                                                     <div style={{ paddingLeft: "7px", fontWeight: "bold", borderBottom: "2px solid black", height: "11%" }}>COD/DOD AUTHORISED DETAILS</div>
                                                     <div style={{ paddingLeft: "7px", borderBottom: "2px solid black", height: "30%" }}> COD/DOD AMOUNT (Rs..)</div>
-                                                    <div style={{ paddingLeft: "7px", height: "40%" ,display:"flex",gap:"10px",justifyContent:"center",alignItems:"center"}}>
+                                                    <div style={{ paddingLeft: "7px", height: "40%", display: "flex", gap: "10px", justifyContent: "center", alignItems: "center" }}>
                                                         <div>User Booking : </div>
                                                         <div>{docket?.UserName}</div>
-                                                        </div>
+                                                    </div>
 
                                                 </div>
                                                 <div style={{ width: "30%", borderRight: "2px solid black" }}>
@@ -551,7 +546,7 @@ const handleDownloadPDF = async () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="container-2" style={{ borderRadius: "0px", width: "800px", display: "flex",border:"none",  flexDirection: "column", marginBottom: "10px" }}>
+                                        <div className="container-2 foot" style={{ borderRadius: "0px", width: "800px", display: "flex", border: "none", flexDirection: "column", marginBottom: "10px" }}>
                                             <div className='div1' style={{ width: "100%", height: "150px", border: "2px solid black", display: "flex", color: "black" }}>
                                                 <div className='logo' style={{ width: "24%", height: "100%", padding: "5px" }}> <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
                                                 <div className='heading' style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", alignItems: "start", paddingLeft: "5px" }}>
@@ -561,7 +556,7 @@ const handleDownloadPDF = async () => {
                                                     <div style={{ fontSize: "12px" }}><b>Mobile No :</b> (+91) {getBranch?.MobileNo}</div>
                                                     <div style={{ fontSize: "12px" }}><b>Email :</b> {getBranch?.Email}</div>
                                                 </div>
-                                                <div className='booking' style={{ width: "26%", display: "flex", justifyContent: "end" ,alignItems:"center"}}>
+                                                <div className='booking' style={{ width: "26%", display: "flex", justifyContent: "end", alignItems: "center" }}>
                                                     <table style={tableStyle}>
                                                         <tbody >
                                                             <tr>
@@ -580,8 +575,8 @@ const handleDownloadPDF = async () => {
                                                                 <td style={cellsStyle}>Origin:</td>
                                                                 <td style={cellsStyle}>{docket?.Origin_Name}</td>
                                                             </tr>
-                                                           
-                                                             <tr>
+
+                                                            <tr>
                                                                 <td style={cellsStyle}>Destination:</td>
                                                                 <td style={cellsStyle}>{docket?.Destination_Name}</td>
                                                             </tr>
@@ -589,7 +584,7 @@ const handleDownloadPDF = async () => {
                                                                 <td style={cellsStyle}>Booking Date:</td>
                                                                 <td style={cellsStyle}>{docket?.BookDate}</td>
                                                             </tr>
-                                                            
+
                                                             <tr>
                                                                 <td style={cellsStyle}>Booking Branch:</td>
                                                                 <td style={cellsStyle}>{docket?.Branch_Name}</td>
@@ -614,18 +609,18 @@ const handleDownloadPDF = async () => {
                                             </div>
                                             <div className='div3' style={{ width: "100%", fontSize: "10px", borderStyle: "solid", borderWidth: "0 2px 2px 2px", borderColor: "black", display: "flex" }}>
                                                 <div className='consignor px-2' style={{ width: "50%", borderRight: "2px solid black", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
-                                                    { docket?.Shipper_Name && <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Shipper Name : </div> <span>{docket?.Shipper_Name}</span></div>}
+                                                    {docket?.Shipper_Name && <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Shipper Name : </div> <span>{docket?.Shipper_Name}</span></div>}
                                                     <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Address : </div><span>{docket?.Customer_Add1},{docket?.Customer_Add2},{docket?.Customer_Add3},{docket?.Pin_Code}</span></div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
                                                         <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Mob No : </div><span>(+91) {docket?.Shipper_Name ? docket?.ShipperPhone : docket?.Customer_Mob}</span></div>
                                                         <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>Email : </div><span>{docket?.Shipper_Name ? docket?.ShipperEmail : docket?.Email_Id}</span></div>
                                                     </div>
                                                     <div style={{ display: "flex", gap: "10px" }}>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.Shipper_Name ? docket?.ShipperCity  :docket?.City}</span></div>
-                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>State : </div><span>{docket?.Shipper_Name ? docket?.Shipper_State_Name :docket?.Customer_State_Name}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>City : </div><span>{docket?.Shipper_Name ? docket?.ShipperCity : docket?.City}</span></div>
+                                                        <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>State : </div><span>{docket?.Shipper_Name ? docket?.Shipper_State_Name : docket?.Customer_State_Name}</span></div>
                                                     </div>
 
-                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Shipper_Name ? docket?.ShipperGST  :docket?.Gst_No}</span></div>
+                                                    <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold" }}>GST NO : </div><span>{docket?.Shipper_Name ? docket?.ShipperGST : docket?.Gst_No}</span></div>
 
                                                 </div>
                                                 <div className='consignee px-2' style={{ width: "50%", display: "flex", flexDirection: "column", gap: "3px", paddingTop: "2px" }}>
@@ -803,7 +798,7 @@ const handleDownloadPDF = async () => {
                                                     </div>
                                                 </div>
                                                 <div className='payment' style={{ width: "30%" }}>
-                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center"}}>
+                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                                                         <div style={{ fontWeight: "bold", }}>  DOCKET NO : </div>
                                                         <div style={{}}>
                                                             <BarCode
@@ -835,10 +830,10 @@ const handleDownloadPDF = async () => {
                                                     </div>
                                                     <div style={{ paddingLeft: "7px", fontWeight: "bold", borderBottom: "2px solid black", height: "11%" }}>COD/DOD AUTHORISED DETAILS</div>
                                                     <div style={{ paddingLeft: "7px", borderBottom: "2px solid black", height: "30%" }}> COD/DOD AMOUNT (Rs..)</div>
-                                                    <div style={{ paddingLeft: "7px", height: "40%" ,display:"flex",gap:"10px",justifyContent:"center",alignItems:"center"}}>
+                                                    <div style={{ paddingLeft: "7px", height: "40%", display: "flex", gap: "10px", justifyContent: "center", alignItems: "center" }}>
                                                         <div>User Booking : </div>
                                                         <div>{docket?.UserName}</div>
-                                                        </div>
+                                                    </div>
 
                                                 </div>
                                                 <div style={{ width: "30%", borderRight: "2px solid black" }}>
@@ -873,7 +868,7 @@ const handleDownloadPDF = async () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>     
+                                        </div>
                                     </div>
                                 ))
                             }

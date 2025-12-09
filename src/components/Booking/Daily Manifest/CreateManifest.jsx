@@ -9,7 +9,6 @@ import 'react-toggle/style.css';
 import { refeshPend } from "../../../App";
 
 function CreateManifest() {
-    const { refFun } = useContext(refeshPend)
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [isInput, setInput] = useState("SELF");
@@ -39,7 +38,7 @@ function CreateManifest() {
     const [toDate, setToDate] = useState(today);
     const [formData, setFormData] = useState({
         maniDate: new Date(),
-        fromDest: '',
+        fromDest: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "",
         toDest: '',
         mode: '',
         transportType: '',
@@ -56,7 +55,9 @@ function CreateManifest() {
         bookingWeight: '',
         manifestWeight: '',
         Train_Code: '',
+        TrainNo: '',
         Flight_Code: '',
+        FlightNo: '',
         docketNo: []
     });
 
@@ -161,8 +162,8 @@ function CreateManifest() {
         return isMatch && isDateInRange;
     });
     const convertDateFormat = (dateStr) => {
-        const [day, month, year] = dateStr.split('-');
-        return `${year}-${month}-${day}`;
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
     };
 
     const handleSearchChange = (e) => {
@@ -262,40 +263,70 @@ function CreateManifest() {
 
         fetchData('/Master/getMode', setGetMode);
         fetchData('/Master/getVendor', setGetVendor);
-        fetchData('/Master/getdomestic', setGetCity);
         fetchData('/Master/getGetdriver', setGetDriver);
         fetchData('/Master/VehicleMaster', setGetVehicle);
         fetchData('/Master/gettransport', setGetTransport);
         fetchData('/Master/GetAllFlights', setGetFlight);
         fetchData('/Master/GetAllTrains', setGetTrain);
     }, []);
+    useEffect(() => {
+        const fetchData = async (setData, Product_Type) => {
+
+
+            try {
+                const response = await getApi(`/Master/GetInterDomestic?Product_Type=${Product_Type}`);
+                const data = response.Data || response.data
+                // Check if the response contains data, then update the corresponding state
+                if (data) {
+                    setData(Array.isArray(data) ? data : []);
+                } else {
+                    setData([]);
+                }
+            } catch (err) {
+                console.error(`Error fetching data from /Master/GetInterDomestic:`, err);
+
+            }
+
+        };
+        const Product_Type = getMode.find(m => m.Mode_Code === formData.mode)?.Mode_Type == "INTERNATIONAL" ? "International" : "Domestic"
+        fetchData(setGetCity, Product_Type);
+    }, [formData.mode])
 
 
     const handleSelectAll = () => {
-        setSelectAll(!selectAll);
-        if (!selectAll) {
-            setSelectedRows(getManifest.map((_, index) => index));
+        const newState = !selectAll;
+        setSelectAll(newState);
+
+        if (newState) {
+            // Select All
+            setSelectedRows(getManifest.map((_, index) => index));                    // row index array
+            setSelectedDocketNos(getManifest.map(m => m.DocketNo));                   // all docket numbers
+            setSelectedManifestRows([...getManifest]);                                // entire row data
         } else {
+            // Unselect All
             setSelectedRows([]);
+            setSelectedDocketNos([]);
+            setSelectedManifestRows([]);
         }
     };
-    useEffect(() => {
-        console.log(isInput);
-    }, [isInput])
 
-    const handleRowSelect = (index, docketNo) => {
-        if (selectedRows.includes(index)) {
-            setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== index));
+
+
+    const handleRowSelect = (index, docketNo, n) => {
+        const already = selectedRows.includes(index);
+        const updatedRows = already ? selectedRows.filter(i => i !== index) : [...selectedRows, index];
+        if (already) {
             setSelectedDocketNos(selectedDocketNos.filter(docket => docket !== docketNo));
             setSelectedManifestRows(selectedManifestRows.filter(row => row.DocketNo !== docketNo));
         } else {
-            setSelectedRows([...selectedRows, index]);
             setSelectedDocketNos([...selectedDocketNos, docketNo]);
             setSelectedManifestRows([
                 ...selectedManifestRows,
                 getManifest.find(manifest => manifest.DocketNo === docketNo)
             ]);
         }
+        setSelectedRows(updatedRows);
+        setSelectAll(updatedRows.length === n);
     };
 
     const handleFormChange = (e) => {
@@ -313,6 +344,59 @@ function CreateManifest() {
         }));
         setModalIsOpen(false);
     };
+    const handleFind = () => {
+        // Convert to string if numbers come
+        const doc = String(formData.bookingWeight).trim();
+
+        if (!doc) {
+            Swal.fire({
+                icon: "warning",
+                title: "Empty",
+                text: `Enter docket number!`
+            });
+            return;
+        }
+
+        // Check availability in Manifest list
+        const found = getManifest.find(m => String(m.DocketNo) === doc);
+
+        if (!found) {
+            Swal.fire({
+                icon: "error",
+                title: "Not Found!",
+                text: `Docket No ${doc} not exists in Manifest List`
+            });
+            return;
+        }
+
+        // If already selected → stop
+        if (selectedDocketNos.includes(doc)) {
+            Swal.fire({
+                icon: "warning",
+                title: "Already Selected",
+                text: `Docket No ${doc} is already added`
+            });
+            return;
+        }
+
+        // Add to lists
+        setSelectedDocketNos([...selectedDocketNos, doc]);
+        setSelectedManifestRows([...selectedManifestRows, found]);
+
+        // If row index required, find and push
+        const index = getManifest.findIndex(m => String(m.DocketNo) === doc);
+        setSelectedRows(prev => [...prev, index]);
+
+        // Auto selectAll if length matches
+        setSelectAll(selectedRows.length + 1 === getManifest.length);
+
+        Swal.fire({
+            icon: "success",
+            title: "Added Successfully",
+            text: `Docket No ${doc} added to selection`
+        });
+    };
+
     const formatDate = (date) => {
         if (!date) return null;
         const year = date.getFullYear();
@@ -333,22 +417,55 @@ function CreateManifest() {
         trainNo: t.Train_No,  // extra info if needed
     }));
 
+    const handleReset = () => {
+        // 🔁 Reset Form after success
+        setFormData({
+            maniDate: new Date(),
+            fromDest: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "",
+            toDest: "",
+            mode: "",
+            transportType: "",
+            vehicleType: "",
+            vehicleNo: "",
+            driverName: "",
+            driverMobile: "",
+            vendorCode: "",
+            vendorAwbNo: "",
+            MAwbNo: "",
+            bagNo: "",
+            DoxSpx: "",
+            remark: "",
+            Train_Code: "",
+            TrainNo: "",
+            Flight_Code: "",
+            FlightNo: "",
+            docketNo: []
+        });
+
+        setSelectedManifestRows([]);
+        setSelectedRows([]);
+        setSelectedDocketNos([]);
+        setSelectAll(false);
+    }
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (selectedDocketNos.length === 0) {
             Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Please select at least one Docket No before submitting the form.',
+                icon: "error",
+                title: "No Dockets Selected",
+                text: "Please select at least one Docket before submit!"
             });
             return;
         }
+
+        // 🔥 Complete final payload matching Node API
         const requestPayload = {
             DocketNo: selectedDocketNos,
-            sessionLocationCode: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
-            fromDest: formData.fromDest,
+            sessionLocationCode: formData.fromDest,
+
             toDest: formData.toDest,
             Mode: formData.mode,
             Remark: formData.remark,
@@ -358,56 +475,66 @@ function CreateManifest() {
             VendorCode: formData.vendorCode,
             VendorAwbNo: formData.vendorAwbNo,
             driverName: formData.driverName,
-            driverMobile: formData.driverMobile,
+            driverMobile: String(formData.driverMobile),
             ManifestDate: formatDate(formData.maniDate),
             DispatchFlag: "1",
-        };
-        try {
-            const response = await postApi('/Manifest/generateManifest', requestPayload);
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: 'Data has been successfully generated!',
-                timer: 2000,
-                showConfirmButton: true,
-            });
-            setFormData({
-                maniDate: new Date(),
-                fromDest: '',
-                toDest: '',
-                mode: '',
-                transportType: '',
-                vehicleType: '',
-                vehicleNo: '',
-                driverName: '',
-                driverMobile: '',
-                vendorCode: '',
-                vendorAwbNo: '',
-                MAwbNo: '',
-                bagNo: '',
-                DoxSpx: '',
-                remark: '',
-                bookingWeight: '',
-                manifestWeight: '',
-                Train_Code: '',
-                Flight_Code: '',
-                docketNo: []
-            })
-            refFun();
 
-            setSelectedManifestRows([]);
-            setSelectedRows([]);
-            setSelectedDocketNos([]);
-            setSelectAll(false);
+            // 🔥 New Added Keys
+            Train_Code: formData.Train_Code || null,
+            Flight_Code: formData.Flight_Code || null,
+            MasterAwbNo: formData.MAwbNo || null,
+            DoxSpx: formData.DoxSpx || null,
+        };
+
+        try {
+            const response = await postApi("/Manifest/generateManifest", requestPayload);
+            if (response.status === 1) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Manifest Generated",
+                    text: response?.message || "Data Generated Successfully",
+                    showConfirmButton: true
+                });
+
+                // 🔁 Reset Form after success
+                setFormData({
+                    maniDate: new Date(),
+                    fromDest: JSON.parse(localStorage.getItem("Login"))?.Branch_Code || "",
+                    toDest: "",
+                    mode: "",
+                    transportType: "",
+                    vehicleType: "",
+                    vehicleNo: "",
+                    driverName: "",
+                    driverMobile: "",
+                    vendorCode: "",
+                    vendorAwbNo: "",
+                    MAwbNo: "",
+                    bagNo: "",
+                    DoxSpx: "",
+                    remark: "",
+                    Train_Code: "",
+                    TrainNo: "",
+                    Flight_Code: "",
+                    FlightNo: "",
+                    docketNo: []
+                });
+
+                await fetchDataM()
+                setSelectedManifestRows([]);
+                setSelectedRows([]);
+                setSelectedDocketNos([]);
+                setSelectAll(false);
+            }
+
+
+
         } catch (error) {
-            console.error("Error submitting manifest: ", error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Something went wrong while generating data. Please try again.',
-            });
+            console.error("Error:", error);
+            Swal.fire({ icon: "error", title: "Failed", text: error?.message || "Try again later." });
         }
     };
+
     const handleUpdate = async (e) => {
         e.preventDefault();
 
@@ -620,7 +747,8 @@ function CreateManifest() {
                                                 <Select
                                                     options={getVehicle.map(vehicle => ({
                                                         value: vehicle.vehicle_model,   // adjust keys from your API
-                                                        label: vehicle.vehicle_model
+                                                        label: vehicle.vehicle_model,
+                                                        vehicle_number: vehicle.vehicle_number,
                                                     }))}
                                                     value={
                                                         formData.vehicleType
@@ -630,7 +758,8 @@ function CreateManifest() {
                                                     onChange={(selectedOption) =>
                                                         setFormData({
                                                             ...formData,
-                                                            vehicleType: selectedOption ? selectedOption.value : ""
+                                                            vehicleType: selectedOption ? selectedOption.value : "",
+                                                            vehicleNo: selectedOption ? selectedOption.vehicle_number : ""
                                                         })
                                                     }
                                                     placeholder="Vehicle Type"
@@ -672,7 +801,8 @@ function CreateManifest() {
                                         <Select
                                             options={getDriver.map(driver => ({
                                                 value: driver.Driver_Code,   // adjust keys from your API
-                                                label: driver.Driver_Name
+                                                label: driver.Driver_Name,
+                                                MobileNo: driver.MobileNo,
                                             }))}
                                             value={
                                                 formData.driverName
@@ -682,8 +812,10 @@ function CreateManifest() {
                                             onChange={(selectedOption) =>
                                                 setFormData({
                                                     ...formData,
-                                                    driverName: selectedOption ? selectedOption.value : ""
+                                                    driverName: selectedOption ? selectedOption.value : "",
+                                                    driverMobile: selectedOption ? selectedOption.MobileNo : ""
                                                 })
+
                                             }
                                             placeholder="Driver Name"
                                             isSearchable
@@ -726,6 +858,7 @@ function CreateManifest() {
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     Train_Code: selectedOption.value,
+                                                    TrainNo: selectedOption.trainNo
                                                 }));
                                             }}
                                             placeholder="Select Train Name"
@@ -746,7 +879,7 @@ function CreateManifest() {
                                     <div className="input-field3" >
                                         <label htmlFor="">Train Number</label>
                                         <input type="tel" placeholder="Train Number"
-                                            value={formData.driverMobile} onChange={(e) => setFormData({ ...formData, driverMobile: e.target.value })} />
+                                            value={formData.TrainNo} onChange={(e) => setFormData({ ...formData, TrainNo: e.target.value })} />
                                     </div>
                                 </>}
 
@@ -768,6 +901,7 @@ function CreateManifest() {
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     Flight_Code: selectedOption.value,
+                                                    FlightNo: selectedOption.flightNo
                                                 }));
                                             }}
                                             placeholder="Select Flight Name"
@@ -788,7 +922,7 @@ function CreateManifest() {
                                     <div className="input-field3" >
                                         <label htmlFor="">Flight Number</label>
                                         <input type="tel" placeholder="Flight Number"
-                                            value={formData.driverMobile} onChange={(e) => setFormData({ ...formData, driverMobile: e.target.value })} />
+                                            value={formData.FlightNo} onChange={(e) => setFormData({ ...formData, FlightNo: e.target.value })} />
                                     </div>
                                 </>}
 
@@ -884,9 +1018,9 @@ function CreateManifest() {
 
 
                             <div className="bottom-buttons" style={{ display: "flex", flexDirection: "row", marginTop: "20px", marginLeft: "10px", justifyContent: "center", alignItems: "center", }}>
-                                <button type="button" className="ok-btn" style={{ width: "50px" }}>Find</button>
+                                <button type="button" className="ok-btn" style={{ width: "50px" }} onClick={handleFind}>Find</button>
                                 <button type="submit" className="ok-btn" style={{}}>Generate</button>
-                                <button type="button" className="ok-btn" style={{ width: "50px" }}>Reset</button>
+                                <button type="button" className="ok-btn" style={{ width: "50px" }} onClick={handleReset}>Reset</button>
                                 <button type="button" className="ok-btn" onClick={() => { setModalIsOpen2(true) }}>Setup</button>
                             </div>
 
@@ -916,7 +1050,7 @@ function CreateManifest() {
                                     <tr key={index}>
                                         <td>{index + 1}</td>
                                         <td>{docket.DocketNo}</td>
-                                        <td style={{ width: "100px" }}>{docket.BookDate}</td>
+                                        <td>{convertDateFormat(docket.BookDate)}</td>
                                         <td>{docket.customerName}</td>
                                         <td>{docket.consigneeName}</td>
                                         <td>{docket.fromDest}</td>
@@ -983,10 +1117,10 @@ function CreateManifest() {
                                         <button style={{ marginTop: "0px" }} className="ok-btn" onClick={handleDocketNoSelect}>Submit</button>
                                     </div>
                                 </div>
-                                <div className='table-container'>
+                                <div className='table-container' style={{ maxHeight: "300px", overflowY: "auto" }}>
                                     <table className='table table-bordered table-sm' style={{ whiteSpace: "nowrap" }}>
                                         <thead className='table-sm'>
-                                            <tr>
+                                            <tr style={{ position: "sticky", top: 0, zIndex: 2 }}>
                                                 <th scope="col">
                                                     <input type="checkbox" style={{ height: "15px", width: "15px" }} checked={selectAll}
                                                         onChange={handleSelectAll} />
@@ -1010,11 +1144,11 @@ function CreateManifest() {
                                                 <tr key={index}>
                                                     <td scope="col">
                                                         <input type="checkbox" style={{ height: "15px", width: "15px" }} checked={selectedRows.includes(index)}
-                                                            onChange={() => handleRowSelect(index, manifest.DocketNo)} />
+                                                            onChange={() => handleRowSelect(index, manifest.DocketNo, getManifest.length)} />
                                                     </td>
                                                     <td>{index + 1}</td>
                                                     <td>{manifest.DocketNo}</td>
-                                                    <td style={{ width: "100px" }}>{manifest.BookDate}</td>
+                                                    <td>{convertDateFormat(manifest.BookDate)}</td>
                                                     <td>{manifest.customerName}</td>
                                                     <td>{manifest.consigneeName}</td>
                                                     <td>{manifest.fromDest}</td>

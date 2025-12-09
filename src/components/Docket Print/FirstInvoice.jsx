@@ -33,29 +33,31 @@ function FirstInvoice() {
     const navigate = useNavigate();
     const invNo = location?.state?.invoiceNo || "";
     const fromPath = location?.state?.from || "/";
-    const termArr = location?.state?.termArr || [];
+    const [termArr, setTermArr] = useState([]);
+    const [isChecked, setIsChecked] = useState({
+        Delivery_Charges: false,
+        Hamali_Charges: false,
+        ODA_Charges: false,
+        Charged_Weight: false,
+        Consignee_Name: false,
+        Fov_Charges: false,
+        Packing_Charges: false,
+        Other_Charges: false,
+        Fuel_Charges: false,
+        Volumetric_Weight: false,
+        Docket_Charges: false,
+        Green_Charges: false,
+        Insurance_Charges: false,
+        Actual_Weight: false,
+        Rate_Per_Kg: false,
+        Term_And_Conditions: false
+    });
     const tab = location?.state?.tab;
     const [getBranch, setGetBranch] = useState([]);
     const [invoiceData, setInvoiceData] = useState([]);
     console.log(location.state);
     const [loading, setLoading] = useState(true);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
-    const [isFovChecked, setIsFovChecked] = useState(false);
-    const [isConsigChecked, setIsConsigChecked] = useState(false);
-    const [isDocketChecked, setIsDocketChecked] = useState(false);
-    const [isDeliveryChecked, setIsDeliveryChecked] = useState(false);
-    const [isPackingChecked, setIsPackingChecked] = useState(false);
-    const [isGreenChecked, setIsGreenChecked] = useState(false);
-    const [isHamaliChecked, setIsHamaliChecked] = useState(false);
-    const [isOtherChecked, setIsOtherChecked] = useState(false);
-    const [isInsuranceChecked, setIsInsuranceChecked] = useState(false);
-    const [isODAChecked, setIsODAChecked] = useState(false);
-    const [isFuelChecked, setIsFuelChecked] = useState(false);
-    const [isCharedChecked, setIsCharedChecked] = useState(false);
-    const [isVolChecked, setIsVolChecked] = useState(false);
-    const [isActualChecked, setIsActualChecked] = useState(false);
-    const [isRateChecked, setIsRateChecked] = useState(false);
-    const [isTermChecked, setIsTermChecked] = useState(false);
     const [getCustomer, setGetCustomer] = useState([]);
 
     useEffect(() => {
@@ -72,26 +74,42 @@ function FirstInvoice() {
         fetchCustomerData();
     }, []);
     useEffect(() => {
-        const savedState = JSON.parse(localStorage.getItem("toggelChargs"));
-        if (savedState) {
-            setIsConsigChecked(savedState.isConsigChecked || false)
-            setIsFovChecked(savedState.isFovChecked || false);
-            setIsDocketChecked(savedState.isDocketChecked || false);
-            setIsDeliveryChecked(savedState.isDeliveryChecked || false);
-            setIsPackingChecked(savedState.isPackingChecked || false);
-            setIsGreenChecked(savedState.isGreenChecked || false);
-            setIsHamaliChecked(savedState.isHamaliChecked || false);
-            setIsOtherChecked(savedState.isOtherChecked || false);
-            setIsInsuranceChecked(savedState.isInsuranceChecked || false);
-            setIsODAChecked(savedState.isODAChecked || false);
-            setIsFuelChecked(savedState.isFuelChecked || false);
-            setIsRateChecked(savedState.isRateChecked || false);
-            setIsActualChecked(savedState.isActualChecked || false);
-            setIsVolChecked(savedState.isVolChecked || false);
-            setIsCharedChecked(savedState.isCharedChecked || false);
-            setIsTermChecked(savedState.isTermChecked || false);
+        const fetchSetup = async () => {
+            try {
+                const response = await getApi(`/Master/getInvoicesSetup`);
 
-        }
+                if (response.status === 1) {
+                    const setup = response.data[0];
+
+                    const updatedChecks = {
+                        Delivery_Charges: setup.Delivery_Charges,
+                        Hamali_Charges: setup.Hamali_Charges,
+                        ODA_Charges: setup.ODA_Charges,
+                        Charged_Weight: setup.Charged_Weight,
+                        Consignee_Name: setup.Consignee_Name,
+                        Fov_Charges: setup.Fov_Charges,
+                        Packing_Charges: setup.Packing_Charges,
+                        Other_Charges: setup.Other_Charges,
+                        Fuel_Charges: setup.Fuel_Charges,
+                        Volumetric_Weight: setup.Volumetric_Weight,
+                        Docket_Charges: setup.Docket_Charges,
+                        Green_Charges: setup.Green_Charges,
+                        Insurance_Charges: setup.Insurance_Charges,
+                        Actual_Weight: setup.Actual_Weight,
+                        Rate_Per_Kg: setup.Rate_Per_Kg,
+                        Term_And_Conditions: true
+                    };
+
+                    setIsChecked(updatedChecks);
+                    setTermArr(response.Terms1_Conditions);
+                }
+
+            } catch (error) {
+                console.log("Setup Fetch Error:", error);
+            }
+        };
+
+        fetchSetup();
     }, []);
 
     useEffect(() => {
@@ -253,15 +271,15 @@ function FirstInvoice() {
     };
 
 
-    const docketTotal = isDocketChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.DocketChrgs || 0), 0) : 0;
-    const hamaliTotal = isHamaliChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.HamaliChrgs || 0), 0) : 0;
-    const deliveryTotal = isDeliveryChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.DeliveryChrgs || 0), 0) : 0;
-    const fovTotal = isFovChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.Fov_Chrgs || 0), 0) : 0;
-    const fuelTotal = isFuelChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.FuelCharges || 0), 0) : 0;
-    const odaTotal = isODAChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.ODA_Chrgs || 0), 0) : 0;
-    const insuranceTotal = isInsuranceChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.InsuranceChrgs || 0), 0) : 0;
-    const packingTotal = isPackingChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.PackingChrgs || 0), 0) : 0;
-    const otherTotal = isOtherChecked ? invoiceData.reduce((sum, inv) => sum + Number(inv.OtherCharges || 0), 0) : 0;
+    const docketTotal = isChecked.Docket_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.DocketChrgs || 0), 0) : 0;
+    const hamaliTotal = isChecked.Hamali_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.HamaliChrgs || 0), 0) : 0;
+    const deliveryTotal = isChecked.Delivery_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.DeliveryChrgs || 0), 0) : 0;
+    const fovTotal = isChecked.Fov_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.Fov_Chrgs || 0), 0) : 0;
+    const fuelTotal = isChecked.Fuel_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.FuelCharges || 0), 0) : 0;
+    const odaTotal = isChecked.ODA_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.ODA_Chrgs || 0), 0) : 0;
+    const insuranceTotal = isChecked.Insurance_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.InsuranceChrgs || 0), 0) : 0;
+    const packingTotal = isChecked.Packing_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.PackingChrgs || 0), 0) : 0;
+    const otherTotal = isChecked.Other_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.OtherCharges || 0), 0) : 0;
 
     const freightTotal = invoiceData.reduce((sum, inv) => sum + Number(inv.Rate || 0), 0);
 
@@ -287,6 +305,19 @@ function FirstInvoice() {
     const rowStyle = {
         border: "1px solid black"
     };
+    const chargeFields = [
+        { label: "Docket Charges", check: "Docket_Charges", total: docketTotal },
+        { label: "Pickup Charges", check: "Hamali_Charges", total: hamaliTotal },
+        { label: "Delivery Charges", check: "Delivery_Charges", total: deliveryTotal },
+        { label: "FOV Charges", check: "Fov_Charges", total: fovTotal },
+        { label: "Fuel Charges", check: "Fuel_Charges", total: fuelTotal },
+        { label: "ODA Charges", check: "ODA_Charges", total: odaTotal },
+        { label: "Insurance Charges", check: "Insurance_Charges", total: insuranceTotal },
+        { label: "Packing Charges", check: "Packing_Charges", total: packingTotal },
+        { label: "Other Charges", check: "Other_Charges", total: otherTotal },
+    ];
+
+
 
     return (
         <>
@@ -399,8 +430,8 @@ function FirstInvoice() {
                                     <div style={{ width: "25%" }}>
                                         <img src={getBranch?.Branch_Logo} alt="" style={{ height: "120px", width: "100%" }} />
                                     </div>
-                                    <div style={{ width: "75%", display: "flex", flexDirection: "column",gap:"5px" }}>
-                                        <div style={{fontSize: "24px", fontWeight: "bold"  }}>
+                                    <div style={{ width: "75%", display: "flex", flexDirection: "column", gap: "5px" }}>
+                                        <div style={{ fontSize: "24px", fontWeight: "bold" }}>
                                             {getBranch?.Company_Name}
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "12px", textAlign: "start" }}>
@@ -419,22 +450,22 @@ function FirstInvoice() {
                                 </div>
 
                                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", border: "1px solid black", marginBottom: "5px", padding: "10px" }}>
-                                    
-                                        <div style={{ display: "flex", flexDirection: "column", width:"60%" }}>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"15%"}}>Client Name</div>  <div style={{width:"2%"}}>:</div> <div style={{fontWeight:"normal",width:"83%"}}>{invoiceData[0]?.CustomerName}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"15%"}}>Address</div>      <div style={{width:"2%"}}>:</div> <div style={{fontWeight:"normal",width:"83%"}}>{invoiceData[0]?.Customer_Add1},{invoiceData[0]?.Customer_Add2},{invoiceData[0]?.Customer_Add3}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"15%"}}>State</div>        <div style={{width:"2%"}}>:</div> <div style={{fontWeight:"normal",width:"83%"}}>{invoiceData[0]?.State_Name}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"15%"}}>Pin Code</div>     <div style={{width:"2%"}}>:</div> <div style={{fontWeight:"normal",width:"83%"}}>{invoiceData[0]?.Pin_Code}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"15%"}}>Mobile No</div>    <div style={{width:"2%"}}>:</div> <div style={{fontWeight:"normal",width:"83%"}}>(+91) {invoiceData[0]?.Customer_Mob}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"15%"}}>Gst No</div>       <div style={{width:"2%"}}>:</div> <div style={{fontWeight:"normal",width:"83%"}}>{invoiceData[0]?.Gst_No}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"15%"}}>Email</div>        <div style={{width:"2%"}}>:</div> <div style={{fontWeight:"normal",width:"83%"}}>{invoiceData[0]?.Email_Id}</div></div>
-                                        </div>
-                                        <div style={{ display: "flex", flexDirection: "column", width:"30%"}}>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"30%"}}>Invoice No</div>  <div style={{width:"5%"}}>:</div> <div style={{fontWeight:"normal"}}>{invoiceData[0]?.BillNo}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"30%"}}>Invoice Date</div>      <div style={{width:"5%"}}>:</div> <div style={{fontWeight:"normal"}}>{invoiceData[0]?.BillDate}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"30%"}}>Invoice From</div>        <div style={{width:"5%"}}>:</div> <div style={{fontWeight:"normal"}}>{invoiceData[0]?.BillFrom}</div></div>
-                                            <div style={{display:"flex",width:"100%",fontWeight:"bold"}}><div style={{width:"30%"}}>Invoice To</div>     <div style={{width:"5%"}}>:</div> <div style={{fontWeight:"normal"}}>{formatDateToDDMMYYYY(invoiceData[0]?.BillTo)}</div></div>
-                                        </div>
+
+                                    <div style={{ display: "flex", flexDirection: "column", width: "60%" }}>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "15%" }}>Client Name</div>  <div style={{ width: "2%" }}>:</div> <div style={{ fontWeight: "normal", width: "83%" }}>{invoiceData[0]?.CustomerName}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "15%" }}>Address</div>      <div style={{ width: "2%" }}>:</div> <div style={{ fontWeight: "normal", width: "83%" }}>{invoiceData[0]?.Customer_Add1},{invoiceData[0]?.Customer_Add2},{invoiceData[0]?.Customer_Add3}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "15%" }}>State</div>        <div style={{ width: "2%" }}>:</div> <div style={{ fontWeight: "normal", width: "83%" }}>{invoiceData[0]?.State_Name}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "15%" }}>Pin Code</div>     <div style={{ width: "2%" }}>:</div> <div style={{ fontWeight: "normal", width: "83%" }}>{invoiceData[0]?.Pin_Code}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "15%" }}>Mobile No</div>    <div style={{ width: "2%" }}>:</div> <div style={{ fontWeight: "normal", width: "83%" }}>(+91) {invoiceData[0]?.Customer_Mob}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "15%" }}>Gst No</div>       <div style={{ width: "2%" }}>:</div> <div style={{ fontWeight: "normal", width: "83%" }}>{invoiceData[0]?.Gst_No}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "15%" }}>Email</div>        <div style={{ width: "2%" }}>:</div> <div style={{ fontWeight: "normal", width: "83%" }}>{invoiceData[0]?.Email_Id}</div></div>
+                                    </div>
+                                    <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "30%" }}>Invoice No</div>  <div style={{ width: "5%" }}>:</div> <div style={{ fontWeight: "normal" }}>{invoiceData[0]?.BillNo}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "30%" }}>Invoice Date</div>      <div style={{ width: "5%" }}>:</div> <div style={{ fontWeight: "normal" }}>{invoiceData[0]?.BillDate}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "30%" }}>Invoice From</div>        <div style={{ width: "5%" }}>:</div> <div style={{ fontWeight: "normal" }}>{invoiceData[0]?.BillFrom}</div></div>
+                                        <div style={{ display: "flex", width: "100%", fontWeight: "bold" }}><div style={{ width: "30%" }}>Invoice To</div>     <div style={{ width: "5%" }}>:</div> <div style={{ fontWeight: "normal" }}>{formatDateToDDMMYYYY(invoiceData[0]?.BillTo)}</div></div>
+                                    </div>
                                 </div>
 
                                 <div className="table-container2 w-100" style={{ width: "100%" }}>
@@ -452,24 +483,25 @@ function FirstInvoice() {
                                                     <th style={headerCellStyle}>Sr No</th>
                                                     <th style={headerCellStyle}>Docket No</th>
                                                     <th style={headerCellStyle}>Date</th>
-                                                    {isConsigChecked && <th style={headerCellStyle}>Consignee Name</th>}
+                                                    {isChecked.Consignee_Name && <th style={headerCellStyle}>Consignee Name</th>}
                                                     <th style={headerCellStyle}>Origin</th>
                                                     <th style={headerCellStyle}>Destination</th>
                                                     <th style={headerCellStyle}>Mode</th>
                                                     <th style={headerCellStyle}>Qty</th>
-                                                    {isActualChecked && <th style={headerCellStyle}>Weight</th>}
-                                                    {isVolChecked && <th style={headerCellStyle}>Volumetric Wt</th>}
-                                                    {isCharedChecked && <th style={headerCellStyle}>Charged Wt</th>}
-                                                    {isRateChecked && <th style={headerCellStyle}>Rate Per Kg</th>}
-                                                    {isDocketChecked && <th style={headerCellStyle}>Dkt Chrgs</th>}
-                                                    {isHamaliChecked && <th style={headerCellStyle}>Pickup Chrgs</th>}
-                                                    {isDeliveryChecked && <th style={headerCellStyle}>Delivery Chrgs</th>}
-                                                    {isFovChecked && <th style={headerCellStyle}>FOV Chrgs</th>}
-                                                    {isFuelChecked && <th style={headerCellStyle}>Fuel Chrgs</th>}
-                                                    {isODAChecked && <th style={headerCellStyle}>ODA Chrgs</th>}
-                                                    {isInsuranceChecked && <th style={headerCellStyle}>Insurance Chrgs</th>}
-                                                    {isPackingChecked && <th style={headerCellStyle}>Packing Chrgs</th>}
-                                                    {isOtherChecked && <th style={headerCellStyle}>Other Chrgs</th>}
+                                                    {isChecked.Actual_Weight && <th style={headerCellStyle}>Weight</th>}
+                                                    {isChecked.Volumetric_Weight && <th style={headerCellStyle}>Volumetric Wt</th>}
+                                                    {isChecked.Charged_Weight && <th style={headerCellStyle}>Charged Wt</th>}
+                                                    {isChecked.Rate_Per_Kg && <th style={headerCellStyle}>Rate Per Kg</th>}
+                                                    {isChecked.Docket_Charges && <th style={headerCellStyle}>Dkt Chrgs</th>}
+                                                    {isChecked.Hamali_Charges && <th style={headerCellStyle}>Pickup Chrgs</th>}
+                                                    {isChecked.Delivery_Charges && <th style={headerCellStyle}>Delivery Chrgs</th>}
+                                                    {isChecked.Fov_Charges && <th style={headerCellStyle}>FOV Chrgs</th>}
+                                                    {isChecked.Fuel_Charges && <th style={headerCellStyle}>Fuel Chrgs</th>}
+                                                    {isChecked.ODA_Charges && <th style={headerCellStyle}>ODA Chrgs</th>}
+                                                    {isChecked.Insurance_Charges && <th style={headerCellStyle}>Insurance Chrgs</th>}
+                                                    {isChecked.Packing_Charges && <th style={headerCellStyle}>Packing Chrgs</th>}
+                                                    {isChecked.Other_Charges && <th style={headerCellStyle}>Other Chrgs</th>}
+
                                                     <th style={headerCellStyle}>Freight Amount</th>
                                                 </tr>
                                             </thead>
@@ -481,25 +513,24 @@ function FirstInvoice() {
                                                             <td style={cellStyle}>{index + 1}</td>
                                                             <td style={cellStyle}>{invoice?.DocketNo}</td>
                                                             <td style={cellStyle}>{formatDateToDDMMYYYY(invoice?.BookDate)}</td>
-                                                            {isConsigChecked && <td style={cellStyle}>{invoice?.ConsigneeName}</td>}
+                                                            {isChecked.Consignee_Name && <td style={cellStyle}>{invoice?.ConsigneeName}</td>}
                                                             <td style={cellStyle}>{invoice?.FromDest}</td>
                                                             <td style={cellStyle}>{invoice?.ToDest}</td>
                                                             <td style={cellStyle}>{invoice?.ModeName}</td>
                                                             <td style={cellStyle}>{invoice?.Qty}</td>
-                                                            {isActualChecked && <td style={cellStyle}>{invoice?.ActualWt}</td>}
-                                                            {isVolChecked && <td style={cellStyle}>{invoice?.VolumetricWt}</td>}
-                                                            {isCharedChecked && <td style={cellStyle}>{invoice?.ChargedWt}</td>}
-                                                            {isRateChecked && <td style={cellStyle}>{invoice?.RatePerkg}</td>}
-                                                            {isDocketChecked && <td style={cellStyle}>{invoice?.DocketChrgs}</td>}
-                                                            {isHamaliChecked && <td style={cellStyle}>{invoice?.HamaliChrgs}</td>}
-                                                            {isDeliveryChecked && <td style={cellStyle}>{invoice?.DeliveryChrgs}</td>}
-                                                            {isFovChecked && <td style={cellStyle}>{invoice?.Fov_Chrgs}</td>}
-                                                            {isFuelChecked && <td style={cellStyle}>{invoice?.FuelCharges}</td>}
-                                                            {isODAChecked && <td style={cellStyle}>{invoice?.ODA_Chrgs}</td>}
-                                                            {isInsuranceChecked && <td style={cellStyle}>{invoice?.InsuranceChrgs}</td>}
-                                                            {isPackingChecked && <td style={cellStyle}>{invoice?.PackingChrgs}</td>}
-                                                            {isOtherChecked && <td style={cellStyle}>{invoice?.OtherCharges}</td>}
-
+                                                            {isChecked.Actual_Weight && <td style={cellStyle}>{invoice?.ActualWt}</td>}
+                                                            {isChecked.Volumetric_Weight && <td style={cellStyle}>{invoice?.VolumetricWt}</td>}
+                                                            {isChecked.Charged_Weight && <td style={cellStyle}>{invoice?.ChargedWt}</td>}
+                                                            {isChecked.Rate_Per_Kg && <td style={cellStyle}>{invoice?.RatePerkg}</td>}
+                                                            {isChecked.Docket_Charges && <td style={cellStyle}>{invoice?.DocketChrgs}</td>}
+                                                            {isChecked.Hamali_Charges && <td style={cellStyle}>{invoice?.HamaliChrgs}</td>}
+                                                            {isChecked.Delivery_Charges && <td style={cellStyle}>{invoice?.DeliveryChrgs}</td>}
+                                                            {isChecked.Fov_Charges && <td style={cellStyle}>{invoice?.Fov_Chrgs}</td>}
+                                                            {isChecked.Fuel_Charges && <td style={cellStyle}>{invoice?.FuelCharges}</td>}
+                                                            {isChecked.ODA_Charges && <td style={cellStyle}>{invoice?.ODA_Chrgs}</td>}
+                                                            {isChecked.Insurance_Charges && <td style={cellStyle}>{invoice?.InsuranceChrgs}</td>}
+                                                            {isChecked.Packing_Charges && <td style={cellStyle}>{invoice?.PackingChrgs}</td>}
+                                                            {isChecked.Other_Charges && <td style={cellStyle}>{invoice?.OtherCharges}</td>}
                                                             <td style={cellStyle}>{invoice?.Rate}</td>
                                                         </tr>
                                                     ))
@@ -514,10 +545,10 @@ function FirstInvoice() {
                                 </div>
                                 <div className='foot'>
                                     <div style={{ width: "100%", display: "flex", border: "1px solid black", marginTop: "10px", justifyContent: "space-between", fontSize: "12px" }}>
-                                        <div style={{ display: "flex", justifyContent:"space-between", alignItems: "start", flexDirection: "column", gap: "10px" ,padding:"10px"}}>
-                                            <div style={{fontWeight:"bold"}}> Tax Payable on Revers charge (Yes/No)</div>
-                                            
-                                            <div style={{display: "flex", whiteSpace: "nowrap", flexDirection: "column", borderTop: "none", justifyContent: "end", fontSize: "13px" }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", flexDirection: "column", gap: "10px", padding: "10px" }}>
+                                            <div style={{ fontWeight: "bold" }}> Tax Payable on Revers charge (Yes/No)</div>
+
+                                            <div style={{ display: "flex", whiteSpace: "nowrap", flexDirection: "column", borderTop: "none", justifyContent: "end", fontSize: "13px" }}>
                                                 <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Bank Name :</div>    <div style={{ textAlign: "start" }}>{getBranch?.Bank_Name}</div></div>
                                                 <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>Branch :</div>  <div style={{ textAlign: "start" }}>{getBranch?.Company_Name}</div></div>
                                                 <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", }}>A/C No :</div> <div style={{ textAlign: "start" }}>{getBranch?.AccountNo}</div></div>
@@ -525,67 +556,14 @@ function FirstInvoice() {
                                             </div>
                                         </div>
                                         <div style={{ display: "flex", width: "20%", justifyContent: "start", alignItems: "start", flexDirection: "column", fontWeight: "bold" }}>
-                                            {isDocketChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>Docket Charges</div>
-                                                    <div>{docketTotal.toFixed(2)}</div>
-                                                </div>
-                                            )}
 
-                                            {isHamaliChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>Pickup Charges</div>
-                                                    <div>{hamaliTotal.toFixed(2)}</div>
-                                                </div>
-                                            )}
-
-                                            {isDeliveryChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>Delivery Charges</div>
-                                                    <div>{deliveryTotal.toFixed(2)}</div>
-                                                </div>
-                                            )}
-
-                                            {isFovChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>FOV Charges</div>
-                                                    <div>{fovTotal.toFixed(2)}</div>
-                                                </div>
-                                            )}
-
-                                            {isFuelChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>Fuel Charges</div>
-                                                    <div>{fuelTotal.toFixed(2)}</div>
-                                                </div>
-                                            )}
-
-                                            {isODAChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>ODA Charges</div>
-                                                    <div>{odaTotal.toFixed(2)}</div>
-                                                </div>
-                                            )}
-
-                                            {isInsuranceChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>Insurance Charges</div>
-                                                    <div>{insuranceTotal.toFixed(2)}</div>
-                                                </div>
-                                            )}
-
-                                            {isPackingChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>Packing Charges</div>
-                                                    <div>{packingTotal.toFixed(2)}</div>
-                                                </div>
-                                            )}
-
-                                            {isOtherChecked && (
-                                                <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                                                    <div>Other Charges</div>
-                                                    <div>{otherTotal.toFixed(2)}</div>
-                                                </div>
+                                            {chargeFields.map(f =>
+                                                isChecked[f.check] && (
+                                                    <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px" }}>
+                                                        <div>{f.label}</div>
+                                                        <div>{f.total.toFixed(2)}</div>
+                                                    </div>
+                                                )
                                             )}
 
                                             <div style={{ width: "100%", paddingRight: "5px", display: "flex", justifyContent: "space-between", gap: "20px", borderBottom: "1px solid black" }}>
@@ -618,18 +596,18 @@ function FirstInvoice() {
                                                 <div>{grossTotal.toFixed(2)}</div>
                                             </div>
 
-
                                         </div>
+
                                     </div>
-                                    <div style={{width: "100%", display: "flex", border: "1px solid black",borderTop:"none",fontWeight:"bold",paddingLeft:"5px"}}>Amount in words : {toTitleCase(toWords(Number(grossTotal || 0).toFixed(2)))}</div>
+                                    <div style={{ width: "100%", display: "flex", border: "1px solid black", borderTop: "none", fontWeight: "bold", paddingLeft: "5px" }}>Amount in words : {toTitleCase(toWords(Number(grossTotal || 0).toFixed(2)))}</div>
 
 
                                     <div style={{ width: "100%", display: "flex", whiteSpace: "nowrap", border: "1px solid black", borderTop: "none", padding: "5px", fontSize: "10px" }}>
                                         <div style={{ display: "flex", width: "65%", gap: "2px", flexDirection: "column" }}>
-                                            <div style={{ fontWeight: "bold", fontSize: "11px"}}> TERMS :</div>
+                                            <div style={{ fontWeight: "bold", fontSize: "11px" }}> TERMS :</div>
                                             {
-                                                isTermChecked && termArr.length > 0 && termArr.map((data, index) => (
-                                                    <div style={{ marginLeft: "5px",whiteSpace:"wrap" }}> {index + 1}. {data}.</div>
+                                                isChecked.Term_And_Conditions && termArr.length > 0 && termArr.map((data, index) => (
+                                                    <div style={{ marginLeft: "5px", whiteSpace: "wrap" }}> {index + 1}. {data}.</div>
                                                 ))
 
                                             }
@@ -638,7 +616,7 @@ function FirstInvoice() {
                                         <div style={{ display: "flex", width: "35%", justifyContent: "center", alignItems: "center" }}>
                                             <div className='stamp' style={{
                                                 display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "40%",
-                                                gap: "120px", fontWeight: "bold", fontSize: "13px", height: "130px", backgroundImage: `url(${getBranch?.Company_Stamp})`, // 👈 use your stored image
+                                                gap: "120px", fontWeight: "bold", fontSize: "13px", backgroundImage: `url(${getBranch?.Company_Stamp})`, // 👈 use your stored image
                                                 backgroundSize: "contain",
                                                 backgroundPosition: "center",
                                                 backgroundRepeat: "no-repeat",

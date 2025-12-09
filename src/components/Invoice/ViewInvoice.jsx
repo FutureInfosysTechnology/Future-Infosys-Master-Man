@@ -12,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-toggle/style.css';
-import { getApi, deleteApi,putApi,postApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, deleteApi, putApi, postApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -58,33 +58,80 @@ function ViewInvoice() {
         billNo: "",
         docketNo: "",
     });
-    const [isFovChecked, setIsFovChecked] = useState(false);
-    const [isTermChecked, setIsTermChecked] = useState(false);
-    const [isConsigChecked, setIsConsigChecked] = useState(false);
+
     const [isAllChecked, setIsAllChecked] = useState(false);
-    const [isDocketChecked, setIsDocketChecked] = useState(false);
-    const [isDeliveryChecked, setIsDeliveryChecked] = useState(false);
-    const [isPackingChecked, setIsPackingChecked] = useState(false);
-    const [isGreenChecked, setIsGreenChecked] = useState(false);
-    const [isHamaliChecked, setIsHamaliChecked] = useState(false);
-    const [isOtherChecked, setIsOtherChecked] = useState(false);
-    const [isInsuranceChecked, setIsInsuranceChecked] = useState(false);
-    const [isODAChecked, setIsODAChecked] = useState(false);
-    const [isFuelChecked, setIsFuelChecked] = useState(false);
-    const [isCharedChecked, setIsCharedChecked] = useState(false);
-    const [isVolChecked, setIsVolChecked] = useState(false);
-    const [isActualChecked, setIsActualChecked] = useState(false);
-    const [isRateChecked, setIsRateChecked] = useState(false);
     const [term, setTerm] = useState("");
+    const [isChecked, setIsChecked] = useState({
+        Delivery_Charges: false,
+        Hamali_Charges: false,
+        ODA_Charges: false,
+        Charged_Weight: false,
+        Consignee_Name: false,
+        Fov_Charges: false,
+        Packing_Charges: false,
+        Other_Charges: false,
+        Fuel_Charges: false,
+        Volumetric_Weight: false,
+        Docket_Charges: false,
+        Green_Charges: false,
+        Insurance_Charges: false,
+        Actual_Weight: false,
+        Rate_Per_Kg: false,
+        Term_And_Conditions: false
+    });
+
     const [termArr, setTermArr] = useState([]);
     const [editIndex, setEditIndex] = useState(null);
     const allOptions = [
-    { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
-    ...getCustomer.map((cust) => ({
-      label: cust.Customer_Name,
-      value: cust.Customer_Code,
-    })),
-  ];
+        { label: "ALL CLIENT DATA", value: "ALL CLIENT DATA" },
+        ...getCustomer.map((cust) => ({
+            label: cust.Customer_Name,
+            value: cust.Customer_Code,
+        })),
+    ];
+    useEffect(() => {
+        const fetchSetup = async () => {
+            try {
+                const response = await getApi(`/Master/getInvoicesSetup`);
+
+                if (response.status === 1) {
+                    const setup = response.data[0];
+
+                    const updatedChecks = {
+                        Delivery_Charges: setup.Delivery_Charges,
+                        Hamali_Charges: setup.Hamali_Charges,
+                        ODA_Charges: setup.ODA_Charges,
+                        Charged_Weight: setup.Charged_Weight,
+                        Consignee_Name: setup.Consignee_Name,
+                        Fov_Charges: setup.Fov_Charges,
+                        Packing_Charges: setup.Packing_Charges,
+                        Other_Charges: setup.Other_Charges,
+                        Fuel_Charges: setup.Fuel_Charges,
+                        Volumetric_Weight: setup.Volumetric_Weight,
+                        Docket_Charges: setup.Docket_Charges,
+                        Green_Charges: setup.Green_Charges,
+                        Insurance_Charges: setup.Insurance_Charges,
+                        Actual_Weight: setup.Actual_Weight,
+                        Rate_Per_Kg: setup.Rate_Per_Kg,
+                        Term_And_Conditions:true
+                    };
+
+                    setIsChecked(updatedChecks);
+                    // If all values are true -> mark select all TRUE
+                    const allSelected = Object.values(updatedChecks).every(v => v === true);
+                    setIsAllChecked(allSelected);
+                    setTermArr(response.Terms1_Conditions);
+                }
+
+            } catch (error) {
+                console.log("Setup Fetch Error:", error);
+            }
+        };
+
+        fetchSetup();
+    }, []);
+
+
     const fetchData = async (endpoint, setData) => {
         try {
             const response = await getApi(endpoint);
@@ -97,212 +144,86 @@ function ViewInvoice() {
             setLoading(false);
         }
     };
-    const handleCheckboxChange = (field, value) => {
-        const newState = {
-            [field]: value
-        };
-        const currentState = JSON.parse(localStorage.getItem("toggelChargs")) || {};
-        localStorage.setItem("toggelChargs", JSON.stringify({ ...currentState, ...newState }));
-    };
-    const handleAllChange = () => {
-        const newValue = !isAllChecked;
 
-        setIsAllChecked(newValue);
+    const handleUpdate = async (e) => {
+    e.preventDefault();
 
-        const allFields = {
-            isAllChecked: newValue,
-            isFovChecked: newValue,
-            isDocketChecked: newValue,
-            isDeliveryChecked: newValue,
-            isPackingChecked: newValue,
-            isGreenChecked: newValue,
-            isHamaliChecked: newValue,
-            isOtherChecked: newValue,
-            isInsuranceChecked: newValue,
-            isODAChecked: newValue,
-            isFuelChecked: newValue,
-            isTermChecked: newValue,
-            isCharedChecked: newValue,
-            isActualChecked: newValue,
-            isVolChecked: newValue,
-            isRateChecked: newValue,
-            isConsigChecked: newValue,
-        };
-        // Update React states
-        setIsAllChecked(newValue);
-        setIsFovChecked(newValue);
-        setIsDocketChecked(newValue);
-        setIsDeliveryChecked(newValue);
-        setIsPackingChecked(newValue);
-        setIsGreenChecked(newValue);
-        setIsHamaliChecked(newValue);
-        setIsOtherChecked(newValue);
-        setIsInsuranceChecked(newValue);
-        setIsODAChecked(newValue);
-        setIsFuelChecked(newValue);
-        setIsTermChecked(newValue);
-        setIsCharedChecked(newValue);
-        setIsActualChecked(newValue);
-        setIsVolChecked(newValue);
-        setIsRateChecked(newValue);
-        setIsConsigChecked(newValue);
-        // Save to localStorage
-        localStorage.setItem("toggelChargs", JSON.stringify(allFields));
-    };
-    useEffect(() => {
-        const allFields = {
-            isFovChecked,
-            isDocketChecked,
-            isDeliveryChecked,
-            isPackingChecked,
-            isGreenChecked,
-            isHamaliChecked,
-            isOtherChecked,
-            isInsuranceChecked,
-            isODAChecked,
-            isFuelChecked,
-            isTermChecked,
-            isActualChecked,
-            isCharedChecked,
-            isVolChecked,
-            isRateChecked,
-            isConsigChecked,
+    try {
+        // Prepare payload for API
+        const requestPayload = {
+            ID: 1, // Or your manifest/invoice ID dynamically
+            Delivery_Charges: isChecked.Delivery_Charges ? 1 : 0,
+            Hamali_Charges: isChecked.Hamali_Charges ? 1 : 0,
+            ODA_Charges: isChecked.ODA_Charges ? 1 : 0,
+            Charged_Weight: isChecked.Charged_Weight ? 1 : 0,
+            Consignee_Name: isChecked.Consignee_Name ? 1 : 0,
+            Fov_Charges: isChecked.Fov_Charges ? 1 : 0,
+            Packing_Charges: isChecked.Packing_Charges ? 1 : 0,
+            Other_Charges: isChecked.Other_Charges ? 1 : 0,
+            Fuel_Charges: isChecked.Fuel_Charges ? 1 : 0,
+            Volumetric_Weight: isChecked.Volumetric_Weight ? 1 : 0,
+            Docket_Charges: isChecked.Docket_Charges ? 1 : 0,
+            Green_Charges: isChecked.Green_Charges ? 1 : 0,
+            Insurance_Charges: isChecked.Insurance_Charges ? 1 : 0,
+            Actual_Weight: isChecked.Actual_Weight ? 1 : 0,
+            Rate_Per_Kg: isChecked.Rate_Per_Kg ? 1 : 0,
+            Terms_Conditions: isChecked.Term_And_Conditions ? 1 : 0,
+            Terms1_Conditions: termArr || [] // Array of terms if any
         };
 
-        // Check if all are true
-        const allChecked = Object.values(allFields).every(Boolean);
-        setIsAllChecked(allChecked);
-        handleCheckboxChange('isAllChecked', allChecked)
-    }, [
-        isFovChecked,
-        isDocketChecked,
-        isDeliveryChecked,
-        isPackingChecked,
-        isGreenChecked,
-        isHamaliChecked,
-        isOtherChecked,
-        isInsuranceChecked,
-        isODAChecked,
-        isFuelChecked,
-        isTermChecked,
-        isActualChecked,
-        isCharedChecked,
-        isVolChecked,
-        isRateChecked,
-        isConsigChecked,
-    ]);
+        const response = await putApi('/Master/updateInvoicesSetup', requestPayload);
 
-    const handleFovChange = (e) => {
-        setIsFovChecked(e.target.checked);
-
-        handleCheckboxChange('isFovChecked', e.target.checked);
-    }
-
-    const handleTermChange = (e) => {
-        setIsTermChecked(e.target.checked);
-        handleCheckboxChange('isTermChecked', e.target.checked);
-    }
-
-    const handleConsigChange = (e) => {
-        setIsConsigChecked(e.target.checked);
-        handleCheckboxChange('isConsigChecked', e.target.checked);
-    }
-
-    const handleDocketChange = (e) => {
-        setIsDocketChecked(e.target.checked);
-
-        handleCheckboxChange('isDocketChecked', e.target.checked);
-    }
-
-    const handleDeliveryChange = (e) => {
-        setIsDeliveryChecked(e.target.checked);
-
-        handleCheckboxChange('isDeliveryChecked', e.target.checked);
-    }
-
-    const handlePackingChange = (e) => {
-        setIsPackingChecked(e.target.checked);
-        handleCheckboxChange('isPackingChecked', e.target.checked);
-    }
-
-    const handleGreenChange = (e) => {
-        setIsGreenChecked(e.target.checked);
-
-        handleCheckboxChange('isGreenChecked', e.target.checked);
-    }
-
-    const handleHamaliChange = (e) => {
-        setIsHamaliChecked(e.target.checked);
-
-        handleCheckboxChange('isHamaliChecked', e.target.checked);
-    }
-
-    const handleOtherChange = (e) => {
-        setIsOtherChecked(e.target.checked);
-
-        handleCheckboxChange('isOtherChecked', e.target.checked);
-    }
-
-    const handleInsuranceChange = (e) => {
-        setIsInsuranceChecked(e.target.checked);
-
-        handleCheckboxChange('isInsuranceChecked', e.target.checked);
-    }
-
-    const handleODAChange = (e) => {
-        setIsODAChecked(e.target.checked);
-
-        handleCheckboxChange('isODAChecked', e.target.checked);
-    }
-
-    const handleFuelChange = (e) => {
-        setIsFuelChecked(e.target.checked);
-
-        handleCheckboxChange('isFuelChecked', e.target.checked);
-    }
-    const handleRateChange = (e) => {
-        setIsRateChecked(e.target.checked);
-
-        handleCheckboxChange('isRateChecked', e.target.checked);
-    }
-    const handleActualChange = (e) => {
-        setIsActualChecked(e.target.checked);
-
-        handleCheckboxChange('isActualChecked', e.target.checked);
-    }
-    const handleVolChange = (e) => {
-        setIsVolChecked(e.target.checked);
-
-        handleCheckboxChange('isVolChecked', e.target.checked);
-    }
-    const handleCharedChange = (e) => {
-        setIsCharedChecked(e.target.checked);
-
-        handleCheckboxChange('isCharedChecked', e.target.checked);
-    }
-
-    useEffect(() => {
-        const savedState = JSON.parse(localStorage.getItem("toggelChargs"));
-        if (savedState) {
-            setIsAllChecked(savedState.isAllChecked || false);
-            setIsFovChecked(savedState.isFovChecked || false);
-            setIsTermChecked(savedState.isTermChecked || false);
-            setIsDocketChecked(savedState.isDocketChecked || false);
-            setIsDeliveryChecked(savedState.isDeliveryChecked || false);
-            setIsPackingChecked(savedState.isPackingChecked || false);
-            setIsGreenChecked(savedState.isGreenChecked || false);
-            setIsHamaliChecked(savedState.isHamaliChecked || false);
-            setIsOtherChecked(savedState.isOtherChecked || false);
-            setIsInsuranceChecked(savedState.isInsuranceChecked || false);
-            setIsODAChecked(savedState.isODAChecked || false);
-            setIsFuelChecked(savedState.isFuelChecked || false);
-            setIsRateChecked(savedState.isRateChecked || false);
-            setIsActualChecked(savedState.isActualChecked || false);
-            setIsVolChecked(savedState.isVolChecked || false);
-            setIsCharedChecked(savedState.isCharedChecked || false);
-            setIsConsigChecked(savedState.isConsigChecked || false)
-
+        if (response.status === 1) {
+            setModalIsOpen(false)
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: response.message || 'Something went wrong.'
+            });
         }
+    } catch (error) {
+        console.error("Error updating invoice setup:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong while updating. Please try again.'
+        });
+    }
+};
+
+
+    const handleCheckChange = (e) => {
+        const { name, checked } = e.target;
+
+        // If ALL checkbox is toggled
+        if (name === "all") {
+            setIsAllChecked(checked); // update main checkbox
+
+            const updated = Object.fromEntries(
+                Object.keys(isChecked).map(k => [k, checked])
+            );
+
+            setIsChecked(updated);
+            return;
+        }
+
+        // Individual Checkbox
+        setIsChecked(prev => {
+            const updated = { ...prev, [name]: checked };
+
+            // If all single checkboxes are true -> selectAll = true
+            const allSelected = Object.values(updated).every(v => v === true);
+            setIsAllChecked(allSelected);
+
+            return updated;
+        });
+    };
+
+
+
+    useEffect(() => {
+
         fetchData('/Master/getCustomerdata', setGetCustomer);
     }, []);
     const handleDelete = async (BillNo) => {
@@ -362,7 +283,7 @@ function ViewInvoice() {
                 pageNumber: currentPage,
             });
 
-            const response = await postApi(`/Smart/getInvoiceGenerateData`,payload);
+            const response = await postApi(`/Smart/getInvoiceGenerateData`, payload);
             console.log(response);
 
             if (response?.status === 1 && Array.isArray(response.Data)) {
@@ -420,33 +341,33 @@ function ViewInvoice() {
         }
         setTerm("");
     };
-    const handleDocketUpdate = async (action, docketNo, billNo,e) => {
+    const handleDocketUpdate = async (action, docketNo, billNo, e) => {
         e.preventDefault();
-    try {
-        if (!docketNo || !billNo) {
-            return Swal.fire("Missing Fields", "Docket No & Bill No are required", "warning");
+        try {
+            if (!docketNo || !billNo) {
+                return Swal.fire("Missing Fields", "Docket No & Bill No are required", "warning");
+            }
+
+            const endpoint =
+                action === "add"
+                    ? "/Smart/AddMissingDocketToBill"
+                    : "/Smart/RemoveDocketFromBill";
+
+            const response = await putApi(
+                `${endpoint}?DocketNo=${docketNo}&BillNo=${billNo}`
+            );
+
+            if (response.status === 1 || response.Status === 1) {
+                Swal.fire("Success", response.message || response.Message, "success");
+                setEditIsOpen(false);
+            } else {
+                Swal.fire("Failed", response.message || response.Message, "error");
+            }
+
+        } catch (error) {
+            Swal.fire("Error", error.message, "error");
         }
-
-        const endpoint =
-            action === "add"
-                ? "/Smart/AddMissingDocketToBill"
-                : "/Smart/RemoveDocketFromBill";
-
-        const response = await putApi(
-            `${endpoint}?DocketNo=${docketNo}&BillNo=${billNo}`
-        );
-
-        if (response.status === 1 || response.Status === 1) {
-            Swal.fire("Success", response.message || response.Message, "success");
-            setEditIsOpen(false);
-        } else {
-            Swal.fire("Failed", response.message || response.Message, "error");
-        }
-
-    } catch (error) {
-        Swal.fire("Error", error.message, "error");
-    }
-};
+    };
 
     return (
         <>
@@ -461,7 +382,7 @@ function ViewInvoice() {
                                     options={allOptions}
                                     value={
                                         formData.customer
-                                            ? allOptions.find(c=>c.value===formData.customer)
+                                            ? allOptions.find(c => c.value === formData.customer)
                                             : null
                                     }
                                     onChange={(selectedOption) =>
@@ -508,7 +429,7 @@ function ViewInvoice() {
                                     className="form-control form-control-sm"
                                 />
                             </div>
-                            
+
                             <div className="input-field3">
                                 <label htmlFor="">Invoice No</label>
                                 <input type="text" placeholder="Invoice No" value={formData.invoiceNo} onChange={(e) => handleFormChange(e.target.value, "invoiceNo")} />
@@ -586,14 +507,14 @@ function ViewInvoice() {
                                                             padding: "10px",
                                                         }}
                                                     >
-                                                        <button className="edit-btn" onClick={() => {setEditIsOpen(true);setOpenRow(null);setModalData({billNo:row?.BillNo,docketNo:""})}}>
+                                                        <button className="edit-btn" onClick={() => { setEditIsOpen(true); setOpenRow(null); setModalData({ billNo: row?.BillNo, docketNo: "" }) }}>
                                                             <i className="bi bi-pen" style={{ fontSize: "18px" }}></i>
                                                         </button>
 
-                                                        <button className="edit-btn" onClick={() =>{;setOpenRow(null); handleOpenInvoicePrint(row.BillNo)}}>
+                                                        <button className="edit-btn" onClick={() => { ; setOpenRow(null); handleOpenInvoicePrint(row.BillNo) }}>
                                                             <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "18px" }}></i>
                                                         </button>
-                                                        <button onClick={() =>{;setOpenRow(null); handleDelete(row.BillNo)}} className="edit-btn">
+                                                        <button onClick={() => { ; setOpenRow(null); handleDelete(row.BillNo) }} className="edit-btn">
                                                             <i className="bi bi-trash" style={{ fontSize: "18px" }}></i>
                                                         </button>
                                                     </div>
@@ -643,16 +564,14 @@ function ViewInvoice() {
                         </div>
                     </div>
                     <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}
-                        className="custom-modal-setup" contentLabel="Modal"
+                        className="custom-modal-custCharges" contentLabel="Modal"
                         style={{
                             content: {
-                                width: '80%',
+                                width: '90%',
                                 top: '50%',             // Center vertically
                                 left: '50%',
                                 whiteSpace: "nowrap",
-                                height:"auto",
-                                display: "flex",
-                                justifyContent: "center",
+                                height:"80%"
 
                             },
                         }}>
@@ -662,167 +581,54 @@ function ViewInvoice() {
                             </div>
 
                             <div className='container2'>
-                                <form>
+                                <form onSubmit={handleUpdate}>
                                     <div className="fields2">
+                                        {/* Select All */}
                                         <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
+                                            <input
+                                                type="checkbox"
                                                 checked={isAllChecked}
-                                                onChange={handleAllChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                All Select</label>
-                                        </div>
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isFovChecked}
-                                                onChange={handleFovChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fov" id="fov" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Fov_Charges</label>
+                                                onChange={handleCheckChange}
+                                                style={{ width: "12px", height: "12px", marginTop: "5px" }}
+                                                name="all"
+                                                id="all"
+                                            />
+                                            <label htmlFor="all" style={{ marginLeft: "10px", fontSize: "12px" }}>All Select</label>
                                         </div>
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isDocketChecked}
-                                                onChange={handleDocketChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="docket" id="docket" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Docket_Charges</label>
-                                        </div>
+                                        {/* Map through all checkboxes */}
+                                        {Object.keys(isChecked).map(key => (
+                                            <div
+                                                className="input-field1"
+                                                style={{ display: "flex", flexDirection: "row" }}
+                                                key={key}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked[key]}
+                                                    onChange={handleCheckChange}
+                                                    style={{ width: "12px", height: "12px", marginTop: "5px" }}
+                                                    name={key}
+                                                    id={key}
+                                                />
+                                                <label htmlFor={key} style={{ marginLeft: "10px", fontSize: "12px" }}>
+                                                    {key.replace(/_/g, " ")}
+                                                </label>
+                                            </div>
+                                        ))}
 
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isDeliveryChecked}
-                                                onChange={handleDeliveryChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="delivery" id="delivery" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Delivery_Charges</label>
-                                        </div>
-
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isPackingChecked}
-                                                onChange={handlePackingChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="packing" id="packing" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Packing_Charges</label>
-                                        </div>
-
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isGreenChecked}
-                                                onChange={handleGreenChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="green" id="green" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Green_Charges</label>
-                                        </div>
-
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isHamaliChecked}
-                                                onChange={handleHamaliChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="hamali" id="hamali" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Hamali_Charges</label>
-                                        </div>
-
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isOtherChecked}
-                                                onChange={handleOtherChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="other" id="other" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Other_Charges</label>
-                                        </div>
-
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isInsuranceChecked}
-                                                onChange={handleInsuranceChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="insurance" id="insurance" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Insurance_Charges</label>
-                                        </div>
-
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isODAChecked}
-                                                onChange={handleODAChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="oda" id="oda" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                ODA_Charges</label>
-                                        </div>
-
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isFuelChecked}
-                                                onChange={handleFuelChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Fuel_Charges</label>
-                                        </div>
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isActualChecked}
-                                                onChange={handleActualChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Actual_Weight</label>
-                                        </div>
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isCharedChecked}
-                                                onChange={handleCharedChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Charged_Weight</label>
-                                        </div>
-
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isVolChecked}
-                                                onChange={handleVolChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Volumetric_Weight</label>
-                                        </div>
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isRateChecked}
-                                                onChange={handleRateChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Rate_Per_Kg</label>
-                                        </div>
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isConsigChecked}
-                                                onChange={handleConsigChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Consignee_Name</label>
-                                        </div>
-                                        <div className="input-field1" style={{ display: "flex", flexDirection: "row" }}>
-                                            <input type="checkbox"
-                                                checked={isTermChecked}
-                                                onChange={handleTermChange}
-                                                style={{ width: "12px", height: "12px", marginTop: "5px" }} name="fuel" id="fuel" />
-                                            <label htmlFor="" style={{ marginLeft: "10px", fontSize: "12px" }}>
-                                                Terms & Conditions</label>
-                                        </div>
                                     </div>
                                     <div className='bottom-buttons'>
-                                        <button onClick={(e) => { e.preventDefault(); setModalIsOpen(false) }} className='ok-btn'>close</button>
+                                        <button  className='ok-btn'>Submit</button>
+                                        <button type="button" onClick={(e) => { setModalIsOpen(false) }} className='ok-btn'>Close</button>
                                     </div>
                                 </form>
                             </div>
                             {
-                                isTermChecked && (
+                                isChecked.Term_And_Conditions && (
                                     <>
-                                        {/* <div className="header-tittle"> */}
-                                        {/* <header>Terms & Conditions</header> */}
-                                        {/* </div> */}
-                                        <div className='container2' style={{ borderRadius: "0px",padding:"10px" }}>
+
+                                        <div className='container2' style={{ borderRadius: "0px", padding: "10px" }}>
                                             <div className="table-container" style={{ borderRadius: "0px" }}>
                                                 <table className="table table-bordered table-sm">
                                                     <thead className="table-info">
@@ -886,8 +692,6 @@ function ViewInvoice() {
                                 left: '50%',
                                 whiteSpace: "nowrap",
                                 minHeight: "60%",
-                                display: "flex",
-                                justifyContent: "center",
 
                             },
                         }}>
@@ -916,10 +720,10 @@ function ViewInvoice() {
                                                 onChange={(e) => setModalData({ ...modalData, docketNo: e.target.value })}
                                             />
                                         </div>
-                                        <div className='bottom-buttons' style={{display:"flex",alignItems:"end",marginTop:"20px",marginLeft:"10px",flexWrap:"wrap"}}>
-                                            <button type="submit" className='ok-btn' onClick={(e)=>handleDocketUpdate("add", modalData.docketNo, modalData.billNo,e)}>Add</button>
-                                            <button type="submit" className='ok-btn' onClick={(e)=>handleDocketUpdate("remove", modalData.docketNo, modalData.billNo,e)}>Remove</button>
-                                            <button type="button" className='ok-btn' onClick={()=>setEditIsOpen(false)}>close</button>
+                                        <div className='bottom-buttons' style={{ display: "flex", alignItems: "end", marginTop: "20px", marginLeft: "10px", flexWrap: "wrap" }}>
+                                            <button type="submit" className='ok-btn' onClick={(e) => handleDocketUpdate("add", modalData.docketNo, modalData.billNo, e)}>Add</button>
+                                            <button type="submit" className='ok-btn' onClick={(e) => handleDocketUpdate("remove", modalData.docketNo, modalData.billNo, e)}>Remove</button>
+                                            <button type="button" className='ok-btn' onClick={() => setEditIsOpen(false)}>close</button>
                                         </div>
                                     </div>
 

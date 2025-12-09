@@ -39,6 +39,33 @@ select:focus {
   outline: none !important;
   box-shadow: none !important;
 }
+/* Remove focus glow / highlight */
+.blue-selectbooking__control,
+.blue-selectbooking__control--is-focused {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.blue-selectbooking__placeholder,
+.blue-selectbooking__placeholder * {
+  color: #6c757d !important;
+  font-size: 13px !important;
+  opacity: 1 !important;         /* in case it's semi-transparent */
+}
+
+/* Make sure the control doesn't override color via inline styles */
+.blue-selectbooking__control,
+.blue-selectbooking__control * {
+  color: inherit !important;
+}
+
+/* Placeholder & Value font like HTML input */
+
+.blue-selectbooking__placeholder,.blue-selectbooking__single-value{
+  color: #6c757d !important;
+  font-size: 13px !important;
+}
+
+
 /* Hide Edge/IE reveal button */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {

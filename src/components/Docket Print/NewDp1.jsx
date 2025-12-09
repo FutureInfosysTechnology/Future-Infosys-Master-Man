@@ -178,6 +178,7 @@ function NewDP1() {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     background: white;
+    
   }
 
   @page {
