@@ -11,7 +11,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import BarCode from "react-barcode";
 import { toWords } from "number-to-words";
 
-function LabelPrintingPdf() {
+function LabelPrintingPdf2() {
     const [getBranch, setGetBranch] = useState([]);
     const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
@@ -111,7 +111,7 @@ function LabelPrintingPdf() {
             if (i < containerElements.length - 1) pdf.addPage();
         }
 
-        pdf.save("LabelPrint.pdf");
+        pdf.save("LabelPrint2.pdf");
     };
 
 
@@ -191,120 +191,150 @@ function LabelPrintingPdf() {
                                         {
                                             Array.from({ length: docket.Qty }, (_, i) => (
                                                 <div className='download'>
-                                                    <div className="container" style={{ border: "2px solid black", padding: "0px", width: "400px", display: "flex", flexDirection: "column" }}>
-                                                        <div style={{
-                                                            borderBottom: "2px solid black", width: "100%", display: "flex", justifyContent: "center", alignItems: "center"
-                                                            , fontWeight: "bolder", fontSize: "30px"
-                                                        }}
-                                                        >Box/Pcs - {i + 1} of {docket.Qty}</div>
-                                                        <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
-                                                            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "50%", borderRight: "2px solid black", padding: "5px" }}>
-                                                                <img src={getBranch?.Branch_Logo} style={{width:"100%",height:"50%"} } />
+                                                    <div className="container" style={{ border: "1px solid black", padding: "0px", width: "450px", display: "flex", flexDirection: "column" }}>
+                                                        <div style={{ display: "flex", width: "100%", padding: "10px" }}>
+                                                            <img src={getBranch?.Branch_Logo} style={{ width: "100%", height: "70px" }} />
+                                                        </div>
+                                                        <div style={{ display: "flex", width: "100%", padding: "10px", justifyContent: "space-between", color: "gray" }}>
+                                                            <div style={{ fontSize: "20px", color: "black", fontWeight: "bold" }}>Deliver To</div>
+                                                            <div>{getBranch?.Website}</div>
+                                                            <div>1668</div>
+                                                        </div>
+                                                        <div style={{ display: "flex", width: "100%", padding: "10px", justifyContent: "space-between", color: "gray" }}>
+                                                            <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-around", fontSize: "12px", gap: "20px" }}>
+                                                                <div style={{ display: "flex", flexDirection: "column" }}>
+                                                                    <div>MEGHNA ARORA</div>
+                                                                    <div>12328B 82 AVENUE</div>
+                                                                </div>
+                                                                <div>SURRREY - BC - V3W 3E7</div>
                                                             </div>
-                                                            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "50%", fontWeight: "bolder", fontSize: "20px", padding: "10px" }}>
-                                                                {getBranch?.Company_Name}</div>
+                                                            <div style={{ display: "flex", flexDirection: "column", borderTop: "1px solid black", width: "30%", alignItems: "end" }}>
+                                                                <div style={{ fontSize: "20px", color: "black", fontWeight: "bold" }}>Canada</div>
+                                                                <div style={{ color: "black" }}>{docket?.BookDate}</div>
+                                                            </div>
                                                         </div>
-                                                        <div style={{ borderBottom: "2px solid black", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                            <BarCode
-                                                                value={docket?.DocketNo}
-                                                                format='CODE128'
-                                                                background='#fff'
-                                                                lineColor='#000'
-                                                                width={2}
-                                                                height={60}
-                                                                displayValue={true}
-                                                            />
-                                                        </div>
-                                                        <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
+                                                        <div style={{ borderBottom: "1px solid black", borderTop: "1px solid black", display: "flex", width: "100%" }}>
 
                                                             <div
-                                                                className="px-1"
+                                                                className="p-2 pb-0"
                                                                 style={{
                                                                     display: "flex",
                                                                     flexDirection: "column",
+                                                                    justifyContent: "space-between",
+                                                                    gap: "10px",
                                                                     width: "50%",
-                                                                    borderRight: "2px solid black",
+                                                                    borderRight: "1px solid black",
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
+
                                                                 }}
                                                             >
-                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Ref No:</div> {/* 🔹 small margin */}
-                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.vendorAwbno}</div>
+                                                                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-around", gap: "15px" }}>
+                                                                    <div style={{ border: "3px dashed black" }}></div>
+                                                                    <div style={{ fontWeight: "bold" }}>PUROLATOR YVR</div>
+                                                                    <div style={{ border: "3px dashed black" }}></div>
+
+                                                                </div>
+                                                                <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                                                    <div style={{ fontSize: "13px", fontWeight: "bold" }}>TRACKING NUMBER</div>
+                                                                    <BarCode
+                                                                        value={docket?.DocketNo}
+                                                                        format='CODE128'
+                                                                        background='#fff'
+                                                                        lineColor='#000'
+                                                                        width={1.5}
+                                                                        height={60}
+                                                                        displayValue={true}
+                                                                    />
+                                                                </div>
                                                             </div>
                                                             <div
-                                                                className="px-1"
+                                                                className="p-2 pb-1"
                                                                 style={{
                                                                     display: "flex",
                                                                     flexDirection: "column",
+                                                                    gap: "10px",
                                                                     width: "50%",
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
+
                                                                 }}
                                                             >
-                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>BookDate:</div> {/* 🔹 small margin */}
-                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.BookDate}</div>
+                                                                <div style={{ display: "flex", justifyContent: "center", fontWeight: "bold", fontSize: "30px" }}>{i + 1} of {docket?.Qty}</div>
+                                                                <div style={{ display: "flex", justifyContent: "center", fontWeight: "bold", flexDirection: "column", alignItems: "center", fontSize: "15px" }}>
+                                                                    <div>9.26 KG</div>
+                                                                    <div style={{ marginTop: "10px" }}>44 X 30 X 36 CM = </div>
+                                                                    <div>9.50 KG</div>
+                                                                </div>
+                                                                <div style={{ fontSize: "12px" }}> <span style={{ fontWeight: "bold" }}>Content :</span> iohfhd sdhdh jopfjjof kihvhhgf khkvjdjh kjhkdvkjhdf jkdvfvfhd
+                                                                    iohfhd sdhdh jopfjjof kihvhhgf khkvjdjh kjhkdvkjhdf jkdvfvfhd</div>
+
                                                             </div>
                                                         </div>
-                                                        <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
+                                                        <div style={{ display: "flex", width: "100%" }}>
 
                                                             <div
-                                                                className="px-1"
+                                                                className="p-2 pb-1"
                                                                 style={{
                                                                     display: "flex",
                                                                     flexDirection: "column",
+                                                                    justifyContent: "space-between",
+                                                                    gap: "10px",
                                                                     width: "50%",
-                                                                    borderRight: "2px solid black",
+                                                                    borderRight: "1px solid black",
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
-                                                                }}
-                                                            >
-                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Origin:</div> {/* 🔹 small margin */}
-                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Origin_Name}</div>
-                                                            </div>
-                                                            <div
-                                                                className="px-1"
-                                                                style={{
-                                                                    display: "flex",
-                                                                    flexDirection: "column",
-                                                                    width: "50%",
-                                                                    fontWeight: "bolder",
-                                                                    lineHeight: "1.1", // 🔹 reduce line spacing
-                                                                }}
-                                                            >
-                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Destination:</div> {/* 🔹 small margin */}
-                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Destination_Name}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div style={{ borderBottom: "2px solid black", display: "flex", width: "100%" }}>
 
-                                                            <div
-                                                                className="px-1"
-                                                                style={{
-                                                                    display: "flex",
-                                                                    flexDirection: "column",
-                                                                    width: "50%",
-                                                                    borderRight: "2px solid black",
-                                                                    lineHeight: "1.1", // 🔹 reduce line spacing
                                                                 }}
                                                             >
-                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Pcs:</div> {/* 🔹 small margin */}
-                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Qty}</div>
+                                                                <div style={{ width: "100%", display: "flex", flexDirection: "column", fontSize: "10px" }}>
+
+                                                                    <div style={{ fontWeight: "bold", fontSize: "20px" }}>Shipper :-</div>
+                                                                    <div style={{ marginTop: "10px" }}>{docket?.Shipper_Name}</div>
+                                                                    <div >{docket?.ShipperAdd},{docket?.ShipperAdd2},{docket?.ShipperAdd3}</div>
+                                                                    <div>{docket?.Shippercity} - {docket?.Shipper_State_Name}</div>
+
+
+                                                                </div>
                                                             </div>
                                                             <div
-                                                                className="px-1"
+                                                                className="p-2"
                                                                 style={{
+                                                                    
                                                                     display: "flex",
-                                                                    flexDirection: "column",
+                                                                    justifyContent:"center",
+                                                                    alignItems:"center",
                                                                     width: "50%",
-                                                                    fontWeight: "bolder",
+                                                                    padding:"20px",
+                                                                    minHeight:"160px",
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
+
                                                                 }}
                                                             >
-                                                                <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "2px" }}>Mode Name:</div> {/* 🔹 small margin */}
-                                                                <div style={{ fontWeight: "bolder", fontSize: "28px", marginTop: "0px" }}>{docket?.Mode_Name}</div>
+                                                                <div style={{
+                                                                    width: "100%",
+                                                                    display: "flex",
+                                                                    flexDirection: "column",
+                                                                    fontSize: "10px",
+                                                                    alignItems: "center",
+                                                                    padding:"10px",
+                                                                    transform: "rotate(90deg)",   // ROTATION HERE
+                                                                    transformOrigin: "center"     // keeps it centered
+                                                                }}>
+                                                                    <div style={{ fontSize: "13px", fontWeight: "bold" }}>PARCEL NUMBER</div>
+
+                                                                    <BarCode
+                                                                        value={docket?.vendorAwbno}
+                                                                        format='CODE128'
+                                                                        background='#fff'
+                                                                        lineColor='#000'
+                                                                        width={1.7}
+                                                                        height={80}
+                                                                        displayValue={true}
+                                                                    />
+                                                                </div>
+
                                                             </div>
+
                                                         </div>
-                                                        <div className="p-1" style={{ fontWeight: "bold", lineHeight: "1.1", textAlign: "center", fontSize: "15px" }}>
-                                                            {getBranch?.Branch_Add1},{getBranch?.Branch_Add2},{getBranch?.Branch_Name},
-                                                            {getBranch?.Branch_PIN},(+91) {getBranch?.MobileNo}
-                                                        </div>
+
                                                     </div>
                                                 </div>
                                             ))
@@ -323,4 +353,4 @@ function LabelPrintingPdf() {
     )
 }
 
-export default LabelPrintingPdf;
+export default LabelPrintingPdf2;

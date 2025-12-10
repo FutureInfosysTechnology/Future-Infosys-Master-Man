@@ -184,8 +184,6 @@ function Booking() {
         InvoiceNo: "",
         SkycType: "",
         SkycNo: "",
-        CkycType: "",
-        CkycNo: "",
         Location_Code: "",
         Mode_Code: "",
         ODAChrgs: 0,
@@ -1819,8 +1817,6 @@ function Booking() {
             InvoiceNo: "",
             SkycType: "",
             SkycNo: "",
-            CkycType: "",
-            CkycNo: "",
             Location_Code: "",
             Mode_Code: "",
             ODAChrgs: 0,
@@ -2398,8 +2394,6 @@ function Booking() {
                         Flight_Code: data.Flight_Code,
                         SkycType: data.KYC_Type,
                         SkycNo: data.KYC_No,
-                        CkycType: data.KYC_Type,
-                        CkycNo: data.KYC_No,
 
                         Status: data.Remark,
                         Vendor_Code: data.Vendor_Code,
@@ -3416,50 +3410,7 @@ function Booking() {
                                             />
                                         </div>
 
-                                        <div className="input-field">
-                                            <label>KYC Type</label>
-
-                                            <Select
-                                                className="blue-selectbooking"
-                                                classNamePrefix="blue-selectbooking"
-                                                options={getKyc.map(kyc => ({
-                                                    value: kyc.KYC_Code,
-                                                    label: kyc.KYC_Name
-                                                }))}
-                                                value={
-                                                    formData.CkycType
-                                                        ? {
-                                                            value: formData.CkycType,
-                                                            label: getKyc.find(kyc => kyc.KYC_Code === formData.CkycType)?.KYC_Name || ""
-                                                        }
-                                                        : null
-                                                }
-                                                onChange={(selectedOption) => {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        CkycType: selectedOption.value
-                                                    }));
-                                                }}
-                                                placeholder="Select KYC Type"
-                                                isSearchable
-                                                menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll area
-                                                styles={{
-                                                    menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps it above other UI
-                                                }}
-                                            />
-                                        </div>
-
-                                        <div className="input-field">
-                                            <label htmlFor="kyc-no">KYC No</label>
-                                            <input
-                                                type="text"
-                                                id="shipper-adhaar"
-                                                placeholder="KYC No"
-                                                value={formData.CkycNo}
-                                                onChange={(e) => setFormData({ ...formData, CkycNo: e.target.value })}
-                                                className="form-control custom-input"
-                                            />
-                                        </div>
+                                       
 
                                         <div className="input-field1">
                                             <label>Mobile No</label>

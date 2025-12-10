@@ -11,6 +11,11 @@ import "./firstinvoice.css"
 import Swal from "sweetalert2";
 import { toWords } from "number-to-words";
 import { TbMailShare } from "react-icons/tb";
+import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+
+
 
 
 function FirstInvoice() {
@@ -270,6 +275,34 @@ function FirstInvoice() {
         pdf.save(`Invoice_${invNo}.pdf`);
     };
 
+const handleExcelDownloadExact = async () => {
+    const element = document.getElementById("pdf");
+    if (!element) return;
+
+    const canvas = await html2canvas(element, { scale: 3 });
+    const imgData = canvas.toDataURL("image/png");
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Manifest");
+
+    // Insert image into sheet
+    const imageId = workbook.addImage({
+        base64: imgData,
+        extension: "png",
+    });
+
+    sheet.addImage(imageId, {
+        tl: { col: 0, row: 0 },   // position
+        ext: { width: canvas.width/3, height: canvas.height/3 } // scale to fit
+    });
+
+    // Download
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), "ManifestLayout.xlsx");
+};
+
+
+
 
     const docketTotal = isChecked.Docket_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.DocketChrgs || 0), 0) : 0;
     const hamaliTotal = isChecked.Hamali_Charges ? invoiceData.reduce((sum, inv) => sum + Number(inv.HamaliChrgs || 0), 0) : 0;
@@ -388,14 +421,14 @@ function FirstInvoice() {
 
                     <div className="container-2" style={{ borderRadius: "0px", width: "992px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px", alignItems: "center" }}>
                         <button
-                            onClick={handleDownloadPDF}
+                            onClick={()=>handleDownloadPDF()}
                             style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Download
                         </button>
 
                         <button
-                            onClick={sendMail}
+                            onClick={()=>sendMail()}
                             style={{ padding: "1px", borderRadius: "6px", background: "blue", width: "50px", color: "white", border: "none", cursor: "pointer" }}
                         >
                             <TbMailShare size={25} />
@@ -411,6 +444,13 @@ function FirstInvoice() {
                             style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
                         >
                             Exit
+                        </button>
+
+                        <button
+                            onClick={() => handleExcelDownloadExact()}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "yellow", color: "black", border: "none", cursor: "pointer" }}
+                        >
+                            Excel
                         </button>
                     </div>
                 </div>

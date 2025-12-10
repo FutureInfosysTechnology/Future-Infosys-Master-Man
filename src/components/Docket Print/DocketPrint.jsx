@@ -8,6 +8,7 @@ import DocketPrint2 from "./DocketPrint2";
 import DocketPrint3 from "./DocketPrint3";
 import DocketPrint4 from "./DocketPrint4";
 import LabelPrinting from "./LabelPrinting";
+import LabelPrinting2 from "./LabelPrinting2";
 import BoxSticker from "./BoxSticker";
 
 import "./DocketPrint.css";
@@ -22,16 +23,18 @@ function DocketPrint() {
 
   // Define all tabs with permissions
   const tabs = [
-    { id: "print1", label: "Delivery Print 1", component: <DockerPrint1 />, permission: "DocketPrint1" },
-    { id: "print2", label: "Delivery Print 2", component: <DocketPrint2 />, permission: "Docketprint2" },
-    { id: "print3", label: "Delivery Print 3", component: <DocketPrint3 />, permission: "Docketprint3" },
-    { id: "print4", label: "Delivery Print 4", component: <DocketPrint4 />, permission: "Docketprint4" },
-    { id: "label", label: "Label Printing", component: <LabelPrinting />, permission: "LebelPrintin" },
-    { id: "sticker", label: "Sticker Printing", component: <BoxSticker />, permission: "StickerPrinting" },
+    { id: "print1", label: "Delivery Print 1", component: <DockerPrint1 />, permission: has("DocketPrint1") },
+    { id: "print2", label: "Delivery Print 2", component: <DocketPrint2 />, permission: has("Docketprint2") },
+    { id: "print3", label: "Delivery Print 3", component: <DocketPrint3 />, permission: has("Docketprint3") },
+    { id: "print4", label: "Delivery Print 4", component: <DocketPrint4 />, permission: has("Docketprint4") },
+    { id: "label", label: "Label Printing", component: <LabelPrinting />, permission: has("LebelPrintin") },
+    { id: "label2", label: "Label Printing 2", component: <LabelPrinting2 />, permission: 1},
+    { id: "sticker", label: "Sticker Printing", component: <BoxSticker />, permission: has("StickerPrinting") },
+    
   ];
 
   // Filter tabs based on permissions
-  const visibleTabs = tabs.filter(tab => has(tab.permission));
+ const visibleTabs = tabs.filter(tab => tab.permission);
 
   const [activeTab, setActiveTab] = useState(location?.state?.tab || visibleTabs[0]?.id || null);
 
