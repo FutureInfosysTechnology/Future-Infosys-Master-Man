@@ -1961,7 +1961,7 @@ function Booking() {
             BookMode: formData.BookMode,
             T_Flag: formData.BookMode,
             UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
-
+            
             // CONSIGNEE
             Receiver_Code: formData.ConsigneeName,
             Consignee_Name: allReceiverOption.find(x => x.value === formData.ConsigneeName)?.label,

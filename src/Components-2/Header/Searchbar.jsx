@@ -121,11 +121,11 @@ function Searchbar() {
                 <input type="text"
                     name="query"
                     placeholder="Enter 6-digit pincode"
-                    value={searchValue} onChange={handleInputChange} />
+                    value={searchValue} onChange={handleInputChange} style={{width:"110px"}}/>
                 <button type="submit" title="search" onClick={(e) => fetchData(e)}>
                     <i className="bi bi-search"></i>
                 </button>
-                
+
             </form>
 
             <Modal overlayClassName="custom-overlay" isOpen={modalIsOpen}

@@ -7,7 +7,8 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import Select from 'react-select'; // 🔹 You forgot this
 import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+
+
 import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 // import './EmailBooking.css'; // Optional: for your custom styles
 import { FaPaperPlane, FaFileExcel, FaFilePdf } from "react-icons/fa";

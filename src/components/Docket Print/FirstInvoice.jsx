@@ -298,7 +298,7 @@ const handleExcelDownloadExact = async () => {
 
     // Download
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), "ManifestLayout.xlsx");
+    saveAs(new Blob([buffer]), "InvoiceExcel.xlsx");
 };
 
 

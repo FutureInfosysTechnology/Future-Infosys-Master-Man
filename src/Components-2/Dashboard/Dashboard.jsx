@@ -203,16 +203,20 @@ function Dashboard() {
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
+    const bk=JSON.parse(localStorage.getItem("DashboardBKSummary"));
+    const mf=JSON.parse(localStorage.getItem("DashboardManifestSummary"));
+    const ins=JSON.parse(localStorage.getItem("DashboardInsconSummary"));
+    const rs=JSON.parse(localStorage.getItem("DashboardRunsheetSummary"));
     const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
     const COLORS1 = ["#FFA500", "#000000"];
     const COLORS2 = ["#007BFF", "red"];
     const cards = [
-        { id: 1, title: "Booking", pending: "24", done: "15", image: bookingSvg },
-        { id: 2, title: "Manifest", pending: "31", done: "20", image: manifestSvg },
-        { id: 3, title: "Inscan", pending: "10", done: "40", image: inscanSvg },
-        { id: 4, title: "Runsheet", pending: "05", done: "30", image: runsheetSvg },
-        { id: 5, title: "Status Activity", pending: "10", done: "50", image: statusSvg },
-        { id: 6, title: "Delivery Updation", pending: "20", done: "25", image: deliverySvg },
+        { id: 1, title: "Booking", pending:bk.BookingPending || "0", done:bk.Delivered || "0", image: bookingSvg ,total:bk.TotalCount},
+        { id: 2, title: "Manifest", pending:mf.PendingManifest || "0", done:mf.ManifestDone|| "0", image: manifestSvg,total:mf.TotalCount },
+        { id: 3, title: "Inscan", pending:ins.InsconPending || "0", done:ins.InscondDone || "0", image: inscanSvg,total:ins.TotalCount },
+        { id: 4, title: "Runsheet", pending:rs.PendingRunsheet || "0", done:rs.RunsheetDone|| "0", image: runsheetSvg,total:rs.TotalCount },
+        { id: 5, title: "Status Activity", pending: "10", done: "50", image: statusSvg,total:0 },
+        { id: 6, title: "Delivery Updation", pending: "20", done: "25", image: deliverySvg,total:0},
     ];
 
     const cards1 = [
@@ -250,7 +254,7 @@ function Dashboard() {
                         {cards.map((card) => {
                             const pending = parseInt(card.pending);
                             const done = parseInt(card.done);
-                            const total = pending + done;
+                            const total = parseInt(card.total)
 
                             const data = [
                                 { name: "Pending", value: pending },
