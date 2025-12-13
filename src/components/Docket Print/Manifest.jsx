@@ -7,7 +7,9 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Header from '../../Components-2/Header/Header';
 import Sidebar1 from '../../Components-2/Sidebar1';
-
+import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 function Manifest() {
 
@@ -77,6 +79,32 @@ function Manifest() {
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`Manifest_${manifestNo}.pdf`);
     };
+
+       const handleExcelDownloadExact = async () => {
+    const element = document.getElementById("pdf");
+    if (!element) return;
+
+    const canvas = await html2canvas(element, { scale: 3 });
+    const imgData = canvas.toDataURL("image/png");
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Manifest");
+
+    // Insert image into sheet
+    const imageId = workbook.addImage({
+        base64: imgData,
+        extension: "png",
+    });
+
+    sheet.addImage(imageId, {
+        tl: { col: 0, row: 0 },   // position
+        ext: { width: canvas.width/3, height: canvas.height/3 } // scale to fit
+    });
+
+    // Download
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), `Manifest_${manifestNo}.xlsx`);
+};
 
     // if (loading) return <p>Loading...</p>;
 
@@ -153,6 +181,14 @@ function Manifest() {
                         >
                             Print
                         </button>
+
+                        <button
+                            onClick={() => handleExcelDownloadExact()}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "yellow", color: "black", border: "none", cursor: "pointer" }}
+                        >
+                            Excel
+                        </button>
+                        
                         <button
                             onClick={() => navigate(fromPath, { state: { tab: "viewmanifest" } })}
                             style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
@@ -164,7 +200,7 @@ function Manifest() {
 
                 <div className="container-2" ref={pageRef} id="pdf" style={{
                     borderRadius: "0px", paddingLeft: "20px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "892px", direction: "flex",
-                    flexDirection: "column", gap: "5px",fontFamily: '"Times New Roman", Times, serif',
+                    flexDirection: "column", gap: "5px", fontFamily: '"Times New Roman", Times, serif',
                 }}>
 
                     <div className="container-2" style={{ borderRadius: "0px", width: "850px", display: "flex", flexDirection: "column" }}>
@@ -172,83 +208,106 @@ function Manifest() {
                         < div id="printable-section" className="container-3" style={{ padding: "0px" }}>
                             <div className="container-3" style={{ border: "5px double black" }}>
 
-                                <div style={{ display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px",gap:"30px" }}>
+                                <div style={{ display: "flex", flexDirection: "row", border: "none", paddingBottom: "5px", marginBottom: "5px", gap: "30px" }}>
                                     <div style={{ width: "35%" }}>
-                                        <img src={getBranch.Branch_Logo} alt="" style={{ height: "100px",width: "100%" }} />
+                                        <img src={getBranch.Branch_Logo} alt="" style={{ height: "100px", width: "100%" }} />
                                     </div>
-                                    <div style={{ width: "60%", display: "flex", flexDirection: "column",gap:"10px" }}>
-                                        <div style={{fontSize: "20px" ,lineHeight:"1",fontWeight:"bold"}}>
+                                    <div style={{ width: "60%", display: "flex", flexDirection: "column", gap: "10px" }}>
+                                        <div style={{ fontSize: "20px", lineHeight: "1", fontWeight: "bold" }}>
                                             {getBranch.Company_Name}
                                         </div>
                                         <div style={{ display: "flex", flexDirection: "column", width: "100%", fontSize: "10px", textAlign: "start" }}>
-                                            <div style={{ display: "flex",gap:"5px"}}><div style={{ fontWeight: "bold",width:"12%"}}>Address :</div><div style={{width:"100%",textAlign:"start"}}>{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div></div>
-                                            <div style={{ display: "flex",gap:"5px"}}><div style={{ fontWeight: "bold",width:"12%"}}>Mob :</div>    <div style={{width:"100%",textAlign:"start"}}>{getBranch.MobileNo}</div></div>
-                                            <div style={{ display: "flex",gap:"5px"}}><div style={{ fontWeight: "bold",width:"12%"}}>Email :</div>  <div style={{width:"100%",textAlign:"start"}}>{getBranch.Email}</div></div>
-                                            <div style={{ display: "flex",gap:"5px"}}><div style={{ fontWeight: "bold",width:"12%"}}>GST No :</div> <div style={{width:"100%",textAlign:"start"}}>{getBranch.GSTNo}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Address :</div><div style={{ width: "100%", textAlign: "start" }}>{getBranch.Branch_Add1},{getBranch.Branch_PIN}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Mob :</div>    <div style={{ width: "100%", textAlign: "start" }}>{getBranch.MobileNo}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>Email :</div>  <div style={{ width: "100%", textAlign: "start" }}>{getBranch.Email}</div></div>
+                                            <div style={{ display: "flex", gap: "5px" }}><div style={{ fontWeight: "bold", width: "12%" }}>GST No :</div> <div style={{ width: "100%", textAlign: "start" }}>{getBranch.GSTNo}</div></div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px", marginTop: "" }}>
+                                <div style={{ display: "flex", fontSize: "10px", border: "1px solid black", marginBottom: "5px" }}>
                                     <div style={{ display: "flex", flexDirection: "column", width: "50%", borderRight: "1px solid black", padding: "10px" }}>
                                         <div>
-                                            <label htmlFor=""><b>VENDOR NAME :</b></label>
-                                            <span style={{ marginLeft: "10px" }}>{manifest.vendorName}</span>
+                                            <b>VENDOR NAME :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.vendorName}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>VEHICLE NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.vehicleNo}</label>
+                                            <b>VEHICLE NO :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.vehicleNo}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>DRIVER NAME :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.driverName}</label>
+                                            <b>DRIVER NAME :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.driverName}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>DRIVER MOBILE NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.driverMobile}</label>
+                                            <b>DRIVER MOBILE NO :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.driverMobile}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>REMARK :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.Remark}</label>
+                                            <b>REMARK :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.remark}
+                                            </span>
                                         </div>
                                     </div>
 
                                     <div style={{ display: "flex", flexDirection: "column", width: "50%", padding: "10px" }}>
                                         <div>
-                                            <label htmlFor=""><b>MANIFEST NO :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestNo}</label>
+                                            <b>MANIFEST NO :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.manifestNo}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>MANIFEST DATE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.manifestDt}</label>
+                                            <b>MANIFEST DATE :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.Manifest_Dt}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>ORIGIN CITY :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.fromDest}</label>
+                                            <b>ORIGIN CITY :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.fromDestName}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>DESTINATION CITY :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.toDest}</label>
+                                            <b>DESTINATION CITY :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.toDestName}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>MODE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.Mode_Name}</label>
+                                            <b>MODE :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.modeName}
+                                            </span>
                                         </div>
 
                                         <div>
-                                            <label htmlFor=""><b>VEHICLE TYPE :</b></label>
-                                            <label htmlFor="" style={{ marginLeft: "10px" }}>{manifest.VehicleType}</label>
+                                            <b>VEHICLE TYPE :</b>
+                                            <span style={{ marginLeft: "10px" }}>
+                                                {manifestData[0]?.vehicleType}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <div className="table-container2" style={{ borderBottom: "1px solid black" }}>
                                     <table className='table table-bordered table-sm' style={{ border: "1px solid black" }}>

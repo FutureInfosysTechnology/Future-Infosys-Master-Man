@@ -1,5 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
-import logoimg from '../../Assets/Images/AceLogo.jpeg';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import 'jspdf-autotable';
 import { getApi, postApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';
@@ -61,8 +60,6 @@ function FirstInvoice() {
     const [getBranch, setGetBranch] = useState([]);
     const [invoiceData, setInvoiceData] = useState([]);
     console.log(location.state);
-    const [loading, setLoading] = useState(true);
-    const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [getCustomer, setGetCustomer] = useState([]);
 
     useEffect(() => {
@@ -152,9 +149,7 @@ function FirstInvoice() {
             } catch (error) {
                 console.error("Invoice Fetch Error:", error);
                 setInvoiceData([]);
-            } finally {
-                setLoading(false);
-            }
+            } 
         };
 
         fetchInvoiceData();
@@ -298,7 +293,7 @@ const handleExcelDownloadExact = async () => {
 
     // Download
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), "InvoiceExcel.xlsx");
+    saveAs(new Blob([buffer]), `Invoice_${invNo}.xlsx`);
 };
 
 
@@ -439,6 +434,14 @@ const handleExcelDownloadExact = async () => {
                         >
                             Print
                         </button>
+
+                         <button
+                            onClick={() => handleExcelDownloadExact()}
+                            style={{ padding: "5px 10px", borderRadius: "6px", background: "yellow", color: "black", border: "none", cursor: "pointer" }}
+                        >
+                            Excel
+                        </button>
+                        
                         <button
                             onClick={() => navigate(fromPath, { state: { tab: tab } })}
                             style={{ padding: "5px 10px", borderRadius: "6px", background: "gray", color: "white", border: "none", cursor: "pointer" }}
@@ -446,12 +449,7 @@ const handleExcelDownloadExact = async () => {
                             Exit
                         </button>
 
-                        <button
-                            onClick={() => handleExcelDownloadExact()}
-                            style={{ padding: "5px 10px", borderRadius: "6px", background: "yellow", color: "black", border: "none", cursor: "pointer" }}
-                        >
-                            Excel
-                        </button>
+                       
                     </div>
                 </div>
 

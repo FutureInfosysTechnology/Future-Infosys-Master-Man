@@ -8,6 +8,7 @@ import CreateManifest from "./CreateManifest";
 import ViewManifest from "./ViewManifest";
 import ForwardingManifest from "./ForwardingManifest";
 import { useLocation } from "react-router-dom";
+import ViewInternational from "./ViewInternational";
 
 function DailyManifest() {
     const location = useLocation();
@@ -35,6 +36,12 @@ function DailyManifest() {
             label: "View Manifest",
             component: <ViewManifest />,
             show: has("ViewManifest"),
+        },
+        {
+            id: "viewint",
+            label: "International Manifest",
+            component: <ViewInternational />,
+            show: 1,
         },
         {
             id: "forwardingmanifest",

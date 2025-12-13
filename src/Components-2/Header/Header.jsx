@@ -14,7 +14,7 @@ function Header() {
         <header id="header" className="header fixed-top d-flex align-items-center justify-content-between g-10">
             <Logo />
             <div className="credit-box" style={{display:"flex",gap:"20px",justifyContent:"center",fontSize:"15px",fontWeight:"bold"}}>
-                <span style={{background:"silver",padding:"5px",borderRadius:"5px",color:""}}>Available Credit Limit : 100000</span>
+                <span style={{background:"silver",padding:"5px",borderRadius:"5px",color:""}}>Wallet Amount : 100000</span>
                 <span style={{background:"silver",padding:"5px",borderRadius:"5px",color:""}}>Balance : 100000</span>
             </div>
             <Searchbar />

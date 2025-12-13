@@ -9,7 +9,7 @@
     import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
     import {useLocation, useNavigate} from "react-router-dom"
 
-    function ViewManifest() {
+    function ViewInternational() {
         const navigate=useNavigate()
         const location=useLocation();
         //  const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -159,7 +159,7 @@
             setShowModal(true);
         };
         const handleOpenManifestPrint = (manifestData) => {
-        navigate("/manifest",{state:{data:manifestData,from: location.pathname}});
+        navigate("/intmanifestpdf",{state:{data:manifestData,from: location.pathname}});
         };
         return (
             <>
@@ -405,4 +405,4 @@
         );
     };
 
-    export default ViewManifest;
+    export default ViewInternational;
