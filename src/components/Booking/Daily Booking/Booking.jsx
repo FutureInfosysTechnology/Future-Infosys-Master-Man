@@ -349,6 +349,190 @@ function Booking() {
             e.preventDefault();
         }
     };
+
+    const handleSearch = async (docket) => {
+        if (!formData.DocketNo) return Swal.fire("Warning", "Enter Docket No", "warning");
+        if (fecthed === formData.DocketNo) {
+            return Swal.fire("Warning", `Docket ${formData.DocketNo} already Fetched`, "warning");
+        }
+        try {
+            setSkipGstCalc(true);
+            const res = await getApi(`/Booking/getOrderByDocket?docketNo=${formData.DocketNo}`);
+            if (res.Success === 1 && res.OrderEntry) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: "Data Fecthed Successfuly",
+                    icon: 'success',
+                });
+
+                setFecthed(docket);
+                const data = res.OrderEntry;
+                console.log(data);
+
+                setFormData(
+                    prev => ({
+                        ...prev,
+                        Location_Code: data.Location_Code,
+                        DocketNo: data.DocketNo,
+                        BookDate: data.BookDate,
+                        Customer_Code: data.Customer_Code,
+                        ConsigneeName: data.Receiver_Code,
+                        ConsigneeAdd1: data.Consignee_Add1,
+                        ConsigneeAdd2: data.Consignee_Add2,
+                        ConsigneeState: data.Consignee_State,
+                        ConsigneePin: data.Consignee_Pin,
+                        Consignee_City: data.Consignee_City,
+                        ConsigneeMob: data.Consignee_Mob,
+                        ConsigneeEmail: data.Consignee_Email,
+                        ConsigneeGST: data.Consignee_GST,
+                        ConsigneeCountry: data.Consignee_Country,
+                        Mode_Code: data.Mode_Code,
+                        OriginCode: data.Origin_code,
+                        DestinationCode: data.Destination_Code,
+                        Origin_Zone: data.Origin_Zone,
+                        Dest_Zone: data.Dest_Zone,
+                        orgZoneName: data.Origin_Zone
+                            ? getCity.find(c => c.Zone_Code === data.Origin_Zone)?.Zone_Name || ""
+                            : "",
+
+                        destZoneName: data.Dest_Zone
+                            ? getCity.find(c => c.Zone_Code === data.Dest_Zone)?.Zone_Name || ""
+                            : "",
+
+                        DispatchDate: data.DispatchDate,
+                        DoxSpx: data.DoxSpx,
+                        RateType: data.RateType,
+                        QtyOrderEntry: data.Qty,
+                        ActualWt: data.ActualWt,
+                        VendorWt: data.VendorWt,
+                        VendorAmt: data.VendorAmt,
+                        VolumetricWt: data.VolumetricWt,
+                        ChargedWt: data.ChargedWt,
+                        RatePerkg: data.RatePerKg,
+                        Rate: data.Rate,
+                        FuelPer: data.FuelPer,
+                        FuelCharges: data.FuelCharges,        // ✅ matches API
+                        FovChrgs: data.Fov_Chrgs,             // ✅ underscore in API
+                        DocketChrgs: data.DocketChrgs,        // ✅ matches API
+                        ODAChrgs: data.ODA_Chrgs,             // ✅ underscore in API
+                        DeliveryChrgs: data.DeliveryChrgs,    // ✅ matches API
+                        PackingChrgs: data.PackingChrgs,      // ✅ matches API
+                        GreenChrgs: data.GreenChrgs,          // ✅ matches API
+                        HamaliChrgs: data.HamaliChrgs,        // ✅ matches API
+                        OtherCharges: data.OtherCharges,      // ✅ matches API
+                        InsuranceChrgs: data.InsuranceChrgs,  // ✅ matches API
+
+                        Charges1: data.Charges1,
+                        Charges2: data.Charges2,
+                        Charges3: data.Charges3,
+                        Charges4: data.Charges4,
+                        Charges5: data.Charges5,
+                        Charges6: data.Charges6,
+                        Charges7: data.Charges7,
+                        Charges8: data.Charges8,
+                        Charges9: data.Charges9,
+                        Charges10: data.Charges10,
+                        Charges11: data.Charges11,
+                        TotalAmt: data.TotalAmt,
+
+                        Train_Code: data.Train_Code,
+                        Flight_Code: data.Flight_Code,
+                        SkycType: data.KYC_Type,
+                        SkycNo: data.KYC_No,
+
+                        Status: data.Remark,
+                        Vendor_Code: data.Vendor_Code,
+                        VendorAwbNo: data.VendorAwbNo,
+                        WebAgent: "",
+                        ExptDateOfDelvDt: data.ExptDateOfDelvDt,
+                        Shipper_Name: data.Shipper_Code,
+                        ShipperAdd: data.ShipperAdd,
+                        ShipperAdd2: data.ShipperAdd2,
+                        ShipperAdd3: data.ShipperAdd3,
+                        ShipperPin: data.ShipperPin,
+                        ShipperPhone: data.ShipperPhone,
+                        ShipperCity: data.ShipperCity,
+                        Shipper_StateCode: data.Shipper_StateCode,
+                        Shipper_GstNo: data.Shipper_GstNo,
+                        ShipperEmail: data.ShipperEmail,
+                        UserName: data.UserName,
+                        InvoiceNo: data.InvoiceNo,
+                        InvValue: data.InvValue,
+                        EwayBill: data.EwayBill,
+                        InvDate: data.InvDate,
+                        BillParty: data.BillParty,
+                        BookMode: data.T_Flag,
+                        TotalGST: data.CGSTAMT + data.SGSTAMT + data.IGSTAMT,
+                        totalgstPer: data.CGSTPer + data.SGSTPer + data.IGSTPer,
+
+                    }));
+                setGstData(pre => ({
+                    ...pre,
+                    CGSTPer: data.CGSTPer,
+                    CGSTAMT: data.CGSTAMT,
+                    SGSTPer: data.SGSTPer,
+                    SGSTAMT: data.SGSTAMT,
+                    IGSTPer: data.IGSTPer,
+                    IGSTAMT: data.IGSTAMT,
+                    GSTPer: data.CGSTPer + data.SGSTPer + data.IGSTPer,
+                    TotalGST: data.CGSTAMT + data.SGSTAMT + data.IGSTAMT,
+                })
+                )
+                setRemarkData({
+                    Remark: data.Remark,
+                    MHWNo: data.MHWNo,
+                });
+                setSelectedOriginPinCode(data.Origin_Pincode);
+                setSelectedDestPinCode(data.Dest_PinCode);
+
+                const multiInvoice = res.MultiInvoice || [];
+                console.log("search", multiInvoice);
+                const formattedInvoices = multiInvoice.map(item => ({
+                    PoNo: item.PoNo || "",
+                    PoDate: new Date(item.PoDate) || "",
+                    InvoiceNo: item.InvNo || "",
+                    InvoiceValue: item.InvValue || "",
+                    Description: item.Description || "",
+                    Qty: item.Qty || 0,
+                    EWayBillNo: item.EWayBill || "",
+                    Remark: item.Remark || "",
+                    InvoiceImg: item.InvoiceImg || ""
+                }));
+                setInvoiceSubmittedData(formattedInvoices);
+                setSubmittedData(res.Volumetric);
+                setVendorSubmittedData(res.VendorVolumetric);
+                // ✅ allow GST calculation AFTER formData update
+                setTimeout(() => {
+                    setSkipGstCalc(false);
+                }, 1000);
+
+                // Qty: 0,
+                // DivideBy: "",
+                // VolmetricWt: 0,
+                // ActualWt: 0,
+                // ChargeWt: 0
+                //  Length:item.Length || 0,
+                //  Width:item.Width || 0,
+                //  Height:item.Height || 0,
+                //  Qty.item.Qty || 0,
+                //  item.DivideBy || "",
+                //  item.VolmetricWt || 0,
+                //  item.ActualWt || 0,
+                //  item.ChargeWt || 0,
+                // }))
+
+
+
+            } else {
+                Swal.fire("Not Found", res.message || "Booking not found.", "info");
+                setSkipGstCalc(false);
+            }
+        } catch (err) {
+            Swal.fire("Error", "Failed to fetch booking data.", "error");
+            setSkipGstCalc(false);
+        }
+    };
+
     useEffect(() => {
         console.log(selectedDestPinCode);
     }
@@ -387,18 +571,7 @@ function Booking() {
         setFormData({ ...formData, [field]: date });
     };
 
-    useEffect(() => {
-        if (formData.freight) {
-            const freight = parseFloat(formData.freight) || 0;
-            const fuelPer = parseFloat(formData.FuelPer) || 0;
-            const fuel = (freight * fuelPer) / 100;
-            console.log("fuel", fuel);
-            setFormData((prev) => ({
-                ...prev,
-                FuelCharges: fuel.toFixed(2), // optional, rounds to 2 decimals
-            }));
-        }
-    }, [formData.freight])
+
 
 
     const handleOriginPinCodeChange = async (e) => {
@@ -1268,10 +1441,6 @@ function Booking() {
         }
         setInputValue("");
     };
-    useEffect(() => {
-
-        console.log("input==0");
-    }, [formData.Customer_Code, formData.Mode_Code]);
 
     useEffect(() => {
         const handleMakeRate = async () => {
@@ -1310,7 +1479,7 @@ function Booking() {
             }
         };
         // 
-        if (formData.Customer_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode) {
+        if (formData.Customer_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode && !skipGstCalc) {
             handleMakeRate();
         }
     },
@@ -1390,7 +1559,7 @@ function Booking() {
         if (
             formData.Vendor_Code &&
             formData.Mode_Code &&
-            formData.VendorAmt
+            formData.VendorAmt && !skipGstCalc
         ) {
             calculateVenGstDetails();
         }
@@ -1448,7 +1617,7 @@ function Booking() {
         };
 
         // 
-        if (formData.Vendor_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode && formData.VendorWt) {
+        if (formData.Vendor_Code && formData.Mode_Code && formData.Dest_Zone && formData.OriginCode && formData.VendorWt && !skipGstCalc) {
             handleVenMakeRate();
         }
     },
@@ -1464,7 +1633,7 @@ function Booking() {
 
     useEffect(() => {
 
-        if (!formData.VendorAmt || formData.VendorAmt == 0) {
+        if (!formData.VendorAmt || formData.VendorAmt == 0 && !skipGstCalc) {
             setVendorShow({
                 Rate: 0,
                 Fuel_Charges: 0,
@@ -1490,87 +1659,89 @@ function Booking() {
                 TotalAmount: 0
             });
         }
-    }, [formData.VendorAmt])
+    }, [formData.VendorAmt]);
+
+    useEffect(() => {
+        if (!skipGstCalc) {
+            const fuelPer = parseFloat(formData.FuelPer) || 0;
+            const rate = parseFloat(formData.Rate) || 0;
+            const fuelCharges = (rate * fuelPer) / 100;
+            setFormData(prev => ({
+                ...prev,
+                FuelCharges: fuelCharges.toFixed(2)
+            }));
+        }
+
+    }, [formData.FuelPer, formData.Rate]);
+
+    useEffect(() => {
+        if (!skipGstCalc) {
+            const fovPer = parseFloat(formData.FovPer) || 0;
+            const rate = parseFloat(formData.Rate) || 0;
+
+            const fovCharges = (rate * fovPer) / 100;
+
+            setFormData(prev => ({
+                ...prev,
+                FovChrgs: fovCharges.toFixed(2)
+            }));
+        }
+    }, [formData.FovPer, formData.Rate]);
+
+
 
     useEffect(() => {
         const calculateGstDetails = async () => {
             try {
-                const {
-                    Customer_Code,
-                    Mode_Code,
-                    Rate,
-                    BookMode,
-                    FovChrgs,
-                    DocketChrgs,
-                    ODAChrgs,
-                    DeliveryChrgs,
-                    PackingChrgs,
-                    GreenChrgs,
-                    HamaliChrgs,
-                    OtherCharges,
-                    InsuranceChrgs
-                } = formData;
 
-                if (!Customer_Code || !Mode_Code || !Rate || !BookMode) return;
+
+                if (!formData.Customer_Code || !formData.Mode_Code || !formData.Rate || !formData.BookMode) return;
 
                 // Build request body
                 const body = {
-                    Customer_Code,
-                    Mode_Code,
-                    Rate,
-                    T_Flag: BookMode,
-                    FovChrgsInput: FovChrgs || 0,
-                    DocketChrgsInput: DocketChrgs || 0,
-                    OdaChrgsInput: ODAChrgs || 0,
-                    DeliveryChrgsInput: DeliveryChrgs || 0,
-                    PackingChrgsInput: PackingChrgs || 0,
-                    GreenChrgsInput: GreenChrgs || 0,
-                    HamaliChrgsInput: HamaliChrgs || 0,
-                    OtherChargesInput: OtherCharges || 0,
-                    InsuranceChrgsInput: InsuranceChrgs || 0,
-                    UseInput: UseInput,
+                    Customer_Code: formData.Customer_Code,
+                    Mode_Code: formData.Mode_Code,
+                    Rate: String(formData.Rate),
+                    T_Flag: formData.BookMode,
                 };
 
                 const response = await postApi(`/Booking/calculateGST`, body);
 
-                if (response?.status === 0) {
-                    const gst = response.Data;
-                    console.log("✅ GST API Response:", gst);
-                    setUseInput(gst?.Success);
-                    console.log(`input==${gst?.Success}`);
-                    setGstData({
-                        CGSTAMT: gst.CGSTAMT,
-                        SGSTAMT: gst.SGSTAMT,
-                        IGSTAMT: gst.IGSTAMT,
-                        TotalGST: gst.TotalGST,
-                        CGSTPer: gst.CGSTPer,
-                        SGSTPer: gst.SGSTPer,
-                        IGSTPer: gst.IGSTPer,
-                        GSTPer: gst.CGSTPer + gst.SGSTPer + gst.IGSTPer,
-                    });
+                const gst = response.data;
+                console.log("✅ GST API Response:", gst);
+                console.log(`input==${gst?.Success}`);
+                setGstData({
+                    CGSTAMT: gst.CGSTAMT,
+                    SGSTAMT: gst.SGSTAMT,
+                    IGSTAMT: gst.IGSTAMT,
+                    TotalGST: gst.TotalGST,
+                    CGSTPer: gst.CGSTPer,
+                    SGSTPer: gst.SGSTPer,
+                    IGSTPer: gst.IGSTPer,
+                    GSTPer: gst.CGSTPer + gst.SGSTPer + gst.IGSTPer,
+                });
 
-                    // setIsGstCalculated(true);
-                    setFormData((prev) => ({
-                        ...prev,
-                        FuelCharges: gst.Fuel_Charges,
-                        FuelPer: gst.CustomerFuel,
-                        CGST: gst.CGSTAMT,
-                        SGST: gst.SGSTAMT,
-                        IGST: gst.IGSTAMT,
-                        TotalGST: gst.TotalGST,
-                        totalgstPer: gst.CGSTPer + gst.SGSTPer + gst.IGSTPer,
-                        TotalAmt: gst.TotalAmt,
-                        FovChrgs: gst.Fov_Charges,
-                        FovPer: gst.Fov_Per || 0,
-                        DocketChrgs: gst.Docket_Charges,
-                        DeliveryChrgs: gst.Delivery_Charges,
-                        PackingChrgs: gst.Packing_Charges,
-                        GreenChrgs: gst.Green_Charges,
-                        HamaliChrgs: gst.Hamali_Charges,
-                        OtherCharges: gst.Other_Charges,
-                        InsuranceChrgs: gst.Insurance_Charges,
-                    }));
-                }
+                // setIsGstCalculated(true);
+                setFormData((prev) => ({
+                    ...prev,
+                    FuelCharges: gst.Fuel_Charges,
+                    FuelPer: gst.CustomerFuel,
+                    CGST: gst.CGSTAMT,
+                    SGST: gst.SGSTAMT,
+                    IGST: gst.IGSTAMT,
+                    TotalGST: gst.TotalGST,
+                    totalgstPer: gst.CGSTPer + gst.SGSTPer + gst.IGSTPer,
+                    TotalAmt: gst.TotalAmt,
+                    FovChrgs: gst.Fov_Charges,
+                    FovPer: gst.Fov_Per || 0,
+                    DocketChrgs: gst.Docket_Charges,
+                    DeliveryChrgs: gst.Delivery_Charges,
+                    PackingChrgs: gst.Packing_Charges,
+                    GreenChrgs: gst.Green_Charges,
+                    HamaliChrgs: gst.Hamali_Charges,
+                    OtherCharges: gst.Other_Charges,
+                    InsuranceChrgs: gst.Insurance_Charges,
+                }));
             } catch (error) {
                 console.error("❌ Error in GST API:", error);
             }
@@ -1579,7 +1750,6 @@ function Booking() {
         // Run only when essential fields change
         if (
             !skipGstCalc &&
-            !isGstCalculated &&
             formData.Customer_Code &&
             formData.Mode_Code &&
             formData.Rate &&
@@ -1592,6 +1762,75 @@ function Booking() {
         formData.Mode_Code,
         formData.Rate,
         formData.BookMode,
+    ]);
+    useEffect(() => {
+        const rate = Number(formData.Rate) || 0;
+        if (!rate || skipGstCalc) return;
+
+        // Charges (fallback to 0)
+        const fuel = Number(formData.FuelCharges) || 0;
+        const fov = Number(formData.FovChrgs) || 0;
+        const docket = Number(formData.DocketChrgs) || 0;
+        const oda = Number(formData.ODAChrgs) || 0;
+        const delivery = Number(formData.DeliveryChrgs) || 0;
+        const packing = Number(formData.PackingChrgs) || 0;
+        const green = Number(formData.GreenChrgs) || 0;
+        const hamali = Number(formData.HamaliChrgs) || 0;
+        const other = Number(formData.OtherCharges) || 0;
+        const insurance = Number(formData.InsuranceChrgs) || 0;
+
+        // GST %
+        const CGSTPer = Number(gstData.CGSTPer) || 0;
+        const SGSTPer = Number(gstData.SGSTPer) || 0;
+        const IGSTPer = Number(gstData.IGSTPer) || 0;
+
+        // Subtotal
+        const subtotal =
+            rate +
+            fuel +
+            fov +
+            docket +
+            oda +
+            delivery +
+            packing +
+            green +
+            hamali +
+            other +
+            insurance;
+
+        // GST Amounts
+        const CGSTAMT = (subtotal * CGSTPer) / 100;
+        const SGSTAMT = (subtotal * SGSTPer) / 100;
+        const IGSTAMT = (subtotal * IGSTPer) / 100;
+
+        const totalGST = CGSTAMT + SGSTAMT + IGSTAMT;
+        const totalAmt = subtotal + totalGST;
+
+        // Update states
+        setGstData({
+            CGSTPer,
+            CGSTAMT,
+            SGSTPer,
+            SGSTAMT,
+            IGSTPer,
+            IGSTAMT,
+            GSTPer: CGSTPer + SGSTPer + IGSTPer,
+            TotalGST: totalGST
+        });
+
+        setFormData(prev => ({
+            ...prev,
+            Subtotal: subtotal,
+            CGST: CGSTAMT,
+            SGST: SGSTAMT,
+            IGST: IGSTAMT,
+            TotalGST: totalGST,
+            TotalAmt: totalAmt
+        }));
+
+    }, [
+        formData.Rate,
+        formData.FuelCharges,
         formData.FovChrgs,
         formData.DocketChrgs,
         formData.ODAChrgs,
@@ -1601,8 +1840,8 @@ function Booking() {
         formData.HamaliChrgs,
         formData.OtherCharges,
         formData.InsuranceChrgs,
-        skipGstCalc
     ]);
+
     useEffect(() => {
         const getVolum = async (Customer_Code, Mode_Code) => {
             try {
@@ -1629,7 +1868,7 @@ function Booking() {
                 console.error("❌ Error in Volumetric:", error);
             }
         };
-        if (formData.Customer_Code && formData.Mode_Code) {
+        if (formData.Customer_Code && formData.Mode_Code && !skipGstCalc) {
             getVolum(formData.Customer_Code, formData.Mode_Code);
         }
     }, [formData.Customer_Code, formData.Mode_Code]);
@@ -1961,7 +2200,7 @@ function Booking() {
             BookMode: formData.BookMode,
             T_Flag: formData.BookMode,
             UserName: JSON.parse(localStorage.getItem("Login"))?.Employee_Name,
-            
+
             // CONSIGNEE
             Receiver_Code: formData.ConsigneeName,
             Consignee_Name: allReceiverOption.find(x => x.value === formData.ConsigneeName)?.label,
@@ -2202,15 +2441,15 @@ function Booking() {
             DoxSpx: formData.DoxSpx,
             DispatchDate: formatDate(formData.DispatchDate),
             Rate: formData.Rate,
-            RatePerkg: formData.RatePerkg,
+            RatePerKg: formData.RatePerkg,
             ActualWt: formData.ActualWt,
             ChargedWt: formData.ChargedWt,
             VolumetricWt: formData.VolumetricWt,
             FuelPer: formData.FuelPer,
             FuelCharges: formData.FuelCharges,
-            FovChrgs: formData.FovChrgs,
+            Fov_Chrgs: formData.FovChrgs,
             DocketChrgs: formData.DocketChrgs,
-            ODAChrgs: formData.ODAChrgs,
+            ODA_Chrgs: formData.ODAChrgs,
             DeliveryChrgs: formData.DeliveryChrgs,
             PackingChrgs: formData.PackingChrgs,
             GreenChrgs: formData.GreenChrgs,
@@ -2253,8 +2492,6 @@ function Booking() {
             // KYC / FLIGHT / TRAIN
             KYC_Type: formData.SkycType,
             KYC_No: formData.SkycNo,
-            C_KYC_Type: formData.CkycType,
-            C_KYC_No: formData.CkycNo,
             Flight_Code: formData.Flight_Code,
             Train_Code: formData.Train_Code,
 
@@ -2306,183 +2543,7 @@ function Booking() {
     };
 
 
-    const handleSearch = async (docket) => {
-        if (!formData.DocketNo) return Swal.fire("Warning", "Enter Docket No", "warning");
-        if (fecthed === formData.DocketNo) {
-            return Swal.fire("Warning", `Docket ${formData.DocketNo} already Fetched`, "warning");
-        }
-        try {
-            const res = await getApi(`/Booking/getOrderByDocket?docketNo=${formData.DocketNo}`);
-            if (res.Success === 1 && res.OrderEntry) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: "Data Fecthed Successfuly",
-                    icon: 'success',
-                });
-                setSkipGstCalc(true);
-                setFecthed(docket);
-                const data = res.OrderEntry;
-                console.log(data);
 
-                setFormData(
-                    prev => ({
-                        ...prev,
-                        Location_Code: data.Location_Code,
-                        DocketNo: data.DocketNo,
-                        BookDate: data.BookDate,
-                        Customer_Code: data.Customer_Code,
-                        ConsigneeName: data.Receiver_Code,
-                        ConsigneeAdd1: data.Consignee_Add1,
-                        ConsigneeAdd2: data.Consignee_Add2,
-                        ConsigneeState: data.Consignee_State,
-                        ConsigneePin: data.Consignee_Pin,
-                        Consignee_City: data.Consignee_City,
-                        ConsigneeMob: data.Consignee_Mob,
-                        ConsigneeEmail: data.Consignee_Email,
-                        ConsigneeGST: data.Consignee_GST,
-                        ConsigneeCountry: data.Consignee_Country,
-                        Mode_Code: data.Mode_Code,
-                        OriginCode: data.Origin_code,
-                        DestinationCode: data.Destination_Code,
-                        Origin_Zone: data.Origin_Zone,
-                        Dest_Zone: data.Dest_Zone,
-                        orgZoneName: data.Origin_Zone
-                            ? getCity.find(c => c.Zone_Code === data.Origin_Zone)?.Zone_Name || ""
-                            : "",
-
-                        destZoneName: data.Dest_Zone
-                            ? getCity.find(c => c.Zone_Code === data.Dest_Zone)?.Zone_Name || ""
-                            : "",
-
-                        DispatchDate: data.DispatchDate,
-                        DoxSpx: data.DoxSpx,
-                        RateType: data.RateType,
-                        QtyOrderEntry: data.Qty,
-                        ActualWt: data.ActualWt,
-                        VendorWt: data.VendorWt,
-                        VendorAmt: data.VendorAmt,
-                        VolumetricWt: data.VolumetricWt,
-                        ChargedWt: data.ChargedWt,
-                        RatePerkg: data.RatePerKg,
-                        Rate: data.Rate,
-                        FuelPer: data.FuelPer,
-                        FuelCharges: data.FuelCharges,        // ✅ matches API
-                        FovChrgs: data.Fov_Chrgs,             // ✅ underscore in API
-                        DocketChrgs: data.DocketChrgs,        // ✅ matches API
-                        ODAChrgs: data.ODA_Chrgs,             // ✅ underscore in API
-                        DeliveryChrgs: data.DeliveryChrgs,    // ✅ matches API
-                        PackingChrgs: data.PackingChrgs,      // ✅ matches API
-                        GreenChrgs: data.GreenChrgs,          // ✅ matches API
-                        HamaliChrgs: data.HamaliChrgs,        // ✅ matches API
-                        OtherCharges: data.OtherCharges,      // ✅ matches API
-                        InsuranceChrgs: data.InsuranceChrgs,  // ✅ matches API
-
-                        Charges1: data.Charges1,
-                        Charges2: data.Charges2,
-                        Charges3: data.Charges3,
-                        Charges4: data.Charges4,
-                        Charges5: data.Charges5,
-                        Charges6: data.Charges6,
-                        Charges7: data.Charges7,
-                        Charges8: data.Charges8,
-                        Charges9: data.Charges9,
-                        Charges10: data.Charges10,
-                        Charges11: data.Charges11,
-                        TotalAmt: data.TotalAmt,
-
-                        Train_Code: data.Train_Code,
-                        Flight_Code: data.Flight_Code,
-                        SkycType: data.KYC_Type,
-                        SkycNo: data.KYC_No,
-
-                        Status: data.Remark,
-                        Vendor_Code: data.Vendor_Code,
-                        VendorAwbNo: data.VendorAwbNo,
-                        WebAgent: "",
-                        ExptDateOfDelvDt: data.ExptDateOfDelvDt,
-                        Shipper_Name: data.Shipper_Code,
-                        ShipperAdd: data.ShipperAdd,
-                        ShipperAdd2: data.ShipperAdd2,
-                        ShipperAdd3: data.ShipperAdd3,
-                        ShipperPin: data.ShipperPin,
-                        ShipperPhone: data.ShipperPhone,
-                        ShipperCity: data.ShipperCity,
-                        Shipper_StateCode: data.Shipper_StateCode,
-                        Shipper_GstNo: data.Shipper_GstNo,
-                        ShipperEmail: data.ShipperEmail,
-                        UserName: data.UserName,
-                        InvoiceNo: data.InvoiceNo,
-                        InvValue: data.InvValue,
-                        EwayBill: data.EwayBill,
-                        InvDate: data.InvDate,
-                        BillParty: data.BillParty,
-                        BookMode: data.T_Flag,
-                        TotalGST: data.CGSTAMT + data.SGSTAMT + data.IGSTAMT,
-                        totalgstPer: data.CGSTPer + data.SGSTPer + data.IGSTPer,
-
-                    }));
-                setGstData(pre => ({
-                    ...pre,
-                    CGSTPer: data.CGSTPer,
-                    CGSTAMT: data.CGSTAMT,
-                    SGSTPer: data.SGSTPer,
-                    SGSTAMT: data.SGSTAMT,
-                    IGSTPer: data.IGSTPer,
-                    IGSTAMT: data.IGSTAMT,
-                    GSTPer: data.CGSTPer + data.SGSTPer + data.IGSTPer,
-                    TotalGST: data.CGSTAMT + data.SGSTAMT + data.IGSTAMT,
-                })
-                )
-                setRemarkData({
-                    Remark: data.Remark,
-                    MHWNo: data.MHWNo,
-                });
-                setSelectedOriginPinCode(data.Origin_Pincode);
-                setSelectedDestPinCode(data.Dest_PinCode);
-
-                const multiInvoice = res.MultiInvoice || [];
-                console.log("search", multiInvoice);
-                const formattedInvoices = multiInvoice.map(item => ({
-                    PoNo: item.PoNo || "",
-                    PoDate: new Date(item.PoDate) || "",
-                    InvoiceNo: item.InvNo || "",
-                    InvoiceValue: item.InvValue || "",
-                    Description: item.Description || "",
-                    Qty: item.Qty || 0,
-                    EWayBillNo: item.EWayBill || "",
-                    Remark: item.Remark || "",
-                    InvoiceImg: item.InvoiceImg || ""
-                }));
-                setInvoiceSubmittedData(formattedInvoices);
-                setSubmittedData(res.Volumetric);
-                setVendorSubmittedData(res.VendorVolumetric)
-
-
-
-                // Qty: 0,
-                // DivideBy: "",
-                // VolmetricWt: 0,
-                // ActualWt: 0,
-                // ChargeWt: 0
-                //  Length:item.Length || 0,
-                //  Width:item.Width || 0,
-                //  Height:item.Height || 0,
-                //  Qty.item.Qty || 0,
-                //  item.DivideBy || "",
-                //  item.VolmetricWt || 0,
-                //  item.ActualWt || 0,
-                //  item.ChargeWt || 0,
-                // }))
-
-
-
-            } else {
-                Swal.fire("Not Found", res.message || "Booking not found.", "info");
-            }
-        } catch (err) {
-            Swal.fire("Error", "Failed to fetch booking data.", "error");
-        }
-    };
 
 
     const handleDelete = async (docketNo) => {
@@ -3410,7 +3471,7 @@ function Booking() {
                                             />
                                         </div>
 
-                                       
+
 
                                         <div className="input-field1">
                                             <label>Mobile No</label>
@@ -3686,38 +3747,65 @@ function Booking() {
 
                                         {isFovChecked && (
                                             <div className="input-field1">
-                                                <label htmlFor="">FOV Charges</label>
-                                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                <label>FOV Charges</label>
+
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    {/* FOV Charges */}
                                                     <input
                                                         type="tel"
+                                                        placeholder="FOV Charges"
                                                         style={{
                                                             width: "70%",
                                                             borderRight: "1px solid #ccc",
                                                             borderRadius: "4px 0 0 4px",
                                                         }}
-                                                        placeholder="FOV Charges"
                                                         value={formData.FovChrgs}
-                                                        onChange={(e) => setFormData({ ...formData, FovChrgs: e.target.value })}
+                                                        onChange={(e) =>
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                FovChrgs: e.target.value.replace(/[^0-9.]/g, "")
+                                                            }))
+                                                        }
                                                     />
-                                                    <input
-                                                        type="tel"
-                                                        placeholder="%"
-                                                        style={{
-                                                            width: "30%",
-                                                            borderLeft: "none",
-                                                            borderRadius: "0 4px 4px 0",
-                                                            padding: "5px",
-                                                            textAlign: "center",
-                                                        }}
-                                                        value={formData.FovPer !== "" ? `${formData.FovPer}%` : ""}
-                                                        onChange={(e) => {
-                                                            // ✅ Strip non-numeric chars before saving
-                                                            const val = e.target.value.replace(/[^0-9.]/g, "");
-                                                            setFormData({ ...formData, FovPer: val });
-                                                        }}
-                                                    />
+
+                                                    {/* FOV % */}
+                                                    <div style={{ position: "relative", width: "45%" }}>
+                                                        <input
+                                                            type="tel"
+                                                            placeholder="0"
+                                                            style={{
+                                                                width: "100%",
+                                                                borderLeft: "none",
+                                                                borderRadius: "0 4px 4px 0",
+                                                                padding: "0px",
+                                                                paddingRight: "18px",
+                                                                textAlign: "center",
+                                                            }}
+                                                            value={formData.FovPer}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                                setFormData(prev => ({ ...prev, FovPer: val }));
+                                                            }}
+                                                        />
+
+                                                        {/* % symbol */}
+                                                        <span
+                                                            style={{
+                                                                position: "absolute",
+                                                                right: "6px",
+                                                                top: "50%",
+                                                                transform: "translateY(-50%)",
+                                                                pointerEvents: "none",
+                                                                color: "#666",
+                                                                fontSize: "12px",
+                                                            }}
+                                                        >
+                                                            %
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
+
                                         )}
 
                                         {isDocketChecked && (
@@ -3786,7 +3874,7 @@ function Booking() {
                                                 <input
                                                     type="tel"
                                                     placeholder="Other Charges"
-                                                    value={formData.OtherCharges}
+                                                    value={formData.OtherCharges || 0}
                                                     onChange={(e) => setFormData({ ...formData, OtherCharges: e.target.value })}
                                                 />
                                             </div>
@@ -3817,9 +3905,12 @@ function Booking() {
                                         )}
 
                                         {isFuelChecked && (
+
                                             <div className="input-field1">
                                                 <label>Fuel Charges</label>
-                                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    {/* Fuel Charges */}
                                                     <input
                                                         type="tel"
                                                         placeholder="Fuel Ch."
@@ -3830,28 +3921,51 @@ function Booking() {
                                                         }}
                                                         value={formData.FuelCharges}
                                                         onChange={(e) =>
-                                                            setFormData({ ...formData, FuelCharges: e.target.value })
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                FuelCharges: e.target.value.replace(/[^0-9.]/g, "")
+                                                            }))
                                                         }
                                                     />
-                                                    <input
-                                                        type="tel"
-                                                        placeholder="%"
-                                                        style={{
-                                                            width: "30%",
-                                                            borderLeft: "none",
-                                                            borderRadius: "0 4px 4px 0",
-                                                            padding: "5px",
-                                                            textAlign: "center",
-                                                        }}
-                                                        value={formData.FuelPer !== "" ? `${formData.FuelPer}%` : ""}
-                                                        onChange={(e) => {
-                                                            // ✅ Strip non-numeric chars before saving
-                                                            const val = e.target.value.replace(/[^0-9.]/g, "");
-                                                            setFormData({ ...formData, FuelPer: val });
-                                                        }}
-                                                    />
+
+                                                    {/* Fuel % */}
+                                                    <div style={{ position: "relative", width: "45%" }}>
+                                                        <input
+                                                            type="tel"
+                                                            placeholder="0"
+                                                            style={{
+                                                                width: "100%",
+                                                                borderLeft: "none",
+                                                                borderRadius: "0 4px 4px 0",
+                                                                padding: "0px",
+                                                                paddingRight: "18px",
+                                                                textAlign: "center",
+                                                            }}
+                                                            value={formData.FuelPer}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                                                setFormData(prev => ({ ...prev, FuelPer: val }));
+                                                            }}
+                                                        />
+
+                                                        {/* % SYMBOL */}
+                                                        <span
+                                                            style={{
+                                                                position: "absolute",
+                                                                right: "6px",
+                                                                top: "50%",
+                                                                transform: "translateY(-50%)",
+                                                                pointerEvents: "none",
+                                                                color: "#666",
+                                                                fontSize: "12px",
+                                                            }}
+                                                        >
+                                                            %
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
+
 
                                         )}
 
@@ -4885,11 +4999,11 @@ function Booking() {
                                                 </td>
                                                 <td>
                                                     <select name="Currency" id="Currency"
-                                                     value={invoiceData.Currency} onChange={handleInvoiceDetailChange}>
+                                                        value={invoiceData.Currency} onChange={handleInvoiceDetailChange}>
                                                         <option value="INR">INR</option>
                                                         <option value="USD">USD</option>
                                                         <option value="EURO">EURO</option>
-                                                     </select>
+                                                    </select>
                                                 </td>
                                                 <td>
                                                     <input type="tel" placeholder="Invoice No" name="InvoiceNo"
@@ -4989,7 +5103,7 @@ function Booking() {
                                                                     InvoiceValue: 0,
                                                                     Description: "",
                                                                     Qty: 0,
-                                                                    Currency:"",
+                                                                    Currency: "",
                                                                     EwayBillDate: getTodayDate(),
                                                                     EWayBillNo: "",
                                                                     Remark: "",
