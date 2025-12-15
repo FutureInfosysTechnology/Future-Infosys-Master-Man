@@ -24,6 +24,7 @@ function BranchAdmin() {
         ID: "",
         UserName: "",
         Employee_Code: "",
+        Customer_Code: "",
         Password: "",
         City_Code: "",
         UserType: "Admin",
@@ -174,6 +175,7 @@ function BranchAdmin() {
                     ID: "",
                     UserName: "",
                     Employee_Code: "",
+                    Customer_Code: "",
                     Password: "",
                     City_Code: "",
                     UserType: "Admin",
@@ -300,6 +302,7 @@ function BranchAdmin() {
             ID: "",
             UserName: "",
             Employee_Code: "",
+            Customer_Code: "",
             Password: "",
             City_Code: "",
             UserType: "Admin",
@@ -399,6 +402,7 @@ function BranchAdmin() {
         const requestBody = {
             UserName: formData.UserName || "",
             Employee_Code: formData.Employee_Code || "",
+            Customer_Code: formData.Customer_Code || "",
             Password: formData.Password || "",
             City_Code: formData.City_Code || "",
             UserType: formData.UserType || "",
@@ -519,6 +523,7 @@ function BranchAdmin() {
             ID: formData.ID,
             UserName: formData.UserName || "",
             Employee_Code: formData.Employee_Code || "",
+            Customer_Code: formData.Customer_Code || "",
             Password: formData.Password || "",
             City_Code: formData.City_Code || "",
             UserType: formData.UserType || "",
@@ -1918,7 +1923,7 @@ function BranchAdmin() {
                                     </thead>
                                     <tbody className='table-body'>
                                         {
-                                            getData.filter(data=>data.UserType==="Admin").map((data, index) => (
+                                            getData.filter(data=>data?.UserType==="Admin").map((data, index) => (
                                                 < tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                                     <td>
                                                         <PiDotsThreeOutlineVerticalFill

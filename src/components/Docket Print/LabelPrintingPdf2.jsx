@@ -78,7 +78,7 @@ function LabelPrintingPdf2() {
 
             // Capture one container as a high-quality image
             const canvas = await html2canvas(element, {
-                scale: 3,
+                scale: 6,
                 useCORS: true,
                 backgroundColor: "#ffffff",
                 scrollY: -window.scrollY,
@@ -192,8 +192,8 @@ function LabelPrintingPdf2() {
                                             Array.from({ length: docket.Qty }, (_, i) => (
                                                 <div className='download'>
                                                     <div className="container" style={{ border: "1px solid black", padding: "0px", width: "450px", display: "flex", flexDirection: "column" }}>
-                                                        <div style={{ display: "flex", width: "100%", padding: "10px" }}>
-                                                            <img src={getBranch?.Branch_Logo} style={{ width: "100%", height: "70px" }} />
+                                                        <div style={{ display: "flex", width: "100%", padding: "10px", justifyContent: "center" }}>
+                                                            <img src={getBranch?.Branch_Logo} style={{ width: "70%", height: "120px" }} />
                                                         </div>
                                                         <div style={{ display: "flex", width: "100%", padding: "10px", justifyContent: "space-between", color: "gray" }}>
                                                             <div style={{ fontSize: "20px", color: "black", fontWeight: "bold" }}>Deliver To</div>
@@ -297,13 +297,13 @@ function LabelPrintingPdf2() {
                                                             <div
                                                                 className="p-2"
                                                                 style={{
-                                                                    
+
                                                                     display: "flex",
-                                                                    justifyContent:"center",
-                                                                    alignItems:"center",
+                                                                    justifyContent: "center",
+                                                                    alignItems: "center",
                                                                     width: "50%",
-                                                                    padding:"20px",
-                                                                    minHeight:"160px",
+                                                                    padding: "20px",
+                                                                    minHeight: "160px",
                                                                     lineHeight: "1.1", // 🔹 reduce line spacing
 
                                                                 }}
@@ -314,21 +314,33 @@ function LabelPrintingPdf2() {
                                                                     flexDirection: "column",
                                                                     fontSize: "10px",
                                                                     alignItems: "center",
-                                                                    padding:"10px",
+                                                                    padding: "10px",
                                                                     transform: "rotate(90deg)",   // ROTATION HERE
                                                                     transformOrigin: "center"     // keeps it centered
                                                                 }}>
                                                                     <div style={{ fontSize: "13px", fontWeight: "bold" }}>PARCEL NUMBER</div>
 
-                                                                    <BarCode
-                                                                        value={docket?.vendorAwbno}
-                                                                        format='CODE128'
-                                                                        background='#fff'
-                                                                        lineColor='#000'
-                                                                        width={1.7}
-                                                                        height={80}
-                                                                        displayValue={true}
-                                                                    />
+                                                                    <div
+                                                                        style={{
+                                                                            width: "180px",      // 🔒 fixed width
+                                                                            height: "70px",      // 🔒 fixed height
+                                                                            overflow: "hidden",  // 🔒 prevent expansion
+                                                                            display: "flex",
+                                                                            alignItems: "center",
+                                                                            justifyContent: "center",
+                                                                        }}
+                                                                    >
+                                                                        <BarCode
+                                                                            value={docket?.vendorAwbno || ""}
+                                                                            format="CODE128"
+                                                                            width={1}          // 🔽 thinner bars for long numbers
+                                                                            height={60}          // 🔒 fixed height
+                                                                            displayValue={false} // 🔥 remove text (saves space)
+                                                                            background="#fff"
+                                                                            lineColor="#000"
+                                                                        />
+                                                                    </div>
+
                                                                 </div>
 
                                                             </div>

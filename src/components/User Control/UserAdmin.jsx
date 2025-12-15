@@ -15,12 +15,14 @@ function UserAdmin() {
     const [eyeDis, setEyeDis] = useState(false);
     const [getData, setGetData] = useState([]);
     const [getEmployee, setGetEmployee] = useState([]);
+    const [getCustomerdata, setgetCustomerdata] = useState([]);
     const [selectedOption, setSelectedOption] = useState("");
     const [selectedOperation, setSelectedOperation] = useState("");
     const [formData, setFormData] = useState({
         ID: "",
         UserName: "",
         Employee_Code: "",
+        Customer_Code: "",
         Password: "",
         City_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
         UserType: "User",
@@ -100,6 +102,14 @@ function UserAdmin() {
             console.error('Fetch Error:', err);
         }
     };
+    const fetchCusData = async () => {
+        try {
+            const response = await getApi('/Master/getCustomerdata');
+            setgetCustomerdata(Array.isArray(response.Data) ? response.Data : []);
+        } catch (err) {
+            console.error('Fetch Error:', err);
+        }
+    };
     const fechUserData = async () => {
         try {
             const response = await getApi('/Master/GetOperationManagement');
@@ -111,6 +121,7 @@ function UserAdmin() {
 
     useEffect(() => {
         fetchEmpData();
+        fetchCusData();
         fechUserData();
     }, []);
 
@@ -133,9 +144,10 @@ function UserAdmin() {
                     ID: "",
                     UserName: "",
                     Employee_Code: "",
+                    Customer_Code: "",
                     Password: "",
                     City_Code: "",
-                    UserType: "Admin",
+                    UserType: "User",
                     DocketBooking: 0,
                     CoshTopayBooking: 0,
                     Smartbooking: 0,
@@ -225,6 +237,7 @@ function UserAdmin() {
             ID: "",
             UserName: "",
             Employee_Code: "",
+            Customer_Code: "",
             Password: "",
             City_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             UserType: "User",
@@ -291,6 +304,7 @@ function UserAdmin() {
         const requestBody = {
             UserName: formData.UserName || "",
             Employee_Code: formData.Employee_Code || "",
+            Customer_Code:formData.Customer_Code || "",
             Password: formData.Password || "",
             City_Code: formData.City_Code || "",
             UserType: formData.UserType || "",
@@ -366,6 +380,7 @@ function UserAdmin() {
             ID: formData.ID,
             UserName: formData.UserName || "",
             Employee_Code: formData.Employee_Code || "",
+            Customer_Code:formData.Customer_Code || "",
             Password: formData.Password || "",
             City_Code: formData.City_Code || "",
             UserType: formData.UserType || "",
@@ -469,6 +484,42 @@ function UserAdmin() {
                                         {eye ? <ImEye /> : <ImEyeBlocked />}
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="input-field1">
+                                <label htmlFor="">Custometr Name</label>
+                                <Select
+                                    options={getCustomerdata.map(emp => ({
+                                        value: emp.Customer_Code,   // adjust keys from your API
+                                        label: emp.Customer_Name
+                                    }))}
+                                    value={
+                                        formData.Customer_Code
+                                            ? { value: formData.Customer_Code, label: getCustomerdata.find(c => c.Customer_Code === formData.Customer_Code)?.Customer_Name || "" }
+                                            : null
+                                    }
+                                    onChange={(selectedOption) =>
+                                        setFormData({
+                                            ...formData,
+                                            Customer_Code: selectedOption ? selectedOption.value : ""
+                                        })
+                                    }
+                                    placeholder="Select Customer"
+                                    isSearchable
+                                    classNamePrefix="blue-selectbooking"
+                                    className="blue-selectbooking"
+                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+                                    styles={{
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }),
+                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                    }}
+                                />
+
                             </div>
 
                             <div className="input-field1">
@@ -1295,11 +1346,12 @@ function UserAdmin() {
                                             <th scope="col">User Name</th>
                                             <th scope="col">Password</th>
                                             <th scope="col">Employee Name</th>
+                                            <th scope="col">Customer Name</th>
                                         </tr>
                                     </thead>
                                     <tbody className='table-body'>
                                         {
-                                            getData.filter(data => data.UserType === "User").map((data, index) => (
+                                            getData.filter(data => data?.UserType === "User").map((data, index) => (
                                                 < tr key={index} style={{ fontSize: "12px", position: "relative" }}>
                                                     <td>
                                                         <PiDotsThreeOutlineVerticalFill
@@ -1330,6 +1382,7 @@ function UserAdmin() {
                                                                         ID: data?.ID,
                                                                         UserName: data?.UserName || "",
                                                                         Employee_Code: data?.Employee_Code || "",
+                                                                        Customer_Code: data?.Customer_Code || "",
                                                                         Password: data?.Password || "",
                                                                         City_Code: data?.City_Code || JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
                                                                         UserType: data?.UserType || "User",
@@ -1528,6 +1581,7 @@ function UserAdmin() {
                                                     <td>{data?.UserName}</td>
                                                     <td>{data?.Password}</td>
                                                     <td>{data?.Employee_Name}</td>
+                                                    <td>{data?.Customer_Name}</td>
 
                                                 </tr>))}
                                     </tbody>
