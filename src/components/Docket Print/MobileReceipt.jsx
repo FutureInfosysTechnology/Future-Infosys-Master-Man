@@ -75,54 +75,58 @@ function MobileReceipt() {
     };
 
 
-    const handleDownloadPDF = async () => {
-        const docketElements = document.querySelectorAll(".docket");
-        if (docketElements.length === 0) return;
+  const handleDownloadPDF = async () => {
+  const docketElements = document.querySelectorAll(".docket");
+  if (!docketElements.length) return;
 
-        const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
 
-        for (let i = 0; i < docketElements.length; i++) {
-            const element = docketElements[i];
+  const margin = 5;
 
-            const canvas = await html2canvas(element, {
-                scale: 4,
-                useCORS: true,
-                backgroundColor: "#ffffff",
-                scrollY: -window.scrollY
-                // ❌ removed windowWidth — this was breaking right border
-            });
+  for (let i = 0; i < docketElements.length; i++) {
+    const element = docketElements[i];
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const canvas = await html2canvas(element, {
+      scale: 4,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scrollX: 0,
+      scrollY: 0,
+    });
 
-            const pxToMm = (px) => (px * 25.4) / 96;
-            const imgWidthMm = pxToMm(canvas.width);
-            const imgHeightMm = pxToMm(canvas.height);
-            const imgRatio = imgWidthMm / imgHeightMm;
+    const imgData = canvas.toDataURL("image/jpeg", 0.85);
 
-            const leftRightPadding = 0;
-            const topPadding = 10;
+    // px → mm
+    const imgWidthMm = (canvas.width * 25.4) / 96;
+    const imgHeightMm = (canvas.height * 25.4) / 96;
 
-            let renderWidth = pdfWidth - leftRightPadding * 2;
-            let renderHeight = renderWidth / imgRatio;
-            let xOffset = leftRightPadding;
-            let yOffset = (pdfHeight - renderHeight) / 2 + topPadding;
+    const maxWidth = pdfWidth - margin * 2;
+    const maxHeight = pdfHeight - margin * 2;
 
-            if (yOffset + renderHeight > pdfHeight) {
-                yOffset = topPadding;
-                renderHeight = pdfHeight - topPadding * 2;
-                renderWidth = renderHeight * imgRatio;
-                xOffset = (pdfWidth - renderWidth) / 2;
-            }
+    const scale = Math.min(
+      maxWidth / imgWidthMm,
+      maxHeight / imgHeightMm
+    );
 
-            pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
+    const renderWidth = imgWidthMm * scale;
+    const renderHeight = imgHeightMm * scale;
 
-            if (i < docketElements.length - 1) pdf.addPage();
-        }
+    // ✅ TRUE CENTER
+    const x = (pdfWidth - renderWidth) / 2;
+    const y = (pdfHeight - renderHeight) / 2;
 
-        pdf.save("Receipts.pdf");
-    };
+    pdf.addImage(imgData, "JPEG", x, y, renderWidth, renderHeight);
+
+    if (i < docketElements.length - 1) pdf.addPage();
+  }
+
+  pdf.save("Receipts.pdf");
+};
+
+
+
 
 
 
@@ -149,10 +153,14 @@ function MobileReceipt() {
   margin: 0;
   padding: 0;
 }
+  .docket {
+  box-sizing: border-box;
+  padding: 2px;          /* keeps border inside */
+}
 
 /* Optional visual scale for whole container (screen view) */
 #pdf {
-  transform: scale(0.9);       /* shrink 90% on screen */
+  transform: scale(0.95);       /* shrink 90% on screen */
   transform-origin: top left;
   width: 111%;                  /* compensate scaling */
 }
@@ -172,7 +180,7 @@ function MobileReceipt() {
   .docket {
     position: absolute;
     top: 0;
-    left:8%;
+    left:3%;
     margin: 0;
     padding: 0;
     width:100% ;
@@ -214,8 +222,8 @@ function MobileReceipt() {
             {data?.length > 0 && (
                 <div className="main-body" id="main-body">
                     <div className="container py-0">
-                        <div className="container-2 py-1" style={{ borderRadius: "0px", width: "670px", gap: "5px", border: "none" }}>
-                            <div className="container-2" style={{ borderRadius: "0px", width: "670px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px" }}>
+                        <div className="container-2 py-1" style={{ borderRadius: "0px", width: "815px", gap: "5px", border: "none" }}>
+                            <div className="container-2" style={{ borderRadius: "0px", width: "815px", display: "flex", flexDirection: "row", border: "none", justifyContent: "end", gap: "10px", fontSize: "12px" }}>
                                 <button
                                     onClick={handleDownloadPDF}
                                     style={{ padding: "5px 5px", borderRadius: "6px", background: "green", color: "white", border: "none", cursor: "pointer" }}
@@ -236,13 +244,14 @@ function MobileReceipt() {
                                 </button>
                             </div>
                         </div>
-                        <div className="container-2" id='pdf' style={{ borderRadius: "0px", paddingLeft: "20px", fontFamily: '"Times New Roman", Times, serif', paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "840px", direction: "flex", flexDirection: "column", gap: "5px" }}>
+                        <div className="container-2" id='pdf' style={{ borderRadius: "0px", paddingLeft: "20px", fontFamily: '"Times New Roman", Times, serif',
+                             paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px", width: "900px", direction: "flex", flexDirection: "column", gap: "5px" }}>
                             {
                                 data.map((docket, index) =>
                                 (
                                     <div className="docket" key={index} style={{}}>
                                         <div class="foot-wrapper">
-                                        <div className=" foot" style={{ borderRadius: "0px", width: "800px", display: "flex", border: "none", flexDirection: "column",marginBottom:"50px" }}>
+                                        <div className=" foot" style={{ borderRadius: "0px", display: "flex", border: "none", flexDirection: "column",marginBottom:"50px" }}>
                                             <div className='div1' style={{ width: "100%", padding: "2px", border: "2px solid silver", display: "flex", color: "black", justifyContent: "space-between" }}>
                                                 <div className='logo' style={{ width: "200px", height: "120px", padding: "5px" }}> <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
                                                 <div className='heading' style={{ width: "50%", display: "flex", flexDirection: "column", alignItems: "start", paddingLeft: "5px" }}>
@@ -566,7 +575,7 @@ function MobileReceipt() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className=" foot" style={{ borderRadius: "0px", width: "800px", display: "flex", border: "none", flexDirection: "column"}}>
+                                        <div className=" foot" style={{ borderRadius: "0px", display: "flex", border: "none", flexDirection: "column"}}>
                                             <div className='div1' style={{ width: "100%", padding: "2px", border: "2px solid silver", display: "flex", color: "black", justifyContent: "space-between" }}>
                                                 <div className='logo' style={{ width: "200px", height: "120px", padding: "5px" }}> <img src={getBranch.Branch_Logo} alt="" style={{ width: "100%", height: "100%" }} /></div>
                                                 <div className='heading' style={{ width: "50%", display: "flex", flexDirection: "column", alignItems: "start", paddingLeft: "5px" }}>

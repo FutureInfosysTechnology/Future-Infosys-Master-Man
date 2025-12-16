@@ -87,7 +87,7 @@ function VendorBoxLabel() {
         const element = containerElements[i];
 
         const canvas = await html2canvas(element, {
-            scale: 2,
+            scale: 6,
             useCORS: true,
             backgroundColor: "#ffffff",
             scrollY: -window.scrollY,
@@ -227,10 +227,10 @@ function VendorBoxLabel() {
                                         {
                                             Array.from({ length: docket.Qty }, (_, i) => (
                                                 <div className='download'>
-                                                    <div className="container-2 p-0" style={{ borderRadius: "0px", width: "995px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", border: "1px solid silver" }}>
-                                                        <div className='div1 ' style={{ borderBottom: "1px solid silver", width: "100%", display: "flex", color: "black" }}>
+                                                    <div className="container-2 p-0" style={{ borderRadius: "0px", width: "995px", border: "none", display: "flex", fontSize: "12px", flexDirection: "column", border: "1px solid gray" }}>
+                                                        <div className='div1 ' style={{ borderBottom: "1px solid gray", width: "100%", display: "flex", color: "black" }}>
                                                             <div className='logo' style={{
-                                                                width: "82%", display: "flex", padding: "5px", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRight: "1px solid silver"
+                                                                width: "82%", display: "flex", padding: "5px", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRight: "1px solid gray"
 
                                                             }}>
                                                                 <div style={{ fontSize: "15px" }}>DOCKET NUMBER</div>
@@ -248,60 +248,60 @@ function VendorBoxLabel() {
                                                                 {i + 1}/{docket?.Qty}
                                                             </div>
                                                         </div>
-                                                        <div className='div2 ' style={{ borderBottom: "1px solid silver", width: "100%", display: "flex", color: "black" }}>
+                                                        <div className='div2 ' style={{ borderBottom: "1px solid gray", width: "100%", display: "flex", color: "black" }}>
                                                             <div className='left' style={{
                                                                 width: "82%", display: "flex", flexDirection: "column",
-                                                                borderRight: "1px solid silver"
+                                                                borderRight: "1px solid gray"
 
                                                             }}>
-                                                                <div className='l1' style={{ fontWeight: "bold", fontSize: "14px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "44%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>CUSTOMER NAME</div>
-                                                                    <div style={{ width: "6%", borderRight: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>QTY</div>
-                                                                    <div style={{ width: "10%", borderRight: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>ORIGIN</div>
-                                                                    <div style={{ width: "17%", borderRight: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>DESTINATION</div>
+                                                                <div className='l1' style={{ fontWeight: "bold", fontSize: "14px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "44%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>CUSTOMER NAME</div>
+                                                                    <div style={{ width: "6%", borderRight: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>QTY</div>
+                                                                    <div style={{ width: "10%", borderRight: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>ORIGIN</div>
+                                                                    <div style={{ width: "17%", borderRight: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>DESTINATION</div>
                                                                     <div style={{ width: "23%", display: "flex", justifyContent: "center", alignItems: "center" }}>SERVICE</div>
                                                                 </div>
-                                                                <div className='l2' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "44%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>{docket?.Customer_Name}</div>
-                                                                    <div style={{ width: "6%", borderRight: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.Qty}</div>
-                                                                    <div style={{ width: "10%", borderRight: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.Origin_Name}</div>
-                                                                    <div style={{ width: "17%", borderRight: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.Destination_Name}</div>
+                                                                <div className='l2' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "44%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>{docket?.Customer_Name}</div>
+                                                                    <div style={{ width: "6%", borderRight: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.Qty}</div>
+                                                                    <div style={{ width: "10%", borderRight: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.Origin_Name}</div>
+                                                                    <div style={{ width: "17%", borderRight: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>{docket?.Destination_Name}</div>
                                                                     <div style={{ width: "23%", display: "flex", justifyContent: "center", alignItems: "center" }}>SERVICE</div>
                                                                 </div>
-                                                                <div className='l3' style={{ fontWeight: "bold", fontSize: "14px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>SENDER'S COMPANY</div>
+                                                                <div className='l3' style={{ fontWeight: "bold", fontSize: "14px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>SENDER'S COMPANY</div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>RECIPIENT'S COMPANY</div>
 
                                                                 </div>
-                                                                <div className='l4' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>{docket?.Shipper_Name}</div>
+                                                                <div className='l4' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>{docket?.Shipper_Name}</div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>{docket?.Consignee_Name}</div>
 
                                                                 </div>
-                                                                <div className='l5' style={{ fontWeight: "bold", fontSize: "14px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>SENDER'S NAME</div>
+                                                                <div className='l5' style={{ fontWeight: "bold", fontSize: "14px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>SENDER'S NAME</div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>RECIPIENT'S NAME</div>
 
                                                                 </div>
-                                                                <div className='l6' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>{docket?.Shipper_Name}</div>
+                                                                <div className='l6' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>{docket?.Shipper_Name}</div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>{docket?.Consignee_Name}</div>
 
                                                                 </div>
-                                                                <div className='l7' style={{ fontWeight: "bold", fontSize: "14px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>ADDRESS</div>
+                                                                <div className='l7' style={{ fontWeight: "bold", fontSize: "14px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>ADDRESS</div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>ADDRESS</div>
 
                                                                 </div>
-                                                                <div className='l8' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>{docket?.ShipperAdd},{docket?.ShipperAdd2},{docket?.ShipperAdd3}</div>
+                                                                <div className='l8' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>{docket?.ShipperAdd},{docket?.ShipperAdd2},{docket?.ShipperAdd3}</div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>{docket?.Consignee_Add1},{docket?.Consignee_Add2}</div>
 
                                                                 </div>
 
-                                                                <div className='l7' style={{ display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>
-                                                                        <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                                                <div className='l7' style={{ display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>
+                                                                        <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", flexDirection: "column", alignItems: "center" }}>
                                                                             <div style={{ fontWeight: "bold", fontSize: "14px", }}>PIN CODE :</div>
                                                                             <div style={{ fontSize: "12px", }}></div>
                                                                         </div>
@@ -311,7 +311,7 @@ function VendorBoxLabel() {
                                                                         </div>
                                                                     </div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>
-                                                                        <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                                                        <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", flexDirection: "column", alignItems: "center" }}>
                                                                             <div style={{ fontWeight: "bold", fontSize: "14px", }}>PIN CODE :</div>
                                                                             <div style={{ fontSize: "12px", }}>{docket?.Consignee_Pin}</div>
                                                                         </div>
@@ -322,14 +322,14 @@ function VendorBoxLabel() {
                                                                     </div>
 
                                                                 </div>
-                                                                <div className='l8' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>{docket?.Shippercity},{docket?.Shipper_State_Name}</div>
+                                                                <div className='l8' style={{ fontSize: "12px", display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>{docket?.Shippercity},{docket?.Shipper_State_Name}</div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>{docket?.Consignee_City},{docket?.Consignee_State_Name},{docket?.Consignee_Country}</div>
 
                                                                 </div>
-                                                                <div className='l9' style={{ display: "flex", borderBottom: "1px solid silver" }}>
-                                                                    <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px" }}>
-                                                                        <div style={{ width: "60%", borderRight: "1px solid silver", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                                                <div className='l9' style={{ display: "flex", borderBottom: "1px solid gray" }}>
+                                                                    <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px" }}>
+                                                                        <div style={{ width: "60%", borderRight: "1px solid gray", display: "flex", flexDirection: "column", alignItems: "center" }}>
                                                                             <div style={{ fontWeight: "bold", fontSize: "14px", }}>DESCRIPTION OF GOODS</div>
                                                                             <div style={{ fontSize: "12px", }}>CLOTH COVER</div>
                                                                         </div>
@@ -339,7 +339,7 @@ function VendorBoxLabel() {
                                                                         </div>
                                                                     </div>
                                                                     <div style={{ width: "50%", display: "flex", paddingLeft: "5px" }}>
-                                                                        <div style={{ width: "50%", borderRight: "1px solid silver", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                                                        <div style={{ width: "50%", borderRight: "1px solid gray", display: "flex", flexDirection: "column", alignItems: "center" }}>
                                                                             <div style={{ fontWeight: "bold", fontSize: "14px", }}>BOOKING DATE</div>
                                                                             <div style={{ fontSize: "12px", }}>{docket?.BookDate}</div>
                                                                         </div>
@@ -360,14 +360,14 @@ function VendorBoxLabel() {
 
                                                                 </div>
                                                                 <div className='l10' style={{ fontSize: "12px", display: "flex" }}>
-                                                                    <div style={{ width: "33.33%", borderRight: "1px solid silver", display: "flex", paddingLeft: "5px", display: "flex", padding: "5px", flexDirection: "column", }}>
+                                                                    <div style={{ width: "33.33%", borderRight: "1px solid gray", display: "flex", paddingLeft: "5px", display: "flex", padding: "5px", flexDirection: "column", }}>
                                                                         <div style={{ fontSize: "14px", fontWeight: "bold" }}>SHIPPER AGREEMENT</div>
                                                                         <div >Shipper agreement to OM International Courier Cargo Services standard terms and conditions of carriage</div>
                                                                         <div style={{ fontSize: "14px", fontWeight: "bold", display: "flex", marginTop: "30px" }}>SHIPPER SIGNATURE</div>
                                                                         <div style={{ fontSize: "14px", fontWeight: "bold" }}>BOOKING DATE</div>
                                                                         <div>{docket?.BookDate}</div>
                                                                     </div>
-                                                                    <div style={{ width: "33.33%", borderRight: "1px solid silver", display: "flex", padding: "5px", flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
+                                                                    <div style={{ width: "33.33%", borderRight: "1px solid gray", display: "flex", padding: "5px", flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
 
                                                                         <div style={{ fontSize: "15px" }}>PARCEL NUMBER</div>
                                                                         <BarCode
@@ -391,24 +391,24 @@ function VendorBoxLabel() {
 
                                                             </div>
                                                             <div className='right' style={{ width: "18%", fontWeight: "bold", fontSize: "13px", display: "flex", flexDirection: "column" }}>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>Box Weight</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.VolumetricWt * docket?.ActualWt * docket?.ChargedWt}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>DIMS IN CM</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.VolumetricWt} * {docket?.ActualWt} * {docket?.ChargedWt} </div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>BOX VOL WT</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.VolumetricWt}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>ACTUAL WEIGHT</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.ActualWt}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>CHARGEABLE WT</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.ChargedWt}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>PAYMENT METHOD</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.T_Flag}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>FREIGHT : {docket?.Rate}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>OTHER : {docket?.OtherCharges}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>CGST @ : {docket?.CGSTAMT}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>SGST @ : {docket?.SGSTAMT}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>IGST @ : {docket?.IGSTAMT}</div>
-                                                                <div style={{ borderBottom: "1px solid silver", display: "flex", justifyContent: "center", alignItems: "center" }}>TOTAL : {docket?.Rate + docket?.OtherCharges + docket?.CGSTAMT + docket?.IGSTAMT + docket?.SGSTAMT}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>Box Weight</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.VolumetricWt * docket?.ActualWt * docket?.ChargedWt}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>DIMS IN CM</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.VolumetricWt} * {docket?.ActualWt} * {docket?.ChargedWt} </div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>BOX VOL WT</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.VolumetricWt}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>ACTUAL WEIGHT</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.ActualWt}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>CHARGEABLE WT</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.ChargedWt}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>PAYMENT METHOD</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center", height: "6%" }}>{docket?.T_Flag}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>FREIGHT : {docket?.Rate}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>OTHER : {docket?.OtherCharges}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>CGST @ : {docket?.CGSTAMT}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>SGST @ : {docket?.SGSTAMT}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>IGST @ : {docket?.IGSTAMT}</div>
+                                                                <div style={{ borderBottom: "1px solid gray", display: "flex", justifyContent: "center", alignItems: "center" }}>TOTAL : {docket?.Rate + docket?.OtherCharges + docket?.CGSTAMT + docket?.IGSTAMT + docket?.SGSTAMT}</div>
                                                                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>REF NO : 727552</div>
 
                                                             </div>
@@ -418,7 +418,7 @@ function VendorBoxLabel() {
                                                                 width: "100%", display: "flex", padding: "20px", alignItems: "center", justifyContent: "center",
 
                                                             }}>
-                                                                <div style={{ fontSize: "10px", width: "90%", border: "1px solid silver", display: "flex", padding: "5px", fontWeight: "bold", flexDirection: "column" }}>
+                                                                <div style={{ fontSize: "10px", width: "90%", border: "1px solid gray", display: "flex", padding: "5px", fontWeight: "bold", flexDirection: "column" }}>
                                                                     <div>TERMS & CONDITIONS :</div>
                                                                     <div>1. NO CLAIMS WOULD BE ENTERTAINED FOR ANY DAMAGE DURING TRANSIT & DELAY IN DELIVERY DUE TO ANY REASON</div>
                                                                     <div>2. MAXIMUM CLAIMS FOR LOSS OF PARCEL WOULD BE USD 50 UPTO 10 KGS & USD 100 ABOVE 10 KGS OR THE DECLARED VALUE WHICHEVER IS LOWER. </div>

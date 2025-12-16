@@ -55,14 +55,30 @@ function DailyManifest() {
     const visibleTabs = tabs.filter((t) => t.show);
 
     // Auto-select the first visible tab
-      useEffect(() => {
+    useEffect(() => {
         if (activeTab === null && visibleTabs.length > 0) {
-          setActiveTab(visibleTabs[0].id);
+            setActiveTab(visibleTabs[0].id);
         }
-      }, [visibleTabs, activeTab]);
+    }, [visibleTabs, activeTab]);
 
     return (
         <>
+            <style>{`
+        .tab-pane {
+  visibility: hidden;
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 100%;
+}
+
+.tab-pane.active {
+  visibility: visible;
+  position: relative;
+  left: 0;
+}
+
+`}</style>
             <Header />
             <Sidebar1 />
 
@@ -75,14 +91,14 @@ function DailyManifest() {
                             <label
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                
+
                             >
                                 {tab.label}
                             </label>
                         ))}
 
                         {/* SLIDER */}
-                        {activeTab && visibleTabs.length > 0 &&(
+                        {activeTab && visibleTabs.length > 0 && (
                             <div
                                 className="slider"
                                 style={{
@@ -94,8 +110,15 @@ function DailyManifest() {
                     </nav>
 
                     {/* CONTENT */}
-                    <section>
-                        {visibleTabs.find((t) => t.id === activeTab)?.component}
+                    <section className="tab-container">
+                        {visibleTabs.map((tab) => (
+                            <div
+                                key={tab.id}
+                                className={`tab-pane ${activeTab === tab.id ? "active" : ""}`}
+                            >
+                                {tab.component}
+                            </div>
+                        ))}
                     </section>
 
                 </div>

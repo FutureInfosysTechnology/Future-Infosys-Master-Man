@@ -74,64 +74,53 @@ function NewDP1() {
     };
 
 
-    const handleDownloadPDF = async () => {
-        const docketElements = document.querySelectorAll(".docket");
-        if (docketElements.length === 0) return;
+const handleDownloadPDF = async () => {
+  await document.fonts.ready;
 
-        const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm
-        const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
+  const docketElements = document.querySelectorAll(".docket");
+  if (!docketElements.length) return;
 
-        for (let i = 0; i < docketElements.length; i++) {
-            const element = docketElements[i];
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
 
-            // ✅ Capture full element (including off-screen parts)
-            const canvas = await html2canvas(element, {
-                scale: 3,
-                useCORS: true,
-                backgroundColor: "#ffffff",
-                scrollY: -window.scrollY,
-                windowWidth: document.documentElement.scrollWidth,
-                windowHeight: document.documentElement.scrollHeight + 200, // buffer to ensure full capture
-            });
+  for (let i = 0; i < docketElements.length; i++) {
+    const element = docketElements[i];
 
-            const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    const canvas = await html2canvas(element, {
+      scale: 6,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      width: element.offsetWidth + 4,
+      height: element.offsetHeight + 4,
+    });
 
-            // Convert canvas size (px → mm)
-            const pxToMm = (px) => (px * 25.4) / 96;
-            const imgWidthMm = pxToMm(canvas.width);
-            const imgHeightMm = pxToMm(canvas.height);
-            const imgRatio = imgWidthMm / imgHeightMm;
+   const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-            // 🟩 Fit docket to A4 width or height (whichever is limiting)
-            let renderWidth, renderHeight;
-            if (imgWidthMm > imgHeightMm) {
-                // Landscape-like docket
-                renderWidth = pdfWidth - 10; // 5mm margin on each side
-                renderHeight = renderWidth / imgRatio;
-            } else {
-                // Portrait-like docket
-                renderHeight = pdfHeight - 20; // top-bottom margin
-                renderWidth = renderHeight * imgRatio;
-                if (renderWidth > pdfWidth - 10) {
-                    renderWidth = pdfWidth - 10;
-                    renderHeight = renderWidth / imgRatio;
-                }
-            }
+    const pxToMm = px => (px * 25.4) / 96;
+    const imgWidthMm = pxToMm(canvas.width);
+    const imgHeightMm = pxToMm(canvas.height);
+    const ratio = imgWidthMm / imgHeightMm;
 
-            // Center docket on page
-            const xOffset = (pdfWidth - renderWidth) / 2;
-            const yOffset = (pdfHeight - renderHeight) / 2;
+    let renderWidth = pdfWidth - 10;
+    let renderHeight = renderWidth / ratio;
 
-            // 🖼️ Draw image perfectly centered
-            pdf.addImage(imgData, "JPEG", xOffset, yOffset, renderWidth, renderHeight);
+    if (renderHeight > pdfHeight - 10) {
+      renderHeight = pdfHeight - 10;
+      renderWidth = renderHeight * ratio;
+    }
 
-            // Add a new page for next docket
-            if (i < docketElements.length - 1) pdf.addPage();
-        }
+    const x = (pdfWidth - renderWidth) / 2;
+    const y = (pdfHeight - renderHeight) / 2;
 
-        pdf.save("NewDp2.pdf");
-    };
+    pdf.addImage(imgData, "PNG", x, y, renderWidth, renderHeight);
+
+    if (i < docketElements.length - 1) pdf.addPage();
+  }
+
+  pdf.save("NewDp2.pdf");
+};
+
 
 
 
