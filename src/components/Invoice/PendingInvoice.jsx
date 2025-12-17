@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from "react";
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import Modal from 'react-modal';
-import Swal from "sweetalert2";
-import Footer from "../../Components-2/Footer";
-import Header from "../../Components-2/Header/Header";
-import Sidebar1 from "../../Components-2/Sidebar1";
+import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import Modal from 'react-modal';
 import Select from 'react-select';
 import 'react-toggle/style.css';
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
 import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
-
 
 
 function PendingInvoice() {
@@ -31,7 +27,6 @@ function PendingInvoice() {
     const [getBranch, setGetBranch] = useState([]);
     const [getMode, setGetMode] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
         if (Array.isArray(response?.Data)) return response.Data;
@@ -88,9 +83,6 @@ function PendingInvoice() {
             setData(extrectArray(response));
         } catch (err) {
             console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
         }
     };
     const handleSubmit = async (e) => {

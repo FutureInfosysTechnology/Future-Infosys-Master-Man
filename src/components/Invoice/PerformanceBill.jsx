@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import Modal from 'react-modal';
+import { useEffect, useState } from 'react';
 import "./permonce.css"
 import Swal from "sweetalert2";
 import Select from 'react-select';
@@ -48,10 +47,6 @@ function PerformanceBill() {
         ShipperPhone: "",
         ShipperEmail: "",
     });
-    const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;
-    const indexOfLastRow = currentPage * rowsPerPage;
-    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const [getState, setGetState] = useState([]);
     const [getCity, setGetCity] = useState([]);
     const [getCountry, setGetCountry] = useState([]);

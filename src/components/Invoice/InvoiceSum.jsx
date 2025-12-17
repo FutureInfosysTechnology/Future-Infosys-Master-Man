@@ -1,20 +1,12 @@
-import React, { useEffect, useState } from "react";
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import Modal from 'react-modal';
-import Swal from "sweetalert2";
-import Footer from "../../Components-2/Footer";
-import Header from "../../Components-2/Header/Header";
-import Sidebar1 from "../../Components-2/Sidebar1";
+import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Select from 'react-select';
-import 'react-toggle/style.css';
-import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
+import Select from 'react-select';
+import 'react-toggle/style.css';
+import Swal from "sweetalert2";
+import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 
 
 
@@ -23,7 +15,6 @@ function InvoiceSum() {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const [modalIsOpen, setModalIsOpen] = useState(false);
     const [invoice, setInvoice] = useState([])
     const [openRow, setOpenRow] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -31,7 +22,7 @@ function InvoiceSum() {
     const [currentPage, setCurrentPage] = useState(1);
     const [getCustomer, setGetCustomer] = useState([]);
     const [getBranch, setGetBranch] = useState([]);
-    const [error, setError] = useState(null);
+    
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
         if (Array.isArray(response?.Data)) return response.Data;
@@ -59,9 +50,6 @@ function InvoiceSum() {
             setData(extrectArray(response));
         } catch (err) {
             console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
         }
     };
 

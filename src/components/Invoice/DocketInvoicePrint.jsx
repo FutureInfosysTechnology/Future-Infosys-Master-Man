@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 import { useLocation, useNavigate } from "react-router-dom"
 import { getApi } from '../Admin Master/Area Control/Zonemaster/ServicesApi';;
 const DocketInvoicePrint = () => {
-    const [data,setData]=useState([]);
     const [formData, setFormData] = useState({
         from: "",
         to: "",
@@ -23,7 +22,6 @@ const DocketInvoicePrint = () => {
                     if (response.status === 1) {
                         console.log(response);
                         console.log(response.Data);
-                        setData(response.Data);
                         response.Data && navigate("/MobileReceipt", { state: { data:response.Data,path:location.pathname,tab:"print" } });
                     }
                     else

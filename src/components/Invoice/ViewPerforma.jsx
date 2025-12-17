@@ -1,17 +1,7 @@
-import React, { useEffect, useState } from "react";
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import Modal from 'react-modal';
+import { useState } from "react";
 import Swal from "sweetalert2";
-import Footer from "../../Components-2/Footer";
-import Header from "../../Components-2/Header/Header";
-import Sidebar1 from "../../Components-2/Sidebar1";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Select from 'react-select';
-import 'react-toggle/style.css';
 import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -27,12 +17,6 @@ function ViewPerforma() {
     const [loading, setLoading] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
-    const [error, setError] = useState(null);
-    const extrectArray = (response) => {
-        if (Array.isArray(response?.data)) return response.data;
-        if (Array.isArray(response?.Data)) return response.Data;
-        return [];
-    }
     const handleFormChange = (value, key) => {
         setFormData({ ...formData, [key]: value })
     }
@@ -50,7 +34,7 @@ function ViewPerforma() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            setLoading(true);
+            
 
             const queryParams = new URLSearchParams({
                 invoiceNos: formData.invoiceNo,
@@ -74,9 +58,7 @@ function ViewPerforma() {
             console.error("Fetch Error:", err);
             setInvoice([]);
             Swal.fire("Error", "Failed to fetch performa invoices", "error");
-        } finally {
-            setLoading(false);
-        }
+        } 
     };
     const handleDelete = (index) => {
         Swal.fire({

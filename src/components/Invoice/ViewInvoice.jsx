@@ -1,13 +1,6 @@
-import React, { useEffect, useState } from "react";
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { useEffect, useState } from "react";
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
-import Footer from "../../Components-2/Footer";
-import Header from "../../Components-2/Header/Header";
-import Sidebar1 from "../../Components-2/Sidebar1";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
@@ -32,7 +25,6 @@ function ViewInvoice() {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [getCustomer, setGetCustomer] = useState([]);
-    const [error, setError] = useState(null);
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
         if (Array.isArray(response?.Data)) return response.Data;
@@ -139,10 +131,8 @@ function ViewInvoice() {
             setData(extrectArray(response));
         } catch (err) {
             console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
+            
+        } 
     };
 
     const handleUpdate = async (e) => {

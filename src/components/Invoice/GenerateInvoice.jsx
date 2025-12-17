@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { getApi, postApi, putApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
-import Swal from "sweetalert2";
+import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
-import 'react-toggle/style.css';
 import Toggle from 'react-toggle';
+import 'react-toggle/style.css';
+import Swal from "sweetalert2";
+import { getApi, putApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 function GenerateInvoice() {
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
@@ -21,8 +21,6 @@ function GenerateInvoice() {
     const [previewData, setPreviewData] = useState([]);
     const [getBranch, setGetBranch] = useState([]);
     const [getMode, setGetMode] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
@@ -44,9 +42,6 @@ function GenerateInvoice() {
             setData(extrectArray(response));
         } catch (err) {
             console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
         }
     };
 
