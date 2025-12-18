@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import '../../Tabs/tabs.css';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
@@ -18,8 +18,7 @@ function PinCode() {
     const [zones, setZones] = useState([]);                // To Get Zone Data
     const [getCity, setGetCity] = useState([]);            //To Get City Data
     const [getState, setGetState] = useState([]);          //To Get State Data
-    const [getVendor, setGetVendor] = useState([]);        // To Get Vendor Data
-    const [getCountry, setGetCountry] = useState([]);      //To Get Country Data
+    const [getVendor, setGetVendor] = useState([]);        // To Get Vendor Data     //To Get Country Data
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -114,17 +113,6 @@ function PinCode() {
         }
     };
 
-    const fetchCountryData = async () => {
-        try {
-            const response = await getApi('/Master/getCountry');
-            setGetCountry(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const fetchVendorData = async () => {
         try {
@@ -144,7 +132,6 @@ function PinCode() {
         fetchZoneData();
         fetchCityData();
         fetchStateData();
-        fetchCountryData();
         fetchVendorData();
     }, []);
 

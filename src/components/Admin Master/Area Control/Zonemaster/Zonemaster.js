@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import '../../../Tabs/tabs.css';
-import { getApi, postApi, deleteApi } from './ServicesApi';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
-import 'react-toastify/dist/ReactToastify.css';
-import Modal from 'react-modal';
-import Swal from 'sweetalert2';
+import { useEffect, useState } from 'react';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import '../../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from './ServicesApi';
 
 
 const ZoneMaster = () => {

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
-import Modal from 'react-modal';
-import '../../Tabs/tabs.css';
-import Swal from "sweetalert2";
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from "jspdf-autotable";
-import { getApi, postApi, putApi, deleteApi } from "./Zonemaster/ServicesApi";
+import { useEffect, useState } from "react";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import Select from "react-select"
+import Modal from 'react-modal';
+import Select from "react-select";
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi, putApi } from "./Zonemaster/ServicesApi";
 
 
 function MultipleCity() {

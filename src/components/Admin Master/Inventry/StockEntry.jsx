@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
-import '../../Tabs/tabs.css';
-import Swal from "sweetalert2";
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import Modal from 'react-modal';
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
-import Select from "react-select";
+import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import Select from "react-select";
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function StockEntry() {
@@ -34,7 +33,7 @@ function StockEntry() {
 
 
     const filteredgetStock = getStockEntry.filter((stock) =>
-        (stock && stock.City_Name && stock.City_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (stock?.City_Name && stock?.City_Name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const indexOfLastRow = currentPage * rowsPerPage;
@@ -193,6 +192,9 @@ function StockEntry() {
 
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+
+     if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
 
     return (
         <>

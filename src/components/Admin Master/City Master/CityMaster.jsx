@@ -1,8 +1,8 @@
-import React, { useState, Suspense, useEffect } from "react";
-import '../../Tabs/tabs.css';
+import React, { Suspense, useEffect, useState } from "react";
 import Footer from "../../../Components-2/Footer";
 import Header from "../../../Components-2/Header/Header";
 import Sidebar1 from "../../../Components-2/Sidebar1";
+import '../../Tabs/tabs.css';
 
 const DomesticCity = React.lazy(() => import("./DomesticCity"));
 const InternationalCity = React.lazy(() => import("./InternationalCity"));

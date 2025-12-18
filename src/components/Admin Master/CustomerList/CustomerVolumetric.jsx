@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import '../../Tabs/tabs.css';
-import Swal from "sweetalert2";
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import Modal from 'react-modal';
 import Select from 'react-select';
 import 'react-toggle/style.css';
-import { postApi, getApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function CustomerVolumetric() {
@@ -40,8 +40,8 @@ function CustomerVolumetric() {
 
 
     const filteredgetVolumetric = getVolumetric.filter((vol) =>
-        (vol && vol.Customer_Code && vol.Customer_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vol && vol.Customer_Name && vol.Customer_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (vol?.Customer_Code && vol?.Customer_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vol?.Customer_Name && vol?.Customer_Name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const indexOfLastRow = currentPage * rowsPerPage;

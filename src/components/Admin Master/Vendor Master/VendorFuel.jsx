@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import '../../Tabs/tabs.css';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import Modal from 'react-modal';
+import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Select, { components } from 'react-select';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import Modal from 'react-modal';
+import Select from 'react-select';
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function VendorFuel() {
@@ -58,20 +58,20 @@ function VendorFuel() {
 
 
     const filteredVendor = getVendorCharges.filter((vendor) =>
-        (vendor && vendor.Vendor_Code && vendor.Vendor_Code?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Vendor_Name && vendor.Vendor_Name?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Mode_Code && vendor.Mode_Code?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Fuel_Charges && vendor.Fuel_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Fov_Charges && vendor.Fov_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Docket_Charges && vendor.Docket_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Dilivery_Charges && vendor.Dilivery_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Packing_Charges && vendor.Packing_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Green_Charges && vendor.Green_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Hamali_Charges && vendor.Hamali_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Other_Charges && vendor.Other_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.Insurance_Charges && vendor.Insurance_Charges?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.From_Date && vendor.From_Date?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (vendor && vendor.To_Date && vendor.To_Date?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (vendor?.Vendor_Code && vendor?.Vendor_Code?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Vendor_Name && vendor?.Vendor_Name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Mode_Code && vendor?.Mode_Code?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Fuel_Charges && vendor?.Fuel_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Fov_Charges && vendor?.Fov_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Docket_Charges && vendor?.Docket_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Dilivery_Charges && vendor?.Dilivery_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Packing_Charges && vendor?.Packing_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Green_Charges && vendor?.Green_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Hamali_Charges && vendor?.Hamali_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Other_Charges && vendor?.Other_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.Insurance_Charges && vendor?.Insurance_Charges?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.From_Date && vendor?.From_Date?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (vendor?.To_Date && vendor?.To_Date?.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -38,8 +38,8 @@ function VehicleEntry() {
 
 
     const filteredgetVehicle = getVehicle.filter((transport) =>
-        (transport && transport.Vehicle_Code && transport.Vehicle_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (transport && transport.vehicle_number && transport.vehicle_number.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (transport?.Vehicle_Code && transport?.Vehicle_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (transport?.vehicle_number && transport?.vehicle_number.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const indexOfLastRow = currentPage * rowsPerPage;

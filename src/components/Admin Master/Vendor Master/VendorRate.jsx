@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
-import Modal from 'react-modal';
-import '../../Tabs/tabs.css';
-import Swal from "sweetalert2";
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { deleteApi, getApi, postApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
+import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
 import Select, { components } from 'react-select';
 import 'react-toggle/style.css';
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 function VendorRate() {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -26,7 +26,7 @@ function VendorRate() {
     const [getCity, setGetCity] = useState([]);               // To Get City Data
     const [getMode, setGetMode] = useState([]);               // To Get Mode Data
     const [getZone, setGetZone] = useState([]);               // To Get Zone Data
-    const [getCountry, setGetCountry] = useState([]);         // To Get Country Data
+            // To Get Country Data
     const [getState, setGetState] = useState([]);             // To Get State Data
     const [getVendor, setGetVendor] = useState([]);
     const [error, setError] = useState(null);
@@ -115,17 +115,7 @@ function VendorRate() {
         }
     };
 
-    const fetchCountryData = async () => {
-        try {
-            const response = await getApi('/Master/getCountry');
-            setGetCountry(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    
  const filterCities = (zoneCodes = [], stateCodes = []) => {
   return getCity.filter(city => {
     const hasZone = zoneCodes.length > 0;
@@ -224,7 +214,6 @@ function VendorRate() {
         fetchCityData();
         fetchModeData();
         fetchZoneData();
-        fetchCountryData();
         fetchStateData();
         fetchVendorData();
     }, [])
@@ -537,7 +526,10 @@ function VendorRate() {
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
 
-    // const emptyRows = Array(5).fill({ code: '', min: '', max: '', rate: '' });
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
+
+
 
 
     return (

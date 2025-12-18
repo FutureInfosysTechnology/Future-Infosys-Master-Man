@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import '../../Tabs/tabs.css';
 import * as XLSX from 'xlsx';
@@ -45,16 +45,16 @@ function ReceiverName() {
 
 
     const filteredgetReceiver = getReceiver.filter((receiver) =>
-        (receiver && receiver.Receiver_Code && receiver.Receiver_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.Receiver_Name && receiver.Receiver_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.Receiver_Add1 && receiver.Receiver_Add1.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.Receiver_Pin && receiver.Receiver_Pin.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.City_Code && receiver.City_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.State_Code && receiver.State_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.Receiver_Mob && receiver.Receiver_Mob.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.Receiver_Email && receiver.Receiver_Email.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.GSTNo && receiver.GSTNo.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (receiver && receiver.HSNNo && receiver.HSNNo.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (receiver?.Receiver_Code && receiver?.Receiver_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.Receiver_Name && receiver?.Receiver_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.Receiver_Add1 && receiver?.Receiver_Add1.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.Receiver_Pin && receiver?.Receiver_Pin.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.City_Code && receiver?.City_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.State_Code && receiver?.State_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.Receiver_Mob && receiver?.Receiver_Mob.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.Receiver_Email && receiver?.Receiver_Email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.GSTNo && receiver?.GSTNo.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (receiver?.HSNNo && receiver?.HSNNo.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const indexOfLastRow = currentPage * rowsPerPage;

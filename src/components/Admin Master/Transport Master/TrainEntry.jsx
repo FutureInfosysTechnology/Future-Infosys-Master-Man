@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getApi, postApi, deleteApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';

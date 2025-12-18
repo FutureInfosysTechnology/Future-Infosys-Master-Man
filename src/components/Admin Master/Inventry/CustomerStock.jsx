@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import Modal from 'react-modal';
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import { postApi, getApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
-import Select from "react-select";
+import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import Select from "react-select";
+import Swal from "sweetalert2";
+import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 function CustomerStock() {
     const [openRow, setOpenRow] = useState(null);
@@ -72,8 +72,8 @@ function CustomerStock() {
 
 
     const filteredgetCustomer = getCustStock.filter((cust) =>
-        (cust && cust.Customer_Name && cust.Customer_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (cust && cust.City_Name && cust.City_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (cust?.Customer_Name && cust?.Customer_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (cust?.City_Name && cust?.City_Name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 
@@ -180,7 +180,9 @@ function CustomerStock() {
 
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
-
+    
+ if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
 
 
     return (

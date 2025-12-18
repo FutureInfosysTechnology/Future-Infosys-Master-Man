@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Header from "../../Components-2/Header/Header";
 import Sidebar1 from "../../Components-2/Sidebar1";
 import Footer from "../../Components-2/Footer";
@@ -7,6 +7,7 @@ import ProductionEntry from "./ProductionEntry";
 import PaymentReceived from "./PaymentReceived";
 import CreditPrint from "./CreditPrint";
 import { useLocation } from "react-router-dom";
+import PaymentReceived2 from "./PaymentReceived2";
 
 function Laiser() {
   const location = useLocation();
@@ -17,14 +18,15 @@ function Laiser() {
 
   // Define tabs with permissions
   const tabs = [
-    { id: "paymentMode", label: "Payment Mode", component: <PaymentReceived />, permission: "PaymentReceivedEntry" },
-    { id: "ledgers", label: "Ledgers", component: <PaymentEntry />, permission: "PayOutStanding" },
-    { id: "creditNote", label: "Credit Note", component: <ProductionEntry />, permission: "CreditBooking" },
-    { id: "creditPrint", label: "Credit Note Print", component: <CreditPrint />, permission: "CreditNoteView" },
+    { id: "paymentMode", label: "Payment Mode", component: <PaymentReceived />, permission: has("PaymentReceivedEntry") },
+    { id: "ledgers", label: "Ledgers", component: <PaymentEntry />, permission: has("PayOutStanding") },
+    { id: "paymentReceived", label: "Payment Received", component: <PaymentReceived2  />, permission: 1 },
+    { id: "creditNote", label: "Credit Note", component: <ProductionEntry />, permission: has("CreditBooking") },
+    { id: "creditPrint", label: "Credit Note Print", component: <CreditPrint />, permission: has("CreditNoteView") },
   ];
 
   // Filter tabs based on user permissions
-  const visibleTabs = tabs.filter(tab => has(tab.permission));
+  const visibleTabs = tabs.filter(tab => tab.permission);
 
   const [activeTab, setActiveTab] = useState(location?.state?.tab || visibleTabs[0]?.id || null);
 

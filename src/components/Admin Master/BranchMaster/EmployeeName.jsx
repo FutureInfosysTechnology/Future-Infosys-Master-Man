@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import '../../Tabs/tabs.css';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
-import Modal from 'react-modal';
-import Select from 'react-select';
-import { getApi, postApi, deleteApi } from '../Area Control/Zonemaster/ServicesApi';
+import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import Select from 'react-select';
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from '../Area Control/Zonemaster/ServicesApi';
 
 
 function EmployeeName() {

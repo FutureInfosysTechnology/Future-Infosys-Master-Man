@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Modal from 'react-modal';
 import '../../Tabs/tabs.css';
 import Swal from "sweetalert2";
@@ -26,10 +26,9 @@ function CustomerRate() {
     const [getCustomer, setGetCustomer] = useState([]);       // To Get Customer Data
     const [getCity, setGetCity] = useState([]);               // To Get City Data
     const [getMode, setGetMode] = useState([]);               // To Get Mode Data
-    const [getZone, setGetZone] = useState([]);               // To Get Zone Data
-    const [getCountry, setGetCountry] = useState([]);         // To Get Country Data
+    const [getZone, setGetZone] = useState([]);               // To Get Zone Data        // To Get Country Data
     const [getState, setGetState] = useState([]);             // To Get State Data
-    const [getVendor, setGetVendor] = useState([]);
+    
     const [error, setError] = useState(null);
     const [filteredCity, setFilteredCity] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -71,15 +70,38 @@ function CustomerRate() {
     const totalPages = Math.ceil(getCustRate.length / rowsPerPage);
 
     const fetchCustomerRateData = async () => {
-        try {
-            const response = await getApi('/Master/GetRateMasterData');
-            setGetCustRate(Array.isArray(response.data) ? response.data : []);
-        } catch (err) {
-            setError(err);
-        } finally {
-            setLoading(false);
+    setLoading(true);
+    try {
+        const queryParams = new URLSearchParams({
+            pageNumber: currentPage,
+            pageSize: rowsPerPage,
+            // search: searchValue || ""   // enable if needed
+        }).toString();
+
+        const response = await getApi(
+            `/Master/GetRateMasterData?${queryParams}`
+        );
+
+        if (response.status !== 1) {
+            throw new Error(response.message || "Failed to fetch rate master data");
         }
-    };
+
+        setGetCustRate(Array.isArray(response.data) ? response.data : []);
+
+        // Optional: backend already returns pageNumber
+        // setCurrentPage(response.pageNumber);
+
+    } catch (err) {
+        console.error(err);
+        setError(err.message || "Something went wrong");
+    } finally {
+        setLoading(false);
+    }
+};
+
+    useEffect(()=>{
+        fetchCustomerRateData();
+    },[rowsPerPage])
 
     const fetchCustomerData = async () => {
         try {
@@ -128,17 +150,7 @@ function CustomerRate() {
         }
     };
 
-    const fetchCountryData = async () => {
-        try {
-            const response = await getApi('/Master/getCountry');
-            setGetCountry(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    
  const filterCities = (zoneCodes = [], stateCodes = []) => {
   return getCity.filter(city => {
     const hasZone = zoneCodes.length > 0;
@@ -219,27 +231,13 @@ function CustomerRate() {
         }
     };
 
-    const fetchVendorData = async () => {
-        try {
-            const response = await getApi('/Master/getVendor');
-            setGetVendor(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            console.error('Fetch Error:', err);
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
-        fetchCustomerRateData();
         fetchCustomerData();
         fetchCityData();
         fetchModeData();
         fetchZoneData();
-        fetchCountryData();
         fetchStateData();
-        fetchVendorData();
     }, [])
     useEffect(() => {
         console.log(formdata);
@@ -252,45 +250,8 @@ function CustomerRate() {
             [name]: value,
         }));
     };
-    // useEffect(() => {
-    //     const fetchCityState = async () => {
-    //         try {
-    //             const res = await getApi("/Master/GetFilterZonewise", { Zone_Code: formdata.Zone_Code });
-    //             if (res.status === 1) {
-    //                 console.log(res?.data);
-    //                 setGetCity(res.data);
-    //                 setGetState(res.data);
-    //             }
-
-    //         }
-    //         catch (error) {
-    //             console.log(error);
-    //         }
-
-    //     }
-    //     if (formdata.Zone_Code.length > 0)
-    //         fetchCityState();
-
-    // }, [formdata.Zone_Code])
-    // useEffect(() => {
-    //     const fetchCity = async () => {
-    //         try {
-    //             const res = await getApi("/Master/GetFilterZoneStatewise", { Zone_Code: formdata.Zone_Code, State_Code: formdata.State_Code });
-    //             if (res.status === 1) {
-    //                 console.log(res?.data);
-    //                 setGetCity(res.data);
-    //             }
-
-    //         }
-    //         catch (error) {
-    //             console.log(error);
-    //         }
-
-    //     }
-    //     if (formdata.State_Code.length > 0 && formdata.Zone_Code.length > 0)
-    //         fetchCity();
-
-    // }, [formdata.Zone_Code, formdata.State_Code])
+   
+   
     const handleAddRow = (e) => {
         e.preventDefault();
 
@@ -559,7 +520,6 @@ function CustomerRate() {
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
 
-    // const emptyRows = Array(5).fill({ code: '', min: '', max: '', rate: '' });
 
 
     return (

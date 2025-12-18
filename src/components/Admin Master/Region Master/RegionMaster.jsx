@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { saveAs } from 'file-saver';
+import { useEffect, useState } from 'react';
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
-import '../../Tabs/tabs.css';
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
+import Footer from '../../../Components-2/Footer';
 import Header from '../../../Components-2/Header/Header';
 import Sidebar1 from '../../../Components-2/Sidebar1';
-import Footer from '../../../Components-2/Footer';
-import { getApi, deleteApi, putApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 
@@ -36,8 +35,8 @@ function RegionMaster() {
 
 
     const filteredgetStatus = getStatus.filter((status) =>
-        (status && status.Activity_Code && status.Activity_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (status && status.Activity_Name && status.Activity_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (status?.Activity_Code && status?.Activity_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (status?.Activity_Name && status?.Activity_Name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 

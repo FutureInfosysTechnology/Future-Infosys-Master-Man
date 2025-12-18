@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import Modal from 'react-modal';
-import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 
@@ -37,8 +37,8 @@ function DriverEntry() {
 
 
     const filteredgetDriver = getDriver.filter((driver) =>
-        (driver && driver.Driver_Code && driver.Driver_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (driver && driver.Driver_Name && driver.Driver_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (driver?.Driver_Code && driver?.Driver_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (driver?.Driver_Name && driver?.Driver_Name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 

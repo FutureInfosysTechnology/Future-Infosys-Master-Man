@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import Modal from 'react-modal';
-import '../../../Tabs/tabs.css';
-import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
-import { getApi, postApi, deleteApi, putApi } from '../Zonemaster/ServicesApi';
+import { useEffect, useState } from 'react';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import '../../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from '../Zonemaster/ServicesApi';
 
 
 

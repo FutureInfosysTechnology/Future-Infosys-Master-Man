@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import '../../Tabs/tabs.css';
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
@@ -7,7 +7,7 @@ import jsPDF from 'jspdf';
 import Modal from 'react-modal';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Select, { components } from 'react-select';
+import Select from 'react-select';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
@@ -156,8 +156,8 @@ function ProductWiseGst() {
 
 
     const filteredgetGST = getGST.filter((gst) =>
-        (gst && gst.Mode_Name && gst.Mode_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (gst && gst.Services_Tax && gst.Services_Tax.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (gst?.Mode_Name && gst?.Mode_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (gst?.Services_Tax && gst?.Services_Tax.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 
@@ -207,7 +207,8 @@ function ProductWiseGst() {
         return `${day}/${month}/${year}`;
     };
 
-
+     if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
     return (
         <>
             <div className="body">

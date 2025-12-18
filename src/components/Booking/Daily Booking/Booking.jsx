@@ -828,11 +828,14 @@ function Booking() {
         }
     };
     console.log(formData);
+    useEffect(()=>{
+
+    },[])
     const fetchReceiverData = async () => {
         try {
             const response = await getApi("/Master/GetReceiver");
 
-            if (response.status === 1 && Array.isArray(response.Data)) {
+            if ( Array.isArray(response.Data)) {
                 const cleanedData = response.Data.map((receiver) => ({
                     value: receiver.Receiver_Code,
                     label: receiver.Receiver_Name?.trim() || "",
@@ -888,6 +891,11 @@ function Booking() {
             console.error("Error fetching receiver data:", error);
         }
     };
+
+    useEffect(()=>{
+        fetchReceiverData();
+        fetchShipper();
+    },[])
     // =======================================================================
 
 
@@ -2538,10 +2546,7 @@ function Booking() {
         zoneCode: dest.Zone_Code,
     })) : null;
     const allVendorOption = getMode?.length > 0 ? getVendor.map(Vendr => ({ label: Vendr.Vendor_Name, value: Vendr.Vendor_Code })) : null;
-    // const allReceiverOption = getReceiver.map(receiver => ({
-    //     label: receiver.Receiver_Name,
-    //     value: receiver.Receiver_Code
-    // }));
+    
 
     const allCustomerOptions = getCustomerdata?.length > 0 ? getCustomerdata.map(cust => ({ label: cust.Customer_Name, value: cust.Customer_Code.toString(), Booking_Type: cust.Booking_Type, CustomerGst: cust.CustomerGst, CustomerFuel: cust.CustomerFuel })) : null;
 
@@ -3241,7 +3246,7 @@ function Booking() {
                                                     options={allReceiverOption}
                                                     value={
                                                         formData.ConsigneeName
-                                                            ? allReceiverOption.find((opt) => opt.value === formData.ConsigneeName) ||
+                                                            ?  allReceiverOption.find((opt) => opt.value === formData.ConsigneeName) ||
                                                             { value: formData.ConsigneeName, label: inputValue || formData.ConsigneeName }
                                                             : null
                                                     }

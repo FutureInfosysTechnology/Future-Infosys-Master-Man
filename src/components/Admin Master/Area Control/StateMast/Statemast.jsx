@@ -1,19 +1,18 @@
 
-import React, { useEffect, useState } from 'react';
-import Modal from 'react-modal';
-import Swal from 'sweetalert2';
-import '../../../Tabs/tabs.css';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
-import { getApi, postApi, deleteApi, putApi } from '../Zonemaster/ServicesApi';
+import { useEffect, useState } from 'react';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import '../../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from '../Zonemaster/ServicesApi';
 
 
 const Statemast = () => {
     const [openRow, setOpenRow] = useState(null);
-    const [state, setState] = useState([]);                  // To Get State Data
-    const [getCountry, setGetCountry] = useState([]);        // To Get Country Data
+    const [state, setState] = useState([]);                  // To Get State Dat        // To Get Country Data
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -55,9 +54,6 @@ const Statemast = () => {
         }
     };
 
-    useEffect(() => {
-        fetchData('/Master/getCountry', setGetCountry);
-    }, []);
 
 
     const handleGenerateCode = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import '../../Tabs/tabs.css';
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
@@ -8,7 +8,7 @@ import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
-import Select, { components } from 'react-select';
+import Select from 'react-select';
 
 
 
@@ -17,7 +17,6 @@ function OdaMaster() {
     const [getODA, setGetODA] = useState([]);
     const [openRow, setOpenRow] = useState(null);
     const [getCustomer, setGetCustomer] = useState([]);         // To Get Customer Data
-    const [getCity, setGetCity] = useState([]);
     const [getMode, setGetMode] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -72,16 +71,6 @@ function OdaMaster() {
         }
     };
 
-    const fetchCityData = async () => {
-        try {
-            const response = await getApi('/Master/getdomestic');
-            setGetCity(Array.isArray(response.Data) ? response.Data : []);
-        } catch (err) {
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const fetchModeData = async () => {
         try {
@@ -97,7 +86,6 @@ function OdaMaster() {
     useEffect(() => {
         fetchODAData();
         fetchCustomerData();
-        fetchCityData();
         fetchModeData();
     }, [])
 
@@ -288,7 +276,8 @@ function OdaMaster() {
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
 
-
+if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
     return (
         <div className="body">

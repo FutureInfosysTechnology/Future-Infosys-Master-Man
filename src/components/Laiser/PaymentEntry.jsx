@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import Modal from 'react-modal';
 import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import { getApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
+import { getApi, putApi } from "../Admin Master/Area Control/Zonemaster/ServicesApi";
 function PaymentEntry() {
     const extrectArray = (response) => {
         if (Array.isArray(response?.data)) return response.data;
@@ -25,7 +25,7 @@ function PaymentEntry() {
     const [formData, setFormData] = useState({
         billDate: today,
         customer: "",
-        branch: "",
+        branch: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
         billNo: "",
 
     });
@@ -43,6 +43,7 @@ function PaymentEntry() {
     const [addPayment, setAddPayment] = useState({
         Customer_Code: "",
         Branch_Code: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
+        Receiver_Name: "",
         Bank_Code: "",
         Transation_No: "",
         Payment_Type: "",
@@ -79,9 +80,10 @@ function PaymentEntry() {
             console.log("API Response for", endpoint, response);  // 👀 Check here
             setData(extrectArray(response));
         } catch (err) {
-            console.error('Fetch Error:', err);}
-            
-        
+            console.error('Fetch Error:', err);
+        }
+
+
     };
 
     useEffect(() => {
@@ -106,34 +108,108 @@ function PaymentEntry() {
 
     const handleSave = async (e) => {
         e.preventDefault();
+        // ✅ Validation
+        if (!formData.branch) {
+            return Swal.fire("Warning", "Branch Code is Required", "warning");
+        }
 
+        if (!formData.customer) {
+            return Swal.fire("Warning", "Customer Code is Required", "warning");
+        }
         try {
+            const queryParams = new URLSearchParams({
+                Branch_Code: formData.branch || "",
+                Customer_Code: formData.customer || "",
+                InvoiceNo: formData.billNo || "",
+                AllCustomerData: formData.customer == "ALL" ? "ALL" : "SINGLE",
+                page: currentPage,
+                limit: rowsPerPage
+            }).toString();
 
-            const response = await getApi(`/GetPaymentReceived?Branch_Code=${formData.branch}&Customer_Code=${formData.customer}&InvoiceNo=${formData.billNo}&InvoiceDate=${formData.billDate}&AllCustomerData=1&page=${currentPage}&limit=${rowsPerPage}`);
-            console.log(response);
+            const response = await getApi(`/getBillGeneratedReceived?${queryParams}`);
 
-            Swal.fire("Success", "Payment Received Added Successfully", "success");
-            setData(response.PaymentOutstanding);
-            setFormData({
-                billDate: today,
-                customer: "",
-                branch: "",
-                billNo: "",
-            });
+            if (response.status !== 1) {
+                throw new Error(response.message || "Failed to fetch data");
+            }
 
+            Swal.fire("Success", "Bill generated received fetched successfully", "success");
+
+            setData(response.data);              // recordsets[0]
 
 
         } catch (error) {
-            console.error("Payment save error:", error);
+            console.error("Fetch error:", error);
 
             Swal.fire({
                 title: "Error!",
-                text: "Failed to save payment",
+                text: error.message || "Failed to fetch bill data",
                 icon: "error",
                 confirmButtonText: "OK"
             });
         }
     };
+
+
+    const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    // ✅ Required validation
+    if (!addPayment.InvoiceNo) {
+        return Swal.fire(
+            "Warning",
+            "Invoice Number is required",
+            "warning"
+        );
+    }
+
+    try {
+        const payload = {
+            InvoiceNo: addPayment.InvoiceNo,              // 🔑 REQUIRED
+            Bank_Code: addPayment.Bank_Code || null,
+            Transation_No: addPayment.Transation_No || null,
+            Receiver_Name: addPayment.Receiver_Name || null, // if needed
+            Payment_Type: addPayment.Payment_Type || null,
+            PayReceivedDate: addPayment.PayReceivedDate || null,
+            TDS: addPayment.TDS || 0,
+            PaymentReceived: addPayment.PaymentReceived || 0,
+            OutstandingAmount: String(addPayment.OutstandingAmount) || "0",
+            Remark: addPayment.Remark || null
+        };
+
+        const response = await putApi(
+            "/Updatebillwise",
+            payload
+        );
+
+        if (!response.success) {
+            throw new Error(
+                response.message || "Failed to update payment details"
+            );
+            return;
+        }
+
+        Swal.fire(
+            "Success",
+            response.message || "Payment updated successfully",
+            "success"
+        );
+        setModalIsOpen(false);
+
+        // ✅ Optional: Refresh data / reset form
+        // fetchBillDetails();
+        // setAddPayment(initialState);
+
+    } catch (error) {
+        console.error("Update error:", error);
+
+        Swal.fire({
+            title: "Error!",
+            text: error.message || "Failed to update payment",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+    }
+};
 
 
     const handleDelete = (index) => {
@@ -162,70 +238,100 @@ function PaymentEntry() {
 
 
     /**************** function to export table data in excel and pdf ************/
-   const handleExportExcel = () => {
+    const handleExportExcel = () => {
 
-    const excelData = currentRows.map((row) => ({
-        "Bill No": row.BillNo,
-        "Bill Date": row.InvoiceDate,
-        "Branch Name": getBranch.find(b => b.Branch_Code === row.Branch_Code)?.Branch_Name,
-        "Customer Name": row.Customer_Name,
-        "GST No": row.Gst_No,
-        "Booking Type": row.Booking_Type,
-        "Total Amount": row.TotalAmount,
-        "Payment Received": row.PaymentReceived,
-        "TDS": row.TDS,
-        "Outstanding Amount": row.OutstandingAmount,
-        "Pay Received Date": ymdToDmy(row.PayReceivedDate),
-        "Bank Name": getBankName.find(b => b.Bank_Code === row.Bank_Code)?.Bank_Name,
-        "Transaction No": row.Transation_No,
-        "Receiver Name": row.Receiver_Name,
-        "Payment Type": row.Payment_Type,
-        "Remark": row.Remark
-    }));
+        const excelData = currentRows.map((row) => ({
+            "Bill No": row.InvoiceNo,
+            "Bill Date": row.InvoiceDate,
+            "Branch Name": row.Branch_Name,
+            "Customer Name": row.Customer_Name,
+            "Total Amount": row.TotalAmount,
+        }));
 
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
-    const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "PaymentData");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "PaymentData");
 
-    const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-    });
+        const excelBuffer = XLSX.write(workbook, {
+            bookType: "xlsx",
+            type: "array",
+        });
 
-    const file = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
-    });
+        const file = new Blob([excelBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+        });
 
-    saveAs(file, "Ledger.xlsx");
-};
+        saveAs(file, "Payment_Ledger.xlsx");
+    };
 
 
     const handleExportPDF = () => {
-        const input = document.getElementById('table-to-pdf');
+        if (!currentRows || currentRows.length === 0) {
+            Swal.fire("Warning", "No data to export", "warning");
+            return;
+        }
 
-        html2canvas(input, { scale: 2 }).then((canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF();
-            const imgWidth = 190;
-            const pageHeight = pdf.internal.pageSize.height;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 10;
+        const pdf = new jsPDF("l", "mm", "a4");
+        const pageWidth = pdf.internal.pageSize.getWidth();
 
-            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+        // Title
+        pdf.setFontSize(14);
+        pdf.text("Payment Ledger", pageWidth / 2, 15, { align: "center" });
 
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+        const columns = [
+            "Bill No",
+            "Bill Date",
+            "Branch Name",
+            "Customer Name",
+            "Total Amount",
+            
+        ];
+
+        const body = currentRows.map(row => ([
+            row.InvoiceNo || "",
+            row.InvoiceDate || "",
+            row.Branch_Name || "",
+            row.Customer_Name || "",
+            row.TotalAmount || 0,
+        ]));
+
+        autoTable(pdf, {
+            head: [columns],
+            body,
+            startY: 22,
+            margin: { left: 10, right: 10 },
+            tableWidth: "auto",   // ✅ auto-fit all columns
+            styles: {
+                fontSize: 8,        // 🔴 key for fitting all columns
+                cellPadding: 1,
+                overflow: "linebreak",
+                valign: "middle"
+            },
+            headStyles: {
+                fillColor: [52, 73, 94],
+                textColor: 255,
+                halign: "center",
+                fontSize: 7
+            },
+            bodyStyles: {
+                halign: "left"
+            },
+            didDrawPage: () => {
+                pdf.setFontSize(8);
+                pdf.text(
+                    `Page ${pdf.internal.getNumberOfPages()}`,
+                    pageWidth - 20,
+                    pdf.internal.pageSize.getHeight() - 10
+                );
             }
-
-            pdf.save('zones.pdf');
         });
+
+        pdf.save("Payment_Ledger.pdf");
     };
+
+
+
 
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -285,27 +391,38 @@ function PaymentEntry() {
                             </div>
 
                             <div className="input-field1">
-                                <label htmlFor="">Customer Name</label>
+                                <label>Customer Name</label>
+
                                 <Select
-                                    options={getCustomer.map(cust => ({
-                                        value: cust.Customer_Code,   // adjust keys from your API
-                                        label: cust.Customer_Name
-                                    }))}
+                                    options={[
+                                        { value: "ALL", label: "ALL CUSTOMER DATA" },
+                                        ...getCustomer.map(cust => ({
+                                            value: cust.Customer_Code,
+                                            label: cust.Customer_Name
+                                        }))
+                                    ]}
+
                                     value={
                                         formData.customer
                                             ? {
                                                 value: formData.customer,
-                                                label: getCustomer.find(c => c.Customer_Code === formData.customer)?.Customer_Name
+                                                label:
+                                                    formData.customer === "ALL"
+                                                        ? "ALL CUSTOMER DATA"
+                                                        : getCustomer.find(c => c.Customer_Code === formData.customer)
+                                                            ?.Customer_Name
                                             }
                                             : null
                                     }
+
                                     onChange={(selectedOption) =>
                                         setFormData({
                                             ...formData,
                                             customer: selectedOption ? selectedOption.value : ""
                                         })
                                     }
-                                    menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
+
+                                    menuPortalTarget={document.body}
                                     styles={{
                                         placeholder: (base) => ({
                                             ...base,
@@ -313,16 +430,16 @@ function PaymentEntry() {
                                             overflow: "hidden",
                                             textOverflow: "ellipsis"
                                         }),
-
-                                        menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
+                                        menuPortal: (base) => ({ ...base, zIndex: 9999 })
                                     }}
+
                                     placeholder="Select Customer"
                                     isSearchable
                                     classNamePrefix="blue-selectbooking"
                                     className="blue-selectbooking"
                                 />
-
                             </div>
+
 
 
 
@@ -353,7 +470,7 @@ function PaymentEntry() {
 
                     <div className="addNew">
                         <div>
-                           
+
 
                             <div className="dropdown">
                                 <button className="dropbtn"><i className="bi bi-file-earmark-arrow-down"></i> Export</button>
@@ -382,19 +499,7 @@ function PaymentEntry() {
                                     <th>Bill Date</th>
                                     <th>Branch Name</th>
                                     <th>Customer Name</th>
-                                    <th>GST No</th>
-                                    <th>Booking Type</th>
-
                                     <th>Total Amount</th>
-                                    <th>Payment Received</th>
-                                    <th>TDS</th>
-                                    <th>Outstanding Amount</th>
-                                    <th>Pay Received Date</th>
-                                    <th>Bank Name</th>
-                                    <th>Transaction No</th>
-                                    <th>Receiver Name</th>
-                                    <th>Payment Type</th>
-                                    <th>Remark</th>
 
 
                                 </tr>
@@ -416,7 +521,7 @@ function PaymentEntry() {
                                                         flexDirection: "row",
                                                         position: "absolute",
                                                         alignItems: "center",
-                                                        left: "60px",
+                                                        left: "80px",
                                                         top: "0px",
                                                         borderRadius: "10px",
                                                         backgroundColor: "white",
@@ -462,20 +567,9 @@ function PaymentEntry() {
                                         <td>{index + 1}</td>
                                         <td>{row.InvoiceNo}</td>
                                         <td>{row.InvoiceDate}</td>
-                                        <td>{getBranch.find(f => f.Branch_Code === row.Branch_Code)?.Branch_Name}</td>
+                                        <td>{row.Branch_Name}</td>
                                         <td>{row.Customer_Name}</td>
-                                        <td>{row.Gst_No}</td>
-                                        <td>{row.Booking_Type}</td>
                                         <td>{row.TotalAmount}</td>
-                                        <td>{row.PaymentReceived}</td>
-                                        <td>{row.TDS}</td>
-                                        <td>{row.OutstandingAmount}</td>
-                                        <td>{ymdToDmy(row.PayReceivedDate)}</td>
-                                        <td>{getBankName.find(f => f.Bank_Code === row.Bank_Code)?.Bank_Name}</td>
-                                        <td>{row.Transation_No}</td>
-                                        <td>{row.Receiver_Name}</td>
-                                        <td>{row.Payment_Type}</td>
-                                        <td>{row.Remark}</td>
 
                                     </tr>
                                 ))}
@@ -533,7 +627,7 @@ function PaymentEntry() {
                                 <header>Payment Received Entry</header>
                             </div>
                             <div className='container2'>
-                                <form onSubmit={(e)=>e.preventDefault()}>
+                                <form onSubmit={handleUpdate}>
                                     <div className="fields2">
 
 
@@ -669,6 +763,12 @@ function PaymentEntry() {
                                         </div>
 
                                         <div className="input-field3">
+                                            <label htmlFor="">Receiver Name</label>
+                                            <input type="text" placeholder="Enter Receiver Name" value={addPayment.Receiver_Name}
+                                                onChange={(e) => setAddPayment({ ...addPayment, Receiver_Name: e.target.value })} />
+                                        </div>
+
+                                        <div className="input-field3">
                                             <label htmlFor="">Date</label>
                                             <DatePicker
                                                 portalId="root-portal"
@@ -694,7 +794,7 @@ function PaymentEntry() {
 
                                         <div className="input-field3">
                                             <label htmlFor="">Narration</label>
-                                            <input type="tel" placeholder="Enter Narration" value={addPayment.Remark}
+                                            <input type="text" placeholder="Enter Narration" value={addPayment.Remark}
                                                 onChange={(e) => setAddPayment({ ...addPayment, Remark: e.target.value })} />
                                         </div>
 

@@ -30,8 +30,8 @@ function TransportEntry() {
 
 
     const filteredgetVehicle = getTransport.filter((transport) =>
-        (transport && transport.Transport_Code && transport.Transport_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (transport && transport.Transport_Name && transport.Transport_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (transport?.Transport_Code && transport?.Transport_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (transport?.Transport_Name && transport?.Transport_Name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 

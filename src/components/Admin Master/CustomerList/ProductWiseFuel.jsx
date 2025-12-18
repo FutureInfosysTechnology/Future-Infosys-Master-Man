@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import '../../Tabs/tabs.css';
 import * as XLSX from 'xlsx';
@@ -8,7 +8,7 @@ import html2canvas from 'html2canvas';
 import Modal from 'react-modal';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Select, { components } from 'react-select';
+import Select from 'react-select';
 import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
@@ -333,7 +333,7 @@ function ProductWiseFuel()
 
 
     const filteredgetCharges = getCust.filter((cust) =>
-        (cust && cust.Mode_Code && cust.Mode_Code.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (cust?.Mode_Code && cust?.Mode_Code.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 

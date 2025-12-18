@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import '../../Tabs/tabs.css';
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
@@ -30,7 +30,6 @@ function CustomerName() {
     const [getBranchName, setGetBranchName] = useState([]);         // To Get Branch Name Data
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
-    const [modalIsOpen2, setModalIsOpen2] = useState(false);
     const [discountOption, setDiscountOption] = useState("Yes");
     const [gstOption, setGstOption] = useState("Yes");
     const [fuelOption, setFuelOption] = useState("No");
@@ -490,13 +489,13 @@ function CustomerName() {
 
 
     const filteredgetCustomer = getCustomer.filter((cust) =>
-        (cust && cust.Booking_Type && cust.Booking_Type.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (cust && cust.Customer_Mob && cust.Customer_Mob.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (cust && cust.Customer_Add3 && cust.Customer_Add3.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (cust && cust.Customer_Add1 && cust.Customer_Add1.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (cust && cust.Customer_Add2 && cust.Customer_Add2.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (cust && cust.Gst_No && cust.Gst_No.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (cust && cust.HSN_NO && cust.HSN_NO.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (cust?.Booking_Type && cust?.Booking_Type.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (cust?.Customer_Mob && cust?.Customer_Mob.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (cust?.Customer_Add3 && cust?.Customer_Add3.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (cust?.Customer_Add1 && cust?.Customer_Add1.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (cust?.Customer_Add2 && cust?.Customer_Add2.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (cust?.Gst_No && cust?.Gst_No.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (cust?.HSN_NO && cust?.HSN_NO.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 

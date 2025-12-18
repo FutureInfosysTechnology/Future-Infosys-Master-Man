@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import '../../Tabs/tabs.css';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import Modal from 'react-modal';
 import Select from 'react-select';
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
 import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 
 
@@ -393,7 +393,9 @@ function BranchName() {
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
 
-
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
+    
     return (
         <>
             <div className="body">

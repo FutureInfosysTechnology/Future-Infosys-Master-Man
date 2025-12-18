@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { getApi, postApi, deleteApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import 'react-toastify/dist/ReactToastify.css';
-import Modal from 'react-modal';
-import Swal from 'sweetalert2';
+import { useEffect, useState } from 'react';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import { deleteApi, getApi, postApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 
 const ProductEntry = () => {
   const [openRow, setOpenRow] = useState(null);

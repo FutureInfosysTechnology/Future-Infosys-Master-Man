@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import '../../Tabs/tabs.css';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import Modal from 'react-modal';
-import sms from '../../../Assets/Images/sms-svgrepo-com.png';
-import mail from '../../../Assets/Images/mail-reception-svgrepo-com.png';
-import whatsapp from '../../../Assets/Images/whatsapp-svgrepo-com.png';
-import { getApi, postApi, deleteApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
-import Select from 'react-select';
+import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import Select from 'react-select';
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function ShipperName() {

@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import '../../Tabs/tabs.css';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import Modal from 'react-modal';
-import Swal from "sweetalert2";
-import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
+import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
 import Select from "react-select";
+import Swal from "sweetalert2";
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 
@@ -80,8 +80,8 @@ function EmployeeStock() {
 
 
     const filteredgetEmp = getEmpStock.filter((emp) =>
-        (emp && emp.Employee_Name && emp.Employee_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
-        (emp && emp.City_Name && emp.City_Name.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+        (emp?.Employee_Name && emp?.Employee_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (emp?.City_Name && emp?.City_Name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
 
@@ -224,6 +224,9 @@ function EmployeeStock() {
 
     const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+
+     if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
 
 
     return (

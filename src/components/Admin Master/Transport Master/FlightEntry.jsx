@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { getApi, postApi, deleteApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import 'react-toastify/dist/ReactToastify.css';
-import Modal from 'react-modal';
-import Swal from 'sweetalert2';
+import { useEffect, useState } from 'react';
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import Modal from 'react-modal';
+import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+import { deleteApi, getApi, postApi, putApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 const FlightEntry = () => {
@@ -142,9 +142,9 @@ const FlightEntry = () => {
   const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const filteredData = currentRows.filter((d) =>
-    (d && d.Flight_Code && d.Flight_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (d && d.Flight_Name && d.Flight_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (d && d.Flight_No && d.Flight_No.toLowerCase().includes(searchQuery.toLowerCase()))
+    (d?.Flight_Code && d?.Flight_Code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (d?.Flight_Name && d?.Flight_Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (d?.Flight_No   && d?.Flight_No.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
 

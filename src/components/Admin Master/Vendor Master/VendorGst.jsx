@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import '../../Tabs/tabs.css';
-import Swal from "sweetalert2";
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { useState } from "react";
 import Modal from 'react-modal';
+import * as XLSX from 'xlsx';
+import '../../Tabs/tabs.css';
 
 
 

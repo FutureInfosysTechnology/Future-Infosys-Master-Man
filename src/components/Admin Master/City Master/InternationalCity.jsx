@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
+import { useEffect, useState } from "react";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import Modal from 'react-modal';
-import '../../Tabs/tabs.css';
+import Select from 'react-select';
 import Swal from "sweetalert2";
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import Select from 'react-select';
-import jsPDF from 'jspdf';
-import { getApi, postApi, deleteApi } from "../Area Control/Zonemaster/ServicesApi";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import '../../Tabs/tabs.css';
+import { deleteApi, getApi, postApi } from "../Area Control/Zonemaster/ServicesApi";
 
 
 function InternationalCity() {
