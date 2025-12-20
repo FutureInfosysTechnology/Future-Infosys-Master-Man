@@ -55,6 +55,7 @@ import BoxStickerPdf from './components/Docket Print/BoxStickerPdf';
 import VendorBillPrint from './components/Docket Print/VendorBillPrint';
 import VendorBill from './components/Booking/Daily Booking/VendorBill';
 import InternationalManifestPdf from './components/Docket Print/InternationalManifestPdf';
+import { DashboardProvider } from './Components-2/Header/DashboardContext';
 
 export const refeshPend=createContext();
 function App() {
@@ -64,6 +65,8 @@ function App() {
   const hubFun=()=>setHub(!hub);
   return (
     <refeshPend.Provider value={{ref,refFun,hub,hubFun}}>
+       <DashboardProvider>
+
     <Router>
       <div className="main">
 
@@ -136,6 +139,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+     </DashboardProvider>
     </refeshPend.Provider>
   );
 }

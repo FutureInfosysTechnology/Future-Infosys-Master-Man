@@ -24,9 +24,9 @@ function GenerateInvoice() {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const [formData, setFormData] = useState({
-        branch: "",
+        branch: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
         BookMode: "Monthly",
-        customerType: "",
+        customerType: "Single",
         fromDate: firstDayOfMonth,
         toDate: today,
         invoiceDate: today,

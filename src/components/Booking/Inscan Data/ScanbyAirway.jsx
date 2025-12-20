@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import '../../Admin Master/Transport Master/modemaster.css';
 import { getApi, postApi } from "../../Admin Master/Area Control/Zonemaster/ServicesApi";
 import Swal from "sweetalert2";
@@ -13,12 +13,12 @@ function ScanbyAirway() {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
-    const [loading, setLoading] = useState(false);
     const [selectAll, setSelectAll] = useState(false);
+    const [selectedScanRows, setSelectedScanRows] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [selectedDocketNos, setSelectedDocketNos] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const {hubFun}=useContext(refeshPend);
+    const { hubFun } = useContext(refeshPend);
     const statusOptions = [
         { value: "Arrived", label: "Arrived" },
         // (maybe you meant "Return"?)
@@ -26,30 +26,30 @@ function ScanbyAirway() {
     const [formData, setFormData] = useState({
         DocketNo: [],
         Inscan_Status: "",
-        Inscan_Remark: ""
+        Inscan_Remark: "",
+        docketNo: "",
     })
 
 
 
     const fetchData = async () => {
-        setLoading(true);
         try {
             const response = await getApi(`/Inscan/pendingInscan?SessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=${currentPage}&pageSize=${rowsPerPage}`);
             const currentPageData = Array.isArray(response.data) ? response.data : [];
             setGetData(currentPageData);
-
+// 
             const allDataResponse = await getApi(`/Inscan/pendingInscan?SessionLocationCode=${JSON.parse(localStorage.getItem("Login"))?.Branch_Code}&pageNumber=1&pageSize=10000`);
             const allData = Array.isArray(allDataResponse.data) ? allDataResponse.data : [];
             setTotalRecords(allData.length);
         } catch (error) {
             console.error("Error fetching data:", error);
-        } finally {
-            setLoading(false);
         }
     };
     useEffect(() => {
         fetchData();
     }, [currentPage, rowsPerPage]);
+
+
 
     const handleRowsPerPageChange = (event) => {
         setRowsPerPage(Number(event.target.value));
@@ -57,23 +57,92 @@ function ScanbyAirway() {
     };
 
     const handleSelectAll = () => {
-        setSelectAll(!selectAll);
-        if (!selectAll) {
-            setSelectedRows(getData.map((_, index) => index));
+        const newState = !selectAll;
+        setSelectAll(newState);
+
+        if (newState) {
+            // Select All
+            setSelectedRows(getData.map((_, index) => index));                    // row index array
+            setSelectedDocketNos(getData.map(m => m.DocketNo));                   // all docket numbers
+            setSelectedScanRows([...getData]);                                // entire row data
         } else {
+            // Unselect All
             setSelectedRows([]);
+            setSelectedDocketNos([]);
+            setSelectedScanRows([]);
         }
     };
 
-    const handleRowSelect = (index, docketNo) => {
-        if (selectedRows.includes(index)) {
-            setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== index));
+    const handleRowSelect = (index, docketNo, n) => {
+        const already = selectedRows.includes(index);
+        const updatedRows = already ? selectedRows.filter(i => i !== index) : [...selectedRows, index];
+        if (already) {
             setSelectedDocketNos(selectedDocketNos.filter(docket => docket !== docketNo));
+            setSelectedScanRows(selectedScanRows.filter(row => row.DocketNo !== docketNo));
         } else {
-            setSelectedRows([...selectedRows, index]);
             setSelectedDocketNos([...selectedDocketNos, docketNo]);
+            setSelectedScanRows([
+                ...selectedScanRows,
+                getData.find(data => data.DocketNo === docketNo)
+            ]);
         }
+        setSelectedRows(updatedRows);
+        setSelectAll(updatedRows.length === n);
     };
+
+    const handleFind = () => {
+            // Convert to string if numbers come
+            const doc = String(formData.docketNo).trim();
+    
+            if (!doc) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Empty",
+                    text: `Enter docket number!`
+                });
+                return;
+            }
+    
+            // Check availability in Manifest list
+            const found = getData.find(m => String(m.DocketNo) === doc);
+    
+            if (!found) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Not Found!",
+                    text: `Docket No ${doc} not exists in Manifest List`
+                });
+                return;
+            }
+    
+            // If already selected → stop
+            if (selectedDocketNos.includes(doc)) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Already Selected",
+                    text: `Docket No ${doc} is already added`
+                });
+                return;
+            }
+    
+            // Add to lists
+            setSelectedDocketNos([...selectedDocketNos, doc]);
+            setSelectedScanRows([...selectedScanRows, found]);
+    
+            // If row index required, find and push
+            const index = getData.findIndex(m => String(m.DocketNo) === doc);
+            setSelectedRows(prev => [...prev, index]);
+    
+            // Auto selectAll if length matches
+            setSelectAll(selectedRows.length + 1 === getData.length);
+    
+            Swal.fire({
+                icon: "success",
+                title: "Added Successfully",
+                text: `Docket No ${doc} added to selection`
+            });
+        };
+    
 
     const filteredInscan = getData.filter((Inscan) =>
         (Inscan && Inscan.DocketNo && Inscan.DocketNo?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
@@ -104,7 +173,7 @@ function ScanbyAirway() {
         }
         const requestPayload = {
             DocketNo: selectedDocketNos,
-            SessionLocationCode: "DEL",
+            SessionLocationCode: JSON.parse(localStorage.getItem("Login"))?.Branch_Code,
             Inscan_Status: formData.Inscan_Status,
             Inscan_Remark: formData.Inscan_Remark
         };
@@ -139,8 +208,8 @@ function ScanbyAirway() {
     return (
         <>
 
-            <div className="container1" style={{ padding: "0px", }}>
-                <form action="" style={{ padding: "0px", margin: "0px" ,background:" #f2f4f3"}} onSubmit={handleSubmit}>
+            <div className="container1 py-0" style={{ padding: "0px", }}>
+                <form action="" style={{ padding: "0px", margin: "0px", background: " #f2f4f3" }} onSubmit={handleSubmit}>
                     <div className="fields2">
                         <div className="input-field3">
                             <label>Status</label>
@@ -150,7 +219,7 @@ function ScanbyAirway() {
                                 onChange={(selectedOption) =>
                                     setFormData({
                                         ...formData,
-                                        Inscan_Status:selectedOption?selectedOption.value:""
+                                        Inscan_Status: selectedOption ? selectedOption.value : ""
                                     })
                                 }
                                 placeholder="Select Status"
@@ -161,11 +230,11 @@ function ScanbyAirway() {
                                 menuPortalTarget={document.body} // ✅ Moves dropdown out of scroll container
                                 styles={{
                                     placeholder: (base) => ({
-      ...base,
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis"
-    }),
+                                        ...base,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                    }),
                                     menuPortal: base => ({ ...base, zIndex: 9999 }) // ✅ Keeps dropdown on top
                                 }}
                             />
@@ -174,25 +243,64 @@ function ScanbyAirway() {
                         <div className="input-field3">
                             <label>Remark</label>
                             <input type="text" placeholder="Enter Remark" value={formData.Inscan_Remark}
-                                onChange={(e) => setFormData({ ...formData, Inscan_Remark: e.target.value })} required />
+                                onChange={(e) => setFormData({ ...formData, Inscan_Remark: e.target.value })} />
                         </div>
 
                         <div className="input-field3" style={{ width: "120px" }}>
                             <label>Docket No</label>
                             <input style={{ width: "120px" }} type="tel" placeholder="Enter Docket No"
-                                value={selectedDocketNos.join(", ")}
-                                readOnly />
+                                value={formData.docketNo} onChange={(e) => setFormData({ ...formData, docketNo: e.target.value })}
+                            />
                         </div>
 
-                        <div className="bottom-buttons" style={{ marginTop: "18px", marginLeft: "25px" }}>
-                            <button className="ok-btn" type="submit">Submit</button>
-                            <button className="ok-btn" style={{ width: "110px" }}>Cancel</button>
+                        <div className="bottom-buttons" style={{ marginTop: "22px", marginLeft: "25px" }}>
+                            <button type="button" className="ok-btn" style={{ width: "60px" }} onClick={handleFind}>Find</button>
+                            <button className="ok-btn" type="submit" style={{ width: "70px" }}>Submit</button>
+                            <button type="button" className="ok-btn" style={{ width: "70px" }}>Cancel</button>
                         </div>
                     </div>
                 </form>
 
-                <div className="addNew" style={{ justifyContent: "end", paddingRight: "10px" }}>
-                    <div className="search-input">
+                <div className='table m-0' style={{ padding: "10px",whiteSpace:"nowrap" }}>
+                    <table className='table table-bordered table-sm'>
+                        <thead className='table-sm'>
+                            <tr>
+                                <th scope="col">Sr.No</th>
+                                <th scope="col">Docket.No</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Customer.Name</th>
+                                <th scope="col">Receiver</th>
+                                <th scope="col">Origin</th>
+                                <th scope="col">Destination</th>
+                                <th scope="col">QTY</th>
+                                <th scope="col">Weight</th>
+                                <th scope="col">Manifest.No</th>
+                                <th scope="col">Manifest.Date</th>
+                            </tr>
+                        </thead>
+                        <tbody className='table-body'>
+                            {selectedScanRows.map((scan, index) => (
+                                <tr key={index}>
+
+                                    <td>{index + 1}</td>
+                                    <td>{scan.DocketNo}</td>
+                                    <td style={{ width: "100px" }}>{scan.Bookdate}</td>
+                                    <td>{scan.Customer_Name}</td>
+                                    <td>{scan.ConsigneeName}</td>
+                                    <td>{scan.FromDest}</td>
+                                    <td>{scan.ToDest}</td>
+                                    <td>{scan.qty}</td>
+                                    <td>{scan.actualwT}</td>
+                                    <td>{scan.ManifestNo}</td>
+                                    <td>{scan.manifestDt}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="addNew m-0" style={{ justifyContent: "end" }}>
+                    <div className="search-input mx-2">
                         <input className="add-input" type="text" placeholder="search"
                             value={searchQuery} onChange={handleSearchChange} />
                         <button type="submit" title="search">
@@ -201,8 +309,8 @@ function ScanbyAirway() {
                     </div>
                 </div>
 
-                <div className='table-container' style={{ padding: "10px" }}>
-                    <table className='table table-bordered table-sm'>
+                <div className='table-container m-0 p-2' style={{whiteSpace:"nowrap"}}>
+                    <table className='table table-bordered table-sm m-0'>
                         <thead className='table-sm'>
                             <tr>
                                 <th scope="col">
@@ -223,23 +331,23 @@ function ScanbyAirway() {
                             </tr>
                         </thead>
                         <tbody className='table-body'>
-                            {filteredInscan.map((manifest, index) => (
+                            {filteredInscan.map((scan, index) => (
                                 <tr key={index}>
                                     <td scope="col">
                                         <input type="checkbox" style={{ height: "15px", width: "15px" }} checked={selectedRows.includes(index)}
-                                            onChange={() => handleRowSelect(index, manifest.DocketNo)} />
+                                            onChange={() => handleRowSelect(index, scan.DocketNo)} />
                                     </td>
                                     <td>{index + 1}</td>
-                                    <td>{manifest.DocketNo}</td>
-                                    <td style={{ width: "100px" }}>{manifest.Bookdate}</td>
-                                    <td>{manifest.Customer_Name}</td>
-                                    <td>{manifest.ConsigneeName}</td>
-                                    <td>{manifest.FromDest}</td>
-                                    <td>{manifest.ToDest}</td>
-                                    <td>{manifest.qty}</td>
-                                    <td>{manifest.actualwT}</td>
-                                    <td>{manifest.ManifestNo}</td>
-                                    <td>{manifest.manifestDt}</td>
+                                    <td>{scan.DocketNo}</td>
+                                    <td style={{ width: "100px" }}>{scan.Bookdate}</td>
+                                    <td>{scan.Customer_Name}</td>
+                                    <td>{scan.ConsigneeName}</td>
+                                    <td>{scan.FromDest}</td>
+                                    <td>{scan.ToDest}</td>
+                                    <td>{scan.qty}</td>
+                                    <td>{scan.actualwT}</td>
+                                    <td>{scan.ManifestNo}</td>
+                                    <td>{scan.manifestDt}</td>
                                 </tr>
                             ))}
                         </tbody>

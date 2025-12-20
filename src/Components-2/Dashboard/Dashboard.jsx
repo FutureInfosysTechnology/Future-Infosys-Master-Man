@@ -1,76 +1,37 @@
-import React, { useState, useEffect, PureComponent } from "react";
-import './dashboard.css';
-import Header from "../Header/Header";
-import Sidebar1 from "../Sidebar1";
-import Footer from "../Footer";
+import { useState } from "react";
 import {
-    LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList, PieChart, Pie, Sector, Cell,
-    BarChart, Bar, Rectangle, CartesianGrid, Legend,
+    Bar,
+    BarChart,
+    Cell,
+    LabelList,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis, YAxis
 } from 'recharts';
-import { ComposableMap, Geographies, Geography } from "react-simple-maps";
-import bookingSvg from "../../Assets/Images/cash-svgrepo-com.png";
-import inscanSvg from "../../Assets/Images/scan-barcode-svgrepo-com.png";
-import runsheetSvg from "../../Assets/Images/delivery-truck-automobile-svgrepo-com.png";
-import manifestSvg from "../../Assets/Images/delivery-truck-truck-svgrepo-com.png";
-import statusSvg from "../../Assets/Images/online-shop-shipping-and-delivery-svgrepo-com.png";
-import deliverySvg from "../../Assets/Images/tablet-ipad-svgrepo-com.png";
-import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Autoplay, Navigation } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import bookingSvg from "../../Assets/Images/cash-svgrepo-com.png";
+import runsheetSvg from "../../Assets/Images/delivery-truck-automobile-svgrepo-com.png";
+import manifestSvg from "../../Assets/Images/delivery-truck-truck-svgrepo-com.png";
+import statusSvg from "../../Assets/Images/online-shop-shipping-and-delivery-svgrepo-com.png";
 import percentage from "../../Assets/Images/percentage-percent-svgrepo-com.png";
-import person1 from "../../Assets/Images/person1.jpg";
-import person2 from "../../Assets/Images/person2.jpg";
-import person3 from "../../Assets/Images/person3.jpg";
-import person4 from "../../Assets/Images/person4.jpg";
-import person5 from "../../Assets/Images/person5.jpg";
+import inscanSvg from "../../Assets/Images/scan-barcode-svgrepo-com.png";
+import deliverySvg from "../../Assets/Images/tablet-ipad-svgrepo-com.png";
+import Footer from "../Footer";
+import { useDashboard } from "../Header/DashboardContext";
+import Header from "../Header/Header";
+import Sidebar1 from "../Sidebar1";
+import './dashboard.css';
 
 // Colors for Pie slices
-const data = [
-    {
-        name: 'Jan',
-        uv: "",
-        pv: "",
-        amt: "",
-    },
-    {
-        name: 'Feb',
-        uv: 3000,
-        pv: 1398,
-        amt: 2210,
-    },
-    {
-        name: 'March',
-        uv: 2000,
-        pv: 9800,
-        amt: 2290,
-    },
-    {
-        name: 'April',
-        uv: 2780,
-        pv: 3908,
-        amt: 2000,
-    },
-    {
-        name: 'May',
-        uv: 1890,
-        pv: 4800,
-        amt: 2181,
-    },
-    {
-        name: 'June',
-        uv: 2390,
-        pv: 3800,
-        amt: 2500,
-    },
-    {
-        name: 'July',
-        uv: 3490,
-        pv: 4300,
-        amt: 2100,
-    },
-];
+
 
 const data1 = [
     {
@@ -181,21 +142,13 @@ const data3 = [
     },
 ];
 
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 
 function Dashboard() {
 
-    const [tooltipContent, setTooltipContent] = useState("");
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
     const handleMouseMove = (e) => {
         setTooltipPosition({ x: e.clientX, y: e.clientY });
-    };
-
-
-    const handleMouseEnter = (geo) => {
-        const { NAME } = geo.properties;
-        setTooltipContent(NAME);
     };
 
     const [isOpen, setIsOpen] = useState(false);
@@ -203,30 +156,25 @@ function Dashboard() {
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
-    const bk=JSON.parse(localStorage.getItem("DashboardBKSummary"));
-    const mf=JSON.parse(localStorage.getItem("DashboardManifestSummary"));
-    const ins=JSON.parse(localStorage.getItem("DashboardInsconSummary"));
-    const rs=JSON.parse(localStorage.getItem("DashboardRunsheetSummary"));
+    const { dashboardData } = useDashboard();
+    console.log(dashboardData);
+
+    const bk = dashboardData.booking || {};
+    const mf = dashboardData.manifest || {};
+    const ins = dashboardData.inscon || {};
+    const rs = dashboardData.runsheet || {};
     const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
     const COLORS1 = ["#FFA500", "#000000"];
     const COLORS2 = ["#007BFF", "red"];
     const cards = [
-        { id: 1, title: "Booking", pending:bk.BookingPending || "0", done:bk.Delivered || "0", image: bookingSvg ,total:bk.TotalCount},
-        { id: 2, title: "Manifest", pending:mf.PendingManifest || "0", done:mf.ManifestDone|| "0", image: manifestSvg,total:mf.TotalCount },
-        { id: 3, title: "Inscan", pending:ins.InsconPending || "0", done:ins.InscondDone || "0", image: inscanSvg,total:ins.TotalCount },
-        { id: 4, title: "Runsheet", pending:rs.PendingRunsheet || "0", done:rs.RunsheetDone|| "0", image: runsheetSvg,total:rs.TotalCount },
-        { id: 5, title: "Status Activity", pending: "10", done: "50", image: statusSvg,total:0 },
-        { id: 6, title: "Delivery Updation", pending: "20", done: "25", image: deliverySvg,total:0},
+        { id: 1, title: "Booking", pending: bk.BookingPending || "0", done: bk.Delivered || "0", image: bookingSvg, total: bk.TotalCount },
+        { id: 2, title: "Manifest", pending: mf.PendingManifest || "0", done: mf.ManifestDone || "0", image: manifestSvg, total: mf.TotalCount },
+        { id: 3, title: "Inscan", pending: ins.InsconPending || "0", done: ins.InscondDone || "0", image: inscanSvg, total: ins.TotalCount },
+        { id: 4, title: "Runsheet", pending: rs.PendingRunsheet || "0", done: rs.RunsheetDone || "0", image: runsheetSvg, total: rs.TotalCount },
+        { id: 5, title: "Status Activity", pending: "10", done: "50", image: statusSvg, total: 0 },
+        { id: 6, title: "Delivery Updation", pending: "20", done: "25", image: deliverySvg, total: 0 },
     ];
 
-    const cards1 = [
-        { id: 1, title: "Mahesh Kumar", image: person1 },
-        { id: 2, title: "Shalini Kumari", image: person2 },
-        { id: 3, title: "Ramesh Kumar", image: person3 },
-        { id: 4, title: "Shushant", image: person4 },
-        { id: 5, title: "Digvijay", image: person5 },
-        { id: 6, title: "Soham", image: person1 },
-    ];
 
 
     return (
@@ -344,8 +292,8 @@ function Dashboard() {
                                                         textAlign: "center",
                                                     }}
                                                 >
-                                                    <h4 style={{ margin: 0, fontSize: "14px" ,fontWeight:"bold" }}>{total}</h4>
-                                                    <small style={{ fontSize: "11px" ,fontWeight:"bold"}}>Total</small>
+                                                    <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "bold" }}>{total}</h4>
+                                                    <small style={{ fontSize: "11px", fontWeight: "bold" }}>Total</small>
                                                 </div>
                                             </div>
 
@@ -392,7 +340,7 @@ function Dashboard() {
                                                     <div style={{ textAlign: "center", flex: 1 }}>
                                                         <span
                                                             style={{
-                                                                color:card.id % 2 === 0 ? "red": "#000000", // black for all
+                                                                color: card.id % 2 === 0 ? "red" : "#000000", // black for all
                                                                 fontWeight: "bold",
                                                                 fontSize: "14px",
                                                             }}
@@ -621,258 +569,8 @@ function Dashboard() {
                         </div>
                     </div>
 
-                    <b style={{ marginTop: "30px" }}>User Reviews</b>
 
-                    <Swiper
-                        modules={[Navigation, Autoplay]}
-                        slidesPerView={3}
-                        spaceBetween={20}
-                        autoplay={{ delay: 4000 }}
-                        speed={1300}
-                        effect="slide"
-                        loop={true}
-                        className="w-100"
-                        breakpoints={{
-                            320: { slidesPerView: 1 },
-                            640: { slidesPerView: 2 },
-                            1024: { slidesPerView: 3 },
-                            1280: { slidesPerView: 3 },
-                        }}
-                    >
-                        {cards1.map((card) => (
-                            <SwiperSlide key={card.id}>
-                                <div className="card booking-card1" style={{ height: "160px", padding: "20px" }}>
-                                    <div className="column1" style={{ height: "100%", width: "100%" }}>
-                                        <div className="row1">
-                                            <img src={card.image} alt="" className="card-image" style={{ padding: "0px", border: "none", marginRight: "20px" }} />
-                                            <div className="column1">
-                                                <b>{card.title}</b>
-                                                <p style={{ margin: "0px", padding: "0px" }}>UI Designer / <i className="bi bi-star-fill" style={{ color: "yellow" }}></i> 5.0</p>
-                                            </div>
-                                        </div>
-                                        <p style={{ margin: "0px", padding: "0px", fontSize: "12px" }}>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sit velit quod corporis esse illo quaerat excepturi doloribus nobis soluta consequuntur.</p>
-                                    </div>
-                                </div>
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
 
-                    {/* <div className="card upper-card">
-                        <div>
-                            <button className="ok-btn">
-                                <i className="bi bi-globe2"></i>
-                            </button>
-                            <b>Sales by City</b>
-
-                        </div>
-                        <div className="dashboard-upper">
-                            <div className="country-table">
-                                <div style={{ display: "flex", flexDirection: "row", borderBottom: "1px solid silver", height: "60px", alignItems: "center" }}>
-                                    <img src={americanflag} alt="" style={{ width: "10%" }} />
-                                    <div style={{ display: "flex", flexDirection: "column", width: "30%", marginLeft: "10px" }}>
-                                        <b style={{ color: "silver" }}>City :</b>
-                                        <label htmlFor="">Mumbai</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Sales :</b>
-                                        <label htmlFor="">2,500</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Value :</b>
-                                        <label htmlFor="">$25,000</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Bounce :</b>
-                                        <label htmlFor="">25.5%</label>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", borderBottom: "1px solid silver", height: "70px", alignItems: "center" }}>
-                                    <img src={germanFlag} alt="" style={{ width: "10%" }} />
-                                    <div style={{ display: "flex", flexDirection: "column", width: "30%", marginLeft: "10px" }}>
-                                        <b style={{ color: "silver" }}>City :</b>
-                                        <label htmlFor="">Delhi</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Sales :</b>
-                                        <label htmlFor="">2,500</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Value :</b>
-                                        <label htmlFor="">$25,000</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Bounce :</b>
-                                        <label htmlFor="">25.5%</label>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", borderBottom: "1px solid silver", height: "70px", alignItems: "center" }}>
-                                    <img src={englandFlag} alt="" style={{ width: "10%" }} />
-                                    <div style={{ display: "flex", flexDirection: "column", width: "30%", marginLeft: "10px" }}>
-                                        <b style={{ color: "silver" }}>City :</b>
-                                        <label htmlFor="">Pune</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Sales :</b>
-                                        <label htmlFor="">2,500</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Value :</b>
-                                        <label htmlFor="">$25,000</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Bounce :</b>
-                                        <label htmlFor="">25.5%</label>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", flexDirection: "row", height: "70px", alignItems: "center" }}>
-                                    <img src={franceFlag} alt="" style={{ width: "10%" }} />
-                                    <div style={{ display: "flex", flexDirection: "column", width: "30%", marginLeft: "10px" }}>
-                                        <b style={{ color: "silver" }}>City :</b>
-                                        <label htmlFor="">Noida</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Sales :</b>
-                                        <label htmlFor="">2,500</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Value :</b>
-                                        <label htmlFor="">$25,000</label>
-                                    </div>
-
-                                    <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
-                                        <b style={{ color: "silver" }}>Bounce :</b>
-                                        <label htmlFor="">25.5%</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="country-map" onMouseMove={handleMouseMove}>
-                                <ComposableMap
-                                    style={{
-                                        width: "100%",
-                                        margin: "0px",
-                                        padding: "0px",
-                                        height: "300px"
-                                    }}
-                                >
-                                    <Geographies geography={geoUrl}>
-                                        {({ geographies }) =>
-                                            geographies.map((geo) => (
-                                                <Geography
-                                                    key={geo.rsmKey}
-                                                    geography={geo}
-                                                    onMouseEnter={() => handleMouseEnter(geo)}
-                                                    onMouseLeave={() => setTooltipContent("")}
-                                                    style={{
-                                                        default: { fill: "#D6D6DA", outline: "none" },
-                                                        hover: { fill: "#F53", outline: "none" },
-                                                        pressed: { fill: "#E42", outline: "none" },
-                                                    }}
-                                                />
-                                            ))
-                                        }
-                                    </Geographies>
-                                </ComposableMap>
-                            </div>
-                        </div>
-                    </div> */}
-
-                    {/* <div className="card middle-card">
-                        <div className="card first-card">
-                            <div className="card graph-card">
-                                <ResponsiveContainer width={"100%"} height={200}>
-                                    <LineChart data={data} margin={{ top: 20 }}>
-                                        <XAxis dataKey="name" padding={{ left: 30, right: 30 }}
-                                            tick={{ fill: "white", fontSize: 12 }} />
-                                        <YAxis tick={{ fill: "white", fontSize: 12 }} />
-                                        <Tooltip />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="pv"
-                                            stroke="white"
-                                        >
-                                            <LabelList position="top" offset={200} />
-                                        </Line>
-                                        <Line type="monotone" dataKey="uv" stroke="#b9b736">
-                                            <LabelList position="top" offset={200} />
-                                        </Line>
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            <div>
-                                <b>Daily Bookings</b>
-                            </div>
-                        </div>
-
-                        <div className="card second-card">
-                            <div className="card graph-card1">
-                                <ResponsiveContainer width={"100%"} height={200}>
-                                    <LineChart data={data1} margin={{ top: 20 }}>
-                                        <XAxis dataKey="name" padding={{ left: 30, right: 30 }}
-                                            tick={{ fill: "white", fontSize: 12 }} />
-                                        <YAxis tick={{ fill: "white", fontSize: 12 }} />
-                                        <Tooltip />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="pv"
-                                            stroke="white"
-                                        >
-                                            <LabelList position="top" offset={200} />
-                                        </Line>
-                                        <Line type="monotone" dataKey="uv" stroke="blue">
-                                            <LabelList position="top" offset={200} />
-                                        </Line>
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            <div>
-                                <b>Daily Manifest</b>
-                            </div>
-                        </div>
-
-                        <div className="card third-card">
-                            <div className="card graph-card2">
-                                <ResponsiveContainer width={"100%"} height={200}>
-                                    <LineChart data={data} margin={{ top: 20 }}>
-                                        <XAxis dataKey="name" padding={{ left: 30, right: 30 }}
-                                            tick={{ fill: "white", fontSize: 12 }} />
-                                        <YAxis tick={{ fill: "white", fontSize: 12 }} />
-                                        <Tooltip />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="pv"
-                                            stroke="black"
-                                        >
-                                            <LabelList position="top" offset={200} />
-                                        </Line>
-                                        <Line type="monotone" dataKey="uv" stroke="white">
-                                            <LabelList position="top" offset={200} />
-                                        </Line>
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            <div>
-                                <b>Daily Deliveries</b>
-                            </div>
-                        </div>
-                    </div> */}
                 </div>
                 <Footer />
             </div>
